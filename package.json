@@ -1,0 +1,9 @@
+{
+  "name": "poker",
+  "version": "0.0.0",
+  "description": "poker",
+  "main": "server.js",
+  "author": {
+    "name": ""
+  }
+}
