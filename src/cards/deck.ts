@@ -4,8 +4,6 @@ import { CardSuit } from "./card-suit";
 
 export class Deck {
 
-    private static readonly NUM_CARDS: number = 52;
-
     private cards: Array<Card>
 
     constructor() {

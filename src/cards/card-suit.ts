@@ -18,4 +18,9 @@
             new CardSuit(4, '\u2660', 'spade')
         ];
 
+    public static lookup(value: number): CardSuit {
+        return CardSuit.VALUES.find(val => val.value == value);
+    }
+
+
 }

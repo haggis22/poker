@@ -14,6 +14,12 @@
         this.plural = plural;
     }
 
+    public static readonly JACK: number = 11;
+    public static readonly QUEEN: number = 12;
+    public static readonly KING: number = 13;
+    public static readonly ACE: number = 14;
+
+
     public static readonly VALUES =
         [
             new CardValue(2, '2', 'deuce', 'deuces'),

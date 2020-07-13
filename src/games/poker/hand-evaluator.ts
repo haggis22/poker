@@ -19,22 +19,15 @@ export class HandEvaluator {
         let byValue: Map<number, number> = new Map<number, number>();
         let bySuit: Map<number, number> = new Map<number, number>();
 
+        let isFlush: boolean = false;
+
         for (let card of hand.cards) {
 
             byValue.set(card.value.value, (byValue.get(card.value.value) || 0) + 1);
             bySuit.set(card.suit.value, (bySuit.get(card.suit.value) || 0) + 1);
 
-        }
-
-        let isFlush: boolean = false;
-
-        for (let [suit, numSuit] of bySuit) {
-
-            if (numSuit == 5) {
-
+            if (bySuit.get(card.suit.value) == 5) {
                 isFlush = true;
-                break;
-
             }
 
         }
@@ -58,23 +51,9 @@ export class HandEvaluator {
         }
 
 
+        // This will hold the values of the cards, in order of importance.
+        // If the user has a pair, for example, then the first position will hold the face value of the pair. After that, in descending order, will be the kickers
         let values = new Array<CardValue>();
-
-        if (isFlush) {
-
-            let kickers = new Array<number>();
-            for (let [value, numValue] of byValue) {
-
-                kickers.push(value);
-
-            }
-
-            kickers.sort((k1, k2) => k2 - k1);
-            values = kickers.map(kickValue => CardValue.lookup(kickValue));
-
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FLUSH, values);
-
-        }
 
         if (numFours > 0) {
 
@@ -166,6 +145,50 @@ export class HandEvaluator {
             return new PokerHandEvaluation(numPairs == 2 ? PokerHandEvaluation.RANK.TWO_PAIR : PokerHandEvaluation.RANK.PAIR, values);
 
         }
+
+        if (hand.cards[0].value.value - hand.cards[4].value.value == 4) {
+
+            // The cards are already ranked in order and we know we don't have any pairs, so if the first one to the last one is an in-order run of 
+            // numbers, then we have a straight (or possibly a straight flush)
+            values = [...hand.cards.map(card => card.value)];
+
+            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values);
+
+        }
+
+        if (hand.cards[0].value.value == CardValue.ACE
+            && hand.cards[1].value.value == 5
+            && hand.cards[4].value.value == 2) {
+
+            // The cards are already ranked in order and we know we don't have any pairs.
+            // In this case the first one is an ace, and the others must be 5 / 4 / 3 / 2, so that's a wheel straight
+
+            // In this case we want to sort the cards so that the 5 is the highest - a 6-high straight would beat a wheel
+            // Start with them in order, with the ace up front...
+            values = [...hand.cards.map(card => card.value)];
+            // ...then pop it off the front and push it on the back
+            values.push(values.shift());
+
+            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values);
+
+        }
+
+        if (isFlush) {
+
+            let kickers = new Array<number>();
+            for (let [value, numValue] of byValue) {
+
+                kickers.push(value);
+
+            }
+
+            kickers.sort((k1, k2) => k2 - k1);
+            values = kickers.map(kickValue => CardValue.lookup(kickValue));
+
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FLUSH, values);
+
+        }
+
 
         let kickers = new Array<number>();
         for (let [value, numValue] of byValue) {
