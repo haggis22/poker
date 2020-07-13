@@ -55,7 +55,11 @@
     <Folder Include="public\" />
     <Folder Include="src\cards\" />
     <Folder Include="src\games\" />
+    <Folder Include="src\games\actions\" />
     <Folder Include="src\games\poker\" />
+    <Folder Include="src\casino\" />
+    <Folder Include="src\games\poker\five-card-draw\" />
+    <Folder Include="src\hands\" />
     <Folder Include="src\players\" />
   </ItemGroup>
   <ItemGroup>
@@ -71,19 +75,55 @@
     <TypeScriptCompile Include="src\cards\deck.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\cards\hand.ts">
+    <TypeScriptCompile Include="src\games\actions\action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\actions\bet-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\actions\deal-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\actions\showdown-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\game.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\hand-describer.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\hand-evaluation.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\hand-evaluator.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\poker\five-card-draw\poker-game-five-card-draw.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\hands\dealt-card.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\hands\hand.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\gaming-session.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\table.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\datastore.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\hand-describer.ts">
+    <TypeScriptCompile Include="src\games\poker\poker-hand-describer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\hand-evaluation.ts">
+    <TypeScriptCompile Include="src\games\poker\poker-hand-evaluation.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\hand-evaluator.ts">
+    <TypeScriptCompile Include="src\games\poker\poker-hand-evaluator.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\players\player.ts">
