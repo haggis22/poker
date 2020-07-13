@@ -36,7 +36,7 @@ export class HandDescriber {
             case HandEvaluation.RANK.FOUR_OF_A_KIND:
                 return `four of a kind, ${evaluation.values[0].plural}`;
 
-            case HandEvaluation.RANK.STRAIGHT:
+            case HandEvaluation.RANK.STRAIGHT_FLUSH:
                 return `straight flush, ${evaluation.values[0].text}-high`;
 
         }
