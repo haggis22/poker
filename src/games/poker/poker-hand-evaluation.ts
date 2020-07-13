@@ -1,7 +1,8 @@
 ﻿import { Card } from "../../cards/card";
 import { CardValue } from "../../cards/card-value";
+import { HandEvaluation } from "../hand-evaluation";
 
-export class HandEvaluation {
+export class PokerHandEvaluation implements HandEvaluation {
 
     public static readonly RANK =
         {
@@ -26,6 +27,12 @@ export class HandEvaluation {
     }
 
     public compareTo(h2: HandEvaluation): number {
+
+        if (!(h2 instanceof PokerHandEvaluation)) {
+            throw new Error(`Cannot compare poker hand with ${(typeof h2)}`);
+        }
+
+        // let poker2: PokerHandEvaluation = h2 as PokerHandEvaluation;
 
         if (this.rank > h2.rank) {
 

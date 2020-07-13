@@ -8,7 +8,6 @@ export class Deck {
 
     constructor() {
 
-        this.reset();
         this.shuffle();
 
     }
@@ -31,6 +30,8 @@ export class Deck {
 
 
     public shuffle(): void {
+
+        this.reset();
 
         console.log(`Num items: ${this.cards.length}`);
 

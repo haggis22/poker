@@ -1,4 +1,4 @@
-﻿import { Hand } from "../cards/hand";
+﻿import { Hand } from "../hands/hand";
 
 export class Player {
 

@@ -1,27 +1,32 @@
-﻿import { Hand } from "../../cards/hand";
-import { HandEvaluation as PokerHandEvaluation} from "./hand-evaluation";
+﻿import { Hand } from "../../hands/hand";
+import { PokerHandEvaluation} from "./poker-hand-evaluation";
 import { CardValue } from "../../cards/card-value";
+import { Card } from "../../cards/card";
+import { HandEvaluation } from "../hand-evaluation";
+import { HandEvaluator } from "../hand-evaluator";
 
-export class HandEvaluator {
+export class PokerHandEvaluator implements HandEvaluator {
 
 
-    public sort(hand: Hand): void {
+    private sort(cards: Array<Card>): void {
 
-        hand.cards.sort((a, b) => b.value.value - a.value.value);
+        cards.sort((a, b) => b.value.value - a.value.value);
 
     }
 
 
-    public evaluate(hand: Hand): PokerHandEvaluation {
+    public evaluate(hand: Hand): HandEvaluation {
 
-        this.sort(hand);
+        let cards = [...hand.cards.map(dealtCard => dealtCard.card)];
+
+        this.sort(cards);
 
         let byValue: Map<number, number> = new Map<number, number>();
         let bySuit: Map<number, number> = new Map<number, number>();
 
         let isFlush: boolean = false;
 
-        for (let card of hand.cards) {
+        for (let card of cards) {
 
             byValue.set(card.value.value, (byValue.get(card.value.value) || 0) + 1);
             bySuit.set(card.suit.value, (bySuit.get(card.suit.value) || 0) + 1);
@@ -146,26 +151,26 @@ export class HandEvaluator {
 
         }
 
-        if (hand.cards[0].value.value - hand.cards[4].value.value == 4) {
+        if (cards[0].value.value - cards[4].value.value == 4) {
 
             // The cards are already ranked in order and we know we don't have any pairs, so if the first one to the last one is an in-order run of 
             // numbers, then we have a straight (or possibly a straight flush)
-            values = [...hand.cards.map(card => card.value)];
+            values = [...cards.map(card => card.value)];
 
             return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values);
 
         }
 
-        if (hand.cards[0].value.value == CardValue.ACE
-            && hand.cards[1].value.value == 5
-            && hand.cards[4].value.value == 2) {
+        if (cards[0].value.value == CardValue.ACE
+            && cards[1].value.value == 5
+            && cards[4].value.value == 2) {
 
             // The cards are already ranked in order and we know we don't have any pairs.
             // In this case the first one is an ace, and the others must be 5 / 4 / 3 / 2, so that's a wheel straight
 
             // In this case we want to sort the cards so that the 5 is the highest - a 6-high straight would beat a wheel
             // Start with them in order, with the ace up front...
-            values = [...hand.cards.map(card => card.value)];
+            values = [...cards.map(card => card.value)];
             // ...then pop it off the front and push it on the back
             values.push(values.shift());
 
