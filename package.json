@@ -7,7 +7,12 @@
     "name": ""
   },
   "dependencies": {
+    "@types/node": "^14.0.22",
     "express": "^4.17.1",
     "socket.io": "^2.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haggis22/poker"
   }
 }
