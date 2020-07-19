@@ -56,9 +56,11 @@
     <Folder Include="src\cards\" />
     <Folder Include="src\games\" />
     <Folder Include="src\games\actions\" />
+    <Folder Include="src\games\actions\betting\" />
     <Folder Include="src\games\poker\" />
     <Folder Include="src\casino\" />
     <Folder Include="src\games\poker\five-card-draw\" />
+    <Folder Include="src\games\poker\five-card-stud\" />
     <Folder Include="src\hands\" />
     <Folder Include="src\players\" />
   </ItemGroup>
@@ -78,7 +80,7 @@
     <TypeScriptCompile Include="src\games\actions\action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\actions\bet-action.ts">
+    <TypeScriptCompile Include="src\games\actions\betting\bet-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\actions\deal-action.ts">
@@ -102,6 +104,7 @@
     <TypeScriptCompile Include="src\games\poker\five-card-draw\poker-game-five-card-draw.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\games\poker\five-card-stud\poker-game-five-card-stud.ts" />
     <TypeScriptCompile Include="src\hands\dealt-card.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

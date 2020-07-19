@@ -8,10 +8,11 @@ import { CardValue } from "./cards/card-value";
 import { CardSuit } from "./cards/card-suit";
 import { Table } from "./casino/table";
 import { PokerGameFiveCardDraw } from "./games/poker/five-card-draw/poker-game-five-card-draw";
+import { PokerGameFiveCardStud } from "./games/poker/five-card-stud/poker-game-five-card-stud";
 
 
 let table = new Table(6, new Deck());
-table.setGame(new PokerGameFiveCardDraw());
+table.setGame(new PokerGameFiveCardStud());
 
 table.seatPlayer(new Player('Danny'));
 table.seatPlayer(new Player('Paul'));

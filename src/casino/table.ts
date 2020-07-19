@@ -4,6 +4,7 @@ import { Game } from "../games/game";
 import { DealAction } from "../games/actions/deal-action";
 import { DealtCard } from "../hands/dealt-card";
 import { ShowdownAction } from "../games/actions/showdown-action";
+import { BetAction } from "../games/actions/betting/bet-action";
 
 export class Table {
 
@@ -77,8 +78,23 @@ export class Table {
 
         return nextPosition;
 
+    }
+
+
+    private findFirstToBet(firstBetRule: number): number {
+
+        switch (firstBetRule) {
+
+
+            case BetAction.FIRST_POSITION:
+                return this.findNextOccupiedSeat(this.button + 1);
+
+        }
+
+        throw new Error(`Do not know the rules for bet type ${firstBetRule}`);
 
     }
+
 
 
     public playHand(): void {
@@ -118,9 +134,36 @@ export class Table {
                         playerPointer = this.findNextOccupiedSeat(playerPointer + 1);
                     }
 
-                }
+                }  // while !everyoneGotOne
 
             }
+
+            else if (action instanceof BetAction)
+            {
+                console.log('-- Round of betting');
+
+                let betAction: BetAction = action as BetAction;
+
+                // give everyone a card
+                let playerPointer: number = this.findFirstToBet(betAction.firstToBet);
+                let whoInitiatedAction = null;
+
+                while (playerPointer != whoInitiatedAction) {
+
+                    console.log(`  ${this.players[playerPointer].name}'s turn to bet`);
+
+                    if (whoInitiatedAction == null) {
+                        whoInitiatedAction = playerPointer;
+                    }
+
+                    playerPointer = this.findNextOccupiedSeat(playerPointer + 1);
+
+                }
+
+                console.log('-- Betting complete');
+
+            }
+
             else if (action instanceof ShowdownAction) {
 
                 for (let p = 0; p < this.players.length; p++) {
