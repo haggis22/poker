@@ -1,15 +1,18 @@
-﻿import { Player } from "../players/player";
-import { Deck } from "../cards/deck";
-import { Game } from "../games/game";
-import { DealAction } from "../games/actions/deal-action";
-import { DealtCard } from "../hands/dealt-card";
-import { ShowdownAction } from "../games/actions/showdown-action";
-import { BetAction } from "../games/actions/betting/bet-action";
+﻿import { Player } from "../../players/player";
+import { Deck } from "../../cards/deck";
+import { Game } from "../../games/game";
+import { HandWinner } from "../../games/hand-winner";
+import { DealAction } from "../../games/actions/deal-action";
+import { DealtCard } from "../../hands/dealt-card";
+import { ShowdownAction } from "../../games/actions/showdown-action";
+import { BetAction } from "../../games/actions/betting/bet-action";
+import { Board } from "./boards/board";
 
 export class Table {
 
     public numSeats: number;
     public players: Array<Player>;
+    public board: Board;
     public deck: Deck;
     public game: Game;
 
@@ -46,6 +49,7 @@ export class Table {
     public setGame(game: Game): void {
 
         this.game = game;
+        this.board = game.newBoard();
 
     }
 
@@ -89,9 +93,43 @@ export class Table {
             case BetAction.FIRST_POSITION:
                 return this.findNextOccupiedSeat(this.button + 1);
 
+            case BetAction.BEST_HAND:
+                {
+                    let handWinners: Array<HandWinner> = this.findWinners();
+
+                    return handWinners[0].seat;
+
+                }
+
         }
 
         throw new Error(`Do not know the rules for bet type ${firstBetRule}`);
+
+    }   // findFirstToBet
+
+
+    
+    private findWinners(): Array<HandWinner> {
+
+        let handWinners: Array<HandWinner> = [];
+
+
+
+
+        for (let p = 0; p < this.players.length; p++) {
+
+            if (this.players[p] != null) {
+
+                let hand =
+                {
+
+                }
+
+            }
+
+        }
+
+        return handWinners;
 
     }
 
