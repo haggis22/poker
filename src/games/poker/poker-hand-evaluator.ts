@@ -8,6 +8,17 @@ import { HandEvaluator } from "../hand-evaluator";
 export class PokerHandEvaluator implements HandEvaluator {
 
 
+    private readonly DEFAULT_NUM_CARDS_REQUIRED_FOR_STRAIGHTS_AND_FLUSHES: number = 5;
+
+    private numCardsRequiredForStraightAndFlushes: number;
+
+    constructor(numCardsRequiredForStraightAndFlushes?: number) {
+        this.numCardsRequiredForStraightAndFlushes = typeof numCardsRequiredForStraightAndFlushes === 'undefined'
+                                                        ? this.DEFAULT_NUM_CARDS_REQUIRED_FOR_STRAIGHTS_AND_FLUSHES
+                                                        : numCardsRequiredForStraightAndFlushes;
+    }
+
+
     private sort(cards: Array<Card>): void {
 
         cards.sort((a, b) => b.value.value - a.value.value);
@@ -31,7 +42,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             byValue.set(card.value.value, (byValue.get(card.value.value) || 0) + 1);
             bySuit.set(card.suit.value, (bySuit.get(card.suit.value) || 0) + 1);
 
-            if (bySuit.get(card.suit.value) == 5) {
+            if (bySuit.get(card.suit.value) == this.numCardsRequiredForStraightAndFlushes) {
                 isFlush = true;
             }
 
@@ -75,7 +86,7 @@ export class PokerHandEvaluator implements HandEvaluator {
 
             }
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FOUR_OF_A_KIND, values);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FOUR_OF_A_KIND, values, hand);
 
         }
 
@@ -94,7 +105,7 @@ export class PokerHandEvaluator implements HandEvaluator {
 
             }
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FULL_HOUSE, values);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FULL_HOUSE, values, hand);
 
         }
 
@@ -120,7 +131,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             values.push(CardValue.lookup(kickers[0]));
             values.push(CardValue.lookup(kickers[1]));
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.THREE_OF_A_KIND, values);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.THREE_OF_A_KIND, values, hand);
 
         }
 
@@ -147,23 +158,24 @@ export class PokerHandEvaluator implements HandEvaluator {
 
             values = [...pairs.map(pairValue => CardValue.lookup(pairValue)), ...kickers.map(kickValue => CardValue.lookup(kickValue))];
 
-            return new PokerHandEvaluation(numPairs == 2 ? PokerHandEvaluation.RANK.TWO_PAIR : PokerHandEvaluation.RANK.PAIR, values);
+            return new PokerHandEvaluation(numPairs == 2 ? PokerHandEvaluation.RANK.TWO_PAIR : PokerHandEvaluation.RANK.PAIR, values, hand);
 
         }
 
-        if (cards[0].value.value - cards[4].value.value == 4) {
+        if (cards.length === this.numCardsRequiredForStraightAndFlushes && cards[0].value.value - cards[this.numCardsRequiredForStraightAndFlushes - 1].value.value === this.numCardsRequiredForStraightAndFlushes - 1) {
 
             // The cards are already ranked in order and we know we don't have any pairs, so if the first one to the last one is an in-order run of 
             // numbers, then we have a straight (or possibly a straight flush)
             values = [...cards.map(card => card.value)];
 
-            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values);
+            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values, hand);
 
         }
 
-        if (cards[0].value.value == CardValue.ACE
-            && cards[1].value.value == 5
-            && cards[4].value.value == 2) {
+        if (cards.length === this.numCardsRequiredForStraightAndFlushes
+            && cards[0].value.value == CardValue.ACE
+            && cards[1].value.value == this.numCardsRequiredForStraightAndFlushes
+            && cards[this.numCardsRequiredForStraightAndFlushes-1].value.value == 2) {
 
             // The cards are already ranked in order and we know we don't have any pairs.
             // In this case the first one is an ace, and the others must be 5 / 4 / 3 / 2, so that's a wheel straight
@@ -174,7 +186,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             // ...then pop it off the front and push it on the back
             values.push(values.shift());
 
-            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values);
+            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values, hand);
 
         }
 
@@ -190,7 +202,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             kickers.sort((k1, k2) => k2 - k1);
             values = kickers.map(kickValue => CardValue.lookup(kickValue));
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FLUSH, values);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FLUSH, values, hand);
 
         }
 
@@ -205,7 +217,7 @@ export class PokerHandEvaluator implements HandEvaluator {
         kickers.sort((k1, k2) => k2 - k1);
         values = kickers.map(kickValue => CardValue.lookup(kickValue));
 
-        return new PokerHandEvaluation(PokerHandEvaluation.RANK.HIGH_CARD, values);
+        return new PokerHandEvaluation(PokerHandEvaluation.RANK.HIGH_CARD, values, hand);
 
     }
 

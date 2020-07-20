@@ -1,6 +1,7 @@
 ﻿import { Card } from "../../cards/card";
 import { CardValue } from "../../cards/card-value";
 import { HandEvaluation } from "../hand-evaluation";
+import { Hand } from "../../hands/hand";
 
 export class PokerHandEvaluation implements HandEvaluation {
 
@@ -20,10 +21,12 @@ export class PokerHandEvaluation implements HandEvaluation {
 
     public rank: number;
     public values: Array<CardValue>;
+    hand: Hand;
 
-    constructor(rank: number, values: Array<CardValue>) {
+    constructor(rank: number, values: Array<CardValue>, hand: Hand) {
         this.rank = rank;
         this.values = values;
+        this.hand = hand;
     }
 
     public compareTo(h2: HandEvaluation): number {

@@ -5,6 +5,6 @@ import { HandEvaluation } from "../hand-evaluation";
 
 export interface BestHandSelector {
 
-    select(evaluator: HandEvaluator, hand: Hand, board: Board): HandEvaluation
+    select(evaluator: HandEvaluator, playerHand: Hand, board: Board): HandEvaluation
 
 }

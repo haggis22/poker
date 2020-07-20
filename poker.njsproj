@@ -17,7 +17,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>dff35402-e957-45f8-a626-681c75b892d6</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>src\server-socket.ts</StartupFile>
+    <StartupFile>build\server-poker.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -84,6 +84,9 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\boards\no-board.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\first-to-bet.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\actions\action.ts">

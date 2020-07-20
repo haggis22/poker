@@ -7,6 +7,7 @@ import { DealtCard } from "../../hands/dealt-card";
 import { ShowdownAction } from "../../games/actions/showdown-action";
 import { BetAction } from "../../games/actions/betting/bet-action";
 import { Board } from "./boards/board";
+import { FirstToBet } from "./first-to-bet";
 
 export class Table {
 
@@ -85,20 +86,18 @@ export class Table {
     }
 
 
-    private findFirstToBet(firstBetRule: number): number {
+    private findFirstToBet(firstBetRule: number): FirstToBet {
 
         switch (firstBetRule) {
 
 
             case BetAction.FIRST_POSITION:
-                return this.findNextOccupiedSeat(this.button + 1);
+                return new FirstToBet(this.findNextOccupiedSeat(this.button + 1), "because he is in first position");
 
             case BetAction.BEST_HAND:
                 {
                     let handWinners: Array<HandWinner> = this.findWinners();
-
-                    return handWinners[0].seat;
-
+                    return new FirstToBet(handWinners[0].seat, `with ${this.game.handDescriber.describe(handWinners[0].evaluation)}`);
                 }
 
         }
@@ -111,23 +110,43 @@ export class Table {
     
     private findWinners(): Array<HandWinner> {
 
-        let handWinners: Array<HandWinner> = [];
-
-
-
+        let handWinners: Array<HandWinner> = new Array<HandWinner>();
 
         for (let p = 0; p < this.players.length; p++) {
 
             if (this.players[p] != null) {
 
-                let hand =
-                {
-
-                }
+                // Put their best hand on the list
+                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, this.players[p].hand, this.board), p, 0))
 
             }
 
         }
+
+        // rank the hands, from best to worst
+        handWinners.sort(function (w1, w2) {
+
+
+            let compare = w1.evaluation.compareTo(w2.evaluation);
+
+            if (compare > 0) {
+
+                // The first hand is better, so keep it first
+                return -1;
+            }
+
+            if (compare < 0) {
+
+                // the first hand is worse, so swap them
+                return 1;
+            }
+
+            // They have the same value, so go with the earlier seat
+            // TODO: depending on where the button is, then higher-numbered seats could be in earlier position than lower-numbered seats
+            return w2.seat - w1.seat;
+
+        });
+
 
         return handWinners;
 
@@ -183,7 +202,9 @@ export class Table {
                 let betAction: BetAction = action as BetAction;
 
                 // give everyone a card
-                let playerPointer: number = this.findFirstToBet(betAction.firstToBet);
+                let firstToBet: FirstToBet = this.findFirstToBet(betAction.firstToBet);
+                console.log(`${this.players[firstToBet.seat].name} is first to bet ${firstToBet.description}`);
+                let playerPointer: number = firstToBet.seat;
                 let whoInitiatedAction = null;
 
                 while (playerPointer != whoInitiatedAction) {

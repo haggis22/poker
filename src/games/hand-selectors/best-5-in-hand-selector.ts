@@ -6,24 +6,25 @@ import { HandEvaluation } from "../hand-evaluation";
 
 export class Best5InHandSelector implements BestHandSelector {
 
-    select(evaluator: HandEvaluator, hand: Hand, board: Board): HandEvaluation {
+    select(evaluator: HandEvaluator, playerHand: Hand, board: Board): HandEvaluation {
 
-        let bestHand = null;
-
-        let cards = hand.cards.filter(card => card.isFaceUp);
+        let cards = playerHand.cards.filter(card => card.isFaceUp);
 
         if (cards.length > 5) {
 
-            bestHand = new Hand();
-            bestHand.cards = [...cards.slice(0, 5)];
-            return bestHand;
+            // for now, just choose the first 5 cards
+            // TODO: look at all the permutations
+            let hand = new Hand();
+            hand.cards = [...cards.slice(0, 5)];
+
+            return evaluator.evaluate(hand);
 
         }
 
-        bestHand = new Hand();
-        bestHand.cards = [...cards];
+        let hand = new Hand();
+        hand.cards = [...cards];
 
-        return bestHand;
+        return evaluator.evaluate(hand);
 
     }
 
