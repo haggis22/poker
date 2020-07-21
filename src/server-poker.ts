@@ -6,7 +6,8 @@ import { PokerGameFiveCardStud } from "./games/poker/five-card-stud/poker-game-f
 
 
 let table = new Table(6, new Deck());
-table.setGame(new PokerGameFiveCardStud());
+// table.setGame(new PokerGameFiveCardStud());
+table.setGame(new PokerGameFiveCardDraw());
 
 table.seatPlayer(new Player('Danny'));
 table.seatPlayer(new Player('Paul'));
