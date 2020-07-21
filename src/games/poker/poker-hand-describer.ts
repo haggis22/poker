@@ -18,6 +18,12 @@ export class PokerHandDescriber implements HandDescriber {
 
         let pokerHandEvaluation: PokerHandEvaluation = evaluation as PokerHandEvaluation;
 
+        if (!evaluation.values || !evaluation.values.length) {
+
+            return 'unknown hand';
+
+        }
+
         switch (pokerHandEvaluation.rank) {
 
             case PokerHandEvaluation.RANK.HIGH_CARD:
