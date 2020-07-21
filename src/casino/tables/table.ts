@@ -114,7 +114,7 @@ export class Table {
 
         for (let p = 0; p < this.players.length; p++) {
 
-            if (this.players[p] != null) {
+            if (this.players[p] != null && this.players[p].hasHand()) {
 
                 // Put their best hand on the list
                 handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, this.players[p].hand, this.board), p, 0))
@@ -231,7 +231,7 @@ export class Table {
 
                     if (player != null) {
 
-                        if (player.hand) {
+                        if (player.hasHand()) {
 
                             for (let card of player.hand.cards) {
 
@@ -251,11 +251,18 @@ export class Table {
 
                     }
 
+                }   // show each player's cards
+
+                let winners: HandWinner[] = this.findWinners();
+
+                for (let winner of winners) {
+
+                    console.log(`${this.players[winner.seat].name} wins ${winner.amount} with ${this.game.handDescriber.describe(winner.evaluation)}`);
 
                 }
 
 
-            }
+            }   // showDown
 
         }
 

@@ -22,5 +22,11 @@ export class Player {
 
     }
 
+    public hasHand(): boolean {
+
+        return this.hand != null;
+
+    }
+
 
 }
