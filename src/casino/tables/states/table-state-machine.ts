@@ -1,8 +1,7 @@
-﻿import { Table } from "../table";
-import { ICommand } from "../../../commands/command";
+﻿import { ITableState } from "./table-state";
 
 export interface ITableStateMachine {
 
-    handleCommand(table: Table, command: ICommand): void;
+    nextState(): ITableState;
 
 }

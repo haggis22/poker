@@ -69,6 +69,7 @@
     <Folder Include="src\games\poker\five-card-stud\" />
     <Folder Include="src\hands\" />
     <Folder Include="src\commands\" />
+    <Folder Include="src\actions\" />
     <Folder Include="src\players\" />
     <Folder Include="src\casino\tables\states\" />
     <Folder Include="src\casino\tables\states\betting\" />
@@ -104,6 +105,9 @@
     <TypeScriptCompile Include="src\casino\tables\pot.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\states\hand-complete-state.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\states\table-state-machine.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -122,7 +126,7 @@
     <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\commands\table\buy-in-command.ts">
+    <TypeScriptCompile Include="src\commands\table\start-game-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\request-seat-command.ts">

@@ -8,6 +8,7 @@ import { TableManager } from "./casino/tables/table-manager";
 import { RequestSeatCommand } from "./commands/table/request-seat-command";
 import { User } from "./players/user";
 import { AddChipsCommand } from "./commands/table/add-chips-command";
+import { StartGameCommand } from "./commands/table/start-game-command";
 
 
 const TABLE_ID = 1;
@@ -48,6 +49,9 @@ console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 2000)).m
 console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 2000)).message);
 console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 2000)).message);
 console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 2000)).message);
+
+console.log(tableManager.handleCommand(new StartGameCommand(TABLE_ID)).message);
+
 
 
 

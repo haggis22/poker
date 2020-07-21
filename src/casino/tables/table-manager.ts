@@ -7,6 +7,8 @@ import { CommandResult } from "../../commands/command-result";
 import { RequestSeatCommand } from "../../commands/table/request-seat-command";
 import { Player } from "../../players/player";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
+import { StartGameCommand } from "../../commands/table/start-game-command";
+import { OpenState } from "./states/open-state";
 
 export class TableManager implements ICommandHandler {
 
@@ -37,6 +39,12 @@ export class TableManager implements ICommandHandler {
         if (command instanceof AddChipsCommand) {
 
             return this.addChips(command);
+
+        }
+
+        if (command instanceof StartGameCommand) {
+
+            return this.startGame(command);
 
         }
 
@@ -101,8 +109,29 @@ export class TableManager implements ICommandHandler {
         player.chips += command.amount;
         return new CommandResult(true, `${player.name} has added ${this.chipFormatter.format(command.amount)} in chips`);
 
-    }
+    }  // addChips
 
+
+    private startGame(command: StartGameCommand): CommandResult {
+
+        if (this.table.state instanceof OpenState) {
+
+            this.table.state = this.game.stateMachine.nextState();
+            this.handleTableStateChange();
+            return new CommandResult(true, "Started game");
+
+        }
+
+        return new CommandResult(false, "Game is already in progress");
+
+    }  // addChips
+
+
+    private handleTableStateChange() : void {
+
+        console.log(`TableState: ${this.table.state.constructor.name}`);
+
+    }
 
 
 }
