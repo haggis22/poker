@@ -75,6 +75,12 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\deal-card-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\cards\card-value.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -105,6 +111,7 @@
     <TypeScriptCompile Include="src\casino\tables\pot.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\states\start-hand-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\hand-complete-state.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

@@ -24,12 +24,13 @@ export class Table {
     public state: ITableState;
     public numSeats: number;
     public players: Array<Player>;
+
     public board: Board;
     public deck: Deck;
     public pots: Pot[];
 
     // tracks which seat has the button so that we know where to deal the next card
-    private button: number;
+    public button: number;
 
     constructor(id: number, numSeats: number, deck: Deck) {
 
@@ -47,36 +48,6 @@ export class Table {
     }
 
 
-    private setButton(): void {
-
-        this.button = this.findNextOccupiedSeat(this.button == null ? 0 : this.button + 1);
-
-    }
-
-    private findNextOccupiedSeat(position: number): number {
-
-        let nextPosition: number = position;
-
-        if (nextPosition > this.numSeats) {
-            nextPosition = 0;
-        }
-
-        while (this.players[nextPosition] == null) {
-            nextPosition++;
-
-            if (nextPosition > this.numSeats) {
-                nextPosition = 0;
-            }
-
-            if (nextPosition == position) {
-                throw new Error("Could not find the next player");
-            }
-
-        }
-
-        return nextPosition;
-
-    }
 
 
     private findFirstToBet(firstBetRule: number): FirstToBet {
@@ -153,11 +124,6 @@ export class Table {
 
 /*
 
-        this.deck.shuffle();
-
-        this.setButton();
-
-        this.pots.length = 0;
 
         for (let action of this.game.actions) {
 

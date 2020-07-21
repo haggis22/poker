@@ -9,6 +9,7 @@ import { Player } from "../../players/player";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
 import { StartGameCommand } from "../../commands/table/start-game-command";
 import { OpenState } from "./states/open-state";
+import { StartHandState } from "./states/start-hand-state";
 
 export class TableManager implements ICommandHandler {
 
@@ -116,8 +117,7 @@ export class TableManager implements ICommandHandler {
 
         if (this.table.state instanceof OpenState) {
 
-            this.table.state = this.game.stateMachine.nextState();
-            this.handleTableStateChange();
+            this.changeTableState(this.game.stateMachine.nextState());
             return new CommandResult(true, "Started game");
 
         }
@@ -127,11 +127,82 @@ export class TableManager implements ICommandHandler {
     }  // addChips
 
 
-    private handleTableStateChange() : void {
+    private changeTableState(state) : void {
 
-        console.log(`TableState: ${this.table.state.constructor.name}`);
+        this.table.state = state;
+        console.log(`TableState: ${state.constructor.name}`);
+
+        if (state instanceof StartHandState) {
+
+            this.startHand();
+
+        }
+
 
     }
+
+
+    private startHand() {
+
+        for (let player of this.table.players) {
+
+            if (player != null) {
+
+                // Add their chips "to-be-added" to their currents stack
+                player.chips += player.chipsToAdd;
+                player.chipsToAdd = 0;
+
+            }
+
+        }
+
+        this.table.deck.shuffle();
+
+        this.setButton();
+
+        this.table.pots.length = 0;
+
+        // OK - jump straight to the next state
+        this.changeTableState(this.game.stateMachine.nextState());
+
+    }   // startHand
+
+
+    private setButton(): void {
+
+        this.table.button = this.findNextOccupiedSeat(this.table.button == null ? 0 : this.table.button + 1);
+
+    }
+
+    private findNextOccupiedSeat(position: number): number {
+
+        let nextPosition: number = position;
+
+        if (nextPosition > this.table.numSeats) {
+            nextPosition = 0;
+        }
+
+        while (this.table.players[nextPosition] == null) {
+
+            nextPosition++;
+
+            if (nextPosition > this.table.numSeats) {
+                nextPosition = 0;
+            }
+
+            if (nextPosition == position) {
+                throw new Error("Could not find the next player");
+            }
+
+        }
+
+        return nextPosition;
+
+    }
+
+
+
+
 
 
 }
