@@ -231,11 +231,23 @@ export class Table {
 
                     if (player != null) {
 
-                        let hand = player.hand;
+                        if (player.hand) {
 
-                        let evaluation = this.game.handEvaluator.evaluate(hand);
+                            for (let card of player.hand.cards) {
 
-                        console.log(`${player.name}, ${hand.display()}:  ${this.game.handDescriber.describe(evaluation)}`);
+                                // flip his cards face up
+                                card.isFaceUp = true;
+
+                            }
+
+                            let evaluation = this.game.handSelector.select(this.game.handEvaluator, player.hand, this.board)
+
+                            console.log(`${player.name}, ${player.hand.display()}:  ${this.game.handDescriber.describe(evaluation)}`);
+
+                        }
+                        else {
+                            console.log('not in hand');
+                        }
 
                     }
 
