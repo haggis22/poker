@@ -2,4 +2,9 @@
 
 export class OpenState implements ITableState {
 
+    isHandInProgress(): boolean {
+        return false;
+    }
+
+
 }

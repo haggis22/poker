@@ -14,4 +14,8 @@ export class BetState implements ITableState {
         this.firstToBet = firstToBet;
     }
 
+    isHandInProgress(): boolean {
+        return true;
+    }
+
 }

@@ -3,5 +3,6 @@
 export interface ITableState {
 
 
+    isHandInProgress(): boolean;
 
 }

@@ -90,8 +90,16 @@ export class TableManager implements ICommandHandler {
             return new CommandResult(false, 'Player is not sitting at table');
         }
 
-        player.addChips(command.amount);
-        return new CommandResult(true, `${player.name} has bought in for ${this.chipFormatter.format(command.amount)}`);
+        if (this.table.state.isHandInProgress()) {
+
+            // we can't add the chips right now, but they will be added before the next hand
+            player.chipsToAdd += command.amount;
+            return new CommandResult(true, `${player.name} has bought in for ${this.chipFormatter.format(command.amount)} on the next hand`);
+
+        }
+
+        player.chips += command.amount;
+        return new CommandResult(true, `${player.name} has added ${this.chipFormatter.format(command.amount)} in chips`);
 
     }
 

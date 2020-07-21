@@ -119,6 +119,12 @@
     <TypeScriptCompile Include="src\commands\command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\commands\table\buy-in-command.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\request-seat-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

@@ -7,6 +7,8 @@ export class Player {
     public name: string;
     public chips: number;
 
+    public chipsToAdd: number;
+
     public hand: Hand;
 
 
@@ -18,7 +20,7 @@ export class Player {
         this.hand = new Hand();
         this.hand.reset();
 
-        this.chips = 0;
+        this.chips = this.chipsToAdd = 0;
 
     }
 
@@ -33,12 +35,5 @@ export class Player {
         return this.hand != null;
 
     }
-
-    public addChips(chips: number) {
-
-        this.chips += chips;
-
-    }
-
 
 }

@@ -42,7 +42,7 @@ export class Table {
 
         this.pots = new Array<Pot>();
 
-        this.state = null;
+        this.state = new OpenState();
 
     }
 

@@ -15,10 +15,10 @@ let table = new Table(TABLE_ID, 6, new Deck());
 
 let tableManager = new TableManager(table, new PokerGameFiveCardDraw(), new MoneyFormatter());
 
-let danny = new User(1, 'Daniel', 1000);
-let mark = new User(2, 'Mark', 1000);
-let paul = new User(3, 'Paul', 1000);
-let joe = new User(4, 'Joe', 1000);
+let danny = new User(1, 'Daniel', 10000);
+let mark = new User(2, 'Mark', 10000);
+let paul = new User(3, 'Paul', 10000);
+let joe = new User(4, 'Joe', 10000);
 
 {
     let requestSeatCommand = new RequestSeatCommand(TABLE_ID, danny, null);
@@ -44,11 +44,10 @@ let joe = new User(4, 'Joe', 1000);
     console.log(result.message);
 }
 
-console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 500)));
-console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 500)));
-console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 500)));
-console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 500)));
-console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 5, 500)));
+console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 2000)).message);
+console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 2000)).message);
+console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 2000)).message);
+console.log(tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 2000)).message);
 
 
 

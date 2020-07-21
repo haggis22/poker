@@ -12,5 +12,9 @@ export class DealState implements ITableState {
 
     }
 
+    isHandInProgress(): boolean {
+        return true;
+    }
+
 
 }

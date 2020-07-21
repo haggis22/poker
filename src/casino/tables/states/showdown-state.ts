@@ -2,6 +2,9 @@
 
 export class ShowdownState implements ITableState {
 
+    isHandInProgress(): boolean {
+        return true;
+    }
 
 
 }
