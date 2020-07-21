@@ -2,6 +2,7 @@
 import { DealState } from "../../../casino/tables/states/deal-state";
 import { BetState } from "../../../casino/tables/states/betting/bet-state";
 import { ShowdownState } from "../../../casino/tables/states/showdown-state";
+import { HandCompleteState } from "../../../casino/tables/states/hand-complete-state";
 
 export class FiveCardStudStateMachine extends PokerStateMachine {
 
@@ -25,6 +26,8 @@ export class FiveCardStudStateMachine extends PokerStateMachine {
         this.states.push(new BetState(BetState.BEST_HAND));
 
         this.states.push(new ShowdownState());
+
+        this.states.push(new HandCompleteState());
 
     }
 
