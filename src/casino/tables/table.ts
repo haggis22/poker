@@ -2,64 +2,50 @@
 import { Deck } from "../../cards/deck";
 import { Game } from "../../games/game";
 import { HandWinner } from "../../games/hand-winner";
-import { DealAction } from "../../games/actions/deal-action";
 import { DealtCard } from "../../hands/dealt-card";
-import { ShowdownAction } from "../../games/actions/showdown-action";
-import { BetAction } from "../../games/actions/betting/bet-action";
 import { Board } from "./boards/board";
 import { FirstToBet } from "./first-to-bet";
 import { IChipFormatter } from "../chips/chip-formatter";
 import { Pot } from "./pot";
 
+import { BetState } from "./states/betting/bet-state";
+
+import { ICommandHandler } from "../../commands/command-handler";
+import { ICommand } from "../../commands/command";
+import { CommandResult } from "../../commands/command-result";
+
+import { ITableState } from "./states/table-state";
+import { OpenState } from "./states/open-state";
+
+
 export class Table {
 
+    public id: number;
+    public state: ITableState;
     public numSeats: number;
     public players: Array<Player>;
     public board: Board;
     public deck: Deck;
-    public game: Game;
-    public chipFormatter: IChipFormatter;
     public pots: Pot[];
 
     // tracks which seat has the button so that we know where to deal the next card
     private button: number;
 
-    constructor(numSeats: number, deck: Deck) {
+    constructor(id: number, numSeats: number, deck: Deck) {
+
+        this.id = id;
+
         this.numSeats = numSeats;
         this.players = new Array<Player>(numSeats);
         this.deck = deck;
         this.button = null;
 
         this.pots = new Array<Pot>();
-    }
 
-
-    public seatPlayer(player: Player, chips: number) : boolean {
-
-        for (let s = 0; s < this.numSeats; s++) {
-
-            if (this.players[s] == null) {
-
-                player.addChips(chips);
-                this.players[s] = player;
-                return true;
-
-            }
-
-        }
-
-        // No room at the table
-        return false;
+        this.state = null;
 
     }
 
-
-    public setGame(game: Game): void {
-
-        this.game = game;
-        this.board = game.newBoard();
-
-    }
 
     private setButton(): void {
 
@@ -95,20 +81,21 @@ export class Table {
 
     private findFirstToBet(firstBetRule: number): FirstToBet {
 
+/*
+
         switch (firstBetRule) {
 
-
-            case BetAction.FIRST_POSITION:
+            case BetState.FIRST_POSITION:
                 return new FirstToBet(this.findNextOccupiedSeat(this.button + 1), "because he is in first position");
 
-            case BetAction.BEST_HAND:
+            case BetState.BEST_HAND:
                 {
                     let handWinners: Array<HandWinner> = this.findWinners();
                     return new FirstToBet(handWinners[0].seat, `with ${this.game.handDescriber.describe(handWinners[0].evaluation)}`);
                 }
 
         }
-
+*/
         throw new Error(`Do not know the rules for bet type ${firstBetRule}`);
 
     }   // findFirstToBet
@@ -118,6 +105,7 @@ export class Table {
     private findWinners(): Array<HandWinner> {
 
         let handWinners: Array<HandWinner> = new Array<HandWinner>();
+/*
 
         for (let p = 0; p < this.players.length; p++) {
 
@@ -154,7 +142,7 @@ export class Table {
 
         });
 
-
+*/
         return handWinners;
 
     }
@@ -162,6 +150,8 @@ export class Table {
 
 
     public playHand(): void {
+
+/*
 
         this.deck.shuffle();
 
@@ -171,9 +161,9 @@ export class Table {
 
         for (let action of this.game.actions) {
 
-            if (action instanceof DealAction) {
+            if (action instanceof DealState) {
 
-                let dealAction: DealAction = action as DealAction;
+                let dealState: DealState = action as DealState;
 
                 // give everyone a card
                 let playerPointer: number = this.findNextOccupiedSeat(this.button + 1);
@@ -182,7 +172,7 @@ export class Table {
 
                 while (!everyoneGotOne) {
 
-                    let dealtCard = new DealtCard(this.deck.deal(), dealAction.isFaceUp);
+                    let dealtCard = new DealtCard(this.deck.deal(), dealState.isFaceUp);
 
                     this.players[playerPointer].hand.deal(dealtCard);
 
@@ -204,14 +194,14 @@ export class Table {
 
             }
 
-            else if (action instanceof BetAction)
+            else if (action instanceof BetState)
             {
                 console.log('-- Round of betting');
 
-                let betAction: BetAction = action as BetAction;
+                let betState: BetState = action as BetState;
 
                 // give everyone a card
-                let firstToBet: FirstToBet = this.findFirstToBet(betAction.firstToBet);
+                let firstToBet: FirstToBet = this.findFirstToBet(betState.firstToBet);
                 console.log(`${this.players[firstToBet.seat].name} is first to bet ${firstToBet.description}`);
                 let playerPointer: number = firstToBet.seat;
                 let whoInitiatedAction = null;
@@ -250,7 +240,7 @@ export class Table {
 
             }
 
-            else if (action instanceof ShowdownAction) {
+            else if (action instanceof ShowdownState) {
 
                 console.log('========');
                 console.log('SHOWDOWN');
@@ -296,9 +286,9 @@ export class Table {
             }   // showDown
 
         }
+*/
 
 
-
-    }
+    }  // playHand
 
 }

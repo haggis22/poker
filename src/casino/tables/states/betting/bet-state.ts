@@ -1,6 +1,6 @@
-﻿import { Action } from "../action";
+﻿import { ITableState } from "../table-state";
 
-export class BetAction implements Action {
+export class BetState implements ITableState {
 
 
     public static FIRST_POSITION: number = 1;
