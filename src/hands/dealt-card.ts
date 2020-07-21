@@ -11,4 +11,13 @@ export class DealtCard {
         this.isFaceUp = isFaceUp;
     }
 
+    public toString(): string {
+
+        return this.isFaceUp
+            ? this.card.toString()
+            : '??';
+
+
+    }
+
 }

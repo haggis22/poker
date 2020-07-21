@@ -25,7 +25,7 @@ export class Hand {
 
     public display(): string {
 
-        return this.cards.map(dealtCard => dealtCard.card.toString()).join(" ");
+        return this.cards.map(dealtCard => dealtCard.toString()).join(" ");
 
     }
 
