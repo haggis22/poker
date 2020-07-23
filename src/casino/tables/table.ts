@@ -48,6 +48,15 @@ export class Table {
     }
 
 
+    public getDealer(): Player {
+
+        if (this.button != null && this.players[this.button] != null) {
+            return this.players[this.button];
+        }
+
+        return null;
+    }
+
 
 
     private findFirstToBet(firstBetRule: number): FirstToBet {

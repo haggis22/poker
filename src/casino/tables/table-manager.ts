@@ -171,6 +171,10 @@ export class TableManager implements ICommandHandler {
     private setButton(): void {
 
         this.table.button = this.findNextOccupiedSeat(this.table.button == null ? 0 : this.table.button + 1);
+        let dealer = this.table.getDealer();
+        if (dealer) {
+            console.log(`${dealer.name} has the button`);
+        }
 
     }
 
