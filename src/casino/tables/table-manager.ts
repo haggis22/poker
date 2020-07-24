@@ -15,21 +15,26 @@ import { ActionBroadcaster } from "../../actions/action-broadcaster";
 import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/player-seated-action";
 import { MoveButtonAction } from "../../actions/table/move-button-action";
+import { AddChipsAction } from "../../actions/table/add-chips-action";
+import { DealState } from "./states/deal-state";
+import { DealtCard } from "../../hands/dealt-card";
+import { DealCardAction } from "../../actions/game/deal-card-action";
+import { Hand } from "../../hands/hand";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private readonly DEBUG_ENABLED: boolean = false;
+    private readonly ALL_ACCESS: number = -1;
+
 
     public table: Table;
     public game: Game;
-    public chipFormatter: IChipFormatter;
     public observers: TableObserver[];
 
 
-    constructor(table: Table, game: Game, chipFormatter: IChipFormatter) {
+    constructor(table: Table, game: Game) {
         this.table = table;
         this.game = game;
-        this.chipFormatter = chipFormatter;
 
         this.observers = new Array<TableObserver>();
     }
@@ -57,6 +62,13 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
         }
 
     }   // broadcast
+
+
+    private hasAccess(observer: TableObserver, playerID: number) {
+
+        return observer.playerID === this.ALL_ACCESS || observer.playerID === playerID;
+
+    }
 
 
     public async handleCommand(command: ICommand): Promise<CommandResult> {
@@ -90,18 +102,16 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
         let seatID = command.seatID;
         if (seatID === null) {
 
-            for (let s = 0; s < this.table.numSeats; s++) {
+            for (let seat of this.table.seats) {
 
-                if (this.table.players[s] == null) {
-
-                    seatID = s;
+                if (seat.player == null) {
+                    seatID = seat.id;
                     break;
-
                 }
 
-            }
+            }  // for each seat
 
-        }
+        }  // no seat specified
 
         if (seatID === null) {
 
@@ -109,26 +119,49 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         }
 
-        if (this.table.players[seatID] == null) {
+        let seat = this.table.seats.find(s => s.id === seatID);
 
-            let player = new Player(command.user.id, command.user.name);
-            this.table.players[seatID] = player;
+        if (seat) {
 
-            this.broadcast(new PlayerSeatedAction(this.table.id, player, seatID));
+            if (seat.player == null) {
 
-            return new CommandResult(true, `${player.name} sits at seat ${seatID}`);
+                seat.player = new Player(command.user.id, command.user.name)
+
+                this.broadcast(new PlayerSeatedAction(this.table.id, seat.player, seatID));
+
+                return new CommandResult(true, `${seat.player.name} sits at seat ${seatID}`);
+
+            }
+
+            return new CommandResult(false, `Seat ${seatID} is already taken`);
 
         }
 
-        return new CommandResult(false, `Seat ${seatID} is already taken`);
+        return new CommandResult(false, `Could not find seat ${seatID}`);
 
     }
+
+    private findPlayer(playerID: number): Player {
+
+        for (let s of this.table.seats) {
+
+            if (s.player && s.player.id == playerID) {
+
+                return s.player;
+
+            }
+
+        }
+
+        return null;
+
+    }   // findPlayer
 
 
 
     private async addChips(command: AddChipsCommand): Promise<CommandResult> {
 
-        let player = this.table.players.find(p => p && p.id == command.playerID);
+        let player: Player = this.findPlayer(command.playerID);
 
         if (!player) {
             return new CommandResult(false, 'Player is not sitting at table');
@@ -138,12 +171,14 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
             // we can't add the chips right now, but they will be added before the next hand
             player.chipsToAdd += command.amount;
-            return new CommandResult(true, `${player.name} has bought in for ${this.chipFormatter.format(command.amount)} on the next hand`);
+            return new CommandResult(true, `${player.name} has bought in for ${command.amount} on the next hand`);
 
         }
 
         player.chips += command.amount;
-        return new CommandResult(true, `${player.name} has added ${this.chipFormatter.format(command.amount)} in chips`);
+        this.broadcast(new AddChipsAction(this.table.id, player.id, command.amount));
+
+        return new CommandResult(true, `${player.name} has added ${command.amount} in chips`);
 
     }  // addChips
 
@@ -169,7 +204,13 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         if (state instanceof StartHandState) {
 
-            this.startHand();
+            return this.startHand();
+
+        }
+
+        if (state instanceof DealState) {
+
+            return this.dealRound(state);
 
         }
 
@@ -179,15 +220,19 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private startHand() {
 
-        for (let player of this.table.players) {
+        for (let seat of this.table.seats) {
 
-            if (player != null) {
+            if (seat.player != null && seat.player.chipsToAdd) {
 
                 // Add their chips "to-be-added" to their currents stack
-                player.chips += player.chipsToAdd;
-                player.chipsToAdd = 0;
+                seat.player.chips += seat.player.chipsToAdd;
+                this.broadcast(new AddChipsAction(this.table.id, seat.player.id, seat.player.chipsToAdd));
+                seat.player.chipsToAdd = 0;
 
-            }
+            }   // they have chips waiting to add
+
+            // take their cards, if they have any
+            seat.hand = new Hand();
 
         }
 
@@ -205,36 +250,29 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private setButton(): void {
 
-        this.table.button = this.findNextOccupiedSeat(this.table.button == null ? 0 : this.table.button + 1);
+        this.table.buttonIndex = this.findNextOccupiedSeat(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
 
-        this.broadcast(new MoveButtonAction(this.table.button));
-
-/*
-        let dealer = this.table.getDealer();
-        if (dealer) {
-            // console.log(`${dealer.name} has the button`);
-        }
-*/
+        this.broadcast(new MoveButtonAction(this.table.id, this.table.seats[this.table.buttonIndex].id));
 
     }
 
-    private findNextOccupiedSeat(position: number): number {
+    private findNextOccupiedSeat(seatIndex: number): number {
 
-        let nextPosition: number = position;
+        let nextPosition: number = seatIndex;
 
-        if (nextPosition > this.table.numSeats) {
+        if (nextPosition >= this.table.seats.length) {
             nextPosition = 0;
         }
 
-        while (this.table.players[nextPosition] == null) {
+        while (this.table.seats[nextPosition].player == null) {
 
             nextPosition++;
 
-            if (nextPosition > this.table.numSeats) {
+            if (nextPosition >= this.table.seats.length) {
                 nextPosition = 0;
             }
 
-            if (nextPosition == position) {
+            if (nextPosition == seatIndex) {
                 throw new Error("Could not find the next player");
             }
 
@@ -242,7 +280,63 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         return nextPosition;
 
-    }
+    }   // findNextOccupiedSeat
+
+
+    private dealRound(dealState: DealState) {
+
+        // give everyone a card
+        let seatIndex: number = this.findNextOccupiedSeat(this.table.buttonIndex + 1);
+
+        let everyoneGotOne = false;
+
+        while (!everyoneGotOne) {
+
+            let card = this.table.deck.deal();
+            let seat = this.table.seats[seatIndex];
+
+            let dealtCard = new DealtCard(card, dealState.isFaceUp);
+
+            this.table.seats[seatIndex].hand.deal(dealtCard);
+
+            if (dealtCard.isFaceUp) {
+
+                this.broadcast(new DealCardAction(this.table.id, seat.id, card));
+
+            }
+            else {
+
+                for (let observer of this.observers) {
+
+                    if (this.hasAccess(observer, seat.player.id)) {
+
+                        this.broadcast(new DealCardAction(this.table.id, seat.id, card));
+
+                    }
+                    else {
+
+                        this.broadcast(new DealCardAction(this.table.id, seat.id, null));
+
+                    }
+
+                }
+
+            }
+
+            if (seatIndex == this.table.buttonIndex) {
+                everyoneGotOne = true;
+            }
+            else {
+                seatIndex = this.findNextOccupiedSeat(seatIndex + 1);
+            }
+
+        }  // while !everyoneGotOne
+
+        // OK - jump to the next state
+        this.changeTableState(this.game.stateMachine.nextState());
+
+    }   // startHand
+
 
 
 

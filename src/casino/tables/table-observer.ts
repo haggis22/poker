@@ -2,6 +2,9 @@
 
 export interface TableObserver {
 
+    playerID: number;
+
     notify(action: Action): void;
+
 
 }

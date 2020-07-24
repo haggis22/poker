@@ -1,14 +1,17 @@
 ﻿import { Action } from "../action";
-import { DealtCard } from "../../hands/dealt-card";
+import { Card } from "../../cards/card";
+import { Seat } from "../../casino/tables/seat";
 
 export class DealCardAction implements Action {
 
-    public playerID: number;
-    public card: DealtCard;
+    public tableID: number;
+    public seatID: number;
+    public card: Card;
 
-    constructor(playerID: number, card: DealtCard) {
+    constructor(tableID: number, seatID: number, card: Card) {
 
-        this.playerID = playerID;
+        this.tableID = tableID;
+        this.seatID = seatID;
         this.card = card;
 
     }

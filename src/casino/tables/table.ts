@@ -16,47 +16,46 @@ import { CommandResult } from "../../commands/command-result";
 
 import { ITableState } from "./states/table-state";
 import { OpenState } from "./states/open-state";
+import { Seat } from "./seat";
 
 
 export class Table {
 
+    public static readonly FIRST_SEAT:number = 1;
+
     public id: number;
     public state: ITableState;
-    public numSeats: number;
-    public players: Array<Player>;
+
+    public seats: Array<Seat>;
 
     public board: Board;
     public deck: Deck;
     public pots: Pot[];
 
     // tracks which seat has the button so that we know where to deal the next card
-    public button: number;
+    public buttonIndex: number;
 
     constructor(id: number, numSeats: number, deck: Deck) {
 
         this.id = id;
 
-        this.numSeats = numSeats;
-        this.players = new Array<Player>(numSeats);
+        this.seats = new Array<Seat>();
+
+        for (let s = 0; s < numSeats; s++) {
+            this.seats.push(new Seat((s + 1)));
+        }
+
+        // Button is not yet assigned
+        this.buttonIndex = null;
+
         this.deck = deck;
-        this.button = null;
+
 
         this.pots = new Array<Pot>();
 
         this.state = new OpenState();
 
     }
-
-
-    public getDealer(): Player {
-
-        if (this.button != null && this.players[this.button] != null) {
-            return this.players[this.button];
-        }
-
-        return null;
-    }
-
 
 
     private findFirstToBet(firstBetRule: number): FirstToBet {
@@ -136,40 +135,7 @@ export class Table {
 
         for (let action of this.game.actions) {
 
-            if (action instanceof DealState) {
-
-                let dealState: DealState = action as DealState;
-
-                // give everyone a card
-                let playerPointer: number = this.findNextOccupiedSeat(this.button + 1);
-
-                let everyoneGotOne = false;
-
-                while (!everyoneGotOne) {
-
-                    let dealtCard = new DealtCard(this.deck.deal(), dealState.isFaceUp);
-
-                    this.players[playerPointer].hand.deal(dealtCard);
-
-                    if (dealtCard.isFaceUp) {
-                        console.log(`${this.players[playerPointer].name} gets ${dealtCard.card.value.symbol}${dealtCard.card.suit.symbol}`);
-                    }
-                    else {
-                        console.log(`${this.players[playerPointer].name} gets a card`);
-                    }
-
-                    if (playerPointer == this.button) {
-                        everyoneGotOne = true;
-                    }
-                    else {
-                        playerPointer = this.findNextOccupiedSeat(playerPointer + 1);
-                    }
-
-                }  // while !everyoneGotOne
-
-            }
-
-            else if (action instanceof BetState)
+            if (action instanceof BetState)
             {
                 console.log('-- Round of betting');
 

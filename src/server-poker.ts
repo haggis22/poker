@@ -17,15 +17,16 @@ import { TableWatcher } from "./casino/clients/table-watcher";
     const TABLE_ID = 1;
     let table = new Table(TABLE_ID, 6, new Deck());
 
-    let tableManager = new TableManager(table, new PokerGameFiveCardDraw(), new MoneyFormatter());
-
-    let client = new TableWatcher();
-    tableManager.register(client);
+    let tableManager = new TableManager(table, new PokerGameFiveCardDraw());
 
     let danny = new User(1, 'Daniel', 10000);
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);
     let joe = new User(4, 'Joe', 10000);
+
+    let client = new TableWatcher(table, danny.id, new MoneyFormatter());
+    tableManager.register(client);
+
 
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, danny, null);

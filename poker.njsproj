@@ -37,6 +37,9 @@
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\actions\table\add-chips-action.ts">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\casino\tables\table-observer.ts">
       <SubType>Code</SubType>
     </Compile>
@@ -127,6 +130,9 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\pot.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\seat.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\states\start-hand-state.ts" />
