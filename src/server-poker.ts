@@ -9,6 +9,7 @@ import { RequestSeatCommand } from "./commands/table/request-seat-command";
 import { User } from "./players/user";
 import { AddChipsCommand } from "./commands/table/add-chips-command";
 import { StartGameCommand } from "./commands/table/start-game-command";
+import { TableWatcher } from "./casino/clients/table-watcher";
 
 
 (async function () {
@@ -18,6 +19,9 @@ import { StartGameCommand } from "./commands/table/start-game-command";
 
     let tableManager = new TableManager(table, new PokerGameFiveCardDraw(), new MoneyFormatter());
 
+    let client = new TableWatcher();
+    tableManager.register(client);
+
     let danny = new User(1, 'Daniel', 10000);
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);
@@ -26,50 +30,41 @@ import { StartGameCommand } from "./commands/table/start-game-command";
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, danny, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
-        console.log(result.message);
     }
 
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, mark, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
-        console.log(result.message);
     }
 
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, paul, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
-        console.log(result.message);
     }
 
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, joe, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
-        console.log(result.message);
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 2000))
-            .then((result) => console.log(result.message));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 2000));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 2000))
-            .then((result) => console.log(result.message));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 2000));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 2000))
-            .then((result) => console.log(result.message));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 2000));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 2000))
-            .then((result) => console.log(result.message));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 2000));
     }
 
     {
         let result = await tableManager.handleCommand(new StartGameCommand(TABLE_ID));
-        console.log(result.message);
     }
 
 

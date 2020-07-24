@@ -37,6 +37,9 @@
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\casino\tables\table-observer.ts">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\index.ts.not">
       <SubType>Code</SubType>
     </Compile>
@@ -56,8 +59,11 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="public\" />
+    <Folder Include="src\actions\game\" />
+    <Folder Include="src\actions\table\" />
     <Folder Include="src\cards\" />
     <Folder Include="src\casino\chips\" />
+    <Folder Include="src\casino\clients\" />
     <Folder Include="src\casino\tables\" />
     <Folder Include="src\casino\tables\boards\" />
     <Folder Include="src\commands\table\" />
@@ -75,10 +81,19 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\action-broadcaster.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\actions\deal-card-action.ts">
+    <TypeScriptCompile Include="src\actions\game\deal-card-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\table\move-button-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\table\player-seated-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\cards\card-value.ts">
@@ -94,6 +109,9 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\chips\chip-formatter.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\clients\table-watcher.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\dealer.ts">

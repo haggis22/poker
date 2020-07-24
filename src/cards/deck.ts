@@ -33,8 +33,6 @@ export class Deck {
 
         this.reset();
 
-        console.log(`Num items: ${this.cards.length}`);
-
         for (let card of this.cards) {
             card.sortValue = Math.random();
         }

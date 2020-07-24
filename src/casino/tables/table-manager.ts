@@ -10,24 +10,56 @@ import { AddChipsCommand } from "../../commands/table/add-chips-command";
 import { StartGameCommand } from "../../commands/table/start-game-command";
 import { OpenState } from "./states/open-state";
 import { StartHandState } from "./states/start-hand-state";
+import { TableObserver } from "./table-observer";
+import { ActionBroadcaster } from "../../actions/action-broadcaster";
+import { Action } from "../../actions/action";
+import { PlayerSeatedAction } from "../../actions/table/player-seated-action";
+import { MoveButtonAction } from "../../actions/table/move-button-action";
 
-export class TableManager implements ICommandHandler {
+export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private readonly DEBUG_ENABLED: boolean = false;
 
     public table: Table;
     public game: Game;
     public chipFormatter: IChipFormatter;
+    public observers: TableObserver[];
 
 
     constructor(table: Table, game: Game, chipFormatter: IChipFormatter) {
         this.table = table;
         this.game = game;
         this.chipFormatter = chipFormatter;
+
+        this.observers = new Array<TableObserver>();
     }
 
 
-    async handleCommand(command: ICommand): Promise<CommandResult> {
+    public register(observer: TableObserver) {
+
+        this.observers.push(observer);
+
+    }
+
+    public unregister(observer: TableObserver) {
+
+        this.observers = this.observers.filter(o => o != observer);
+
+    }
+
+
+    private broadcast(action: Action): void {
+
+        for (let observer of this.observers) {
+
+            observer.notify(action);
+
+        }
+
+    }   // broadcast
+
+
+    public async handleCommand(command: ICommand): Promise<CommandResult> {
 
         if (this.DEBUG_ENABLED) { console.log(`TableManager received ${command.constructor.name}`); }
 
@@ -81,6 +113,9 @@ export class TableManager implements ICommandHandler {
 
             let player = new Player(command.user.id, command.user.name);
             this.table.players[seatID] = player;
+
+            this.broadcast(new PlayerSeatedAction(this.table.id, player, seatID));
+
             return new CommandResult(true, `${player.name} sits at seat ${seatID}`);
 
         }
@@ -130,7 +165,7 @@ export class TableManager implements ICommandHandler {
     private changeTableState(state) : void {
 
         this.table.state = state;
-        console.log(`TableState: ${state.constructor.name}`);
+        console.log(`debug TableState: ${state.constructor.name}`);
 
         if (state instanceof StartHandState) {
 
@@ -171,10 +206,15 @@ export class TableManager implements ICommandHandler {
     private setButton(): void {
 
         this.table.button = this.findNextOccupiedSeat(this.table.button == null ? 0 : this.table.button + 1);
+
+        this.broadcast(new MoveButtonAction(this.table.button));
+
+/*
         let dealer = this.table.getDealer();
         if (dealer) {
-            console.log(`${dealer.name} has the button`);
+            // console.log(`${dealer.name} has the button`);
         }
+*/
 
     }
 
