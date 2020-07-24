@@ -27,7 +27,7 @@ export class TableManager implements ICommandHandler {
     }
 
 
-    handleCommand(command: ICommand): CommandResult {
+    async handleCommand(command: ICommand): Promise<CommandResult> {
 
         if (this.DEBUG_ENABLED) { console.log(`TableManager received ${command.constructor.name}`); }
 
@@ -53,7 +53,7 @@ export class TableManager implements ICommandHandler {
     }
 
 
-    private seatPlayer(command: RequestSeatCommand): CommandResult {
+    private async seatPlayer(command: RequestSeatCommand): Promise<CommandResult> {
 
         let seatID = command.seatID;
         if (seatID === null) {
@@ -91,7 +91,7 @@ export class TableManager implements ICommandHandler {
 
 
 
-    private addChips(command: AddChipsCommand): CommandResult {
+    private async addChips(command: AddChipsCommand): Promise<CommandResult> {
 
         let player = this.table.players.find(p => p && p.id == command.playerID);
 
@@ -113,7 +113,7 @@ export class TableManager implements ICommandHandler {
     }  // addChips
 
 
-    private startGame(command: StartGameCommand): CommandResult {
+    private async startGame(command: StartGameCommand): Promise<CommandResult> {
 
         if (this.table.state instanceof OpenState) {
 

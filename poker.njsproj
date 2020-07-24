@@ -37,7 +37,7 @@
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\index.ts">
+    <Compile Include="src\index.ts.not">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\server-socket.ts" />

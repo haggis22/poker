@@ -3,6 +3,6 @@ import { CommandResult } from "./command-result";
 
 export interface ICommandHandler {
 
-    handleCommand(command: ICommand) : CommandResult
+    handleCommand(command: ICommand) : Promise<CommandResult>
 
 }
