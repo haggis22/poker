@@ -190,7 +190,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         if (this.table.state instanceof OpenState) {
 
-            this.changeTableState(this.game.stateMachine.nextState());
+            this.goToNextState();
             return new CommandResult(true, "Started game");
 
         }
@@ -200,9 +200,37 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     }  // addChips
 
 
+    private isReadyForHand(): boolean {
+
+        return false;
+
+    }
+
+
     private changeTableState(state) : void {
 
+        if (state == null) {
+
+
+            if (this.isReadyForHand()) {
+
+                // start the next hand
+                return this.goToNextState();
+
+            }
+            else {
+
+                console.log('Table not ready - putting into open state');
+                this.table.state = new OpenState();
+                return;
+
+            }
+
+        }
+
         this.table.state = state;
+
+
         console.log(`debug TableState: ${state.constructor.name}`);
 
         if (state instanceof StartHandState) {
@@ -261,8 +289,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.table.pots.length = 0;
 
-        // OK - jump straight to the next state
-        this.changeTableState(this.game.stateMachine.nextState());
+        this.goToNextState();
 
     }   // startHand
 
@@ -351,24 +378,21 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         }  // while !everyoneGotOne
 
-        // OK - jump to the next state
-        this.changeTableState(this.game.stateMachine.nextState());
+        this.goToNextState();
 
     }   // dealRound
 
 
     private makeYourBets(betState: BetState) {
 
-        // OK - jump to the next state
-        this.changeTableState(this.game.stateMachine.nextState());
+        this.goToNextState();
 
     }   // makeYourBets
 
 
     private showdown(showdownState: ShowdownState) {
 
-        // OK - jump to the next state
-        this.changeTableState(this.game.stateMachine.nextState());
+        this.goToNextState();
 
     }   // showdown
 
@@ -376,9 +400,16 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     private completeHand(completeState: HandCompleteState) {
 
         // We're done with this hand
+        this.goToNextState();
 
     }   // completeHand
 
+
+    private goToNextState(): void {
+
+        this.changeTableState(this.game.stateMachine.nextState());
+
+    }
 
 
 

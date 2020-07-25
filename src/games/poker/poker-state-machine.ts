@@ -15,6 +15,7 @@ export class PokerStateMachine implements ITableStateMachine {
         this.currentStateIndex = null;
 
     }
+
     nextState(): ITableState {
 
         if (this.currentStateIndex === null) {
