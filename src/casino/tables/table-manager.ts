@@ -20,6 +20,9 @@ import { DealState } from "./states/deal-state";
 import { DealtCard } from "../../hands/dealt-card";
 import { DealCardAction } from "../../actions/game/deal-card-action";
 import { Hand } from "../../hands/hand";
+import { BetState } from "./states/betting/bet-state";
+import { ShowdownState } from "./states/showdown-state";
+import { HandCompleteState } from "./states/hand-complete-state";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
 
@@ -214,6 +217,22 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         }
 
+        if (state instanceof BetState) {
+
+            return this.makeYourBets(state);
+
+        }
+
+        if (state instanceof ShowdownState) {
+
+            return this.showdown(state);
+        }
+
+        if (state instanceof HandCompleteState) {
+
+            return this.completeHand(state);
+        }
+
 
     }
 
@@ -335,7 +354,31 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
         // OK - jump to the next state
         this.changeTableState(this.game.stateMachine.nextState());
 
-    }   // startHand
+    }   // dealRound
+
+
+    private makeYourBets(betState: BetState) {
+
+        // OK - jump to the next state
+        this.changeTableState(this.game.stateMachine.nextState());
+
+    }   // makeYourBets
+
+
+    private showdown(showdownState: ShowdownState) {
+
+        // OK - jump to the next state
+        this.changeTableState(this.game.stateMachine.nextState());
+
+    }   // showdown
+
+
+    private completeHand(completeState: HandCompleteState) {
+
+        // We're done with this hand
+
+    }   // completeHand
+
 
 
 
