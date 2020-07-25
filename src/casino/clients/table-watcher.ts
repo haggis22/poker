@@ -241,12 +241,16 @@ export class TableWatcher implements TableObserver {
 
             let seat = this.table.seats.find(s => s.id == action.seatID);
 
-            if (seat && seat.hand) {
+            if (seat) {
 
-                let name = seat.player ? seat.player.name : `Seat ${seat.id}`;
-                seat.hand = action.hand;
+                if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
 
-                console.log(`${name} has ${ seat.hand.cards.join(" ")}`);
+                    let name = seat.player ? seat.player.name : `Seat ${seat.id}`;
+                    seat.hand = action.hand;
+
+                    console.log(`${name} has ${seat.hand.cards.join(" ")}`);
+
+                }
 
             }
             else {
