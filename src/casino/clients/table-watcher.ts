@@ -195,12 +195,12 @@ export class TableWatcher implements TableObserver {
 
                 if (dealtCard.isFaceUp) {
 
-                    console.log(`${recipient} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
+                    console.log(`Client: ${recipient} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
 
                 }
                 else {
 
-                    console.log(`${recipient} is dealt a card`);
+                    console.log(`Client: ${recipient} is dealt a card`);
 
                 }
 

@@ -536,7 +536,17 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
             case BetState.BEST_HAND:
                 {
                     let handWinners: Array<HandWinner> = this.findWinners();
-                    return handWinners[0].seatIndex;
+                    for (let s = 0; s < this.table.seats.length; s++) {
+
+                        if (this.table.seats[s].id == handWinners[0].seatID) {
+
+                            return s;
+
+                        }
+
+                    }
+
+                    throw new Error(`Could not find seat index for seatID ${handWinners[0].seatID}`);
                 }
         
         }
@@ -549,44 +559,41 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     private findWinners(): Array<HandWinner> {
 
         let handWinners: Array<HandWinner> = new Array<HandWinner>();
-        /*
-        
-                for (let p = 0; p < this.players.length; p++) {
-        
-                    if (this.players[p] != null && this.players[p].hasHand()) {
-        
-                        // Put their best hand on the list
-                        handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, this.players[p].hand, this.board), p, 0))
-        
-                    }
-        
-                }
-        
-                // rank the hands, from best to worst
-                handWinners.sort(function (w1, w2) {
-        
-        
-                    let compare = w1.evaluation.compareTo(w2.evaluation);
-        
-                    if (compare > 0) {
-        
-                        // The first hand is better, so keep it first
-                        return -1;
-                    }
-        
-                    if (compare < 0) {
-        
-                        // the first hand is worse, so swap them
-                        return 1;
-                    }
-        
-                    // They have the same value, so go with the earlier seat
-                    // TODO: depending on where the button is, then higher-numbered seats could be in earlier position than lower-numbered seats
-                    return w2.seat - w1.seat;
-        
-                });
-        
-        */
+
+        for (let seat of this.table.seats) {
+
+            if (seat.player && seat.hand) {
+
+                // Put their best hand on the list
+                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.id, 0))
+
+            }
+
+        }
+
+        // rank the hands, from best to worst
+        handWinners.sort(function (w1, w2) {
+
+            let compare = w1.evaluation.compareTo(w2.evaluation);
+
+            if (compare > 0) {
+
+                // The first hand is better, so keep it first
+                return -1;
+            }
+
+            if (compare < 0) {
+
+                // the first hand is worse, so swap them
+                return 1;
+            }
+
+            // They have the same value, so go with the earlier seat
+            // TODO: depending on where the button is, then higher-numbered seats could be in earlier position than lower-numbered seats
+            return 0;
+
+        });
+
         return handWinners;
 
     }

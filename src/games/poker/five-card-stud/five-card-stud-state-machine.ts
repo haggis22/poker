@@ -19,13 +19,13 @@ export class FiveCardStudStateMachine extends PokerStateMachine {
         this.states.push(new DealState(true));
         this.states.push(new BetState(BetState.BEST_HAND));
 
-        this.states.push(new DealState(false));
+        this.states.push(new DealState(true));
         this.states.push(new BetState(BetState.BEST_HAND));
 
-        this.states.push(new DealState(false));
+        this.states.push(new DealState(true));
         this.states.push(new BetState(BetState.BEST_HAND));
 
-        this.states.push(new DealState(false));
+        this.states.push(new DealState(true));
         this.states.push(new BetState(BetState.BEST_HAND));
 
         this.states.push(new ShowdownState());

@@ -23,7 +23,7 @@ import { TableRules } from "./casino/tables/table-rules";
 
     let table = new Table(TABLE_ID, rules, new Deck());
 
-    let tableManager = new TableManager(table, new PokerGameFiveCardDraw());
+    let tableManager = new TableManager(table, new PokerGameFiveCardStud());
 
     let danny = new User(1, 'Daniel', 10000);
     let mark = new User(2, 'Mark', 10000);
