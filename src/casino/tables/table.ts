@@ -4,7 +4,6 @@ import { Game } from "../../games/game";
 import { HandWinner } from "../../games/hand-winner";
 import { DealtCard } from "../../hands/dealt-card";
 import { Board } from "./boards/board";
-import { FirstToBet } from "./first-to-bet";
 import { IChipFormatter } from "../chips/chip-formatter";
 import { Pot } from "./pot";
 
@@ -17,6 +16,8 @@ import { CommandResult } from "../../commands/command-result";
 import { ITableState } from "./states/table-state";
 import { OpenState } from "./states/open-state";
 import { Seat } from "./seat";
+import { BetTurn } from "./betting/bet-turn";
+import { TableRules } from "./table-rules";
 
 
 export class Table {
@@ -24,6 +25,8 @@ export class Table {
     public static readonly FIRST_SEAT:number = 1;
 
     public id: number;
+
+    public rules: TableRules;
     public state: ITableState;
 
     public seats: Array<Seat>;
@@ -35,13 +38,17 @@ export class Table {
     // tracks which seat has the button so that we know where to deal the next card
     public buttonIndex: number;
 
-    constructor(id: number, numSeats: number, deck: Deck) {
+    public betTurn: BetTurn;
+
+
+    constructor(id: number, rules: TableRules, deck: Deck) {
 
         this.id = id;
+        this.rules = rules;
 
         this.seats = new Array<Seat>();
 
-        for (let s = 0; s < numSeats; s++) {
+        for (let s = 0; s < rules.numSeats; s++) {
             this.seats.push(new Seat((s + 1)));
         }
 
@@ -50,7 +57,6 @@ export class Table {
 
         this.deck = deck;
 
-
         this.pots = new Array<Pot>();
 
         this.state = new OpenState();
@@ -58,73 +64,8 @@ export class Table {
     }
 
 
-    private findFirstToBet(firstBetRule: number): FirstToBet {
-
-/*
-
-        switch (firstBetRule) {
-
-            case BetState.FIRST_POSITION:
-                return new FirstToBet(this.findNextOccupiedSeat(this.button + 1), "because he is in first position");
-
-            case BetState.BEST_HAND:
-                {
-                    let handWinners: Array<HandWinner> = this.findWinners();
-                    return new FirstToBet(handWinners[0].seat, `with ${this.game.handDescriber.describe(handWinners[0].evaluation)}`);
-                }
-
-        }
-*/
-        throw new Error(`Do not know the rules for bet type ${firstBetRule}`);
-
-    }   // findFirstToBet
-
 
     
-    private findWinners(): Array<HandWinner> {
-
-        let handWinners: Array<HandWinner> = new Array<HandWinner>();
-/*
-
-        for (let p = 0; p < this.players.length; p++) {
-
-            if (this.players[p] != null && this.players[p].hasHand()) {
-
-                // Put their best hand on the list
-                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, this.players[p].hand, this.board), p, 0))
-
-            }
-
-        }
-
-        // rank the hands, from best to worst
-        handWinners.sort(function (w1, w2) {
-
-
-            let compare = w1.evaluation.compareTo(w2.evaluation);
-
-            if (compare > 0) {
-
-                // The first hand is better, so keep it first
-                return -1;
-            }
-
-            if (compare < 0) {
-
-                // the first hand is worse, so swap them
-                return 1;
-            }
-
-            // They have the same value, so go with the earlier seat
-            // TODO: depending on where the button is, then higher-numbered seats could be in earlier position than lower-numbered seats
-            return w2.seat - w1.seat;
-
-        });
-
-*/
-        return handWinners;
-
-    }
 
 
 
@@ -144,40 +85,6 @@ export class Table {
                 // give everyone a card
                 let firstToBet: FirstToBet = this.findFirstToBet(betState.firstToBet);
                 console.log(`${this.players[firstToBet.seat].name} is first to bet ${firstToBet.description}`);
-                let playerPointer: number = firstToBet.seat;
-                let whoInitiatedAction = null;
-
-                while (playerPointer != whoInitiatedAction) {
-
-                    let player = this.players[playerPointer];
-
-                    console.log(`  ${player.name}'s turn to bet`);
-
-                    let bet = Math.min(50, player.chips);
-
-                    player.chips -= bet;
-
-                    if (this.pots.length == 0) {
-
-                        this.pots.push(new Pot());
-
-                    }
-
-                    let pot: Pot = this.pots[0];
-                    pot.addChips(bet, playerPointer);
-
-                    if (whoInitiatedAction == null) {
-                        whoInitiatedAction = playerPointer;
-                    }
-
-                    playerPointer = this.findNextOccupiedSeat(playerPointer + 1);
-
-                }
-
-                console.log('-- Betting complete');
-                for (let pot of this.pots) {
-                    console.log(`Pot: ${this.chipFormatter.format(pot.amount)} : ${pot.seats.size} player(s)`);
-                }
 
             }
 
