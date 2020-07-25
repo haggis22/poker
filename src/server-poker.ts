@@ -18,8 +18,8 @@ import { TableRules } from "./casino/tables/table-rules";
     const TABLE_ID = 1;
 
     // 6 seats
-    // 3 seconds to act
-    let rules = new TableRules(6, 3);
+    // 1 second to act
+    let rules = new TableRules(6, 1);
 
     let table = new Table(TABLE_ID, rules, new Deck());
 

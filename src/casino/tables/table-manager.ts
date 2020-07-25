@@ -37,6 +37,9 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     public game: Game;
     public observers: TableObserver[];
 
+    private seatIndexInitiatingAction: number;
+    private betTimer: ReturnType<typeof setTimeout>;
+
 
     constructor(table: Table, game: Game) {
         this.table = table;
@@ -292,6 +295,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.table.pots.length = 0;
 
+        console.log('Clearing table.betTurn');
         this.table.betTurn = null;
 
         this.goToNextState();
@@ -390,11 +394,13 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private makeYourBets(betState: BetState): void {
 
-        let turn = this.findFirstToBet(betState.firstToBet);
+        let firstSeatIndexToAct = this.findFirstToBet(betState.firstToBet);
 
-        this.table.betTurn = turn;
+        // remember who had first option to act so that we know when the betting turn is done.
+        this.seatIndexInitiatingAction = firstSeatIndexToAct;
 
-        this.broadcast(new BetTurnAction(this.table.id, turn));
+        this.setBetTurn(firstSeatIndexToAct);
+
 
 /*
                  let playerPointer: number = firstToBet.seat;
@@ -433,24 +439,51 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
                 }
 */
 
-        this.goToNextState();
-
     }   // makeYourBets
 
 
-    private findFirstToBet(firstBetRule: number): BetTurn {
+    private setBetTurn(seatIndexToAct: number): void {
+
+        let betTurn = new BetTurn(seatIndexToAct, this.table.rules.timeToAct);
+
+        this.table.betTurn = betTurn;
+
+        this.broadcast(new BetTurnAction(this.table.id, betTurn));
+
+        this.betTimer = setTimeout(() => { this.advanceBetTurn(); }, betTurn.timeToAct * 1000);
+
+    }  // setBetTurn
+
+
+    private advanceBetTurn(): void {
+
+        let nextSeatIndex = this.findNextOccupiedSeatIndex(this.table.betTurn.seatIndex + 1);
+
+        if (nextSeatIndex == this.seatIndexInitiatingAction) {
+
+            console.log('Betting complete');
+            return this.goToNextState();
+
+        }
+
+        this.setBetTurn(nextSeatIndex);
+
+    }   // advanceBetTurn
+
+
+    private findFirstToBet(firstBetRule: number): number {
 
         switch (firstBetRule) {
         
             case BetState.FIRST_POSITION:
                 {
-                    return new BetTurn(this.findNextOccupiedSeatIndex(this.table.buttonIndex + 1), this.table.rules.timeToAct);
+                    return this.findNextOccupiedSeatIndex(this.table.buttonIndex + 1);
                 }
 
             case BetState.BEST_HAND:
                 {
                     let handWinners: Array<HandWinner> = this.findWinners();
-                    return new BetTurn(handWinners[0].seatIndex, this.table.rules.timeToAct);
+                    return handWinners[0].seatIndex;
                 }
         
         }
