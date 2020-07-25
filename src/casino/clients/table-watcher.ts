@@ -9,6 +9,7 @@ import { DealtCard } from "../../hands/dealt-card";
 import { DealCardAction } from "../../actions/game/deal-card-action";
 import { Seat } from "../tables/seat";
 import { Table } from "../tables/table";
+import { BetTurnAction } from "../../actions/game/bet-turn-action";
 
 export class TableWatcher implements TableObserver {
 
@@ -55,6 +56,12 @@ export class TableWatcher implements TableObserver {
         if (action instanceof DealCardAction) {
 
             return this.dealCard(action);
+        }
+
+        if (action instanceof BetTurnAction) {
+
+            return this.betTurn(action);
+
         }
 
     }
@@ -154,7 +161,32 @@ export class TableWatcher implements TableObserver {
 
         }  // if table.id
 
-    }
+    }   // dealCard
+
+
+    private betTurn(action: BetTurnAction): void {
+
+        if (action.tableID == this.table.id) {
+
+            let seat = this.table.seats[action.turn.seatIndex];
+
+            if (seat) {
+
+                let bettor = seat.player ? seat.player.name : `Seat ${seat.id}`;
+
+                console.log(`It is ${bettor}'s turn to act`);
+
+            }
+            else {
+
+                throw new Error(`Seat index out of range: ${action.turn.seatIndex}`);
+
+            }
+
+        }  // if table.id
+
+    }  // betTurn
+
 
 
 }

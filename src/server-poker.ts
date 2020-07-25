@@ -10,12 +10,18 @@ import { User } from "./players/user";
 import { AddChipsCommand } from "./commands/table/add-chips-command";
 import { StartGameCommand } from "./commands/table/start-game-command";
 import { TableWatcher } from "./casino/clients/table-watcher";
+import { TableRules } from "./casino/tables/table-rules";
 
 
 (async function () {
 
     const TABLE_ID = 1;
-    let table = new Table(TABLE_ID, 6, new Deck());
+
+    // 6 seats
+    // 3 seconds to act
+    let rules = new TableRules(6, 3);
+
+    let table = new Table(TABLE_ID, rules, new Deck());
 
     let tableManager = new TableManager(table, new PokerGameFiveCardDraw());
 

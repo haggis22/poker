@@ -55,6 +55,7 @@
     <Content Include="src\casino\chips\money-formatter.ts">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="src\casino\tables\table-rules.ts" />
     <Content Include="tsconfig.json">
       <SubType>Code</SubType>
     </Content>
@@ -69,6 +70,7 @@
     <Folder Include="src\casino\clients\" />
     <Folder Include="src\casino\tables\" />
     <Folder Include="src\casino\tables\boards\" />
+    <Folder Include="src\casino\tables\betting\" />
     <Folder Include="src\commands\table\" />
     <Folder Include="src\games\" />
     <Folder Include="src\games\hand-selectors\" />
@@ -90,6 +92,7 @@
     <TypeScriptCompile Include="src\actions\action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\game\bet-turn-action.ts" />
     <TypeScriptCompile Include="src\actions\game\deal-card-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -126,7 +129,7 @@
     <TypeScriptCompile Include="src\casino\tables\boards\no-board.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\tables\first-to-bet.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\bet-turn.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\pot.ts">

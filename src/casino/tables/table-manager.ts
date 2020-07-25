@@ -23,6 +23,9 @@ import { Hand } from "../../hands/hand";
 import { BetState } from "./states/betting/bet-state";
 import { ShowdownState } from "./states/showdown-state";
 import { HandCompleteState } from "./states/hand-complete-state";
+import { BetTurn } from "./betting/bet-turn";
+import { HandWinner } from "../../games/hand-winner";
+import { BetTurnAction } from "../../actions/game/bet-turn-action";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
 
@@ -289,6 +292,8 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.table.pots.length = 0;
 
+        this.table.betTurn = null;
+
         this.goToNextState();
 
     }   // startHand
@@ -296,13 +301,13 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private setButton(): void {
 
-        this.table.buttonIndex = this.findNextOccupiedSeat(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
+        this.table.buttonIndex = this.findNextOccupiedSeatIndex(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
 
         this.broadcast(new MoveButtonAction(this.table.id, this.table.seats[this.table.buttonIndex].id));
 
     }
 
-    private findNextOccupiedSeat(seatIndex: number): number {
+    private findNextOccupiedSeatIndex(seatIndex: number): number {
 
         let nextPosition: number = seatIndex;
 
@@ -332,7 +337,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     private dealRound(dealState: DealState) {
 
         // give everyone a card
-        let seatIndex: number = this.findNextOccupiedSeat(this.table.buttonIndex + 1);
+        let seatIndex: number = this.findNextOccupiedSeatIndex(this.table.buttonIndex + 1);
 
         let everyoneGotOne = false;
 
@@ -373,7 +378,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
                 everyoneGotOne = true;
             }
             else {
-                seatIndex = this.findNextOccupiedSeat(seatIndex + 1);
+                seatIndex = this.findNextOccupiedSeatIndex(seatIndex + 1);
             }
 
         }  // while !everyoneGotOne
@@ -383,11 +388,123 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     }   // dealRound
 
 
-    private makeYourBets(betState: BetState) {
+    private makeYourBets(betState: BetState): void {
+
+        let turn = this.findFirstToBet(betState.firstToBet);
+
+        this.table.betTurn = turn;
+
+        this.broadcast(new BetTurnAction(this.table.id, turn));
+
+/*
+                 let playerPointer: number = firstToBet.seat;
+                let whoInitiatedAction = null;
+
+                while (playerPointer != whoInitiatedAction) {
+
+                    let player = this.players[playerPointer];
+
+                    console.log(`  ${player.name}'s turn to bet`);
+
+                    let bet = Math.min(50, player.chips);
+
+                    player.chips -= bet;
+
+                    if (this.pots.length == 0) {
+
+                        this.pots.push(new Pot());
+
+                    }
+
+                    let pot: Pot = this.pots[0];
+                    pot.addChips(bet, playerPointer);
+
+                    if (whoInitiatedAction == null) {
+                        whoInitiatedAction = playerPointer;
+                    }
+
+                    playerPointer = this.findNextOccupiedSeat(playerPointer + 1);
+
+                }
+
+                console.log('-- Betting complete');
+                for (let pot of this.pots) {
+                    console.log(`Pot: ${this.chipFormatter.format(pot.amount)} : ${pot.seats.size} player(s)`);
+                }
+*/
 
         this.goToNextState();
 
     }   // makeYourBets
+
+
+    private findFirstToBet(firstBetRule: number): BetTurn {
+
+        switch (firstBetRule) {
+        
+            case BetState.FIRST_POSITION:
+                {
+                    return new BetTurn(this.findNextOccupiedSeatIndex(this.table.buttonIndex + 1), this.table.rules.timeToAct);
+                }
+
+            case BetState.BEST_HAND:
+                {
+                    let handWinners: Array<HandWinner> = this.findWinners();
+                    return new BetTurn(handWinners[0].seatIndex, this.table.rules.timeToAct);
+                }
+        
+        }
+
+        throw new Error(`Do not know the rules for bet type ${firstBetRule}`);
+
+    }   // findFirstToBet
+
+
+    private findWinners(): Array<HandWinner> {
+
+        let handWinners: Array<HandWinner> = new Array<HandWinner>();
+        /*
+        
+                for (let p = 0; p < this.players.length; p++) {
+        
+                    if (this.players[p] != null && this.players[p].hasHand()) {
+        
+                        // Put their best hand on the list
+                        handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, this.players[p].hand, this.board), p, 0))
+        
+                    }
+        
+                }
+        
+                // rank the hands, from best to worst
+                handWinners.sort(function (w1, w2) {
+        
+        
+                    let compare = w1.evaluation.compareTo(w2.evaluation);
+        
+                    if (compare > 0) {
+        
+                        // The first hand is better, so keep it first
+                        return -1;
+                    }
+        
+                    if (compare < 0) {
+        
+                        // the first hand is worse, so swap them
+                        return 1;
+                    }
+        
+                    // They have the same value, so go with the earlier seat
+                    // TODO: depending on where the button is, then higher-numbered seats could be in earlier position than lower-numbered seats
+                    return w2.seat - w1.seat;
+        
+                });
+        
+        */
+        return handWinners;
+
+    }
+
 
 
     private showdown(showdownState: ShowdownState) {
