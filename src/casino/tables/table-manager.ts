@@ -1,6 +1,5 @@
 ﻿import { Table } from "./table";
 import { Game } from "../../games/game";
-import { IChipFormatter } from "../chips/chip-formatter";
 import { ICommandHandler } from "../../commands/command-handler";
 import { ICommand } from "../../commands/command";
 import { CommandResult } from "../../commands/command-result";
@@ -26,6 +25,9 @@ import { HandCompleteState } from "./states/hand-complete-state";
 import { BetTurn } from "./betting/bet-turn";
 import { HandWinner } from "../../games/hand-winner";
 import { BetTurnAction } from "../../actions/game/bet-turn-action";
+import { FlipCardsAction } from "../../actions/game/flip-cards-action";
+import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
+import { ClearHandAction } from "../../actions/game/clear-hand-action";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
 
@@ -53,7 +55,10 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.observers.push(observer);
 
-    }
+        // Create a snapshot of the table situation, from the given player's perspective
+        observer.notify(this.createTableSnapshot(observer.playerID));
+
+    }   // register
 
     public unregister(observer: TableObserver) {
 
@@ -104,6 +109,52 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         throw new Error("Method not implemented.");
     }
+
+
+    private createTableSnapshot(playerID: number): TableSnapshotAction {
+
+        let table: Table = new Table(this.table.id, this.table.rules, null);
+
+        table.pots = [...this.table.pots];
+        table.betTurn = this.table.betTurn;
+        table.buttonIndex = this.table.buttonIndex;
+        table.board = this.table.board;
+
+        for (let s = 0; s < this.table.seats.length; s++) {
+
+            table.seats[s].id = this.table.seats[s].id;
+            table.seats[s].player = this.table.seats[s].player;
+
+            let hand = null;
+
+            if (this.table.seats[s].hand != null) {
+
+                hand = new Hand();
+
+                for (let card of this.table.seats[s].hand.cards) {
+
+                    if (card.isFaceUp) {
+                        hand.cards.push(card);
+                    }
+                    else if (this.table.seats[s].player.id == playerID) {
+                        hand.cards.push(card);
+                    }
+                    else {
+                        // they get a card with no value, face-down
+                        hand.cards.push(new DealtCard(null, false));
+                    }
+
+                }
+
+            }  // if the seat has a hand
+
+            table.seats[s].hand = hand;
+
+        }
+
+        return new TableSnapshotAction(table);
+
+    }  // createTableSnapshot
 
 
     private async seatPlayer(command: RequestSeatCommand): Promise<CommandResult> {
@@ -286,6 +337,8 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
             // take their cards, if they have any
             seat.hand = new Hand();
+
+            this.broadcast(new ClearHandAction(this.table.id, seat.id));
 
         }
 
@@ -541,6 +594,21 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
 
     private showdown(showdownState: ShowdownState) {
+
+        // Flip all the cards face-up
+        for (let seat of this.table.seats) {
+
+            if (seat.hand) {
+
+                seat.hand.flipCards();
+
+                this.broadcast(new FlipCardsAction(this.table.id, seat.id, seat.hand))
+
+            }
+
+        }
+
+
 
         this.goToNextState();
 

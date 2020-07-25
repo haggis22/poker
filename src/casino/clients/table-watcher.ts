@@ -10,6 +10,10 @@ import { DealCardAction } from "../../actions/game/deal-card-action";
 import { Seat } from "../tables/seat";
 import { Table } from "../tables/table";
 import { BetTurnAction } from "../../actions/game/bet-turn-action";
+import { FlipCardsAction } from "../../actions/game/flip-cards-action";
+import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
+import { ClearHandAction } from "../../actions/game/clear-hand-action";
+import { Hand } from "../../hands/hand";
 
 export class TableWatcher implements TableObserver {
 
@@ -18,15 +22,18 @@ export class TableWatcher implements TableObserver {
 
     private chipFormatter: IChipFormatter;
 
+    private tableID: number;
     private table: Table;
 
     // Maps playerID to Player object
     private playerMap: Map<number, Player>;
 
 
-    constructor(table: Table, playerID: number, chipFormatter: IChipFormatter) {
+    constructor(tableID: number, playerID: number, chipFormatter: IChipFormatter) {
 
-        this.table = table;
+        this.tableID = tableID;
+        this.table = null;
+
         this.playerID = playerID;
         this.chipFormatter = chipFormatter;
 
@@ -37,6 +44,12 @@ export class TableWatcher implements TableObserver {
 
     notify(action: Action): void {
 
+        if (action instanceof TableSnapshotAction) {
+
+            return this.grabTableData(action);
+
+        }
+
         if (action instanceof PlayerSeatedAction) {
 
             return this.seatPlayer(action);
@@ -46,6 +59,11 @@ export class TableWatcher implements TableObserver {
         if (action instanceof MoveButtonAction) {
 
             return this.moveButton(action);
+        }
+
+        if (action instanceof ClearHandAction) {
+
+            return this.clearHand(action);
         }
 
         if (action instanceof AddChipsAction) {
@@ -61,6 +79,12 @@ export class TableWatcher implements TableObserver {
         if (action instanceof BetTurnAction) {
 
             return this.betTurn(action);
+
+        }
+
+        if (action instanceof FlipCardsAction) {
+
+            return this.flipCards(action);
 
         }
 
@@ -80,6 +104,13 @@ export class TableWatcher implements TableObserver {
         }
 
         return null;
+
+    }
+
+
+    private grabTableData(action: TableSnapshotAction): void {
+
+        this.table = action.table;
 
     }
 
@@ -113,6 +144,24 @@ export class TableWatcher implements TableObserver {
 
     }
 
+
+    private clearHand(action: ClearHandAction): void {
+
+        if (action.tableID === this.table.id) {
+
+            let seat = this.table.seats.find(s => s.id == action.seatID);
+
+            if (seat) {
+
+                seat.hand = new Hand();
+
+            }
+
+        }
+
+    }  // clearHand
+
+
     private addChips(action: AddChipsAction): void {
 
         if (action.tableID === this.table.id) {
@@ -128,9 +177,7 @@ export class TableWatcher implements TableObserver {
 
         }
 
-
-
-    }
+    }  // addChips
 
 
     private dealCard(action: DealCardAction): void {
@@ -180,6 +227,31 @@ export class TableWatcher implements TableObserver {
             else {
 
                 throw new Error(`Seat index out of range: ${action.turn.seatIndex}`);
+
+            }
+
+        }  // if table.id
+
+    }  // betTurn
+
+
+    private flipCards(action: FlipCardsAction): void {
+
+        if (action.tableID == this.table.id) {
+
+            let seat = this.table.seats.find(s => s.id == action.seatID);
+
+            if (seat && seat.hand) {
+
+                let name = seat.player ? seat.player.name : `Seat ${seat.id}`;
+                seat.hand = action.hand;
+
+                console.log(`${name} has ${ seat.hand.cards.join(" ")}`);
+
+            }
+            else {
+
+                throw new Error(`Could not find seatID ${action.seatID}`);
 
             }
 

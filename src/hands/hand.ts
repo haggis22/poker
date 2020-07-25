@@ -23,10 +23,15 @@ export class Hand {
     }
 
 
-    public display(): string {
+    public flipCards(): void {
 
-        return this.cards.map(dealtCard => dealtCard.toString()).join(" ");
+        for (let card of this.cards) {
+
+            card.isFaceUp = true;
+
+        }
 
     }
+
 
 }

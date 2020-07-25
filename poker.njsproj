@@ -52,6 +52,7 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="README.md" />
+    <Content Include="src\actions\game\flip-cards-action.ts" />
     <Content Include="src\casino\chips\money-formatter.ts">
       <SubType>Code</SubType>
     </Content>
@@ -96,10 +97,16 @@
     <TypeScriptCompile Include="src\actions\game\deal-card-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\game\clear-hand-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\move-button-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\player-seated-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\table\table-snapshot-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\cards\card-value.ts">

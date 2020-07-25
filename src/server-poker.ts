@@ -19,7 +19,7 @@ import { TableRules } from "./casino/tables/table-rules";
 
     // 6 seats
     // 1 second to act
-    let rules = new TableRules(6, 1);
+    let rules = new TableRules(6, 0.5);
 
     let table = new Table(TABLE_ID, rules, new Deck());
 
@@ -30,9 +30,8 @@ import { TableRules } from "./casino/tables/table-rules";
     let paul = new User(3, 'Paul', 10000);
     let joe = new User(4, 'Joe', 10000);
 
-    let client = new TableWatcher(table, danny.id, new MoneyFormatter());
+    let client = new TableWatcher(table.id, danny.id, new MoneyFormatter());
     tableManager.register(client);
-
 
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, danny, null);
