@@ -49,7 +49,7 @@ export class Table {
         this.seats = new Array<Seat>();
 
         for (let s = 0; s < rules.numSeats; s++) {
-            this.seats.push(new Seat((s + 1)));
+            this.seats.push(new Seat(s));
         }
 
         // Button is not yet assigned

@@ -3,17 +3,22 @@ import { Player } from "../../players/player";
 
 export class Seat {
 
-    public id: number;
+    public index: number;
     public player: Player;
     public hand: Hand
 
 
-    constructor(id) {
+    constructor(index: number) {
 
-        this.id = id;
-
+        this.index = index;
         this.player = null;
         this.hand = null;
+
+    }
+
+    public getName(): string {
+
+        return this.player ? this.player.name : `Seat ${(this.index + 1)}`;
 
     }
 

@@ -119,13 +119,13 @@ export class TableWatcher implements TableObserver {
 
         if (this.table.id == action.tableID) {
 
-            let seat = this.table.seats.find(s => s.id == action.seatID);
+            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
             if (seat) {
 
                 seat.player = action.player;
                 this.playerMap.set(action.player.id, action.player);
-                console.log(`${action.player.name} sits at Table ${action.tableID}, seat ${action.seatID}`);
+                console.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
 
 
             }
@@ -138,7 +138,7 @@ export class TableWatcher implements TableObserver {
 
         if (action.tableID === this.table.id) {
 
-            console.log(`Seat ${action.seatID} now has the button at table ${this.table.id}`);
+            console.log(`Seat ${(action.seatIndex+1)} now has the button at table ${this.table.id}`);
 
         }
 
@@ -149,7 +149,7 @@ export class TableWatcher implements TableObserver {
 
         if (action.tableID === this.table.id) {
 
-            let seat = this.table.seats.find(s => s.id == action.seatID);
+            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
             if (seat) {
 
@@ -184,14 +184,14 @@ export class TableWatcher implements TableObserver {
 
         if (action.tableID == this.table.id) {
 
-            let seat = this.table.seats.find(s => action.seatID == s.id);
+            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
             if (seat) {
 
                 let dealtCard = new DealtCard(action.card, action.card != null);
                 seat.hand.deal(dealtCard);
 
-                let recipient = seat.player ? seat.player.name : `Seat ${seat.id}`;
+                let recipient = seat.player ? seat.player.name : `Seat ${(action.seatIndex+1)}`;
 
                 if (dealtCard.isFaceUp) {
 
@@ -219,9 +219,7 @@ export class TableWatcher implements TableObserver {
 
             if (seat) {
 
-                let bettor = seat.player ? seat.player.name : `Seat ${seat.id}`;
-
-                console.log(`It is ${bettor}'s turn to act`);
+                console.log(`It is ${seat.getName()}'s turn to act`);
 
             }
             else {
@@ -239,13 +237,13 @@ export class TableWatcher implements TableObserver {
 
         if (action.tableID == this.table.id) {
 
-            let seat = this.table.seats.find(s => s.id == action.seatID);
+            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
             if (seat) {
 
                 if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
 
-                    let name = seat.player ? seat.player.name : `Seat ${seat.id}`;
+                    let name = seat.player ? seat.player.name : `Seat ${(action.seatIndex+1)}`;
                     seat.hand = action.hand;
 
                     console.log(`${name} has ${seat.hand.cards.join(" ")}`);
@@ -255,7 +253,7 @@ export class TableWatcher implements TableObserver {
             }
             else {
 
-                throw new Error(`Could not find seatID ${action.seatID}`);
+                throw new Error(`Could not find seat ${action.seatIndex}`);
 
             }
 

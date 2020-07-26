@@ -4,13 +4,13 @@ export class RequestSeatCommand {
 
     public tableID: number;
     public user: User;
-    public seatID: number;
+    public seatIndex: number;
 
 
-    constructor(tableID: number, user: User, seatID: number) {
+    constructor(tableID: number, user: User, seatIndex: number) {
         this.tableID = tableID;
         this.user = user;
-        this.seatID = seatID;
+        this.seatIndex = seatIndex;
     }
 
 

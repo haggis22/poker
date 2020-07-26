@@ -5,13 +5,13 @@ export class PlayerSeatedAction implements Action {
 
     public tableID: number;
     public player: Player;
-    public seatID: number;
+    public seatIndex: number;
 
 
-    constructor(tableID: number, player: Player, seatID: number) {
+    constructor(tableID: number, player: Player, seatIndex: number) {
         this.tableID = tableID;
         this.player = player;
-        this.seatID = seatID;
+        this.seatIndex = seatIndex;
     }
 
 }

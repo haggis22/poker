@@ -122,7 +122,6 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         for (let s = 0; s < this.table.seats.length; s++) {
 
-            table.seats[s].id = this.table.seats[s].id;
             table.seats[s].player = this.table.seats[s].player;
 
             let hand = null;
@@ -159,13 +158,13 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private async seatPlayer(command: RequestSeatCommand): Promise<CommandResult> {
 
-        let seatID = command.seatID;
-        if (seatID === null) {
+        let seatIndex = command.seatIndex;
+        if (seatIndex === null) {
 
-            for (let seat of this.table.seats) {
+            for (let s = 0; s < this.table.seats.length; s++) {
 
-                if (seat.player == null) {
-                    seatID = seat.id;
+                if (this.table.seats[s].player == null) {
+                    seatIndex = s;
                     break;
                 }
 
@@ -173,13 +172,13 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         }  // no seat specified
 
-        if (seatID === null) {
+        if (seatIndex === null) {
 
             return new CommandResult(false, 'No seats available');
 
         }
 
-        let seat = this.table.seats.find(s => s.id === seatID);
+        let seat = seatIndex < this.table.seats.length ? this.table.seats[seatIndex] : null;
 
         if (seat) {
 
@@ -187,17 +186,17 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
                 seat.player = new Player(command.user.id, command.user.name)
 
-                this.broadcast(new PlayerSeatedAction(this.table.id, seat.player, seatID));
+                this.broadcast(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
 
-                return new CommandResult(true, `${seat.player.name} sits at seat ${seatID}`);
+                return new CommandResult(true, `${seat.player.name} sits at seat ${(seatIndex+1)}`);
 
             }
 
-            return new CommandResult(false, `Seat ${seatID} is already taken`);
+            return new CommandResult(false, `Seat ${(seatIndex+1)} is already taken`);
 
         }
 
-        return new CommandResult(false, `Could not find seat ${seatID}`);
+        return new CommandResult(false, `Could not find seat ${seatIndex}`);
 
     }
 
@@ -338,7 +337,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
             // take their cards, if they have any
             seat.hand = new Hand();
 
-            this.broadcast(new ClearHandAction(this.table.id, seat.id));
+            this.broadcast(new ClearHandAction(this.table.id, seat.index));
 
         }
 
@@ -360,7 +359,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.table.buttonIndex = this.findNextOccupiedSeatIndex(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
 
-        this.broadcast(new MoveButtonAction(this.table.id, this.table.seats[this.table.buttonIndex].id));
+        this.broadcast(new MoveButtonAction(this.table.id, this.table.buttonIndex));
 
     }
 
@@ -409,7 +408,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
             if (dealtCard.isFaceUp) {
 
-                this.broadcast(new DealCardAction(this.table.id, seat.id, card));
+                this.broadcast(new DealCardAction(this.table.id, seatIndex, card));
 
             }
             else {
@@ -418,12 +417,12 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
                     if (this.hasAccess(observer, seat.player.id)) {
 
-                        this.broadcast(new DealCardAction(this.table.id, seat.id, card));
+                        this.broadcast(new DealCardAction(this.table.id, seatIndex, card));
 
                     }
                     else {
 
-                        this.broadcast(new DealCardAction(this.table.id, seat.id, null));
+                        this.broadcast(new DealCardAction(this.table.id, seatIndex, null));
 
                     }
 
@@ -536,17 +535,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
             case BetState.BEST_HAND:
                 {
                     let handWinners: Array<HandWinner> = this.findWinners();
-                    for (let s = 0; s < this.table.seats.length; s++) {
-
-                        if (this.table.seats[s].id == handWinners[0].seatID) {
-
-                            return s;
-
-                        }
-
-                    }
-
-                    throw new Error(`Could not find seat index for seatID ${handWinners[0].seatID}`);
+                    return handWinners[0].seatIndex;
                 }
         
         }
@@ -565,7 +554,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
             if (seat.player && seat.hand) {
 
                 // Put their best hand on the list
-                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.id, 0))
+                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
 
             }
 
@@ -578,7 +567,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
             if (compare > 0) {
 
-                // The first hand is better, so keep it first
+                // The first hand is better, so keep it first in the list
                 return -1;
             }
 
@@ -609,7 +598,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
                 seat.hand.flipCards();
 
-                this.broadcast(new FlipCardsAction(this.table.id, seat.id, seat.hand))
+                this.broadcast(new FlipCardsAction(this.table.id, seat.index, seat.hand))
 
             }
 

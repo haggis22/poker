@@ -3,13 +3,13 @@
 export class HandWinner {
 
     public evaluation: HandEvaluation;
-    public seatID: number;
+    public seatIndex: number;
     public amount: number;
 
-    constructor(evaluation: HandEvaluation, seatID: number, amount: number) {
+    constructor(evaluation: HandEvaluation, seatIndex: number, amount: number) {
 
         this.evaluation = evaluation;
-        this.seatID = seatID;
+        this.seatIndex = seatIndex;
         this.amount = amount;
 
     }
