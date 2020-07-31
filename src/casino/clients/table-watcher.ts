@@ -310,14 +310,16 @@ export class TableWatcher implements TableObserver {
 
             let describer: HandDescriber = new PokerHandDescriber();
 
+            let potDescription = action.potIndex > 0 ? `side pot #${action.potIndex}` : `the main pot`;
+
             if (seat.player) {
 
-                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} with ${describer.describe(action.handEvaluation)}`);
+                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}`);
                 seat.player.chips += action.amount;
 
             }
             else {
-                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} with ${describer.describe(action.handEvaluation)}, but the player is gone`);
+                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}, but the player is gone`);
 
             }
 

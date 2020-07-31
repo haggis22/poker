@@ -31,6 +31,8 @@ import { ClearHandAction } from "../../actions/game/clear-hand-action";
 import { AnteAction } from "../../actions/betting/ante-action";
 import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
 import { WinPotAction } from "../../actions/game/win-pot-action";
+import { IChipFormatter } from "../chips/chip-formatter";
+import { MoneyFormatter } from "../chips/money-formatter";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
 
@@ -326,7 +328,15 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private startHand() {
 
+        let chipFormatter: IChipFormatter = new MoneyFormatter();
+
         for (let seat of this.table.seats) {
+
+            if (seat.player != null) {
+
+                console.log(`${seat.getName()}: ${chipFormatter.format(seat.player.chips)}`);
+
+            }
 
             if (seat.player != null && seat.player.chipsToAdd) {
 
@@ -355,16 +365,22 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            if (seat.player != null && seat.player.chips > 0) {
+            if (seat.player != null) {
 
-                let ante = 100;
-                this.table.betTracker.addBet(seat.index, ante);
-                this.broadcast(new AnteAction(this.table.id, seat.index, ante));
-                this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                let ante = Math.min(seat.player.chips, 100);
 
-            }
+                if (ante > 0) {
 
-        }
+                    seat.player.chips -= ante;
+                    this.table.betTracker.addBet(seat.index, ante);
+                    this.broadcast(new AnteAction(this.table.id, seat.index, ante));
+                    this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+
+                }  // player has enough to ante
+
+            }   // seat has player
+
+        }  // for each seat
 
         this.table.betTracker.gatherBets();
         this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
@@ -667,27 +683,27 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
                 if (winnerHand) {
 
-                    this.broadcast(new WinPotAction(this.table.id, seatIndex, winnerHand.evaluation, equalShare + remainder));
+                    this.broadcast(new WinPotAction(this.table.id, seatIndex, pot.index, winnerHand.evaluation, equalShare + remainder));
                     remainder = 0;
 
                 }
 
             }
 
-
         }  // for each Pot
 
-
-
         this.goToNextState();
+
 
     }   // showdown
 
 
     private completeHand(completeState: HandCompleteState) {
 
-        // We're done with this hand
-        this.goToNextState();
+        // We're done with this hand - go to the next one
+
+        // This will preserve the `this` reference in the call
+        setTimeout(() => { this.goToNextState(); }, 1000);
 
     }   // completeHand
 
