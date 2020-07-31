@@ -28,6 +28,10 @@ import { BetTurnAction } from "../../actions/game/bet-turn-action";
 import { FlipCardsAction } from "../../actions/game/flip-cards-action";
 import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
 import { ClearHandAction } from "../../actions/game/clear-hand-action";
+import { Pot } from "./pot";
+import { AnteAction } from "../../actions/betting/ante-action";
+import { UpdatePotsAction } from "../../actions/betting/update-pots-action";
+import { WinPotAction } from "../../actions/game/win-pot-action";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
 
@@ -151,7 +155,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         }
 
-        return new TableSnapshotAction(table);
+        return new TableSnapshotAction(table.id, table);
 
     }  // createTableSnapshot
 
@@ -347,6 +351,23 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.table.pots.length = 0;
 
+        let pot: Pot = new Pot(this.table.pots.length);
+
+        for (let seat of this.table.seats) {
+
+            if (seat.player != null && seat.player.chips > 0) {
+
+                let ante = 100;
+                pot.addChips(ante, seat.index);
+                this.broadcast(new AnteAction(this.table.id, seat.index, ante));
+
+            }
+
+        }
+
+        this.table.pots.push(pot);
+        this.broadcast(new UpdatePotsAction(this.table.id, this.table.pots));
+
         console.log('Clearing table.betTurn');
         this.table.betTurn = null;
 
@@ -502,7 +523,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.broadcast(new BetTurnAction(this.table.id, betTurn));
 
-        this.betTimer = setTimeout(() => { this.advanceBetTurn(); }, betTurn.timeToAct * 1000);
+        this.betTimer = setTimeout(() => { this.advanceBetTurn(); }, betTurn.timeToAct * 10);
 
     }  // setBetTurn
 
@@ -603,6 +624,57 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
             }
 
         }
+
+        let winners: HandWinner[] = this.findWinners();
+
+        for (let winner of winners) {
+            console.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
+        }
+
+        for (let pot of this.table.pots) {
+
+            let potWinningHand = null;
+            let potWinnerSeatIndexes = new Set<number>();
+
+            for (let winner of winners) {
+
+                if (pot.seats.has(winner.seatIndex)) {
+
+                    if (potWinningHand == null) {
+
+                        potWinningHand = winner.evaluation;
+                        potWinnerSeatIndexes.add(winner.seatIndex);
+
+                    }
+                    else if (winner.evaluation.compareTo(potWinningHand) >= 0) {
+
+                        // Should never be *greater*, since we're going to descending order of hand strength
+                        potWinnerSeatIndexes.add(winner.seatIndex);
+
+                    }
+
+                }
+
+            }
+
+            let equalShare: number = Math.floor(pot.amount / potWinnerSeatIndexes.size);
+            let remainder = pot.amount - (potWinnerSeatIndexes.size * equalShare);
+
+            for (let seatIndex of potWinnerSeatIndexes) {
+
+                let winnerHand = winners.find(hw => hw.seatIndex == seatIndex);
+
+                if (winnerHand) {
+
+                    this.broadcast(new WinPotAction(this.table.id, seatIndex, winnerHand.evaluation, equalShare + remainder));
+                    remainder = 0;
+
+                }
+
+            }
+
+
+        }  // for each Pot
 
 
 

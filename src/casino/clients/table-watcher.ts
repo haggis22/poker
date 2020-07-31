@@ -14,6 +14,11 @@ import { FlipCardsAction } from "../../actions/game/flip-cards-action";
 import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
 import { ClearHandAction } from "../../actions/game/clear-hand-action";
 import { Hand } from "../../hands/hand";
+import { AnteAction } from "../../actions/betting/ante-action";
+import { UpdatePotsAction } from "../../actions/betting/update-pots-action";
+import { WinPotAction } from "../../actions/game/win-pot-action";
+import { HandDescriber } from "../../games/hand-describer";
+import { PokerHandDescriber } from "../../games/poker/poker-hand-describer";
 
 export class TableWatcher implements TableObserver {
 
@@ -43,6 +48,13 @@ export class TableWatcher implements TableObserver {
 
 
     notify(action: Action): void {
+
+        if (this.tableID != action.tableID) {
+
+            // Not my table - I don't care
+            return;
+
+        }
 
         if (action instanceof TableSnapshotAction) {
 
@@ -88,6 +100,24 @@ export class TableWatcher implements TableObserver {
 
         }
 
+        if (action instanceof AnteAction) {
+
+            return this.ante(action);
+
+        }
+
+        if (action instanceof UpdatePotsAction) {
+
+            return this.updatePots(action);
+
+        }
+
+        if (action instanceof WinPotAction) {
+
+            return this.winPot(action);
+
+        }
+
     }
 
 
@@ -117,18 +147,14 @@ export class TableWatcher implements TableObserver {
 
     private seatPlayer(action: PlayerSeatedAction): void {
 
-        if (this.table.id == action.tableID) {
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
-            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        if (seat) {
 
-            if (seat) {
+            seat.player = action.player;
+            this.playerMap.set(action.player.id, action.player);
+            console.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
 
-                seat.player = action.player;
-                this.playerMap.set(action.player.id, action.player);
-                console.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
-
-
-            }
 
         }
 
@@ -136,20 +162,16 @@ export class TableWatcher implements TableObserver {
 
     private moveButton(action: MoveButtonAction): void {
 
-        if (action.tableID === this.table.id) {
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
-            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        if (seat) {
 
-            if (seat) {
+            console.log(`${seat.getName()} now has the button at table ${this.table.id}`);
 
-                console.log(`${seat.getName()} now has the button at table ${this.table.id}`);
+        }
+        else {
 
-            }
-            else {
-
-                console.log(`Could not find seat ${action.seatIndex}`);
-            }
-
+            console.log(`Could not find seat ${action.seatIndex}`);
         }
 
     }
@@ -157,15 +179,11 @@ export class TableWatcher implements TableObserver {
 
     private clearHand(action: ClearHandAction): void {
 
-        if (action.tableID === this.table.id) {
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
-            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        if (seat) {
 
-            if (seat) {
-
-                seat.hand = new Hand();
-
-            }
+            seat.hand = new Hand();
 
         }
 
@@ -174,16 +192,12 @@ export class TableWatcher implements TableObserver {
 
     private addChips(action: AddChipsAction): void {
 
-        if (action.tableID === this.table.id) {
+        let player = this.findPlayer(action.playerID);
 
-            let player = this.findPlayer(action.playerID);
+        if (player) {
 
-            if (player) {
-
-                player.chips += action.amount;
-                console.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
-
-            }
+            player.chips += action.amount;
+            console.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
 
         }
 
@@ -192,81 +206,130 @@ export class TableWatcher implements TableObserver {
 
     private dealCard(action: DealCardAction): void {
 
-        if (action.tableID == this.table.id) {
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
-            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        if (seat) {
 
-            if (seat) {
+            let dealtCard = new DealtCard(action.card, action.card != null);
+            seat.hand.deal(dealtCard);
 
-                let dealtCard = new DealtCard(action.card, action.card != null);
-                seat.hand.deal(dealtCard);
+            if (dealtCard.isFaceUp) {
 
-                if (dealtCard.isFaceUp) {
+                console.log(`Client: ${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
 
-                    console.log(`Client: ${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
+            }
+            else {
 
-                }
-                else {
-
-                    console.log(`Client: ${seat.getName()} is dealt a card`);
-
-                }
+                console.log(`Client: ${seat.getName()} is dealt a card`);
 
             }
 
-        }  // if table.id
+        }
 
     }   // dealCard
 
 
     private betTurn(action: BetTurnAction): void {
 
-        if (action.tableID == this.table.id) {
+        let seat = this.table.seats[action.turn.seatIndex];
 
-            let seat = this.table.seats[action.turn.seatIndex];
+        if (seat) {
 
-            if (seat) {
+            console.log(`It is ${seat.getName()}'s turn to act`);
 
-                console.log(`It is ${seat.getName()}'s turn to act`);
+        }
+        else {
 
-            }
-            else {
+            throw new Error(`Seat index out of range: ${action.turn.seatIndex}`);
 
-                throw new Error(`Seat index out of range: ${action.turn.seatIndex}`);
-
-            }
-
-        }  // if table.id
+        }
 
     }  // betTurn
 
 
     private flipCards(action: FlipCardsAction): void {
 
-        if (action.tableID == this.table.id) {
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
-            let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        if (seat) {
 
-            if (seat) {
+            if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
 
-                if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
+                seat.hand = action.hand;
 
-                    seat.hand = action.hand;
+                console.log(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
 
-                    console.log(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
+            }
 
-                }
+        }
+        else {
+
+            throw new Error(`Could not find seat ${action.seatIndex}`);
+
+        }
+
+    }  // betTurn
+
+
+    private ante(action: AnteAction): void {
+
+        let seat = this.table.seats[action.seatIndex];
+
+        if (seat) {
+
+            console.log(`${seat.getName()} antes ${this.chipFormatter.format(action.amount)}`);
+
+        }
+        else {
+
+            throw new Error(`Ante: Seat index out of range: ${action.seatIndex}`);
+
+        }
+
+    }  // ante
+
+
+    private updatePots(action: UpdatePotsAction): void {
+
+        this.table.pots = action.pots;
+
+        for (let p = 0; p < action.pots.length; p++) {
+
+            console.log(`Pot ${(p + 1)}: ${this.chipFormatter.format(action.pots[p].amount)} - ${action.pots[p].seats.size} player${action.pots[p].seats.size == 1 ? '' : 's'}`);
+
+        }
+
+    }  // updatePots
+
+
+    private winPot(action: WinPotAction): void {
+
+        let seat = this.table.seats[action.seatIndex];
+
+        if (seat) {
+
+            let describer: HandDescriber = new PokerHandDescriber();
+
+            if (seat.player) {
+
+                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} with ${describer.describe(action.handEvaluation)}`);
+                seat.player.chips += action.amount;
 
             }
             else {
-
-                throw new Error(`Could not find seat ${action.seatIndex}`);
+                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} with ${describer.describe(action.handEvaluation)}, but the player is gone`);
 
             }
 
-        }  // if table.id
+        }
+        else {
 
-    }  // betTurn
+            throw new Error(`WinPot: Seat index out of range: ${action.seatIndex}`);
+
+        }
+
+    }  // winPot
+
 
 
 

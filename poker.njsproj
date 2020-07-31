@@ -65,6 +65,7 @@
     <Folder Include="src\" />
     <Folder Include="public\" />
     <Folder Include="src\actions\game\" />
+    <Folder Include="src\actions\betting\" />
     <Folder Include="src\actions\table\" />
     <Folder Include="src\cards\" />
     <Folder Include="src\casino\chips\" />
@@ -93,11 +94,20 @@
     <TypeScriptCompile Include="src\actions\action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\betting\ante-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\betting\update-pots-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\game\bet-turn-action.ts" />
     <TypeScriptCompile Include="src\actions\game\deal-card-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\game\clear-hand-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\game\win-pot-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\move-button-action.ts">
