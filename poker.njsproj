@@ -162,6 +162,9 @@
     <TypeScriptCompile Include="src\casino\tables\seat.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\stakes.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\states\start-hand-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\hand-complete-state.ts">
       <SubType>Code</SubType>

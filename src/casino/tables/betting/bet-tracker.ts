@@ -9,6 +9,7 @@ export class BetTracker {
 
     public pots: Pot[];
     private currentBet: number;
+    private deadRaise: boolean;
 
     constructor() {
 
@@ -21,8 +22,16 @@ export class BetTracker {
     public reset(): void {
 
         this.pots.length = 0;
+        this.clearBets();
+
+    }
+
+    private clearBets(): void {
+
         this.bets.clear();
         this.currentBet = 0;
+        this.deadRaise = false;
+
 
     }
 
@@ -34,11 +43,33 @@ export class BetTracker {
 
     }
 
+
+    public getCurrentBet(): number {
+
+        return this.currentBet;
+
+    }  // getCurrentBet
+
+
+    public isDeadRaise(): boolean {
+
+        return this.deadRaise;
+
+    }
+
+
     public addBet(seatIndex: number, amount: number): void {
+
+        if (amount > this.currentBet) {
+
+            this.currentBet = amount;
+
+        }
 
         this.bets.set(seatIndex, (this.bets.has(seatIndex) ? this.bets.get(seatIndex) : 0) + amount);
 
     }
+
 
     public gatherBets(): void {
 
@@ -93,7 +124,7 @@ export class BetTracker {
 
         }   // while !done
 
-        this.bets.clear();
+        this.clearBets();
 
     }   // gatherBets
 

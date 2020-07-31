@@ -119,8 +119,14 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private createTableSnapshot(playerID: number): TableSnapshotAction {
 
-        let table: Table = new Table(this.table.id, this.table.rules, null);
 
+        let stakes = Object.assign({}, this.table.stakes);
+        let rules = Object.assign({}, this.table.rules);
+        let deck = null;
+
+        let table: Table = new Table(this.table.id, stakes, rules, deck);
+
+        // TODO: make shallow copies of all these instead
         table.betTracker = this.table.betTracker;
         table.betTurn = this.table.betTurn;
         table.buttonIndex = this.table.buttonIndex;
@@ -391,7 +397,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
             if (seat.player != null && seat.player.isActive) {
 
-                let ante = Math.min(seat.player.chips, 100);
+                let ante = Math.min(seat.player.chips, this.table.stakes.ante);
 
                 if (ante > 0) {
 
@@ -522,14 +528,14 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
         // remember who had first option to act so that we know when the betting turn is done.
         this.seatIndexInitiatingAction = firstSeatIndexToAct;
 
-        this.setBetTurn(firstSeatIndexToAct);
+        this.setBetTurn(firstSeatIndexToAct, 0, this.table.stakes.minRaise, false);
 
     }   // makeYourBets
 
 
-    private setBetTurn(seatIndexToAct: number): void {
+    private setBetTurn(seatIndexToAct: number, currentBet: number, minRaise: number, isDeadRaise: boolean): void {
 
-        let betTurn = new BetTurn(seatIndexToAct, this.table.rules.timeToAct);
+        let betTurn = new BetTurn(seatIndexToAct, currentBet, minRaise, isDeadRaise, this.table.rules.timeToAct);
 
         this.table.betTurn = betTurn;
 
@@ -551,7 +557,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         }
 
-        this.setBetTurn(nextSeatIndex);
+        this.setBetTurn(nextSeatIndex, this.table.betTracker.getCurrentBet(), this.table.betTracker.getCurrentBet() + this.table.stakes.minRaise, this.table.betTracker.isDeadRaise());
 
     }   // advanceBetTurn
 

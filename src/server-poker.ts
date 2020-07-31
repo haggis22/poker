@@ -11,17 +11,22 @@ import { AddChipsCommand } from "./commands/table/add-chips-command";
 import { StartGameCommand } from "./commands/table/start-game-command";
 import { TableWatcher } from "./casino/clients/table-watcher";
 import { TableRules } from "./casino/tables/table-rules";
+import { Stakes } from "./casino/tables/stakes";
 
 
 (async function () {
 
     const TABLE_ID = 1;
 
+    let blinds = new Array<number>();
+
+    let stakes = new Stakes(blinds, 50, 100);
+
     // 6 seats
     // 1 second to act
     let rules = new TableRules(6, 0.5);
 
-    let table = new Table(TABLE_ID, rules, new Deck());
+    let table = new Table(TABLE_ID, stakes, rules, new Deck());
 
     let tableManager = new TableManager(table, new PokerGameFiveCardStud());
 
@@ -55,19 +60,19 @@ import { TableRules } from "./casino/tables/table-rules";
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 300));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 700));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 300));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 500));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 300));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 600));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 300));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 400));
     }
 
     {

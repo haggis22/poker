@@ -19,6 +19,7 @@ import { Seat } from "./seat";
 import { BetTurn } from "./betting/bet-turn";
 import { TableRules } from "./table-rules";
 import { BetTracker } from "./betting/bet-tracker";
+import { Stakes } from "./stakes";
 
 
 export class Table {
@@ -27,6 +28,7 @@ export class Table {
 
     public id: number;
 
+    public stakes: Stakes;
     public rules: TableRules;
     public state: ITableState;
 
@@ -43,9 +45,10 @@ export class Table {
     public betTurn: BetTurn;
 
 
-    constructor(id: number, rules: TableRules, deck: Deck) {
+    constructor(id: number, stakes: Stakes, rules: TableRules, deck: Deck) {
 
         this.id = id;
+        this.stakes = stakes;
         this.rules = rules;
 
         this.seats = new Array<Seat>();

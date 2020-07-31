@@ -1,3 +1,5 @@
+import { Stakes } from "./stakes";
+
 export class TableRules {
 
 
