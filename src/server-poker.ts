@@ -55,19 +55,19 @@ import { TableRules } from "./casino/tables/table-rules";
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 2000));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 300));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 2000));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 300));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 2000));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 300));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 2000));
+        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 300));
     }
 
     {

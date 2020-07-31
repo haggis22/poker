@@ -265,7 +265,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private isReadyForHand(): boolean {
 
-        return false;
+        return this.table.seats.filter(seat => seat.player && (seat.player.chips + seat.player.chipsToAdd) > 0).length > 1;
 
     }
 
