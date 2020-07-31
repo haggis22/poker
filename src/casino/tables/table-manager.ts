@@ -265,7 +265,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
     private isReadyForHand(): boolean {
 
-        return this.table.seats.filter(seat => seat.player && (seat.player.chips + seat.player.chipsToAdd) > 0).length > 1;
+        return this.table.seats.filter(seat => seat.player && seat.player.isActive && (seat.player.chips + seat.player.chipsToAdd) > 0).length > 1;
 
     }
 
@@ -334,33 +334,51 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            if (seat.player != null) {
+            if (seat.player == null) {
 
-                console.log(`${seat.getName()}: ${chipFormatter.format(seat.player.chips)}`);
+                seat.isPlaying = false;
+                seat.hand = null;
 
             }
+            else {
 
-            if (seat.player != null && seat.player.chipsToAdd) {
+                if (seat.player.chipsToAdd) {
 
-                // Add their chips "to-be-added" to their currents stack
-                seat.player.chips += seat.player.chipsToAdd;
-                this.broadcast(new AddChipsAction(this.table.id, seat.player.id, seat.player.chipsToAdd));
+                    // Add their chips "to-be-added" to their currents stack
+                    seat.player.chips += seat.player.chipsToAdd;
+                    this.broadcast(new AddChipsAction(this.table.id, seat.player.id, seat.player.chipsToAdd));
 
-                seat.player.chipsToAdd = 0;
-                this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
+                    seat.player.chipsToAdd = 0;
+                    this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
 
-            }   // they have chips waiting to add
+                }   // they have chips waiting to add
 
-            // take their cards, if they have any
-            seat.hand = new Hand();
+                if (seat.player.chips == 0) {
+
+                    seat.player.isActive = false;
+
+                    // TODO: Broadcast sitting out event
+
+                }
+
+            }
 
             this.broadcast(new ClearHandAction(this.table.id, seat.index));
 
         }
 
-        this.table.deck.shuffle();
+        for (let seat of this.table.seats) {
 
-        this.setButton();
+            if (seat.player) {
+
+                console.log(`${seat.getName()}: ${chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
+
+            }
+
+        }
+
+
+        this.table.deck.shuffle();
 
         this.table.betTracker.reset();
 
@@ -369,7 +387,9 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            if (seat.player != null) {
+            seat.isPlaying = false;
+
+            if (seat.player != null && seat.player.isActive) {
 
                 let ante = Math.min(seat.player.chips, 100);
 
@@ -377,12 +397,15 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
                     seat.player.chips -= ante;
 
-
                     this.table.betTracker.addBet(seat.index, ante);
                     this.broadcast(new AnteAction(this.table.id, seat.index, ante));
                     this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
 
                     this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+
+                    seat.isPlaying = true;
+
+                    seat.hand = new Hand();
 
                 }  // player has enough to ante
 
@@ -392,6 +415,8 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.table.betTracker.gatherBets();
         this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+
+        this.setButton();
 
         console.log('Clearing table.betTurn');
         this.table.betTurn = null;
@@ -417,7 +442,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
             nextPosition = 0;
         }
 
-        while (this.table.seats[nextPosition].player == null) {
+        while (this.table.seats[nextPosition].player == null || !this.table.seats[nextPosition].isPlaying) {
 
             nextPosition++;
 
@@ -498,44 +523,6 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
         this.seatIndexInitiatingAction = firstSeatIndexToAct;
 
         this.setBetTurn(firstSeatIndexToAct);
-
-
-/*
-                 let playerPointer: number = firstToBet.seat;
-                let whoInitiatedAction = null;
-
-                while (playerPointer != whoInitiatedAction) {
-
-                    let player = this.players[playerPointer];
-
-                    console.log(`  ${player.name}'s turn to bet`);
-
-                    let bet = Math.min(50, player.chips);
-
-                    player.chips -= bet;
-
-                    if (this.pots.length == 0) {
-
-                        this.pots.push(new Pot());
-
-                    }
-
-                    let pot: Pot = this.pots[0];
-                    pot.addChips(bet, playerPointer);
-
-                    if (whoInitiatedAction == null) {
-                        whoInitiatedAction = playerPointer;
-                    }
-
-                    playerPointer = this.findNextOccupiedSeat(playerPointer + 1);
-
-                }
-
-                console.log('-- Betting complete');
-                for (let pot of this.pots) {
-                    console.log(`Pot: ${this.chipFormatter.format(pot.amount)} : ${pot.seats.size} player(s)`);
-                }
-*/
 
     }   // makeYourBets
 

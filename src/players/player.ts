@@ -5,11 +5,11 @@ export class Player {
 
     public id: number;
     public name: string;
-    public chips: number;
 
+    public chips: number;
     public chipsToAdd: number;
 
-    public hand: Hand;
+    public isActive: boolean;
 
 
     constructor(id: number, name: string) {
@@ -17,22 +17,9 @@ export class Player {
         this.id = id;
         this.name = name;
 
-        this.hand = new Hand();
-        this.hand.reset();
-
         this.chips = this.chipsToAdd = 0;
 
-    }
-
-    public reset(): void {
-
-        this.hand.reset();
-
-    }
-
-    public hasHand(): boolean {
-
-        return this.hand != null;
+        this.isActive = true;
 
     }
 
