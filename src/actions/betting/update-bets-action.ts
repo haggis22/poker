@@ -1,7 +1,8 @@
 ﻿import { Pot } from "../../casino/tables/betting/pot";
 import { BetTracker } from "../../casino/tables/betting/bet-tracker";
+import { Action } from "../action";
 
-export class UpdateBetsAction {
+export class UpdateBetsAction implements Action {
 
     public tableID: number;
     public betTracker: BetTracker

@@ -1,4 +1,6 @@
-﻿export class AnteAction {
+﻿import { Action } from "../action";
+
+export class AnteAction implements Action {
 
     public tableID: number;
     public seatIndex: number;
