@@ -2,7 +2,7 @@
 import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/player-seated-action";
 import { MoveButtonAction } from "../../actions/table/move-button-action";
-import { AddChipsAction } from "../../actions/table/add-chips-action";
+import { AddChipsAction } from "../../actions/players/add-chips-action";
 import { Player } from "../../players/player";
 import { IChipFormatter } from "../chips/chip-formatter";
 import { DealtCard } from "../../hands/dealt-card";
@@ -19,6 +19,7 @@ import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
 import { WinPotAction } from "../../actions/game/win-pot-action";
 import { HandDescriber } from "../../games/hand-describer";
 import { PokerHandDescriber } from "../../games/poker/poker-hand-describer";
+import { StackUpdateAction } from "../../actions/players/stack-update-action";
 
 export class TableWatcher implements TableObserver {
 
@@ -81,6 +82,11 @@ export class TableWatcher implements TableObserver {
         if (action instanceof AddChipsAction) {
 
             return this.addChips(action);
+        }
+
+        if (action instanceof StackUpdateAction) {
+
+            return this.updateStack(action);
         }
 
         if (action instanceof DealCardAction) {
@@ -206,6 +212,20 @@ export class TableWatcher implements TableObserver {
     }  // addChips
 
 
+    private updateStack(action: StackUpdateAction): void {
+
+        let player = this.findPlayer(action.playerID);
+
+        if (player) {
+
+            player.chips = action.chips;
+            console.log(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
+
+        }
+
+    }  // updateStack
+
+
     private dealCard(action: DealCardAction): void {
 
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
@@ -317,7 +337,6 @@ export class TableWatcher implements TableObserver {
             if (seat.player) {
 
                 console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}`);
-                seat.player.chips += action.amount;
 
             }
             else {

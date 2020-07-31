@@ -14,7 +14,7 @@ import { ActionBroadcaster } from "../../actions/action-broadcaster";
 import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/player-seated-action";
 import { MoveButtonAction } from "../../actions/table/move-button-action";
-import { AddChipsAction } from "../../actions/table/add-chips-action";
+import { AddChipsAction } from "../../actions/players/add-chips-action";
 import { DealState } from "./states/deal-state";
 import { DealtCard } from "../../hands/dealt-card";
 import { DealCardAction } from "../../actions/game/deal-card-action";
@@ -33,6 +33,7 @@ import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
 import { WinPotAction } from "../../actions/game/win-pot-action";
 import { IChipFormatter } from "../chips/chip-formatter";
 import { MoneyFormatter } from "../chips/money-formatter";
+import { StackUpdateAction } from "../../actions/players/stack-update-action";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
 
@@ -72,7 +73,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     }
 
 
-    private broadcast(action: Action): void {
+    public broadcast(action: Action): void {
 
         for (let observer of this.observers) {
 
@@ -344,7 +345,9 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
                 // Add their chips "to-be-added" to their currents stack
                 seat.player.chips += seat.player.chipsToAdd;
                 this.broadcast(new AddChipsAction(this.table.id, seat.player.id, seat.player.chipsToAdd));
+
                 seat.player.chipsToAdd = 0;
+                this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
 
             }   // they have chips waiting to add
 
@@ -373,8 +376,12 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
                 if (ante > 0) {
 
                     seat.player.chips -= ante;
+
+
                     this.table.betTracker.addBet(seat.index, ante);
                     this.broadcast(new AnteAction(this.table.id, seat.index, ante));
+                    this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
+
                     this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
                 }  // player has enough to ante
@@ -684,8 +691,19 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
                 if (winnerHand) {
 
-                    this.broadcast(new WinPotAction(this.table.id, seatIndex, pot.index, winnerHand.evaluation, equalShare + remainder));
-                    remainder = 0;
+                    let player = this.table.seats[seatIndex].player;
+
+                    if (player) {
+
+                        this.broadcast(new WinPotAction(this.table.id, seatIndex, pot.index, winnerHand.evaluation, equalShare + remainder));
+
+                        player.chips += (equalShare + remainder);
+
+                        this.broadcast(new StackUpdateAction(this.table.id, player.id, player.chips));
+
+                        remainder = 0;
+
+                    }
 
                 }
 
