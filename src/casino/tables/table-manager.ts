@@ -584,7 +584,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            if (seat.player && seat.hand) {
+            if (seat.isPlaying && seat.hand && seat.player) {
 
                 // Put their best hand on the list
                 handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
