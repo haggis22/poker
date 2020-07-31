@@ -151,8 +151,10 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            seat.player = action.player;
-            this.playerMap.set(action.player.id, action.player);
+            seat.player = new Player(action.player.id, action.player.name);
+            Object.assign(seat.player, action.player);
+
+            this.playerMap.set(action.player.id, seat.player);
             console.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
 
 
@@ -197,7 +199,7 @@ export class TableWatcher implements TableObserver {
         if (player) {
 
             player.chips += action.amount;
-            console.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
+            console.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips - now has ${this.chipFormatter.format(player.chips)}`);
 
         }
 

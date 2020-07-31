@@ -240,6 +240,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
         }
 
         player.chips += command.amount;
+
         this.broadcast(new AddChipsAction(this.table.id, player.id, command.amount));
 
         return new CommandResult(true, `${player.name} has added ${command.amount} in chips`);
