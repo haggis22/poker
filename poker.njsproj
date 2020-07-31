@@ -97,7 +97,7 @@
     <TypeScriptCompile Include="src\actions\betting\ante-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\actions\betting\update-pots-action.ts">
+    <TypeScriptCompile Include="src\actions\betting\update-bets-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\game\bet-turn-action.ts" />
@@ -140,6 +140,9 @@
     <TypeScriptCompile Include="src\casino\dealer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\betting\bet-tracker.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\boards\board.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -149,7 +152,7 @@
     <TypeScriptCompile Include="src\casino\tables\betting\bet-turn.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\tables\pot.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\pot.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\seat.ts">

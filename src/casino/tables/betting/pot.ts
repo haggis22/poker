@@ -12,15 +12,15 @@
         this.seats = new Set<number>();
     }
 
-    addChips(chips: number, seat: number) {
+    addChips(chips: number, seatIndex: number) {
 
         this.amount += chips;
-        this.seats.add(seat);
+        this.seats.add(seatIndex);
 
     }
 
-    foldPlayer(seat: number) {
-        this.seats.delete(seat);
+    foldPlayer(seatIndex: number) {
+        this.seats.delete(seatIndex);
     }
 
 }

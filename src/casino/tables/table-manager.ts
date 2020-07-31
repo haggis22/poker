@@ -28,9 +28,8 @@ import { BetTurnAction } from "../../actions/game/bet-turn-action";
 import { FlipCardsAction } from "../../actions/game/flip-cards-action";
 import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
 import { ClearHandAction } from "../../actions/game/clear-hand-action";
-import { Pot } from "./pot";
 import { AnteAction } from "../../actions/betting/ante-action";
-import { UpdatePotsAction } from "../../actions/betting/update-pots-action";
+import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
 import { WinPotAction } from "../../actions/game/win-pot-action";
 
 export class TableManager implements ICommandHandler, ActionBroadcaster {
@@ -119,7 +118,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         let table: Table = new Table(this.table.id, this.table.rules, null);
 
-        table.pots = [...this.table.pots];
+        table.betTracker = this.table.betTracker;
         table.betTurn = this.table.betTurn;
         table.buttonIndex = this.table.buttonIndex;
         table.board = this.table.board;
@@ -349,24 +348,26 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
 
         this.setButton();
 
-        this.table.pots.length = 0;
+        this.table.betTracker.reset();
 
-        let pot: Pot = new Pot(this.table.pots.length);
+        this.table.betTracker.startBettingRound();
+        this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         for (let seat of this.table.seats) {
 
             if (seat.player != null && seat.player.chips > 0) {
 
                 let ante = 100;
-                pot.addChips(ante, seat.index);
+                this.table.betTracker.addBet(seat.index, ante);
                 this.broadcast(new AnteAction(this.table.id, seat.index, ante));
+                this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
             }
 
         }
 
-        this.table.pots.push(pot);
-        this.broadcast(new UpdatePotsAction(this.table.id, this.table.pots));
+        this.table.betTracker.gatherBets();
+        this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         console.log('Clearing table.betTurn');
         this.table.betTurn = null;
@@ -631,7 +632,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
             console.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
         }
 
-        for (let pot of this.table.pots) {
+        for (let pot of this.table.betTracker.pots) {
 
             let potWinningHand = null;
             let potWinnerSeatIndexes = new Set<number>();

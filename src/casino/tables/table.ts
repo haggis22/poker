@@ -5,7 +5,7 @@ import { HandWinner } from "../../games/hand-winner";
 import { DealtCard } from "../../hands/dealt-card";
 import { Board } from "./boards/board";
 import { IChipFormatter } from "../chips/chip-formatter";
-import { Pot } from "./pot";
+import { Pot } from "./betting/pot";
 
 import { BetState } from "./states/betting/bet-state";
 
@@ -18,6 +18,7 @@ import { OpenState } from "./states/open-state";
 import { Seat } from "./seat";
 import { BetTurn } from "./betting/bet-turn";
 import { TableRules } from "./table-rules";
+import { BetTracker } from "./betting/bet-tracker";
 
 
 export class Table {
@@ -33,7 +34,8 @@ export class Table {
 
     public board: Board;
     public deck: Deck;
-    public pots: Pot[];
+
+    public betTracker: BetTracker;
 
     // tracks which seat has the button so that we know where to deal the next card
     public buttonIndex: number;
@@ -57,7 +59,7 @@ export class Table {
 
         this.deck = deck;
 
-        this.pots = new Array<Pot>();
+        this.betTracker = new BetTracker();
 
         this.state = new OpenState();
 

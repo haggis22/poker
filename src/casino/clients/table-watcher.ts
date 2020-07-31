@@ -15,7 +15,7 @@ import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
 import { ClearHandAction } from "../../actions/game/clear-hand-action";
 import { Hand } from "../../hands/hand";
 import { AnteAction } from "../../actions/betting/ante-action";
-import { UpdatePotsAction } from "../../actions/betting/update-pots-action";
+import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
 import { WinPotAction } from "../../actions/game/win-pot-action";
 import { HandDescriber } from "../../games/hand-describer";
 import { PokerHandDescriber } from "../../games/poker/poker-hand-describer";
@@ -106,9 +106,9 @@ export class TableWatcher implements TableObserver {
 
         }
 
-        if (action instanceof UpdatePotsAction) {
+        if (action instanceof UpdateBetsAction) {
 
-            return this.updatePots(action);
+            return this.updateBets(action);
 
         }
 
@@ -289,17 +289,17 @@ export class TableWatcher implements TableObserver {
     }  // ante
 
 
-    private updatePots(action: UpdatePotsAction): void {
+    private updateBets(action: UpdateBetsAction): void {
 
-        this.table.pots = action.pots;
+        this.table.betTracker = action.betTracker;
 
-        for (let p = 0; p < action.pots.length; p++) {
+        for (let pot of this.table.betTracker.pots) {
 
-            console.log(`Pot ${(p + 1)}: ${this.chipFormatter.format(action.pots[p].amount)} - ${action.pots[p].seats.size} player${action.pots[p].seats.size == 1 ? '' : 's'}`);
+            console.log(`Pot ${(pot.index + 1)}: ${this.chipFormatter.format(pot.amount)} - ${pot.seats.size} player${pot.seats.size == 1 ? '' : 's'}`);
 
         }
 
-    }  // updatePots
+    }  // updateBets
 
 
     private winPot(action: WinPotAction): void {

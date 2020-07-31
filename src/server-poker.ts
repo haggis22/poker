@@ -25,10 +25,11 @@ import { TableRules } from "./casino/tables/table-rules";
 
     let tableManager = new TableManager(table, new PokerGameFiveCardStud());
 
-    let danny = new User(1, 'Daniel', 10000);
+    let danny = new User(1, 'Danny', 10000);
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);
     let joe = new User(4, 'Joe', 10000);
+    let sekhar = new User(5, 'Sekhar', 0);
 
     let client = new TableWatcher(table.id, danny.id, new MoneyFormatter());
     tableManager.register(client);
