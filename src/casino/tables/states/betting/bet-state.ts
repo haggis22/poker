@@ -1,6 +1,6 @@
-﻿import { ITableState } from "../table-state";
+﻿import { TableState } from "../table-state";
 
-export class BetState implements ITableState {
+export class BetState implements TableState {
 
 
     public static FIRST_POSITION: number = 1;

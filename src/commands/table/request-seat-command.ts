@@ -1,6 +1,7 @@
 ﻿import { User } from "../../players/user";
+import { Command } from "../command";
 
-export class RequestSeatCommand {
+export class RequestSeatCommand implements Command {
 
     public tableID: number;
     public user: User;

@@ -1,7 +1,7 @@
-﻿import { ITableState } from "./table-state";
+﻿import { TableState } from "./table-state";
 
-export interface ITableStateMachine {
+export interface TableStateMachine {
 
-    nextState(): ITableState;
+    nextState(): TableState;
 
 }

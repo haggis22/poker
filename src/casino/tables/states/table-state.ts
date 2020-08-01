@@ -1,6 +1,4 @@
-﻿import { ICommand } from "../../../commands/command";
-
-export interface ITableState {
+﻿export interface TableState {
 
 
     isHandInProgress(): boolean;

@@ -1,22 +1,22 @@
-﻿import { ITableStateMachine } from "../../casino/tables/states/table-state-machine";
+﻿import { TableStateMachine } from "../../casino/tables/states/table-state-machine";
 import { Table } from "../../casino/tables/table";
-import { ICommand } from "../../commands/command";
-import { ITableState } from "../../casino/tables/states/table-state";
+import { Command } from "../../commands/command";
+import { TableState } from "../../casino/tables/states/table-state";
 
-export class PokerStateMachine implements ITableStateMachine {
+export class PokerStateMachine implements TableStateMachine {
 
     private currentStateIndex: number;
-    protected states: ITableState[];
+    protected states: TableState[];
 
 
     constructor() {
 
-        this.states = new Array<ITableState>();
+        this.states = new Array<TableState>();
         this.currentStateIndex = null;
 
     }
 
-    nextState(): ITableState {
+    nextState(): TableState {
 
         if (this.currentStateIndex === null) {
 

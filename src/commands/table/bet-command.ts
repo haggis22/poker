@@ -1,6 +1,6 @@
 ﻿import { Command } from "../command";
 
-export class AddChipsCommand implements Command {
+export class BetCommand implements Command {
 
     public tableID: number;
     public playerID: number;

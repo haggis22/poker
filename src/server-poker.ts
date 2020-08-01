@@ -21,7 +21,6 @@ import { Stakes } from "./casino/tables/stakes";
     let blinds = new Array<number>();
 
     let stakes = new Stakes(blinds, 50, 100);
-
     // 6 seats
     // 1 second to act
     let rules = new TableRules(6, 0.5);
@@ -36,8 +35,9 @@ import { Stakes } from "./casino/tables/stakes";
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
 
-    let client = new TableWatcher(table.id, danny.id, new MoneyFormatter());
-    tableManager.register(client);
+    let watcher = new TableWatcher(table.id, danny.id, new MoneyFormatter());
+
+    tableManager.register(watcher);
 
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, danny, null);

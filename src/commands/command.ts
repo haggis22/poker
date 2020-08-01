@@ -1,3 +1,5 @@
-﻿export interface ICommand {
+﻿export interface Command {
+
+    tableID: number;
 
 }

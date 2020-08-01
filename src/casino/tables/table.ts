@@ -1,19 +1,7 @@
-﻿import { Player } from "../../players/player";
-import { Deck } from "../../cards/deck";
-import { Game } from "../../games/game";
-import { HandWinner } from "../../games/hand-winner";
-import { DealtCard } from "../../hands/dealt-card";
+﻿import { Deck } from "../../cards/deck";
 import { Board } from "./boards/board";
-import { IChipFormatter } from "../chips/chip-formatter";
-import { Pot } from "./betting/pot";
 
-import { BetState } from "./states/betting/bet-state";
-
-import { ICommandHandler } from "../../commands/command-handler";
-import { ICommand } from "../../commands/command";
-import { CommandResult } from "../../commands/command-result";
-
-import { ITableState } from "./states/table-state";
+import { TableState } from "./states/table-state";
 import { OpenState } from "./states/open-state";
 import { Seat } from "./seat";
 import { BetTurn } from "./betting/bet-turn";
@@ -30,7 +18,7 @@ export class Table {
 
     public stakes: Stakes;
     public rules: TableRules;
-    public state: ITableState;
+    public state: TableState;
 
     public seats: Array<Seat>;
 

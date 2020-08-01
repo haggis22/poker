@@ -1,7 +1,7 @@
 ﻿import { Table } from "./table";
 import { Game } from "../../games/game";
-import { ICommandHandler } from "../../commands/command-handler";
-import { ICommand } from "../../commands/command";
+import { CommandHandler } from "../../commands/command-handler";
+import { Command } from "../../commands/command";
 import { CommandResult } from "../../commands/command-result";
 import { RequestSeatCommand } from "../../commands/table/request-seat-command";
 import { Player } from "../../players/player";
@@ -35,7 +35,7 @@ import { IChipFormatter } from "../chips/chip-formatter";
 import { MoneyFormatter } from "../chips/money-formatter";
 import { StackUpdateAction } from "../../actions/players/stack-update-action";
 
-export class TableManager implements ICommandHandler, ActionBroadcaster {
+export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private readonly DEBUG_ENABLED: boolean = false;
     private readonly ALL_ACCESS: number = -1;
@@ -91,7 +91,7 @@ export class TableManager implements ICommandHandler, ActionBroadcaster {
     }
 
 
-    public async handleCommand(command: ICommand): Promise<CommandResult> {
+    public async handleCommand(command: Command): Promise<CommandResult> {
 
         if (this.DEBUG_ENABLED) { console.log(`TableManager received ${command.constructor.name}`); }
 

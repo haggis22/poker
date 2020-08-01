@@ -1,6 +1,6 @@
-﻿import { ICommand } from "../command";
+﻿import { Command } from "../command";
 
-export class StartGameCommand implements ICommand {
+export class StartGameCommand implements Command {
 
     public tableID: number;
 

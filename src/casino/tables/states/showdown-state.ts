@@ -1,6 +1,6 @@
-﻿import { ITableState } from "./table-state";
+﻿import { TableState } from "./table-state";
 
-export class ShowdownState implements ITableState {
+export class ShowdownState implements TableState {
 
     isHandInProgress(): boolean {
         return true;

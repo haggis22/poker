@@ -1,8 +1,8 @@
-﻿import { ICommand } from "./command";
+﻿import { Command } from "./command";
 import { CommandResult } from "./command-result";
 
-export interface ICommandHandler {
+export interface CommandHandler {
 
-    handleCommand(command: ICommand) : Promise<CommandResult>
+    handleCommand(command: Command) : Promise<CommandResult>
 
 }

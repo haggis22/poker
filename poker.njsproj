@@ -187,6 +187,9 @@
     <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\commands\table\bet-command.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\start-game-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

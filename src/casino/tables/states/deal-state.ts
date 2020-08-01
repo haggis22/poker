@@ -1,8 +1,7 @@
-﻿import { ITableState } from "./table-state";
-import { ICommand } from "../../../commands/command";
+﻿import { TableState } from "./table-state";
 
 
-export class DealState implements ITableState {
+export class DealState implements TableState {
 
     public isFaceUp: boolean;
 
