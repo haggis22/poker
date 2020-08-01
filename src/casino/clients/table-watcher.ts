@@ -23,6 +23,7 @@ import { StackUpdateAction } from "../../actions/players/stack-update-action";
 import { BetCommand } from "../../commands/table/bet-command";
 import { CommandHandler } from "../../commands/command-handler";
 import { BetTracker } from "../tables/betting/bet-tracker";
+import { BetAction } from "../../actions/betting/bet-action";
 
 export class TableWatcher implements TableObserver {
 
@@ -116,6 +117,12 @@ export class TableWatcher implements TableObserver {
         if (action instanceof AnteAction) {
 
             return this.ante(action);
+
+        }
+
+        if (action instanceof BetAction) {
+
+            return this.bet(action);
 
         }
 
@@ -331,7 +338,7 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            console.log(`${seat.getName()} antes ${this.chipFormatter.format(action.amount)}`);
+            console.log(`${seat.getName()} antes ${this.chipFormatter.format(action.ante.chipsAdded)}`);
 
         }
         else {
@@ -341,6 +348,31 @@ export class TableWatcher implements TableObserver {
         }
 
     }  // ante
+
+
+    private bet(action: BetAction): void {
+
+        let seat = this.table.seats[action.seatIndex];
+
+        if (seat) {
+
+            if (action.bet.chipsAdded > 0) {
+
+                console.log(`${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`);
+            }
+            else {
+
+                console.log(`${seat.getName()} checks`);
+            }
+
+        }
+        else {
+
+            throw new Error(`Bet: Seat index out of range: ${action.seatIndex}`);
+
+        }
+
+    }  // bet
 
 
     private updateBets(action: UpdateBetsAction): void {

@@ -286,11 +286,11 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             if (bettorSeat) {
 
-                if (this.table.betTracker.isValidBet(bettorSeat, command.amount)) {
+                let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount);
+
+                if (bet.isValid) {
 
                     clearTimeout(this.betTimer);
-
-                    let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount);
 
                     this.broadcast(new BetAction(this.table.id, bettorSeat.index, bet));
                     this.broadcast(new StackUpdateAction(this.table.id, bettorSeat.player.id, bettorSeat.player.chips));
@@ -300,19 +300,19 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
                 }
                 else {
-                    return new CommandResult(false, "That is not a legal bet");
+                    return new CommandResult(bet.isValid, bet.message);
                 }
 
             }
             else {
 
-                return new CommandResult(false, "It is not your turn to bet");
+                return new CommandResult(false, "You are not in the hand");
 
             }
 
         }
 
-        return new CommandResult(false, "It is not your turn to bet");
+        return new CommandResult(false, "It is not time to bet");
 
     }  // bet
 
@@ -442,25 +442,43 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             // assume they're in, at least until they fail to pay the ante.
             // The table won't take the ante bet if they're not marked as in already.
-            seat.isPlaying = true;
-            let paidAnte: boolean = false;
+            seat.isPlaying = seat.player && seat.player.isActive;
 
-            if (seat.player != null && seat.player.isActive) {
+            if (this.table.stakes.ante > 0) {
 
-                let chipsPutIn = this.createBet(seat, this.table.stakes.ante);
+                let paidAnte: boolean = false;
 
-                if (chipsPutIn > 0) {
+                if (seat.isPlaying) {
 
-                    paidAnte = true;
-                    this.broadcast(new AnteAction(this.table.id, seat.index, chipsPutIn));
+                    console.log(`There is an ante, and seat ${seat.index} is playing`);
 
-                    seat.hand = new Hand();
+                    // set the betting to the ante's seat or it will not be accepted
+                    this.table.betTracker.seatIndex = seat.index;
 
-                }  // player has enough to ante
+                    let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante);
 
-            }   // seat has player
+                    console.log(`ante result: ${ante}`);
 
-            seat.isPlaying = paidAnte;
+                    if (ante.isValid) {
+
+                        paidAnte = true;
+
+                        this.broadcast(new AnteAction(this.table.id, seat.index, ante));
+                        this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
+                        this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+
+                        seat.hand = new Hand();
+
+                    }  // valid ante
+
+                }   // seat has player
+                else {
+                    console.log(`Seat ${seat.index} is not playing`);
+                }
+
+                seat.isPlaying = paidAnte;
+
+            }  // if there is an ante
 
         }  // for each seat
 
@@ -587,10 +605,21 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
             let checkerSeat = this.table.seats[this.table.betTracker.seatIndex];
 
             // try to check
-            if (this.table.betTracker.isValidBet(checkerSeat, 0)) {
+            let check: Bet = this.table.betTracker.addBet(checkerSeat, null);
 
+            if (check.isValid) {
+
+                this.broadcast(new BetAction(this.table.id, checkerSeat.index, check));
+                this.advanceBetTurn();
 
             }
+            else {
+
+                // TODO: Fold player
+                this.advanceBetTurn();
+
+            }
+
 
         }, this.table.rules.timeToAct * 1000);
 
@@ -633,28 +662,6 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         throw new Error(`Do not know the rules for bet type ${firstBetRule}`);
 
     }   // findFirstToBet
-
-
-    private createBet(seat: Seat, amount: number): number {
-
-        if (seat && seat.player) {
-
-            // console.log(`in create bet for ${seat.getName()}, amount ${amount}`);
-
-            let betResult: Bet = this.table.betTracker.addBet(seat, amount);
-
-            // console.log(`betResult: ${betResult}`);
-
-            this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
-            this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
-
-            return betResult.chipsAdded;
-
-        }
-
-        return 0;
-
-    }   // createBet
 
 
     private findWinners(): Array<HandWinner> {

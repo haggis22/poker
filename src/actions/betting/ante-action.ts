@@ -1,16 +1,17 @@
 ﻿import { Action } from "../action";
+import { Bet } from "../../casino/tables/betting/bet";
 
 export class AnteAction implements Action {
 
     public tableID: number;
     public seatIndex: number;
-    public amount: number;
+    public ante: Bet;
 
-    constructor(tableID: number, seatIndex: number, amount: number) {
+    constructor(tableID: number, seatIndex: number, ante: Bet) {
 
         this.tableID = tableID;
         this.seatIndex = seatIndex;
-        this.amount = amount;
+        this.ante = ante;
 
     }
 

@@ -40,20 +40,32 @@ export class BetTracker {
         this.bets.clear();
         this.currentBet = 0;
         this.isDeadRaise = false;
+        this.seatIndex = null;
 
-
-    }
-
-    public isValidBet(seat: Seat, amount: number): boolean {
-
-        return true;
-
-    }  // isValidBet
+    }   // clearBets
 
 
     public addBet(seat: Seat, totalBetAmount: number): Bet {
 
-        if (seat && seat.isPlaying && seat.player && seat.player.chips > 0) {
+        if (!seat || !seat.player) {
+
+            return new Bet(false, 0, 0, false, "There is no player in that seat");
+
+        }
+
+        if (this.seatIndex != seat.index) {
+
+            return new Bet(false, 0, 0, false, "It is not your turn to bet");
+
+        }
+
+        if (!seat.isPlaying) {
+
+            return new Bet(false, 0, 0, false, "You are not in the hand");
+
+        }
+
+        if (seat.player.chips > 0) {
 
             let playerCurrentBet: number = this.bets.has(seat.index) ? this.bets.get(seat.index) : 0;
 
@@ -74,12 +86,12 @@ export class BetTracker {
 
             this.bets.set(seat.index, playerTotalBet);
 
-            return new Bet(playerTotalBet, chipsRequired, isAllIn);
+            return new Bet(true, playerTotalBet, chipsRequired, isAllIn, null);
 
         }
 
         // hasn't added any chips, so not suddenly all-in
-        return new Bet(0, 0, false);
+        return new Bet(true, 0, 0, false, null);
 
     }   // addBet
 
