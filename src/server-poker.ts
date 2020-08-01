@@ -35,7 +35,7 @@ import { Stakes } from "./casino/tables/stakes";
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
 
-    let watcher = new TableWatcher(table.id, danny.id, new MoneyFormatter());
+    let watcher = new TableWatcher(tableManager, table.id, danny.id, new MoneyFormatter());
 
     tableManager.register(watcher);
 

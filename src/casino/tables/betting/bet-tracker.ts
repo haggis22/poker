@@ -1,15 +1,23 @@
 ﻿import { Pot } from "./pot";
+import { Seat } from "../seat";
+import { Bet } from "./bet";
 
 export class BetTracker {
 
 
+    public seatIndexInitiatingAction: number;
+    public seatIndex: number;
+
+    public currentBet: number;
+    public minRaise: number;
+
+    public isDeadRaise: boolean;
+    public timeToAct: number;
 
     // Tracks how much each seat has bet so far in this round
     public bets: Map<number, number>;
 
     public pots: Pot[];
-    private currentBet: number;
-    private deadRaise: boolean;
 
     constructor() {
 
@@ -26,49 +34,54 @@ export class BetTracker {
 
     }
 
-    private clearBets(): void {
+    public clearBets(): void {
 
+        this.seatIndexInitiatingAction = null;
         this.bets.clear();
         this.currentBet = 0;
-        this.deadRaise = false;
+        this.isDeadRaise = false;
 
 
     }
 
+    public isValidBet(seat: Seat, amount: number): boolean {
 
-    public startBettingRound(): void {
+        return true;
 
-        this.currentBet = 0;
-        this.bets.clear();
-
-    }
+    }  // isValidBet
 
 
-    public getCurrentBet(): number {
+    public addBet(seat: Seat, totalBetAmount: number): Bet {
 
-        return this.currentBet;
+        if (seat && seat.isPlaying && seat.player && seat.player.chips > 0) {
 
-    }  // getCurrentBet
+            let playerCurrentBet: number = this.bets.has(seat.index) ? this.bets.get(seat.index) : 0;
 
+            let chipsRequired: number = totalBetAmount - playerCurrentBet;
 
-    public isDeadRaise(): boolean {
+            let isAllIn: boolean = false;
 
-        return this.deadRaise;
+            if (chipsRequired >= seat.player.chips) {
 
-    }
+                chipsRequired = seat.player.chips;
+                isAllIn = true;
 
+            }
 
-    public addBet(seatIndex: number, amount: number): void {
+            seat.player.chips -= chipsRequired;
 
-        if (amount > this.currentBet) {
+            let playerTotalBet = playerCurrentBet + chipsRequired;
 
-            this.currentBet = amount;
+            this.bets.set(seat.index, playerTotalBet);
+
+            return new Bet(playerTotalBet, chipsRequired, isAllIn);
 
         }
 
-        this.bets.set(seatIndex, (this.bets.has(seatIndex) ? this.bets.get(seatIndex) : 0) + amount);
+        // hasn't added any chips, so not suddenly all-in
+        return new Bet(0, 0, false);
 
-    }
+    }   // addBet
 
 
     public gatherBets(): void {

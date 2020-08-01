@@ -4,7 +4,6 @@ import { Board } from "./boards/board";
 import { TableState } from "./states/table-state";
 import { OpenState } from "./states/open-state";
 import { Seat } from "./seat";
-import { BetTurn } from "./betting/bet-turn";
 import { TableRules } from "./table-rules";
 import { BetTracker } from "./betting/bet-tracker";
 import { Stakes } from "./stakes";
@@ -29,8 +28,6 @@ export class Table {
 
     // tracks which seat has the button so that we know where to deal the next card
     public buttonIndex: number;
-
-    public betTurn: BetTurn;
 
 
     constructor(id: number, stakes: Stakes, rules: TableRules, deck: Deck) {

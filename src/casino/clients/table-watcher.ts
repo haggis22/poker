@@ -20,11 +20,16 @@ import { WinPotAction } from "../../actions/game/win-pot-action";
 import { HandDescriber } from "../../games/hand-describer";
 import { PokerHandDescriber } from "../../games/poker/poker-hand-describer";
 import { StackUpdateAction } from "../../actions/players/stack-update-action";
+import { BetCommand } from "../../commands/table/bet-command";
+import { CommandHandler } from "../../commands/command-handler";
+import { BetTracker } from "../tables/betting/bet-tracker";
 
 export class TableWatcher implements TableObserver {
 
 
     public playerID: number;
+
+    private commandHandler: CommandHandler;
 
     private chipFormatter: IChipFormatter;
 
@@ -35,7 +40,9 @@ export class TableWatcher implements TableObserver {
     private playerMap: Map<number, Player>;
 
 
-    constructor(tableID: number, playerID: number, chipFormatter: IChipFormatter) {
+    constructor(commandHandler: CommandHandler, tableID: number, playerID: number, chipFormatter: IChipFormatter) {
+
+        this.commandHandler = commandHandler;
 
         this.tableID = tableID;
         this.table = null;
@@ -253,16 +260,41 @@ export class TableWatcher implements TableObserver {
 
     private betTurn(action: BetTurnAction): void {
 
-        let seat = this.table.seats[action.turn.seatIndex];
+        let seat = this.table.seats[action.bets.seatIndex];
 
         if (seat) {
 
             console.log(`It is ${seat.getName()}'s turn to act`);
 
+            if (seat.isPlaying && seat.player) {
+
+                let tracker: BetTracker = action.bets;
+
+                if (tracker.currentBet > 0) {
+
+                    // This represents a call (possibly all-in)
+                    let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
+                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+
+                    this.commandHandler.handleCommand(betCommand);
+
+                }
+                else {
+
+                    // This represents a bet out (or a check, if the player has no chips)
+                    let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
+                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+
+                    this.commandHandler.handleCommand(betCommand);
+
+                }
+
+            }   // seat has a player
+
         }
         else {
 
-            throw new Error(`Seat index out of range: ${action.turn.seatIndex}`);
+            throw new Error(`Seat index out of range: ${action.bets.seatIndex}`);
 
         }
 

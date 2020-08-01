@@ -1,15 +1,15 @@
 ﻿import { Action } from "../action";
-import { BetTurn } from "../../casino/tables/betting/bet-turn";
+import { BetTracker } from "../../casino/tables/betting/bet-tracker";
 
 export class BetTurnAction implements Action {
 
     public tableID: number;
-    public turn: BetTurn;
+    public bets: BetTracker;
 
-    constructor(tableID: number, turn: BetTurn) {
+    constructor(tableID: number, bets: BetTracker) {
 
         this.tableID = tableID;
-        this.turn = turn;
+        this.bets = bets;
 
     }
 
