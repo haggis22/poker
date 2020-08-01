@@ -26,7 +26,7 @@ import { HandWinner } from "../../games/hand-winner";
 import { BetTurnAction } from "../../actions/game/bet-turn-action";
 import { FlipCardsAction } from "../../actions/game/flip-cards-action";
 import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
-import { ClearHandAction } from "../../actions/game/clear-hand-action";
+import { SetHandAction } from "../../actions/game/set-hand-action";
 import { AnteAction } from "../../actions/betting/ante-action";
 import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
 import { WinPotAction } from "../../actions/game/win-pot-action";
@@ -117,6 +117,8 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         }
 
         if (command instanceof BetCommand) {
+
+            console.log(`Manager heard a bet command`);
 
             return this.bet(command);
 
@@ -282,7 +284,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (this.table.state instanceof BetState) {
 
-            let bettorSeat: Seat = this.table.seats.find(seat => seat.isPlaying && seat.player && seat.player.id == command.playerID);
+            let bettorSeat: Seat = this.table.seats.find(seat => seat.hand && seat.player && seat.player.id == command.playerID);
 
             if (bettorSeat) {
 
@@ -388,13 +390,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            if (seat.player == null) {
-
-                seat.isPlaying = false;
-                seat.hand = null;
-
-            }
-            else {
+            if (seat.player) {
 
                 if (seat.player.chipsToAdd) {
 
@@ -417,8 +413,6 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             }
 
-            this.broadcast(new ClearHandAction(this.table.id, seat.index));
-
         }
 
         for (let seat of this.table.seats) {
@@ -440,17 +434,19 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            // assume they're in, at least until they fail to pay the ante.
-            // The table won't take the ante bet if they're not marked as in already.
-            seat.isPlaying = seat.player && seat.player.isActive;
+            // Start off without a hand for the seat...
+            seat.hand = null;
 
-            if (this.table.stakes.ante > 0) {
+            if (seat.player && seat.player.isActive) {
 
-                let paidAnte: boolean = false;
+                // assume they're in, at least until they fail to pay the ante.
+                // The table won't take the ante bet if they're not marked as in already.
+                // They need to have a blank hand for the table to accept the ante as a bet
+                seat.hand = new Hand();
 
-                if (seat.isPlaying) {
+                if (this.table.stakes.ante > 0) {
 
-                    console.log(`There is an ante, and seat ${seat.index} is playing`);
+                    console.log(`There is an ante, and ${seat.getName()} is playing`);
 
                     // set the betting to the ante's seat or it will not be accepted
                     this.table.betTracker.seatIndex = seat.index;
@@ -461,24 +457,31 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
                     if (ante.isValid) {
 
-                        paidAnte = true;
-
                         this.broadcast(new AnteAction(this.table.id, seat.index, ante));
                         this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
                         this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
-                        seat.hand = new Hand();
-
                     }  // valid ante
+                    else {
 
-                }   // seat has player
-                else {
-                    console.log(`Seat ${seat.index} is not playing`);
-                }
+                        // they didn't pay the ante, so take away their (blank) cards
+                        seat.hand = null;
 
-                seat.isPlaying = paidAnte;
+                    }
 
-            }  // if there is an ante
+                }  // if there is an ante
+
+            }
+
+            else {
+
+                console.log(`${seat.getName()} is not playing`);
+                seat.hand = null;
+
+            }
+
+            // This will tell watchers whether or not the given seat is in the hand
+            this.broadcast(new SetHandAction(this.table.id, seat.index, seat.hand != null));
 
         }  // for each seat
 
@@ -508,7 +511,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
             nextPosition = 0;
         }
 
-        while (this.table.seats[nextPosition].player == null || !this.table.seats[nextPosition].isPlaying) {
+        while (this.table.seats[nextPosition].player == null || !this.table.seats[nextPosition].hand) {
 
             nextPosition++;
 
@@ -670,7 +673,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            if (seat.isPlaying && seat.hand && seat.player) {
+            if (seat.hand) {
 
                 // Put their best hand on the list
                 handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
@@ -795,7 +798,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         // We're done with this hand - go to the next one
 
         // This will preserve the `this` reference in the call
-        setTimeout(() => { this.goToNextState(); }, 1000);
+        // setTimeout(() => { this.goToNextState(); }, 1000);
 
     }   // completeHand
 

@@ -12,7 +12,7 @@ import { Table } from "../tables/table";
 import { BetTurnAction } from "../../actions/game/bet-turn-action";
 import { FlipCardsAction } from "../../actions/game/flip-cards-action";
 import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
-import { ClearHandAction } from "../../actions/game/clear-hand-action";
+import { SetHandAction } from "../../actions/game/set-hand-action";
 import { Hand } from "../../hands/hand";
 import { AnteAction } from "../../actions/betting/ante-action";
 import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
@@ -24,6 +24,7 @@ import { BetCommand } from "../../commands/table/bet-command";
 import { CommandHandler } from "../../commands/command-handler";
 import { BetTracker } from "../tables/betting/bet-tracker";
 import { BetAction } from "../../actions/betting/bet-action";
+import { Bet } from "../tables/betting/bet";
 
 export class TableWatcher implements TableObserver {
 
@@ -82,9 +83,9 @@ export class TableWatcher implements TableObserver {
             return this.moveButton(action);
         }
 
-        if (action instanceof ClearHandAction) {
+        if (action instanceof SetHandAction) {
 
-            return this.clearHand(action);
+            return this.setHand(action);
         }
 
         if (action instanceof AddChipsAction) {
@@ -199,17 +200,18 @@ export class TableWatcher implements TableObserver {
     }
 
 
-    private clearHand(action: ClearHandAction): void {
+    private setHand(action: SetHandAction): void {
 
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
         if (seat) {
 
-            seat.hand = new Hand();
+            // If the seat has a hand, create a blank hand and copy the values over from the action
+            seat.hand = action.hasHand ? new Hand() : null;
 
         }
 
-    }  // clearHand
+    }  // setHand
 
 
     private addChips(action: AddChipsAction): void {
@@ -260,6 +262,14 @@ export class TableWatcher implements TableObserver {
 
             }
 
+/*
+            if (seat.index == 0) {
+                console.log(`DEBUGGGGG: got DealCardAction: ${action}`);
+                console.log(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
+            }
+*/
+
+
         }
 
     }   // dealCard
@@ -273,7 +283,9 @@ export class TableWatcher implements TableObserver {
 
             console.log(`It is ${seat.getName()}'s turn to act`);
 
-            if (seat.isPlaying && seat.player) {
+            if (seat.hand && seat.player) {
+
+                console.log(`${seat.getName()} is thinking`);
 
                 let tracker: BetTracker = action.bets;
 
@@ -297,6 +309,11 @@ export class TableWatcher implements TableObserver {
                 }
 
             }   // seat has a player
+            else {
+
+                console.log(`${seat.getName()} is MIA`);
+
+            }
 
         }
         else {
@@ -356,14 +373,29 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            if (action.bet.chipsAdded > 0) {
+            let message = 'Unknown message';
 
-                console.log(`${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`);
-            }
-            else {
+            switch (action.bet.betType) {
 
-                console.log(`${seat.getName()} checks`);
-            }
+                case Bet.CHECK:
+                    message = `${seat.getName()} checks`;
+                    break;
+
+                case Bet.OPEN:
+                    message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    break;
+
+                case Bet.CALL:
+                    message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    break;
+
+                case Bet.RAISE:
+                    message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    break;
+
+            }  // switch
+
+            console.log(message);
 
         }
         else {

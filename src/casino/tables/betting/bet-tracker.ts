@@ -49,49 +49,77 @@ export class BetTracker {
 
         if (!seat || !seat.player) {
 
-            return new Bet(false, 0, 0, false, "There is no player in that seat");
+            return new Bet(false, 0, 0, false, Bet.INVALID, "There is no player in that seat");
 
         }
 
         if (this.seatIndex != seat.index) {
 
-            return new Bet(false, 0, 0, false, "It is not your turn to bet");
+            return new Bet(false, 0, 0, false, Bet.INVALID, "It is not your turn to bet");
 
         }
 
-        if (!seat.isPlaying) {
+        if (!seat.hand) {
 
-            return new Bet(false, 0, 0, false, "You are not in the hand");
+            return new Bet(false, 0, 0, false, Bet.INVALID, "You are not in the hand");
 
         }
 
-        if (seat.player.chips > 0) {
+        // TODO: Make sure the bet is enough to call, or put the player all-in
+        let playerCurrentBet: number = this.bets.has(seat.index) ? this.bets.get(seat.index) : 0;
 
-            let playerCurrentBet: number = this.bets.has(seat.index) ? this.bets.get(seat.index) : 0;
+        let chipsRequired: number = totalBetAmount - playerCurrentBet;
 
-            let chipsRequired: number = totalBetAmount - playerCurrentBet;
+        let isAllIn: boolean = false;
 
-            let isAllIn: boolean = false;
+        if (chipsRequired >= seat.player.chips) {
 
-            if (chipsRequired >= seat.player.chips) {
+            chipsRequired = seat.player.chips;
+            isAllIn = true;
 
-                chipsRequired = seat.player.chips;
-                isAllIn = true;
+        }
+
+        seat.player.chips -= chipsRequired;
+
+        let playerTotalBet = playerCurrentBet + chipsRequired;
+
+        let betType: number = null;
+
+        if (playerTotalBet > this.currentBet) {
+
+            this.isDeadRaise = playerTotalBet < this.minRaise;
+
+            if (this.currentBet === 0) {
+
+                betType = Bet.OPEN;
+
+            }
+            else {
+
+                betType = Bet.RAISE;
 
             }
 
-            seat.player.chips -= chipsRequired;
+            this.currentBet = playerTotalBet;
 
-            let playerTotalBet = playerCurrentBet + chipsRequired;
+        }
+        else if (this.currentBet === 0) {
 
-            this.bets.set(seat.index, playerTotalBet);
+            betType = Bet.CHECK;
 
-            return new Bet(true, playerTotalBet, chipsRequired, isAllIn, null);
+        }
+        else {
+
+            betType = Bet.CALL;
 
         }
 
-        // hasn't added any chips, so not suddenly all-in
-        return new Bet(true, 0, 0, false, null);
+        this.bets.set(seat.index, playerTotalBet);
+
+        // console.log(`BetType is ${betType}`);
+
+        return new Bet(true, playerTotalBet, chipsRequired, isAllIn, betType, null);
+
 
     }   // addBet
 

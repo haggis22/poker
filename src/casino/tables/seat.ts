@@ -6,7 +6,6 @@ export class Seat {
     public index: number;
     public player: Player;
     public hand: Hand;
-    public isPlaying: boolean;
 
 
     constructor(index: number) {
@@ -15,8 +14,6 @@ export class Seat {
 
         this.player = null;
         this.hand = null;
-
-        this.isPlaying = false;
 
     }
 

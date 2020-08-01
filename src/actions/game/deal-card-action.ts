@@ -17,4 +17,8 @@ export class DealCardAction implements Action {
     }
 
 
+    public toString(): string {
+        return JSON.stringify(this);
+    }
+
 }
