@@ -440,7 +440,10 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            seat.isPlaying = false;
+            // assume they're in, at least until they fail to pay the ante.
+            // The table won't take the ante bet if they're not marked as in already.
+            seat.isPlaying = true;
+            let paidAnte: boolean = false;
 
             if (seat.player != null && seat.player.isActive) {
 
@@ -448,15 +451,16 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
                 if (chipsPutIn > 0) {
 
+                    paidAnte = true;
                     this.broadcast(new AnteAction(this.table.id, seat.index, chipsPutIn));
-
-                    seat.isPlaying = true;
 
                     seat.hand = new Hand();
 
                 }  // player has enough to ante
 
             }   // seat has player
+
+            seat.isPlaying = paidAnte;
 
         }  // for each seat
 
@@ -635,7 +639,11 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (seat && seat.player) {
 
+            // console.log(`in create bet for ${seat.getName()}, amount ${amount}`);
+
             let betResult: Bet = this.table.betTracker.addBet(seat, amount);
+
+            // console.log(`betResult: ${betResult}`);
 
             this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
             this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
