@@ -118,7 +118,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (command instanceof BetCommand) {
 
-            console.log(`Manager heard a bet command`);
+            // console.log(`Manager heard a bet command`);
 
             return this.bet(command);
 
@@ -511,7 +511,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
             nextPosition = 0;
         }
 
-        while (this.table.seats[nextPosition].player == null || !this.table.seats[nextPosition].hand) {
+        while (!this.table.seats[nextPosition].hand) {
 
             nextPosition++;
 
@@ -636,11 +636,25 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         if (nextSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
             console.log('Betting complete');
+
+            this.table.betTracker.gatherBets();
+            this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+
             return this.goToNextState();
 
         }
 
-        this.setBetTurn(nextSeatIndex);
+        if (this.table.seats[nextSeatIndex].player && this.table.seats[nextSeatIndex].player.chips > 0) {
+
+            return this.setBetTurn(nextSeatIndex);
+
+        }
+
+        // Otherwise, move the marker...
+        this.table.betTracker.seatIndex = nextSeatIndex;
+
+        // ...and keep looking
+        this.advanceBetTurn();
 
     }   // advanceBetTurn
 
@@ -798,7 +812,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         // We're done with this hand - go to the next one
 
         // This will preserve the `this` reference in the call
-        // setTimeout(() => { this.goToNextState(); }, 1000);
+        setTimeout(() => { this.goToNextState(); }, 10000);
 
     }   // completeHand
 

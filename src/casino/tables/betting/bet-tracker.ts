@@ -171,7 +171,7 @@ export class BetTracker {
 
                 // Create a new side pot - it will become the active pot to which bets get added
                 this.pots.push(new Pot(this.pots.length));
-                pot = this.pots[this.pots.length = 1];
+                pot = this.pots[this.pots.length - 1];
 
             }
 

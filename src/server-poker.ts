@@ -20,7 +20,7 @@ import { Stakes } from "./casino/tables/stakes";
 
     let blinds = new Array<number>();
 
-    let stakes = new Stakes(blinds, 50, 100);
+    let stakes = new Stakes(blinds, 50, 200);
     // 6 seats
     // 1 second to act
     let rules = new TableRules(6, 0.5);
