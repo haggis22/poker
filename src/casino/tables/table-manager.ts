@@ -52,12 +52,19 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
     private betTimer: ReturnType<typeof setTimeout>;
 
 
+    private numTimers: number;
+    private numTimersElapsed: number;
+    private numTimersKilled: number;
+
+
     constructor(table: Table, game: Game) {
 
         this.table = table;
         this.game = game;
 
         this.observers = new Array<TableObserver>();
+
+        this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
     }
 
 
@@ -294,6 +301,8 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
                 if (bet.isValid) {
 
                     clearTimeout(this.betTimer);
+                    this.numTimersKilled++;
+                    this.logTimers();
 
                     this.broadcast(new BetAction(this.table.id, bettorSeat.index, bet));
                     this.broadcast(new StackUpdateAction(this.table.id, bettorSeat.player.id, bettorSeat.player.chips));
@@ -377,6 +386,8 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         }
 
         if (state instanceof HandCompleteState) {
+
+            console.log(`HandComplete: numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
 
             return this.completeHand(state);
         }
@@ -530,7 +541,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         return nextPosition;
 
-    }   // findNextOccupiedSeat
+    }   // findNextOccupiedSeatIndex
 
 
     private dealRound(dealState: DealState) {
@@ -589,24 +600,45 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private makeYourBets(betState: BetState): void {
 
+        console.log('In makeYourBets');
+
         this.table.betTracker.clearBets();
-        this.table.betTracker.seatIndexInitiatingAction = this.findFirstToBet(betState.firstToBet);
-        this.table.betTracker.currentBet = 0;
         this.table.betTracker.minRaise = this.table.stakes.minRaise;
 
-        this.setBetTurn(this.table.betTracker.seatIndexInitiatingAction);
+        let firstSeatIndexWithAction: number = this.findFirstToBet(betState.firstToBet);
+
+        if (firstSeatIndexWithAction == null) {
+
+            console.log('No betting action this round');
+            return this.goToNextState();
+
+        }
+
+        this.table.betTracker.seatIndexInitiatingAction = firstSeatIndexWithAction;
+
+        this.setBetTurn(firstSeatIndexWithAction);
 
     }   // makeYourBets
 
+
+    private logTimers() {
+
+        console.log(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
+
+    }
 
     private setBetTurn(seatIndexToAct: number): void {
 
         this.table.betTracker.seatIndex = seatIndexToAct;
         this.table.betTracker.timeToAct = this.table.rules.timeToAct;
 
-        this.broadcast(new BetTurnAction(this.table.id, this.table.betTracker));
+        this.numTimers++;
+        this.logTimers();
 
         this.betTimer = setTimeout(() => {
+
+            this.numTimersElapsed++;
+            this.logTimers();
 
             let checkerSeat = this.table.seats[this.table.betTracker.seatIndex];
 
@@ -629,37 +661,57 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         }, this.table.rules.timeToAct * 1000);
 
+        this.broadcast(new BetTurnAction(this.table.id, this.table.betTracker));
+
     }  // setBetTurn
 
 
     private advanceBetTurn(): void {
 
+        // console.log('In advanceBetTurn');
+        if (this.table.state instanceof HandCompleteState) {
+
+            let error = new Error('Should not be here');
+            console.log(error.stack);
+            throw error;
+
+        }
+
         let nextSeatIndex = this.findNextOccupiedSeatIndex(this.table.betTracker.seatIndex + 1);
 
-        if (nextSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
+        let done: boolean = false;
 
-            console.log('Betting complete');
+        while (!done) {
 
-            this.table.betTracker.gatherBets();
-            this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+            if (nextSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
-            this.checkBetsToReturn();
+                console.log('Betting complete');
 
-            return this.goToNextState();
+                this.table.betTracker.gatherBets();
+                this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
-        }
+                this.checkBetsToReturn();
 
-        if (this.table.seats[nextSeatIndex].player && this.table.seats[nextSeatIndex].player.chips > 0) {
+                return this.goToNextState();
 
-            return this.setBetTurn(nextSeatIndex);
+            }
 
-        }
+            if (this.table.seats[nextSeatIndex].player && this.table.seats[nextSeatIndex].player.chips > 0) {
 
-        // Otherwise, move the marker...
-        this.table.betTracker.seatIndex = nextSeatIndex;
+                done = true;
 
-        // ...and keep looking
-        this.advanceBetTurn();
+            }
+            else {
+
+                // Otherwise, keep moving the marker
+                nextSeatIndex = this.findNextOccupiedSeatIndex(nextSeatIndex + 1);
+
+            }
+
+        }  // while !done
+
+        this.setBetTurn(nextSeatIndex);
+
 
     }   // advanceBetTurn
 
@@ -859,7 +911,11 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         // We're done with this hand - go to the next one
 
         // This will preserve the `this` reference in the call
-        setTimeout(() => { this.goToNextState(); }, 10000);
+        setTimeout(() => {
+
+            console.log('Going to next state from completeHand');
+            this.goToNextState();
+        }, 10000);
 
     }   // completeHand
 

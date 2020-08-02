@@ -23,7 +23,7 @@ import { Stakes } from "./casino/tables/stakes";
     let stakes = new Stakes(blinds, 50, 200);
     // 6 seats
     // 1 second to act
-    let rules = new TableRules(6, 0.5);
+    let rules = new TableRules(6, 2);
 
     let table = new Table(TABLE_ID, stakes, rules, new Deck());
 
