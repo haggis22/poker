@@ -94,6 +94,9 @@ export class BetTracker {
         // TODO: Make sure the bet is enough to call, or put the player all-in
         let playerCurrentBet: number = this.bets.has(seat.index) ? this.bets.get(seat.index) : 0;
 
+        // If they tried to bet more than they have, then reduce it to an all-in
+        totalBetAmount = Math.min(totalBetAmount, playerCurrentBet + seat.player.chips);
+
         let chipsRequired: number = totalBetAmount - playerCurrentBet;
 
         let isAllIn: boolean = false;
@@ -102,6 +105,8 @@ export class BetTracker {
 
             chipsRequired = seat.player.chips;
 
+            // they have to have put in some chips with this bet to get marked as all-in. If they were previously all-in
+            // and they're not putting in any chips this round, then don't mark them all-in again
             if (chipsRequired > 0) {
                 isAllIn = true;
             }

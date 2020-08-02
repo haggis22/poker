@@ -345,8 +345,9 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
                 // This will tell watchers that the given seat is no longer in the hand
                 this.broadcast(new SetHandAction(this.table.id, folderSeat.index, false));
-
                 this.broadcast(new FoldAction(this.table.id, folderSeat.index, fold));
+
+                this.advanceBetTurn();
 
             }
             else {

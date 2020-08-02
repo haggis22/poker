@@ -27,6 +27,7 @@ import { BetAction } from "../../actions/betting/bet-action";
 import { Bet } from "../tables/betting/bet";
 import { BetReturnedAction } from "../../actions/game/bet-returned-action";
 import { FoldAction } from "../../actions/betting/fold-action";
+import { FoldCommand } from "../../commands/table/fold-command";
 
 export class TableWatcher implements TableObserver {
 
@@ -305,11 +306,25 @@ export class TableWatcher implements TableObserver {
 
                 if (tracker.currentBet > 0) {
 
-                    // This represents a call (possibly all-in)
-                    let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
-                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+                    if (Math.random() >= 0.25) {
 
-                    this.commandHandler.handleCommand(betCommand);
+                        // This represents a call (possibly all-in)
+                        let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
+                        let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+
+                        this.commandHandler.handleCommand(betCommand);
+                        return;
+
+                    }
+                    else {
+
+                        // We're folding!
+                        let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.id);
+
+                        this.commandHandler.handleCommand(foldCommand);
+                        return;
+
+                    }
 
                 }
                 else {
@@ -319,6 +334,7 @@ export class TableWatcher implements TableObserver {
                     let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
 
                     this.commandHandler.handleCommand(betCommand);
+                    return;
 
                 }
 
@@ -326,6 +342,7 @@ export class TableWatcher implements TableObserver {
             else {
 
                 console.log(`${seat.getName()} is MIA`);
+                return;
 
             }
 
@@ -360,7 +377,7 @@ export class TableWatcher implements TableObserver {
 
         }
 
-    }  // betTurn
+    }  // flipCards
 
 
     private ante(action: AnteAction): void {
