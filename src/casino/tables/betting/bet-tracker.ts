@@ -75,7 +75,10 @@ export class BetTracker {
         if (chipsRequired >= seat.player.chips) {
 
             chipsRequired = seat.player.chips;
-            isAllIn = true;
+
+            if (chipsRequired > 0) {
+                isAllIn = true;
+            }
 
         }
 
