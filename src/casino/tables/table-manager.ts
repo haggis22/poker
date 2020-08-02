@@ -387,8 +387,6 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (state instanceof HandCompleteState) {
 
-            console.log(`HandComplete: numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
-
             return this.completeHand(state);
         }
 
