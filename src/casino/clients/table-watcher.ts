@@ -361,7 +361,13 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            console.log(`${seat.getName()} antes ${this.chipFormatter.format(action.ante.chipsAdded)}`);
+            let message = `${seat.getName()} antes ${this.chipFormatter.format(action.ante.chipsAdded)}`;
+
+            if (action.ante.isAllIn) {
+                message += ' and is all-in';
+            }
+
+            console.log(message);
 
         }
         else {
