@@ -28,6 +28,9 @@ import { Bet } from "../tables/betting/bet";
 import { BetReturnedAction } from "../../actions/game/bet-returned-action";
 import { FoldAction } from "../../actions/betting/fold-action";
 import { FoldCommand } from "../../commands/table/fold-command";
+import { Logger } from "../../logging/logger";
+
+const logger: Logger = new Logger();
 
 export class TableWatcher implements TableObserver {
 
@@ -191,7 +194,7 @@ export class TableWatcher implements TableObserver {
             Object.assign(seat.player, action.player);
 
             this.playerMap.set(action.player.id, seat.player);
-            console.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
+            logger.info(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
 
 
         }
@@ -204,12 +207,12 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            console.log(`${seat.getName()} now has the button at table ${this.table.id}`);
+            logger.info(`${seat.getName()} now has the button at table ${this.table.id}`);
 
         }
         else {
 
-            console.log(`Could not find seat ${action.seatIndex}`);
+            logger.info(`Could not find seat ${action.seatIndex}`);
         }
 
     }
@@ -236,7 +239,7 @@ export class TableWatcher implements TableObserver {
         if (player) {
 
             player.chips += action.amount;
-            console.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips - now has ${this.chipFormatter.format(player.chips)}`);
+            logger.info(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips - now has ${this.chipFormatter.format(player.chips)}`);
 
         }
 
@@ -250,7 +253,7 @@ export class TableWatcher implements TableObserver {
         if (player) {
 
             player.chips = action.chips;
-            console.log(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
+            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
 
         }
 
@@ -268,19 +271,19 @@ export class TableWatcher implements TableObserver {
 
             if (dealtCard.isFaceUp) {
 
-                console.log(`Client: ${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
+                logger.info(`Client: ${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
 
             }
             else {
 
-                console.log(`Client: ${seat.getName()} is dealt a card`);
+                logger.info(`Client: ${seat.getName()} is dealt a card`);
 
             }
 
 /*
             if (seat.index == 0) {
-                console.log(`DEBUGGGGG: got DealCardAction: ${action}`);
-                console.log(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
+                logger.debug(`DEBUGGGGG: got DealCardAction: ${action}`);
+                logger.debug(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
             }
 */
 
@@ -296,11 +299,11 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            console.log(`It is ${seat.getName()}'s turn to act`);
+            logger.info(`It is ${seat.getName()}'s turn to act`);
 
             if (seat.hand && seat.player) {
 
-                console.log(`${seat.getName()} is thinking`);
+                logger.info(`${seat.getName()} is thinking`);
 
                 let tracker: BetTracker = action.bets;
 
@@ -341,7 +344,7 @@ export class TableWatcher implements TableObserver {
             }   // seat has a player
             else {
 
-                console.log(`${seat.getName()} is MIA`);
+                logger.info(`${seat.getName()} is MIA`);
                 return;
 
             }
@@ -366,7 +369,7 @@ export class TableWatcher implements TableObserver {
 
                 seat.hand = action.hand;
 
-                console.log(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
+                logger.info(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
 
             }
 
@@ -392,7 +395,7 @@ export class TableWatcher implements TableObserver {
                 message += ' and is all-in';
             }
 
-            console.log(message);
+            logger.info(message);
 
         }
         else {
@@ -436,7 +439,7 @@ export class TableWatcher implements TableObserver {
                 message += ' and is all-in';
             }
 
-            console.log(message);
+            logger.info(message);
 
         }
         else {
@@ -454,7 +457,7 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            console.log(`${seat.getName()} folds`);
+            logger.info(`${seat.getName()} folds`);
 
         }
         else {
@@ -472,7 +475,7 @@ export class TableWatcher implements TableObserver {
 
         for (let pot of this.table.betTracker.pots) {
 
-            console.log(`Pot ${(pot.index + 1)}: ${this.chipFormatter.format(pot.amount)} - ${pot.seats.size} player${pot.seats.size == 1 ? '' : 's'}`);
+            logger.info(`Pot ${(pot.index + 1)}: ${this.chipFormatter.format(pot.amount)} - ${pot.seats.size} player${pot.seats.size == 1 ? '' : 's'}`);
 
         }
 
@@ -486,7 +489,7 @@ export class TableWatcher implements TableObserver {
 
         }
 
-        console.log(`   Bets: [ ${betString} ]`);
+        logger.info(`   Bets: [ ${betString} ]`);
 
     }  // updateBets
 
@@ -503,11 +506,11 @@ export class TableWatcher implements TableObserver {
 
             if (seat.player) {
 
-                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}`);
+                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}`);
 
             }
             else {
-                console.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}, but the player is gone`);
+                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}, but the player is gone`);
 
             }
 
@@ -529,11 +532,11 @@ export class TableWatcher implements TableObserver {
 
             if (seat.player) {
 
-                console.log(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
+                logger.info(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
 
             }
             else {
-                console.log(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
+                logger.info(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
             }
 
         }

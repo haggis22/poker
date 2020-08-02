@@ -41,10 +41,13 @@ import { BetReturnedAction } from "../../actions/game/bet-returned-action";
 import { FoldCommand } from "../../commands/table/fold-command";
 import { Fold } from "./betting/fold";
 import { FoldAction } from "../../actions/betting/fold-action";
+import { Logger } from "../../logging/logger";
+
+const logger: Logger = new Logger();
+
 
 export class TableManager implements CommandHandler, ActionBroadcaster {
 
-    private readonly DEBUG_ENABLED: boolean = false;
     private readonly ALL_ACCESS: number = -1;
 
 
@@ -107,7 +110,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     public async handleCommand(command: Command): Promise<CommandResult> {
 
-        if (this.DEBUG_ENABLED) { console.log(`TableManager received ${command.constructor.name}`); }
+        logger.debug(`TableManager received ${command.constructor.name}`);
 
         if (command instanceof RequestSeatCommand) {
 
@@ -382,7 +385,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
             }
             else {
 
-                console.log('Table not ready - putting into open state');
+                logger.info('Table not ready - putting into open state');
                 this.table.state = new OpenState();
                 return;
 
@@ -392,8 +395,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         this.table.state = state;
 
-
-        console.log(`debug TableState: ${state.constructor.name}`);
+        logger.debug(`TableState: ${state.constructor.name}`);
 
         if (state instanceof StartHandState) {
 
@@ -461,7 +463,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             if (seat.player) {
 
-                console.log(`${seat.getName()}: ${chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
+                logger.info(`${seat.getName()}: ${chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
 
             }
 
@@ -488,14 +490,14 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
                 if (this.table.stakes.ante > 0) {
 
-                    // console.log(`There is an ante, and ${seat.getName()} is playing`);
+                    // logger.info(`There is an ante, and ${seat.getName()} is playing`);
 
                     // set the betting to the ante's seat or it will not be accepted
                     this.table.betTracker.seatIndex = seat.index;
 
                     let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante);
 
-                    // console.log(`ante result: ${ante}`);
+                    // logger.info(`ante result: ${ante}`);
 
                     if (ante.isValid) {
 
@@ -517,7 +519,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             else {
 
-                console.log(`${seat.getName()} is sitting out`);
+                logger.info(`${seat.getName()} is sitting out`);
                 seat.hand = null;
 
             }
@@ -630,7 +632,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private makeYourBets(betState: BetState): void {
 
-        console.log('In makeYourBets');
+        logger.info('In makeYourBets');
 
         this.table.betTracker.clearBets();
         this.table.betTracker.minRaise = this.table.stakes.minRaise;
@@ -639,7 +641,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (firstSeatIndexWithAction == null) {
 
-            console.log('No betting action this round');
+            logger.info('No betting action this round');
             return this.goToNextState();
 
         }
@@ -653,7 +655,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private logTimers() {
 
-        // console.log(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
+        // logger.info(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
 
     }
 
@@ -698,11 +700,11 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private advanceBetTurn(): void {
 
-        // console.log('In advanceBetTurn');
+        // logger.info('In advanceBetTurn');
         if (this.table.state instanceof HandCompleteState) {
 
             let error = new Error('Should not be here');
-            console.log(error.stack);
+            logger.info(error.stack);
             throw error;
 
         }
@@ -715,7 +717,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             if (nextSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
-                console.log('Betting complete');
+                logger.info('Betting complete');
 
                 this.table.betTracker.gatherBets();
                 this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
@@ -880,7 +882,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         let winners: HandWinner[] = this.findWinners();
 
         for (let winner of winners) {
-            console.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
+            logger.info(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
         }
 
         for (let pot of this.table.betTracker.pots) {
