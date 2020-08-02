@@ -1,6 +1,7 @@
 ﻿import { Pot } from "./pot";
 import { Seat } from "../seat";
 import { Bet } from "./bet";
+import { Fold } from "./fold";
 
 export class BetTracker {
 
@@ -45,6 +46,31 @@ export class BetTracker {
     }   // clearBets
 
 
+    public fold(seat: Seat): Fold {
+
+        if (!seat) {
+
+            return new Fold(false, "Invalid seat");
+
+        }
+
+        if (!seat.hand) {
+
+            return new Fold(false, "You do not have a hand");
+
+        }
+
+        if (this.seatIndex != seat.index) {
+
+            return new Fold(false, "It is not your turn to act");
+
+        }
+
+        return new Fold(true, null);
+
+    }   // fold
+
+
     public addBet(seat: Seat, totalBetAmount: number): Bet {
 
         if (!seat || !seat.player) {
@@ -53,15 +79,15 @@ export class BetTracker {
 
         }
 
-        if (this.seatIndex != seat.index) {
-
-            return new Bet(false, 0, 0, false, Bet.INVALID, "It is not your turn to bet");
-
-        }
-
         if (!seat.hand) {
 
             return new Bet(false, 0, 0, false, Bet.INVALID, "You are not in the hand");
+
+        }
+
+        if (this.seatIndex != seat.index) {
+
+            return new Bet(false, 0, 0, false, Bet.INVALID, "It is not your turn to act");
 
         }
 

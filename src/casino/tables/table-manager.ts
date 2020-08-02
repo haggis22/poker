@@ -38,6 +38,9 @@ import { Seat } from "./seat";
 import { Bet } from "./betting/bet";
 import { BetAction } from "../../actions/betting/bet-action";
 import { BetReturnedAction } from "../../actions/game/bet-returned-action";
+import { FoldCommand } from "../../commands/table/fold-command";
+import { Fold } from "./betting/fold";
+import { FoldAction } from "../../actions/betting/fold-action";
 
 export class TableManager implements CommandHandler, ActionBroadcaster {
 
@@ -126,10 +129,13 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (command instanceof BetCommand) {
 
-            // console.log(`Manager heard a bet command`);
-
             return this.bet(command);
 
+        }
+
+        if (command instanceof FoldCommand) {
+
+            return this.fold(command);
         }
 
         throw new Error("Method not implemented.");
@@ -292,34 +298,25 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (this.table.state instanceof BetState) {
 
-            let bettorSeat: Seat = this.table.seats.find(seat => seat.hand && seat.player && seat.player.id == command.playerID);
+            let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.id == command.playerID);
 
-            if (bettorSeat) {
+            let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount);
 
-                let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount);
+            if (bet.isValid) {
 
-                if (bet.isValid) {
+                clearTimeout(this.betTimer);
+                this.numTimersKilled++;
+                this.logTimers();
 
-                    clearTimeout(this.betTimer);
-                    this.numTimersKilled++;
-                    this.logTimers();
+                this.broadcast(new BetAction(this.table.id, bettorSeat.index, bet));
+                this.broadcast(new StackUpdateAction(this.table.id, bettorSeat.player.id, bettorSeat.player.chips));
+                this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
-                    this.broadcast(new BetAction(this.table.id, bettorSeat.index, bet));
-                    this.broadcast(new StackUpdateAction(this.table.id, bettorSeat.player.id, bettorSeat.player.chips));
-                    this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
-
-                    this.advanceBetTurn();
-
-                }
-                else {
-                    return new CommandResult(bet.isValid, bet.message);
-                }
+                this.advanceBetTurn();
 
             }
             else {
-
-                return new CommandResult(false, "You are not in the hand");
-
+                return new CommandResult(bet.isValid, bet.message);
             }
 
         }
@@ -327,6 +324,41 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         return new CommandResult(false, "It is not time to bet");
 
     }  // bet
+
+
+    private async fold(command: FoldCommand): Promise<CommandResult> {
+
+        if (this.table.state instanceof BetState) {
+
+            let folderSeat: Seat = this.table.seats.find(seat => seat.hand && seat.player && seat.player.id == command.playerID);
+
+            let fold: Fold = this.table.betTracker.fold(folderSeat);
+
+            if (fold.isValid) {
+
+                clearTimeout(this.betTimer);
+                this.numTimersKilled++;
+                this.logTimers();
+
+                // Take away their cards
+                folderSeat.hand = null;
+
+                // This will tell watchers that the given seat is no longer in the hand
+                this.broadcast(new SetHandAction(this.table.id, folderSeat.index, false));
+
+                this.broadcast(new FoldAction(this.table.id, folderSeat.index, fold));
+
+            }
+            else {
+                return new CommandResult(fold.isValid, fold.message);
+            }
+
+        }
+
+        return new CommandResult(false, "It is not time to bet");
+
+    }  // fold
+
 
 
     private isReadyForHand(): boolean {
@@ -389,7 +421,6 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             return this.completeHand(state);
         }
-
 
     }
 

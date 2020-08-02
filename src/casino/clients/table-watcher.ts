@@ -26,6 +26,7 @@ import { BetTracker } from "../tables/betting/bet-tracker";
 import { BetAction } from "../../actions/betting/bet-action";
 import { Bet } from "../tables/betting/bet";
 import { BetReturnedAction } from "../../actions/game/bet-returned-action";
+import { FoldAction } from "../../actions/betting/fold-action";
 
 export class TableWatcher implements TableObserver {
 
@@ -127,6 +128,13 @@ export class TableWatcher implements TableObserver {
             return this.bet(action);
 
         }
+
+        if (action instanceof FoldAction) {
+
+            return this.fold(action);
+
+        }
+
 
         if (action instanceof UpdateBetsAction) {
 
@@ -421,6 +429,24 @@ export class TableWatcher implements TableObserver {
         }
 
     }  // bet
+
+
+    private fold(action: FoldAction): void {
+
+        let seat = this.table.seats[action.seatIndex];
+
+        if (seat) {
+
+            console.log(`${seat.getName()} folds`);
+
+        }
+        else {
+
+            throw new Error(`Fold: Seat index out of range: ${action.seatIndex}`);
+
+        }
+
+    }  // fold
 
 
     private updateBets(action: UpdateBetsAction): void {
