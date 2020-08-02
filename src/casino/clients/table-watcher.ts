@@ -309,7 +309,7 @@ export class TableWatcher implements TableObserver {
 
                 if (tracker.currentBet > 0) {
 
-                    if (Math.random() >= 0.25) {
+                    if (Math.random() >= 0.75) {
 
                         // This represents a call (possibly all-in)
                         let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);

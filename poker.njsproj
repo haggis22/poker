@@ -84,6 +84,7 @@
     <Folder Include="src\hands\" />
     <Folder Include="src\commands\" />
     <Folder Include="src\actions\" />
+    <Folder Include="src\logging\" />
     <Folder Include="src\players\" />
     <Folder Include="src\casino\tables\states\" />
     <Folder Include="src\casino\tables\states\betting\" />
@@ -257,6 +258,9 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\poker\poker-hand-evaluator.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\logging\logger.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\players\player.ts">

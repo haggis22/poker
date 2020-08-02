@@ -578,12 +578,40 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private dealRound(dealState: DealState) {
 
-        // give everyone a card
-        let seatIndex: number = this.findNextOccupiedSeatIndex(this.table.buttonIndex + 1);
+        let seatsNeedingCards = [];
 
-        let everyoneGotOne = false;
+        let seatIndex = this.table.buttonIndex + 1;
+        let hasGoneAround = false;
 
-        while (!everyoneGotOne) {
+        while (!hasGoneAround) {
+
+            if (seatIndex >= this.table.seats.length) {
+                seatIndex = 0;
+            }
+
+            if (this.table.seats[seatIndex].hand) {
+
+                seatsNeedingCards.push(seatIndex);
+
+            }
+
+            if (seatIndex == this.table.buttonIndex) {
+                hasGoneAround = true;
+            }
+            else {
+
+                seatIndex++;
+
+                if (seatIndex >= this.table.seats.length) {
+                    seatIndex = 0;
+                }
+
+            }
+
+
+        }
+
+        for (let seatIndex of seatsNeedingCards) {
 
             let card = this.table.deck.deal();
             let seat = this.table.seats[seatIndex];
@@ -616,14 +644,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             }
 
-            if (seatIndex == this.table.buttonIndex) {
-                everyoneGotOne = true;
-            }
-            else {
-                seatIndex = this.findNextOccupiedSeatIndex(seatIndex + 1);
-            }
-
-        }  // while !everyoneGotOne
+        }  // for each seatIndex in seatsNeedingCards
 
         this.goToNextState();
 
