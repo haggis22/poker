@@ -309,7 +309,7 @@ export class TableWatcher implements TableObserver {
 
                 if (tracker.currentBet > 0) {
 
-                    if (Math.random() >= 0.75) {
+                    if (Math.random() >= 0.20) {
 
                         // This represents a call (possibly all-in)
                         let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
@@ -504,13 +504,15 @@ export class TableWatcher implements TableObserver {
 
             let potDescription = action.potIndex > 0 ? `side pot #${action.potIndex}` : `the main pot`;
 
+            let handDescription = action.handEvaluation ? ` with ${describer.describe(action.handEvaluation)}` : '';
+
             if (seat.player) {
 
-                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}`);
+                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
 
             }
             else {
-                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription} with ${describer.describe(action.handEvaluation)}, but the player is gone`);
+                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}, but the player is gone`);
 
             }
 

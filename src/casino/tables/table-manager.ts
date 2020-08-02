@@ -373,6 +373,13 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
     }
 
 
+    private countPlayersInHand(): number {
+
+        return this.table.seats.filter(s => s.hand).length;
+
+    }  // countPlayersInHand
+
+
     private changeTableState(state: TableState): void {
 
         if (state == null) {
@@ -396,7 +403,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         if (state.requiresMultiplePlayers()) {
 
-            if (this.table.seats.filter(s => s.hand).length < 2) {
+            if (this.countPlayersInHand()  < 2) {
 
                 // blow through this state since there is 0 or 1 person still in the hand at the table.
                 return this.goToNextState();
@@ -783,6 +790,8 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
     private findFirstToBet(firstBetRule: number): number {
 
         // First count how many players CAN act this round - if only 1 (or 0) then there's nothing to do
+        // This is not the same as blowing through rounds because we're down to just one player because everyone else folded.
+        // In this case, at least one person must be all-in, so we're going to keep dealing cards, but we don't need to bet.
         if (this.table.seats.filter(s => s.hand && s.player && s.player.chips).length < 2) {
 
             // we don't have 2 players with money, so dump out
@@ -898,14 +907,20 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private showdown(showdownState: ShowdownState) {
 
-        // Flip all the cards face-up
-        for (let seat of this.table.seats) {
+        let isShowdownRequired = this.countPlayersInHand() > 1;
 
-            if (seat.hand) {
+        if (isShowdownRequired) {
 
-                seat.hand.flipCards();
+            // Flip all the cards face-up
+            for (let seat of this.table.seats) {
 
-                this.broadcast(new FlipCardsAction(this.table.id, seat.index, seat.hand))
+                if (seat.hand) {
+
+                    seat.hand.flipCards();
+
+                    this.broadcast(new FlipCardsAction(this.table.id, seat.index, seat.hand))
+
+                }
 
             }
 
@@ -913,9 +928,11 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         let winners: HandWinner[] = this.findWinners();
 
+/*
         for (let winner of winners) {
             logger.info(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
         }
+*/
 
         for (let pot of this.table.betTracker.pots) {
 
@@ -956,7 +973,9 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
                     if (player) {
 
-                        this.broadcast(new WinPotAction(this.table.id, seatIndex, pot.index, winnerHand.evaluation, equalShare + remainder));
+                        let winnerEvaluation = isShowdownRequired ? winnerHand.evaluation : null;
+
+                        this.broadcast(new WinPotAction(this.table.id, seatIndex, pot.index, winnerEvaluation, equalShare + remainder));
 
                         player.chips += (equalShare + remainder);
 
@@ -971,6 +990,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
             }
 
         }  // for each Pot
+
 
         this.goToNextState();
 
