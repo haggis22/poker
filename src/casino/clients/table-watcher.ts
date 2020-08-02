@@ -395,6 +395,10 @@ export class TableWatcher implements TableObserver {
 
             }  // switch
 
+            if (action.bet.isAllIn) {
+                message += ' and is all-in';
+            }
+
             console.log(message);
 
         }
