@@ -487,7 +487,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             else {
 
-                console.log(`${seat.getName()} is not playing`);
+                console.log(`${seat.getName()} is sitting out`);
                 seat.hand = null;
 
             }
@@ -623,7 +623,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private logTimers() {
 
-        console.log(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
+        // console.log(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
 
     }
 
@@ -717,6 +717,14 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
 
     private findFirstToBet(firstBetRule: number): number {
+
+        // First count how many players CAN act this round - if only 1 (or 0) then there's nothing to do
+        if (this.table.seats.filter(s => s.hand && s.player && s.player.chips).length < 2) {
+
+            // we don't have 2 players with money, so dump out
+            return null;
+
+        }
 
         switch (firstBetRule) {
         
@@ -913,9 +921,9 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
         // This will preserve the `this` reference in the call
         setTimeout(() => {
 
-            console.log('Going to next state from completeHand');
             this.goToNextState();
-        }, 10000);
+
+        }, 2000);
 
     }   // completeHand
 
