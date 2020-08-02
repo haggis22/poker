@@ -117,7 +117,11 @@ export class BetTracker {
 
         }
 
-        this.bets.set(seat.index, playerTotalBet);
+        if (playerTotalBet > 0) {
+
+            this.bets.set(seat.index, playerTotalBet);
+
+        }
 
         // console.log(`BetType is ${betType}`);
 
@@ -127,17 +131,51 @@ export class BetTracker {
     }   // addBet
 
 
+    private createPot(): Pot {
+
+        this.pots.push(new Pot(this.pots.length));
+
+        return this.pots[this.pots.length - 1];
+
+    }
+
+
     public gatherBets(): void {
+
+        if (this.bets.size === 0) {
+
+            // No bets to gather. Dump out or we will create extra pots because people from the last one are not in the "no-bets" round
+            return;
+        }
+
+        let pot = null;
 
         if (this.pots.length == 0) {
 
-            // Create a new pot
-            this.pots.push(new Pot(0));
+            pot = this.createPot();
 
         }
+        else {
+            pot = this.pots[this.pots.length - 1];
+        }
 
-        // Everyone still betting should be active in the most recent pot
-        let pot = this.pots[this.pots.length - 1];
+        // Everyone still betting should be active in the most recent pot, but it's not necessarily true
+        // that everyone in the most recent pot should also be in this one
+        let needsNew = false;
+
+        for (let previousBettorIndex of pot.seats) {
+            if (!this.bets.has(previousBettorIndex) || this.bets.get(previousBettorIndex) === 0) {
+                needsNew = true;
+                break;
+            }
+        }
+
+        if (needsNew) {
+
+            // Create a new pot because someone in the last pot is not in this round of betting
+            pot = this.createPot();
+
+        }
 
         let done: boolean = false;
 
@@ -147,11 +185,7 @@ export class BetTracker {
 
             for (let amount of this.bets.values()) {
 
-                if (amount > 0) {
-
-                    smallestBet = Math.min(smallestBet, amount);
-
-                }
+                smallestBet = Math.min(smallestBet, amount);
 
             }
 
@@ -167,14 +201,16 @@ export class BetTracker {
                     done = false;
 
                 }
+                else {
+                    this.bets.delete(seatIndex);
+                }
 
             }
 
             if (!done) {
 
                 // Create a new side pot - it will become the active pot to which bets get added
-                this.pots.push(new Pot(this.pots.length));
-                pot = this.pots[this.pots.length - 1];
+                pot = this.createPot();
 
             }
 
@@ -183,5 +219,13 @@ export class BetTracker {
         this.clearBets();
 
     }   // gatherBets
+
+
+    // Removes specified pots safely - no deleting while iterating issues
+    public killPots(potIndexesToKill: Set<number>): void {
+
+        this.pots = this.pots.filter(pot => !potIndexesToKill.has(pot.index));
+
+    }   // killPots
 
 }

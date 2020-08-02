@@ -37,6 +37,7 @@ import { BetCommand } from "../../commands/table/bet-command";
 import { Seat } from "./seat";
 import { Bet } from "./betting/bet";
 import { BetAction } from "../../actions/betting/bet-action";
+import { BetReturnedAction } from "../../actions/game/bet-returned-action";
 
 export class TableManager implements CommandHandler, ActionBroadcaster {
 
@@ -446,14 +447,14 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
                 if (this.table.stakes.ante > 0) {
 
-                    console.log(`There is an ante, and ${seat.getName()} is playing`);
+                    // console.log(`There is an ante, and ${seat.getName()} is playing`);
 
                     // set the betting to the ante's seat or it will not be accepted
                     this.table.betTracker.seatIndex = seat.index;
 
                     let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante);
 
-                    console.log(`ante result: ${ante}`);
+                    // console.log(`ante result: ${ante}`);
 
                     if (ante.isValid) {
 
@@ -487,6 +488,8 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         this.table.betTracker.gatherBets();
         this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+
+        this.checkBetsToReturn();
 
         this.setButton();
 
@@ -640,6 +643,8 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
             this.table.betTracker.gatherBets();
             this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
+            this.checkBetsToReturn();
+
             return this.goToNextState();
 
         }
@@ -723,6 +728,48 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     }
 
+
+    private checkBetsToReturn() {
+
+        this.table.betTracker.gatherBets();
+
+        let potIndexesToKill: Set<number> = new Set<number>();
+
+        for (let pot of this.table.betTracker.pots) {
+
+            if (pot.seats.size === 1) {
+
+                // Convert the set (of 1 element) to an array, and take its first element
+                let seat = this.table.seats[[...pot.seats][0]];
+
+                if (seat) {
+
+
+                    potIndexesToKill.add(pot.index);
+
+                    this.broadcast(new BetReturnedAction(this.table.id, seat.index, pot.amount));
+
+                    if (seat.player) {
+
+                        seat.player.chips += pot.amount;
+                        this.broadcast(new StackUpdateAction(this.table.id, seat.player.id, seat.player.chips));
+
+                    }  // if player is not null
+
+                }  // if seat
+
+            }   // if pot only has 1 bettor in it
+
+        }
+
+        if (potIndexesToKill.size > 0) {
+
+            this.table.betTracker.killPots(potIndexesToKill);
+            this.broadcast(new UpdateBetsAction(this.table.id, this.table.betTracker));
+
+        }
+
+    } // checkBetsToReturn
 
 
     private showdown(showdownState: ShowdownState) {

@@ -14,8 +14,12 @@
 
     addChips(chips: number, seatIndex: number) {
 
-        this.amount += chips;
-        this.seats.add(seatIndex);
+        if (chips > 0) {
+
+            this.amount += chips;
+            this.seats.add(seatIndex);
+
+        }
 
     }
 

@@ -109,6 +109,7 @@
     <TypeScriptCompile Include="src\actions\game\set-hand-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\game\bet-returned-action.ts" />
     <TypeScriptCompile Include="src\actions\game\win-pot-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

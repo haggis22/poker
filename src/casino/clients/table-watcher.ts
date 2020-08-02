@@ -25,6 +25,7 @@ import { CommandHandler } from "../../commands/command-handler";
 import { BetTracker } from "../tables/betting/bet-tracker";
 import { BetAction } from "../../actions/betting/bet-action";
 import { Bet } from "../tables/betting/bet";
+import { BetReturnedAction } from "../../actions/game/bet-returned-action";
 
 export class TableWatcher implements TableObserver {
 
@@ -137,6 +138,11 @@ export class TableWatcher implements TableObserver {
 
             return this.winPot(action);
 
+        }
+
+        if (action instanceof BetReturnedAction) {
+
+            return this.returnBet(action);
         }
 
     }
@@ -421,6 +427,18 @@ export class TableWatcher implements TableObserver {
 
         }
 
+        let betString = '';
+        let comma = '';
+
+        for (let [key, value] of this.table.betTracker.bets) {
+
+            betString += `${comma}${this.table.seats[key].getName()}: ${this.chipFormatter.format(value)}`;
+            comma = ', ';
+
+        }
+
+        console.log(`   Bets: [ ${betString} ]`);
+
     }  // updateBets
 
 
@@ -452,6 +470,31 @@ export class TableWatcher implements TableObserver {
         }
 
     }  // winPot
+
+
+    private returnBet(action: BetReturnedAction): void {
+
+        let seat = this.table.seats[action.seatIndex];
+
+        if (seat) {
+
+            if (seat.player) {
+
+                console.log(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
+
+            }
+            else {
+                console.log(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
+            }
+
+        }
+        else {
+
+            throw new Error(`BetReturned: Seat index out of range: ${action.seatIndex}`);
+
+        }
+
+    }  // returnBet
 
 
 
