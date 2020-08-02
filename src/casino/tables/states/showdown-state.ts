@@ -6,5 +6,8 @@ export class ShowdownState implements TableState {
         return true;
     }
 
+    requiresMultiplePlayers(): boolean {
+        return false;
+    }
 
 }

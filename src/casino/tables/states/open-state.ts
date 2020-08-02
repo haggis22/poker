@@ -6,5 +6,9 @@ export class OpenState implements TableState {
         return false;
     }
 
+    requiresMultiplePlayers(): boolean {
+        return false;
+    }
+
 
 }

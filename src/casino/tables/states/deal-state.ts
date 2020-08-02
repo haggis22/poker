@@ -15,5 +15,8 @@ export class DealState implements TableState {
         return true;
     }
 
+    requiresMultiplePlayers(): boolean {
+        return true;
+    }
 
 }

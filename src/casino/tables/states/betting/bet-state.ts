@@ -18,4 +18,8 @@ export class BetState implements TableState {
         return true;
     }
 
+    requiresMultiplePlayers(): boolean {
+        return true;
+    }
+
 }

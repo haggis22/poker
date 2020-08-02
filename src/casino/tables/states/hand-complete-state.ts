@@ -6,5 +6,10 @@ export class HandCompleteState implements TableState {
         return false;
     }
 
+    requiresMultiplePlayers(): boolean {
+        return false;
+    }
+
+
 
 }

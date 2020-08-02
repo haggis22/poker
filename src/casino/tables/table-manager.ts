@@ -42,6 +42,7 @@ import { FoldCommand } from "../../commands/table/fold-command";
 import { Fold } from "./betting/fold";
 import { FoldAction } from "../../actions/betting/fold-action";
 import { Logger } from "../../logging/logger";
+import { TableState } from "./states/table-state";
 
 const logger: Logger = new Logger();
 
@@ -372,7 +373,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
     }
 
 
-    private changeTableState(state) : void {
+    private changeTableState(state: TableState): void {
 
         if (state == null) {
 
@@ -389,6 +390,16 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
                 this.table.state = new OpenState();
                 return;
 
+            }
+
+        }
+
+        if (state.requiresMultiplePlayers()) {
+
+            if (this.table.seats.filter(s => s.hand).length < 2) {
+
+                // blow through this state since there is 0 or 1 person still in the hand at the table.
+                return this.goToNextState();
             }
 
         }
