@@ -1,5 +1,4 @@
-﻿import { TableObserver } from "../tables/table-observer";
-import { Action } from "../../actions/action";
+﻿import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/player-seated-action";
 import { MoveButtonAction } from "../../actions/table/move-button-action";
 import { AddChipsAction } from "../../actions/players/add-chips-action";
@@ -29,10 +28,12 @@ import { BetReturnedAction } from "../../actions/game/bet-returned-action";
 import { FoldAction } from "../../actions/betting/fold-action";
 import { FoldCommand } from "../../commands/table/fold-command";
 import { Logger } from "../../logging/logger";
+import { ActionHandler } from "../../actions/action-handler";
+import { ActionBroadcaster } from "../../actions/action-broadcaster";
 
 const logger: Logger = new Logger();
 
-export class TableWatcher implements TableObserver {
+export class TableWatcher implements ActionHandler, ActionBroadcaster {
 
 
     public playerID: number;
@@ -62,8 +63,20 @@ export class TableWatcher implements TableObserver {
 
     }
 
+    registerActionHandler(handler: ActionHandler) {
+        throw new Error("Method not implemented.");
+    }
 
-    notify(action: Action): void {
+    unregisterActionHandler(handler: ActionHandler) {
+        throw new Error("Method not implemented.");
+    }
+
+    broadcastAction(action: Action) {
+        throw new Error("Method not implemented.");
+    }
+
+
+    public handleAction(action: Action): void {
 
         if (this.tableID != action.tableID) {
 
@@ -72,11 +85,19 @@ export class TableWatcher implements TableObserver {
 
         }
 
-        if (action instanceof TableSnapshotAction) {
+        if (this.table == null) {
 
-            return this.grabTableData(action);
+            if (action instanceof TableSnapshotAction) {
+
+                return this.grabTableData(action);
+
+            }
+
+            // we don't have a table yet, so we can't do anything
+            return;
 
         }
+
 
         if (action instanceof PlayerSeatedAction) {
 
@@ -164,7 +185,7 @@ export class TableWatcher implements TableObserver {
 
         for (let seat of this.table.seats) {
 
-            if (seat.player && seat.player.id == playerID) {
+            if (seat.player && seat.player.userID == playerID) {
 
                 return seat.player;
 
@@ -190,10 +211,10 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            seat.player = new Player(action.player.id, action.player.name);
+            seat.player = new Player(action.player.userID, action.player.name);
             Object.assign(seat.player, action.player);
 
-            this.playerMap.set(action.player.id, seat.player);
+            this.playerMap.set(action.player.userID, seat.player);
             logger.info(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
 
 
@@ -313,7 +334,7 @@ export class TableWatcher implements TableObserver {
 
                         // This represents a call (possibly all-in)
                         let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
-                        let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+                        let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
                         this.commandHandler.handleCommand(betCommand);
                         return;
@@ -322,7 +343,7 @@ export class TableWatcher implements TableObserver {
                     else {
 
                         // We're folding!
-                        let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.id);
+                        let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
 
                         this.commandHandler.handleCommand(foldCommand);
                         return;
@@ -334,7 +355,7 @@ export class TableWatcher implements TableObserver {
 
                     // This represents a bet out (or a check, if the player has no chips)
                     let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
-                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
                     this.commandHandler.handleCommand(betCommand);
                     return;

@@ -1,14 +1,10 @@
-﻿import { TableObserver } from "../casino/tables/table-observer";
-import { Action } from "./action";
+﻿import { Action } from "./action";
+import { ActionHandler } from "./action-handler";
 
 export interface ActionBroadcaster {
 
-    register(observer: TableObserver);
+    registerActionHandler(handler: ActionHandler);
 
-    unregister(observer: TableObserver);
-
-    broadcast(action: Action);
-
-
+    unregisterActionHandler(handler: ActionHandler);
 
 }

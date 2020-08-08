@@ -40,9 +40,6 @@
     <Compile Include="src\actions\players\add-chips-action.ts">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\casino\tables\table-observer.ts">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="src\index.ts.not">
       <SubType>Code</SubType>
     </Compile>
@@ -85,12 +82,16 @@
     <Folder Include="src\commands\" />
     <Folder Include="src\actions\" />
     <Folder Include="src\logging\" />
+    <Folder Include="src\communication\" />
     <Folder Include="src\players\" />
     <Folder Include="src\casino\tables\states\" />
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\actions\action-broadcaster.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\action-handler.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\action.ts">
@@ -142,6 +143,9 @@
     <TypeScriptCompile Include="src\casino\chips\chip-formatter.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\clients\client-ui.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\clients\table-watcher.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -180,6 +184,9 @@
     <TypeScriptCompile Include="src\casino\tables\table-manager.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\commands\command-broadcaster.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\command-handler.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -200,6 +207,15 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\request-seat-command.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\commands\table\table-snapshot-command.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\client-manager.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\game-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\game.ts">

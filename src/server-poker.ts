@@ -12,6 +12,7 @@ import { StartGameCommand } from "./commands/table/start-game-command";
 import { TableWatcher } from "./casino/clients/table-watcher";
 import { TableRules } from "./casino/tables/table-rules";
 import { Stakes } from "./casino/tables/stakes";
+import { TableSnapshotCommand } from "./commands/table/table-snapshot-command";
 
 
 (async function () {
@@ -37,7 +38,8 @@ import { Stakes } from "./casino/tables/stakes";
 
     let watcher = new TableWatcher(tableManager, table.id, danny.id, new MoneyFormatter());
 
-    tableManager.register(watcher);
+    tableManager.registerActionHandler(watcher);
+    tableManager.handleCommand(new TableSnapshotCommand(table.id, danny.id));
 
     {
         let requestSeatCommand = new RequestSeatCommand(TABLE_ID, danny, null);
