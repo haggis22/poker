@@ -95,10 +95,10 @@
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\haggis22-serializer.ts">
+    <TypeScriptCompile Include="src\communication\danny-socket.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\danny-socket.ts">
+    <TypeScriptCompile Include="src\communication\serializer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\messages\action-message.ts" />

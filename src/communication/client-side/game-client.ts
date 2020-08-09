@@ -4,12 +4,12 @@ import { MessageBroadcaster } from "../../messages/message-broadcaster";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
 import { DannySocket } from "../danny-socket";
-import { Haggis22Serializer } from "../haggis22-serializer";
+import { Serializer } from "../serializer";
 
 export class GameClient implements MessageBroadcaster, CommandHandler, DannySocket {
 
     private socket: DannySocket;
-    private serializer: Haggis22Serializer;
+    private serializer: Serializer;
 
     private messageHandlers: MessageHandler[];
 
@@ -17,7 +17,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
     constructor() {
 
         this.messageHandlers = new Array<MessageHandler>();
-        this.serializer = new Haggis22Serializer();
+        this.serializer = new Serializer();
 
     }
 
@@ -31,12 +31,14 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
     private send(o: any): void {
 
         if (this.socket) {
-            this.socket.receive(this.serializer.serialize(o));
+            this.socket.receive(o.constructor.name, this.serializer.serialize(o));
         }
 
     }
 
-    receive(msg: string): void {
+    receive(msgType: string, msg: string): void {
+
+        console.log(`GameClient: received ${msgType} : ${msg}`);
 
         let o: any = this.serializer.deserialize(msg);
 
@@ -68,11 +70,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
     handleCommand(command: Command): void {
 
-        if (this.socket) {
-
-            this.socket.receive(this.serializer.serialize(command));
-
-        }
+        this.send(command);
 
     }
 

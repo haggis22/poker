@@ -6,12 +6,12 @@ import { CommandBroadcaster } from "../../commands/command-broadcaster";
 import { Command } from "../../commands/command";
 import { Message } from "../../messages/message";
 import { DannySocket } from "../danny-socket";
-import { Haggis22Serializer } from "../haggis22-serializer";
+import { Serializer } from "../serializer";
 
 export class ServerClient implements MessageHandler, CommandBroadcaster, DannySocket {
 
     private socket: DannySocket;
-    private serializer: Haggis22Serializer;
+    private serializer: Serializer;
 
     public userID: number;
 
@@ -23,7 +23,7 @@ export class ServerClient implements MessageHandler, CommandBroadcaster, DannySo
 
         this.commandHandlers = new Array<CommandHandler>();
 
-        this.serializer = new Haggis22Serializer();
+        this.serializer = new Serializer();
 
 
     }
@@ -35,7 +35,7 @@ export class ServerClient implements MessageHandler, CommandBroadcaster, DannySo
     private send(o: any): void {
 
         if (this.socket) {
-            this.socket.receive(this.serializer.serialize(o));
+            this.socket.receive(o.constructor.name, this.serializer.serialize(o));
         }
 
     }
@@ -74,14 +74,10 @@ export class ServerClient implements MessageHandler, CommandBroadcaster, DannySo
 
     handleMessage(publicMessage: Message, privateMessage?: Message): void {
 
-        if (this.socket) {
-
-            // ServerClient objects only get the message object that is suitable for passing down the link.
-            // The privateMessage will always be null because the ClientManager will have decided whether this
-            // serverClient is allowed to have the private message (if there was one)
-            this.socket.receive(this.serializer.serialize(publicMessage));
-
-        }
+        // ServerClient objects only get the message object that is suitable for passing down the link.
+        // The privateMessage will always be null because the ClientManager will have decided whether this
+        // serverClient is allowed to have the private message (if there was one)
+        this.send(publicMessage);
 
     }
 

@@ -12,10 +12,11 @@ export class Logger {
     }
 
 
-    private async write(message: string): Promise<any> {
+    private write(message: string): void {
 
         console.log(message);
 
+/*
         return new Promise((resolve, reject) => {
 
             fs.appendFile(this.path, message + '\n', 'utf8', (err) => {
@@ -27,15 +28,16 @@ export class Logger {
             });  // fs.appendFile
 
         });
+*/
 
     }
 
-    public async debug(message: string): Promise<any> {
+    public debug(message: string): void {
 
         return this.write(message);
     }
 
-    public async info(message: string): Promise<any> {
+    public info(message: string): void {
 
         return this.write(message);
     }

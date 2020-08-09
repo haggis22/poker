@@ -1,6 +1,7 @@
 ﻿export class Action {
 
     constructor() {
+
     }
 
 }

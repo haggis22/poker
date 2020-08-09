@@ -12,4 +12,15 @@ export class TableAction extends Action {
 
     }
 
+    serialize(): string {
+
+        return JSON.stringify(['TableAction', { tableID: this.tableID }]);
+
+    }
+
+    deserialize(txt: string) {
+        throw new Error("Method not implemented.");
+    }
+
+
 }

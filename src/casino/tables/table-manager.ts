@@ -228,9 +228,13 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private seatPlayer(action: PlayerSeatedAction): void {
 
+        this.log(' in seatPlayer (action)');
+
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
         if (seat) {
+
+            this.log(` set player for seat ${seat.index}`);
 
             seat.player = action.player;
 
@@ -264,10 +268,9 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private broadcastAction(action: Action) {
 
-        this.broadcastMessage(new ActionMessage(action));
-
         logger.debug(`${(this.isMaster ? 'Server' : 'Client')} TableManager broadcast ${action.constructor.name} to ${this.messageHandlers.length} listeners`);
 
+        this.broadcastMessage(new ActionMessage(action));
 
     }
 
@@ -409,8 +412,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     }
 
     private commandSeatPlayer(command: RequestSeatCommand): void {
-
-        this.log('heard RequestSeatCommand');
 
         let seatIndex = command.seatIndex;
         if (seatIndex === null) {
