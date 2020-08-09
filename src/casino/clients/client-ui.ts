@@ -3,23 +3,61 @@ import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
+import { User } from "../../players/user";
+import { ActionMessage } from "../../messages/action-message";
 
 export class ClientUI implements MessageHandler, CommandBroadcaster {
 
+    private user: User;
+    private commandHandlers: CommandHandler[];
+
+    constructor(user: User) {
+
+        this.user = user;
+
+        this.commandHandlers = new Array<CommandHandler>();
+
+    }
+
+
     handleMessage(publicMessage: Message, privateMessage?: Message): void {
-        throw new Error("Method not implemented.");
+
+        let text = `${this.user.name}:`;
+        if (publicMessage && publicMessage.text) {
+
+            text += ' ' + publicMessage.text;
+
+        }
+
+        if (publicMessage instanceof ActionMessage)
+        {
+            text += ` ${(typeof publicMessage.action)}`;
+        }
+
+        console.log(text);
+
     }
 
     registerCommandHandler(handler: CommandHandler) {
-        throw new Error("Method not implemented.");
+
+        this.commandHandlers.push(handler);
+
     }
 
     unregisterCommandHandler(handler: CommandHandler) {
-        throw new Error("Method not implemented.");
+
+        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+
     }
 
-    broadcastCommand(command: Command) {
-        throw new Error("Method not implemented.");
+    private broadcastCommand(command: Command) {
+
+        for (let handler of this.commandHandlers) {
+
+            handler.handleCommand(command);
+
+        }
+
     }
 
 

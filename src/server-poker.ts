@@ -24,7 +24,7 @@ function createTable(): Table {
     let tableID = 1;
 
     // # seats, # secods to act
-    let rules = new TableRules(6, 1);
+    let rules = new TableRules(6, 0.1);
 
     // blinds, ante, minRaise
     let stakes = new Stakes(new Array<number>(), 50, 200);
@@ -38,6 +38,7 @@ function createTable(): Table {
 
 (async function () {
 
+    let danny = new User(1, 'Danny', 10000);
 
     let table: Table = createTable();
     let tableManager: TableManager = new TableManager(table);
@@ -49,13 +50,12 @@ function createTable(): Table {
 
     let gameClient: GameClient = new GameClient();
     let tableWatcher: TableWatcher = new TableWatcher(tableManager, table.id, new MoneyFormatter());
-    let clientUI: ClientUI = new ClientUI();
+    let clientUI: ClientUI = new ClientUI(danny);
 
     gameClient.registerMessageHandler(tableWatcher);
     gameClient.registerMessageHandler(clientUI);
     clientUI.registerCommandHandler(gameClient);
 
-    let danny = new User(1, 'Danny', 10000);
 
     let dannyServerClient: ServerClient = new ServerClient(danny.id, clientManager);
     // set up this server object to listen to the gameClient so that it will receive commands
