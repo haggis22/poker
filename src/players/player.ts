@@ -1,4 +1,5 @@
 ﻿import { Hand } from "../hands/hand";
+import { User } from "./user";
 
 export class Player {
 
@@ -12,10 +13,10 @@ export class Player {
     public isActive: boolean;
 
 
-    constructor(userID: number, name: string) {
+    constructor(user: User) {
 
-        this.userID = userID;
-        this.name = name;
+        this.userID = user.id;
+        this.name = user.name;
 
         this.chips = this.chipsToAdd = 0;
 

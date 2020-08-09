@@ -1,13 +1,14 @@
-﻿import { Command } from "../command";
+﻿import { TableCommand } from "./table-command";
 
-export class FoldCommand implements Command {
+export class FoldCommand extends TableCommand {
 
-    public tableID: number;
     public userID: number;
 
 
     constructor(tableID: number, userID: number) {
-        this.tableID = tableID;
+
+        super(tableID);
+
         this.userID = userID;
     }
 

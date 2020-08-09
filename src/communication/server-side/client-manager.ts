@@ -22,6 +22,8 @@ export class ClientManager implements MessageHandler, MessageBroadcaster, Comman
 
     handleCommand(command: Command): void {
 
+        console.log(`ClientManager heard: ${command.constructor.name}`);
+
         for (let handler of this.commandHandlers) {
             handler.handleCommand(command);
         }

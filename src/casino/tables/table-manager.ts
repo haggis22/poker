@@ -44,15 +44,21 @@ import { BetTurnAction } from "../../actions/table/game/bet-turn-action";
 import { BetReturnedAction } from "../../actions/table/game/bet-returned-action";
 import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
 import { IChipFormatter } from "../../clients/chips/chip-formatter";
+import { CommandBroadcaster } from "../../commands/command-broadcaster";
+import { TableAction } from "../../actions/table/table-action";
 
 const logger: Logger = new Logger();
 
 
-export class TableManager implements CommandHandler, MessageBroadcaster {
+export class TableManager implements CommandHandler, CommandBroadcaster, MessageBroadcaster, MessageHandler {
 
     private readonly ALL_ACCESS: number = -1;
 
+    private isMaster: boolean;
+    private tableID: number;
     private table: Table;
+
+    private commandHandlers: CommandHandler[];
     private messageHandlers: MessageHandler[];
 
     private betTimer: ReturnType<typeof setTimeout>;
@@ -62,15 +68,17 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private numTimersKilled: number;
 
 
-    constructor(table: Table) {
+    constructor(isMaster: boolean, tableID: number, table: Table) {
 
+        this.isMaster = isMaster;
+        this.tableID = tableID;
         this.table = table;
 
+        this.commandHandlers = new Array<CommandHandler>();
         this.messageHandlers = new Array<MessageHandler>();
 
         this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
     }
-
 
     public registerMessageHandler(handler: MessageHandler): void {
 
@@ -82,6 +90,153 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     public unregisterMessageHandler(handler: MessageHandler): void {
 
         this.messageHandlers = this.messageHandlers.filter(o => o != handler);
+
+    }
+
+
+    public handleMessage(publicMessage: Message, privateMessage?: Message): void {
+
+        // By the time it gets here, there should never be a privateMessage
+
+        let message: ActionMessage = publicMessage as ActionMessage;
+
+        if (message && message.action instanceof TableAction) {
+
+            this.handleAction(message.action);
+
+            // We have handled it
+            return;
+
+        }
+
+
+        // Pass it along
+        this.broadcastMessage(publicMessage);
+
+    }
+
+    private handleAction(action: TableAction): void {
+
+        if (!action || action.tableID !== this.tableID) {
+
+            // Not a TableAction, or not my table - I don't care
+            return;
+
+        }
+
+        if (this.table == null) {
+
+            if (action instanceof TableSnapshotAction) {
+
+                return this.grabTableData(action);
+
+            }
+
+            // we don't have a table yet, so we can't do anything
+            return;
+
+        }
+
+        if (action instanceof PlayerSeatedAction) {
+
+            return this.seatPlayer(action);
+
+        }
+
+        /*
+        if (action instanceof MoveButtonAction) {
+
+            return this.moveButton(action);
+        }
+
+        if (action instanceof SetHandAction) {
+
+            return this.setHand(action);
+        }
+
+        if (action instanceof AddChipsAction) {
+
+            return this.addChips(action);
+        }
+
+        if (action instanceof StackUpdateAction) {
+
+            return this.updateStack(action);
+        }
+
+        if (action instanceof DealCardAction) {
+
+            return this.dealCard(action);
+        }
+
+        if (action instanceof BetTurnAction) {
+
+            return this.betTurn(action);
+
+        }
+
+        if (action instanceof FlipCardsAction) {
+
+            return this.flipCards(action);
+
+        }
+
+        if (action instanceof AnteAction) {
+
+            return this.ante(action);
+
+        }
+
+        if (action instanceof BetAction) {
+
+            return this.bet(action);
+
+        }
+
+        if (action instanceof FoldAction) {
+
+            return this.fold(action);
+
+        }
+
+
+        if (action instanceof UpdateBetsAction) {
+
+            return this.updateBets(action);
+
+        }
+
+        if (action instanceof WinPotAction) {
+
+            return this.winPot(action);
+
+        }
+
+        if (action instanceof BetReturnedAction) {
+
+            return this.returnBet(action);
+        }
+*/
+    }
+
+
+    private grabTableData(action: TableSnapshotAction): void {
+
+        this.table = action.table;
+
+    }
+
+    private seatPlayer(action: PlayerSeatedAction): void {
+
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+
+        if (seat) {
+
+            seat.player = action.player;
+
+        }
+
+        this.broadcastAction(action);
 
     }
 
@@ -106,20 +261,59 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     }   // sendPrivateMessage
 
+
     private broadcastAction(action: Action) {
 
         this.broadcastMessage(new ActionMessage(action));
 
+        logger.debug(`${(this.isMaster ? 'Server' : 'Client')} TableManager broadcast ${action.constructor.name} to ${this.messageHandlers.length} listeners`);
+
+
     }
+
+
+
+
+    registerCommandHandler(handler: CommandHandler): void {
+
+        this.commandHandlers.push(handler);
+
+    }
+
+    unregisterCommandHandler(handler: CommandHandler): void {
+
+        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+
+    }
+
+
+    broadcastCommand(command: Command): void {
+
+        for (let handler of this.commandHandlers) {
+            handler.handleCommand(command);
+        }
+
+    }
+
 
 
     public handleCommand(command: Command): void {
 
-        logger.debug(`TableManager received ${command.constructor.name}`);
+        logger.debug(`${(this.isMaster ? 'Server' : 'Client')} TableManager received ${ command.constructor.name }`);
+
+        // Pass it along
+        this.broadcastCommand(command);
+
+        if (!this.isMaster) {
+
+            // don't actually process the command yourself
+            return;
+
+        }
 
         if (command instanceof RequestSeatCommand) {
 
-            return this.seatPlayer(command);
+            return this.commandSeatPlayer(command);
 
         }
 
@@ -208,7 +402,15 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // createTableSnapshot
 
 
-    private seatPlayer(command: RequestSeatCommand): void {
+    private log(message: string): void {
+
+        logger.debug(`${(this.isMaster ? 'Server' : 'Client')} TableManager ${message}`);
+
+    }
+
+    private commandSeatPlayer(command: RequestSeatCommand): void {
+
+        this.log('heard RequestSeatCommand');
 
         let seatIndex = command.seatIndex;
         if (seatIndex === null) {
@@ -236,9 +438,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (seat.player == null) {
 
-                seat.player = new Player(command.user.id, command.user.name)
+                let player:Player = new Player(command.user);
 
-                this.broadcastAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
+                return this.handleAction(new PlayerSeatedAction(this.table.id, player, seatIndex));
 
             }
 
@@ -250,21 +452,14 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     }
 
-    private findPlayer(playerID: number): Player {
 
-        for (let s of this.table.seats) {
+    private findPlayer(userID: number): Player {
 
-            if (s.player && s.player.userID == playerID) {
-
-                return s.player;
-
-            }
-
-        }
-
-        return null;
+        let seat = this.table.seats.find(s => s.player && s.player.userID == userID);
+        return seat ? seat.player : null;
 
     }   // findPlayer
+
 
 
 

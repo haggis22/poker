@@ -44,7 +44,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (publicMessage.text) {
 
-            console.log(`${this.user.name}: ${publicMessage.text}`);
+            this.log(publicMessage.text);
 
         }
 
@@ -188,11 +188,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (seat) {
 
-            logger.info(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`);
+            this.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`);
 
         }
 
     }
 
+
+    private log(message: string): void {
+
+        logger.info(`${this.user.name}: ${message}`);
+
+    }
 
 }

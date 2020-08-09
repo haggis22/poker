@@ -1,14 +1,14 @@
-﻿import { User } from "../../players/user";
-import { Command } from "../command";
+﻿import { TableCommand } from "./table-command";
 
-export class TableSnapshotCommand implements Command {
+export class TableSnapshotCommand extends TableCommand {
 
-    public tableID: number;
     public userID: number;
 
 
     constructor(tableID: number, userID: number) {
-        this.tableID = tableID;
+
+        super(tableID);
+
         this.userID = userID;
     }
 

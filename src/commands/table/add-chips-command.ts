@@ -1,14 +1,15 @@
-﻿import { Command } from "../command";
+﻿import { TableCommand } from "./table-command";
 
-export class AddChipsCommand implements Command {
+export class AddChipsCommand extends TableCommand {
 
-    public tableID: number;
     public userID: number;
     public amount: number;
 
 
     constructor(tableID: number, userID: number, amount: number) {
-        this.tableID = tableID;
+
+        super(tableID);
+
         this.userID = userID;
         this.amount = amount;
     }

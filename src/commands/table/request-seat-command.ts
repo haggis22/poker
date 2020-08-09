@@ -1,15 +1,16 @@
 ﻿import { User } from "../../players/user";
-import { Command } from "../command";
+import { TableCommand } from "./table-command";
 
-export class RequestSeatCommand implements Command {
+export class RequestSeatCommand extends TableCommand {
 
-    public tableID: number;
     public user: User;
     public seatIndex: number;
 
 
     constructor(tableID: number, user: User, seatIndex: number) {
-        this.tableID = tableID;
+
+        super(tableID);
+
         this.user = user;
         this.seatIndex = seatIndex;
     }

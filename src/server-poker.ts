@@ -46,13 +46,13 @@ function createTable(): Table {
 
     // Client Side
     let dannyUI: TableUI = new TableUI(danny, new MoneyFormatter());
-    let tableWatcher: TableWatcher = new TableWatcher(table.id);
+    let tableWatcher: TableManager = new TableManager(false, table.id, null);
     let gameClient: GameClient = new GameClient();
 
     // Server Side
     let dannyServerClient: ServerClient = new ServerClient(danny.id);
     let clientManager: ClientManager = new ClientManager();
-    let tableManager: TableManager = new TableManager(table);
+    let serverTableManager: TableManager = new TableManager(true, table.id, table);
 
     // Now join all the links in the chain
     dannyUI.registerCommandHandler(tableWatcher);
@@ -61,15 +61,15 @@ function createTable(): Table {
     tableWatcher.registerCommandHandler(gameClient);
 
     gameClient.registerMessageHandler(tableWatcher);
-    gameClient.registerCommandHandler(dannyServerClient);
+    gameClient.connect(dannyServerClient);
 
-    dannyServerClient.registerMessageHandler(gameClient);
+    dannyServerClient.connect(gameClient);
     dannyServerClient.registerCommandHandler(clientManager);
 
     clientManager.registerMessageHandler(dannyServerClient);
-    clientManager.registerCommandHandler(tableManager);
+    clientManager.registerCommandHandler(serverTableManager);
 
-    tableManager.registerMessageHandler(clientManager);
+    serverTableManager.registerMessageHandler(clientManager);
 
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);
@@ -77,56 +77,58 @@ function createTable(): Table {
     let sekhar = new User(5, 'Sekhar', 0);
 
 
-    tableManager.handleCommand(new TableSnapshotCommand(table.id, danny.id));
+    serverTableManager.handleCommand(new TableSnapshotCommand(table.id, danny.id));
 
     {
         let requestSeatCommand = new RequestSeatCommand(table.id, danny, null);
-        let result = await tableManager.handleCommand(requestSeatCommand);
+        serverTableManager.handleCommand(requestSeatCommand);
     }
+
+/*
 
     {
         let requestSeatCommand = new RequestSeatCommand(table.id, mark, null);
-        let result = await tableManager.handleCommand(requestSeatCommand);
+        serverTableManager.handleCommand(requestSeatCommand);
     }
 
     {
         let requestSeatCommand = new RequestSeatCommand(table.id, paul, null);
-        let result = await tableManager.handleCommand(requestSeatCommand);
+        serverTableManager.handleCommand(requestSeatCommand);
     }
 
     {
         let requestSeatCommand = new RequestSeatCommand(table.id, joe, null);
-        let result = await tableManager.handleCommand(requestSeatCommand);
+        serverTableManager.handleCommand(requestSeatCommand);
     }
 
     {
         let requestSeatCommand = new RequestSeatCommand(table.id, sekhar, null);
-        let result = await tableManager.handleCommand(requestSeatCommand);
+        serverTableManager.handleCommand(requestSeatCommand);
     }
 
 
     {
-        tableManager.handleCommand(new AddChipsCommand(table.id, 1, 700));
+        serverTableManager.handleCommand(new AddChipsCommand(table.id, 1, 700));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(table.id, 2, 500));
+        serverTableManager.handleCommand(new AddChipsCommand(table.id, 2, 500));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(table.id, 3, 600));
+        serverTableManager.handleCommand(new AddChipsCommand(table.id, 3, 600));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(table.id, 4, 400));
+        serverTableManager.handleCommand(new AddChipsCommand(table.id, 4, 400));
     }
 
     {
-        let result = await tableManager.handleCommand(new StartGameCommand(table.id));
+        serverTableManager.handleCommand(new StartGameCommand(table.id));
     }
 
+*/
 
-    // table.playHand();
 
 })();
 

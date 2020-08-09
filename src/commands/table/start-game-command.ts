@@ -1,11 +1,11 @@
-﻿import { Command } from "../command";
+﻿import { TableCommand } from "./table-command";
 
-export class StartGameCommand implements Command {
-
-    public tableID: number;
+export class StartGameCommand extends TableCommand {
 
     constructor(tableID: number) {
-        this.tableID = tableID;
+
+        super(tableID);
+
     }
 
 }

@@ -35,14 +35,11 @@ import { Command } from "../commands/command";
 
 const logger: Logger = new Logger();
 
-export class TableWatcher implements CommandHandler, CommandBroadcaster, MessageHandler, MessageBroadcaster {
+export class TableWatcher {
 
 
     private tableID: number;
     private table: Table;
-
-    private commandHandlers: CommandHandler[];
-    private messageHandlers: MessageHandler[];
 
 
 
@@ -51,216 +48,15 @@ export class TableWatcher implements CommandHandler, CommandBroadcaster, Message
         this.tableID = tableID;
         this.table = null;
 
-        this.messageHandlers = new Array<MessageHandler>();
-        this.commandHandlers = new Array<CommandHandler>();
 
     }
-
-    registerMessageHandler(handler: MessageHandler): void {
-
-        this.messageHandlers.push(handler);
-
-    }
-
-    unregisterMessageHandler(handler: MessageHandler): void {
-
-        this.messageHandlers = this.messageHandlers.filter(mh => mh !== handler);
-
-    }
-
-    private broadcastMessage(message: Message): void {
-
-        for (let handler of this.messageHandlers) {
-            handler.handleMessage(message);
-        }
-
-    }
-
-    registerCommandHandler(handler: CommandHandler): void {
-
-        this.commandHandlers.push(handler);
-
-    }
-
-    unregisterCommandHandler(handler: CommandHandler): void {
-
-        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
-
-    }
-
-    broadcastCommand(command: Command): void {
-
-        for (let handler of this.commandHandlers) {
-            handler.handleCommand(command);
-        }
-
-    }
-
-    handleCommand(command: Command): void {
-
-        // TODO: validate the command is lawful
-        // This probably means combining the table-watcher and table-manager.  Sigh...
-        this.broadcastCommand(command);
-
-    }
-
-    public handleMessage(publicMessage: Message, privateMessage?: Message): void {
-
-        // By the time it gets here, there should never be a privateMessage
-
-        // Pass it along
-        this.broadcastMessage(publicMessage);
-
-        let message: ActionMessage = publicMessage as ActionMessage;
-
-        if (!message) {
-
-            // Not an ActionMessage, so we don't care
-            return;
-
-        }
-
-        let action: TableAction = message.action as TableAction;
-
-        if (!action || action.tableID !== this.tableID) {
-
-            // Not a TableAction, or not my table - I don't care
-            return;
-
-        }
-
-        if (this.table == null) {
-
-            if (action instanceof TableSnapshotAction) {
-
-                return this.grabTableData(action);
-
-            }
-
-            // we don't have a table yet, so we can't do anything
-            return;
-
-        }
-
-
-        if (action instanceof PlayerSeatedAction) {
-
-            return this.seatPlayer(action);
-
-        }
-
-        if (action instanceof MoveButtonAction) {
-
-            return this.moveButton(action);
-        }
-
-        if (action instanceof SetHandAction) {
-
-            return this.setHand(action);
-        }
-
-        if (action instanceof AddChipsAction) {
-
-            return this.addChips(action);
-        }
-
-        if (action instanceof StackUpdateAction) {
-
-            return this.updateStack(action);
-        }
-
-        if (action instanceof DealCardAction) {
-
-            return this.dealCard(action);
-        }
-
-        if (action instanceof BetTurnAction) {
-
-            return this.betTurn(action);
-
-        }
-
-        if (action instanceof FlipCardsAction) {
-
-            return this.flipCards(action);
-
-        }
-
-        if (action instanceof AnteAction) {
-
-            return this.ante(action);
-
-        }
-
-        if (action instanceof BetAction) {
-
-            return this.bet(action);
-
-        }
-
-        if (action instanceof FoldAction) {
-
-            return this.fold(action);
-
-        }
-
-
-        if (action instanceof UpdateBetsAction) {
-
-            return this.updateBets(action);
-
-        }
-
-        if (action instanceof WinPotAction) {
-
-            return this.winPot(action);
-
-        }
-
-        if (action instanceof BetReturnedAction) {
-
-            return this.returnBet(action);
-        }
-
-    }
-
 
     private findPlayer(userID: number): Player {
-
-        for (let seat of this.table.seats) {
-
-            if (seat.player && seat.player.userID == userID) {
-
-                return seat.player;
-
-            }
-
-        }
 
         return null;
 
     }
 
-
-    private grabTableData(action: TableSnapshotAction): void {
-
-        this.table = action.table;
-
-    }
-
-
-    private seatPlayer(action: PlayerSeatedAction): void {
-
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
-
-        if (seat) {
-
-            seat.player = new Player(action.player.userID, action.player.name);
-            Object.assign(seat.player, action.player);
-
-        }
-
-    }
 
     private moveButton(action: MoveButtonAction): void {
 
@@ -376,7 +172,7 @@ export class TableWatcher implements CommandHandler, CommandBroadcaster, Message
                         let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
                         let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
-                        this.broadcastCommand(betCommand);
+                        // this.broadcastCommand(betCommand);
                         return;
 
                     }
@@ -385,7 +181,7 @@ export class TableWatcher implements CommandHandler, CommandBroadcaster, Message
                         // We're folding!
                         let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
 
-                        this.broadcastCommand(foldCommand);
+                        // this.broadcastCommand(foldCommand);
                         return;
 
                     }
@@ -397,7 +193,7 @@ export class TableWatcher implements CommandHandler, CommandBroadcaster, Message
                     let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
                     let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
-                    this.broadcastCommand(betCommand);
+                    // this.broadcastCommand(betCommand);
                     return;
 
                 }

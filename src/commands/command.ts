@@ -1,5 +1,8 @@
-﻿export interface Command {
+﻿export class Command {
 
-    tableID: number;
+
+    constructor() {
+
+    }
 
 }
