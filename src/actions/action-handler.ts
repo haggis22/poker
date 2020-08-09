@@ -2,6 +2,6 @@
 
 export interface ActionHandler {
 
-    handleAction(publicAction: Action, privateAction?: Action);
+    handleAction(action: Action): void;
 
 }

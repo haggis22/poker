@@ -7,14 +7,14 @@ import { Seat } from "./seat";
 import { TableRules } from "./table-rules";
 import { BetTracker } from "./betting/bet-tracker";
 import { Stakes } from "./stakes";
+import { Game } from "../../games/game";
 
 
 export class Table {
 
-    public static readonly FIRST_SEAT:number = 1;
-
     public id: number;
 
+    public game: Game;
     public stakes: Stakes;
     public rules: TableRules;
     public state: TableState;
@@ -30,9 +30,11 @@ export class Table {
     public buttonIndex: number;
 
 
-    constructor(id: number, stakes: Stakes, rules: TableRules, deck: Deck) {
+    constructor(id: number, game: Game, stakes: Stakes, rules: TableRules, deck: Deck) {
 
         this.id = id;
+
+        this.game = game;
         this.stakes = stakes;
         this.rules = rules;
 

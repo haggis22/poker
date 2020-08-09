@@ -1,16 +1,18 @@
 ﻿import { Action } from "../action";
+import { PrivateAction } from "../private-action";
 import { Card } from "../../cards/card";
-import { Seat } from "../../casino/tables/seat";
 
-export class DealCardAction implements Action {
+export class DealCardAction implements Action, PrivateAction {
 
     public tableID: number;
+    public userID: number;
     public seatIndex: number;
     public card: Card;
 
-    constructor(tableID: number, seatIndex: number, card: Card) {
+    constructor(tableID: number, userID: number, seatIndex: number, card: Card) {
 
         this.tableID = tableID;
+        this.userID = userID;
         this.seatIndex = seatIndex;
         this.card = card;
 

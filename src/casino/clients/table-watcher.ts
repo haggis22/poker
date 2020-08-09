@@ -36,8 +36,6 @@ const logger: Logger = new Logger();
 export class TableWatcher implements ActionHandler, ActionBroadcaster {
 
 
-    public playerID: number;
-
     private commandHandler: CommandHandler;
 
     private chipFormatter: IChipFormatter;
@@ -49,14 +47,13 @@ export class TableWatcher implements ActionHandler, ActionBroadcaster {
     private playerMap: Map<number, Player>;
 
 
-    constructor(commandHandler: CommandHandler, tableID: number, playerID: number, chipFormatter: IChipFormatter) {
+    constructor(commandHandler: CommandHandler, tableID: number, chipFormatter: IChipFormatter) {
 
         this.commandHandler = commandHandler;
 
         this.tableID = tableID;
         this.table = null;
 
-        this.playerID = playerID;
         this.chipFormatter = chipFormatter;
 
         this.playerMap = new Map<number, Player>();

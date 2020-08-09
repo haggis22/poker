@@ -44,57 +44,57 @@ import { Logger } from "../../logging/logger";
 import { TableState } from "./states/table-state";
 import { ActionHandler } from "../../actions/action-handler";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";
+import { CreateTableCommand } from "../../commands/table/create-table-command";
+import { PrivateActionHandler } from "../../actions/private-action-handler";
+import { PrivateActionBroadcaster } from "../../actions/private-action-broadcaster";
+import { PrivateAction } from "../../actions/private-action";
 
 const logger: Logger = new Logger();
 
 
-export class TableManager implements CommandHandler, ActionBroadcaster {
+export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
     private readonly ALL_ACCESS: number = -1;
 
-
-    public table: Table;
-    public game: Game;
-    public actionHandlers: ActionHandler[];
+    private table: Table;
+    private actionHandlers: PrivateActionHandler[];
 
     private betTimer: ReturnType<typeof setTimeout>;
-
 
     private numTimers: number;
     private numTimersElapsed: number;
     private numTimersKilled: number;
 
 
-    constructor(table: Table, game: Game) {
+    constructor(table: Table) {
 
         this.table = table;
-        this.game = game;
 
-        this.actionHandlers = new Array<ActionHandler>();
+        this.actionHandlers = new Array<PrivateActionHandler>();
 
         this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
     }
 
 
-    public registerActionHandler(handler: ActionHandler) {
+    public registerPrivateActionHandler(handler: PrivateActionHandler) {
 
         this.actionHandlers.push(handler);
 
     }   // register
 
 
-    public unregisterActionHandler(handler: ActionHandler) {
+    public unregisterPrivateActionHandler(handler: PrivateActionHandler) {
 
         this.actionHandlers = this.actionHandlers.filter(o => o != handler);
 
     }
 
 
-    private broadcastAction(publicAction: Action, privateAction?: Action): void {
+    private broadcastAction(publicAction: Action, privateAction?: PrivateAction): void {
 
         for (let observer of this.actionHandlers) {
 
-            observer.handleAction(publicAction, privateAction || publicAction);
+            observer.handleAction(publicAction, privateAction);
 
         }
 
@@ -144,14 +144,16 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
     }
 
 
-    private createTableSnapshot(userID: number): TableSnapshotAction {
+
+    private createTableSnapshot(userID: number): Table {
 
 
+        let game = Object.assign({}, this.table.game);
         let stakes = Object.assign({}, this.table.stakes);
         let rules = Object.assign({}, this.table.rules);
         let deck = null;
 
-        let table: Table = new Table(this.table.id, stakes, rules, deck);
+        let table: Table = new Table(this.table.id, game, stakes, rules, deck);
 
         // TODO: make shallow copies of all these instead
         table.betTracker = this.table.betTracker;
@@ -189,7 +191,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
         }
 
-        return new TableSnapshotAction(table.id, table);
+        return table;
 
     }  // createTableSnapshot
 
@@ -365,8 +367,11 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private async tableSnapshot(command: TableSnapshotCommand): Promise<CommandResult> {
 
+        let table: Table = this.createTableSnapshot(command.userID);
+        let tableAction: TableSnapshotAction = new TableSnapshotAction(table.id, command.userID, table);
+
         // Create a snapshot of the table situation, from the given player's perspective
-        this.broadcastAction(this.createTableSnapshot(null), this.createTableSnapshot(command.userID));
+        this.broadcastAction(null, tableAction);
 
         return new CommandResult(true, null);
 
@@ -641,6 +646,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             let card = this.table.deck.deal();
             let seat = this.table.seats[seatIndex];
+            let userID = seat.player.userID;
 
             let dealtCard = new DealtCard(card, dealState.isFaceUp);
 
@@ -648,18 +654,14 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
             if (dealtCard.isFaceUp) {
 
-                this.broadcastAction(new DealCardAction(this.table.id, seatIndex, card));
+                // It's face-up, so there is only a public action
+                this.broadcastAction(new DealCardAction(this.table.id, userID, seatIndex, card));
 
             }
             else {
 
-                for (let observer of this.actionHandlers) {
-
-                    // The public action is the one that everyone can see (the face-down card), while the private action
-                    // will only be sent to the client that is registered for the given player
-                    this.broadcastAction(new DealCardAction(this.table.id, seatIndex, null), new DealCardAction(this.table.id, seatIndex, card));
-
-                }
+                // It's face-down, so the public action does not include the card info, whereas the private action does
+                this.broadcastAction(new DealCardAction(this.table.id, userID, seatIndex, null), new DealCardAction(this.table.id, userID, seatIndex, card));
 
             }
 
@@ -829,7 +831,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
             if (seat.hand) {
 
                 // Put their best hand on the list
-                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
+                handWinners.push(new HandWinner(this.table.game.handSelector.select(this.table.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
 
             }
 
@@ -1015,7 +1017,7 @@ export class TableManager implements CommandHandler, ActionBroadcaster {
 
     private goToNextState(): void {
 
-        this.changeTableState(this.game.stateMachine.nextState());
+        this.changeTableState(this.table.game.stateMachine.nextState());
 
     }
 

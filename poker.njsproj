@@ -88,6 +88,9 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\private-action-broadcaster.ts" />
+    <TypeScriptCompile Include="src\actions\private-action-handler.ts" />
+    <TypeScriptCompile Include="src\actions\private-action.ts" />
     <TypeScriptCompile Include="src\actions\action-broadcaster.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -199,6 +202,9 @@
     <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\commands\table\create-table-command.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\fold-command.ts" />
     <TypeScriptCompile Include="src\commands\table\bet-command.ts">
       <SubType>Code</SubType>
@@ -216,6 +222,9 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\game-client.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\server-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\game.ts">
