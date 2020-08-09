@@ -1,7 +1,7 @@
-﻿import { CommandHandler } from "../commands/command-handler";
-import { Command } from "../commands/command";
-import { MessageBroadcaster } from "../messages/message-broadcaster";
-import { MessageHandler } from "../messages/message-handler";
+﻿import { CommandHandler } from "../../commands/command-handler";
+import { Command } from "../../commands/command";
+import { MessageBroadcaster } from "../../messages/message-broadcaster";
+import { MessageHandler } from "../../messages/message-handler";
 
 export class GameClient implements MessageBroadcaster, CommandHandler {
 

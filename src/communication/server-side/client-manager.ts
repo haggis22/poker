@@ -1,10 +1,10 @@
-﻿import { CommandBroadcaster } from "../commands/command-broadcaster";
-import { CommandHandler } from "../commands/command-handler";
-import { Command } from "../commands/command";
+﻿import { CommandBroadcaster } from "../../commands/command-broadcaster";
+import { CommandHandler } from "../../commands/command-handler";
+import { Command } from "../../commands/command";
 import { ServerClient } from "./server-client";
-import { MessageBroadcaster } from "../messages/message-broadcaster";
-import { MessageHandler } from "../messages/message-handler";
-import { Message } from "../messages/message";
+import { MessageBroadcaster } from "../../messages/message-broadcaster";
+import { MessageHandler } from "../../messages/message-handler";
+import { Message } from "../../messages/message";
 
 export class ClientManager implements MessageHandler, MessageBroadcaster, CommandHandler, CommandBroadcaster {
 

@@ -1,6 +1,6 @@
 ﻿import { Command } from "../command";
 import { Game } from "../../games/game";
-import { Stakes } from "../../casino/tables/stakes";
+import { Stakes } from "../../casino/tables/betting/stakes";
 import { TableRules } from "../../casino/tables/table-rules";
 
 export class CreateTableCommand implements Command {

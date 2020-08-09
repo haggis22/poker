@@ -1,4 +1,4 @@
-import { Stakes } from "./stakes";
+import { Stakes } from "./betting/stakes";
 
 export class TableRules {
 

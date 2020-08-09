@@ -21,7 +21,7 @@ import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-ac
 import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
 import { WinPotAction } from "../../actions/table/game/win-pot-action";
 import { IChipFormatter } from "../chips/chip-formatter";
-import { MoneyFormatter } from "../chips/money-formatter";
+import { MoneyFormatter } from "../../clients/chips/money-formatter";
 import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
 import { BetCommand } from "../../commands/table/bet-command";
 import { Seat } from "./seat";

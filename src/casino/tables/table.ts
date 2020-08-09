@@ -6,7 +6,7 @@ import { OpenState } from "./states/open-state";
 import { Seat } from "./seat";
 import { TableRules } from "./table-rules";
 import { BetTracker } from "./betting/bet-tracker";
-import { Stakes } from "./stakes";
+import { Stakes } from "./betting/stakes";
 import { Game } from "../../games/game";
 
 

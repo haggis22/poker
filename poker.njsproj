@@ -50,7 +50,7 @@
     </Content>
     <Content Include="README.md" />
     <Content Include="src\actions\table\game\flip-cards-action.ts" />
-    <Content Include="src\casino\chips\money-formatter.ts">
+    <Content Include="src\clients\chips\money-formatter.ts">
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
@@ -63,13 +63,15 @@
     <Folder Include="public\" />
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
+    <Folder Include="src\communication\client-side\" />
+    <Folder Include="src\communication\server-side\" />
     <Folder Include="src\messages\" />
     <Folder Include="src\actions\table\state\" />
     <Folder Include="src\actions\table\players\" />
     <Folder Include="src\actions\table\" />
     <Folder Include="src\cards\" />
-    <Folder Include="src\casino\chips\" />
-    <Folder Include="src\casino\clients\" />
+    <Folder Include="src\clients\chips\" />
+    <Folder Include="src\clients\" />
     <Folder Include="src\casino\tables\" />
     <Folder Include="src\casino\tables\boards\" />
     <Folder Include="src\casino\tables\betting\" />
@@ -149,16 +151,13 @@
     <TypeScriptCompile Include="src\cards\deck.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\chips\chip-formatter.ts">
+    <TypeScriptCompile Include="src\clients\chips\chip-formatter.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\clients\client-ui.ts">
+    <TypeScriptCompile Include="src\clients\client-ui.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\clients\table-watcher.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\dealer.ts">
+    <TypeScriptCompile Include="src\clients\table-watcher.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\betting\fold.ts" />
@@ -180,7 +179,7 @@
     <TypeScriptCompile Include="src\casino\tables\seat.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\tables\stakes.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\stakes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\states\start-hand-state.ts" />
@@ -221,13 +220,13 @@
     <TypeScriptCompile Include="src\commands\table\table-snapshot-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\client-manager.ts">
+    <TypeScriptCompile Include="src\communication\server-side\client-manager.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\game-client.ts">
+    <TypeScriptCompile Include="src\communication\client-side\game-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\server-client.ts">
+    <TypeScriptCompile Include="src\communication\server-side\server-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\game.ts">
@@ -268,9 +267,6 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\hands\hand.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\gaming-session.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\table.ts">
