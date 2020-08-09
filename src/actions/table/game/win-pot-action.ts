@@ -1,9 +1,8 @@
-﻿import { Action } from "../action";
-import { HandEvaluation } from "../../games/hand-evaluation";
+﻿import { TableAction } from "../table-action";
+import { HandEvaluation } from "../../../games/hand-evaluation";
 
-export class WinPotAction implements Action {
+export class WinPotAction extends TableAction {
 
-    public tableID: number;
     public seatIndex: number;
     public potIndex: number;
     public handEvaluation: HandEvaluation;
@@ -11,7 +10,8 @@ export class WinPotAction implements Action {
 
     constructor(tableID: number, seatIndex: number, potIndex: number, handEvaluation: HandEvaluation, amount: number) {
 
-        this.tableID = tableID;
+        super(tableID);
+
         this.seatIndex = seatIndex;
         this.potIndex = potIndex;
         this.handEvaluation = handEvaluation;

@@ -1,16 +1,18 @@
-﻿import { Action } from "../action";
+﻿import { TableAction } from "../table-action";
 
-export class StackUpdateAction implements Action {
+export class StackUpdateAction extends TableAction {
 
-    public tableID: number;
     public playerID: number;
     public chips: number;
 
 
     constructor(tableID: number, playerID: number, chips: number) {
-        this.tableID = tableID;
+
+        super(tableID);
+
         this.playerID = playerID;
         this.chips = chips;
+
     }
 
 }

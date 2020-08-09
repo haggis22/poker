@@ -1,5 +1,6 @@
-﻿export interface Action {
+﻿export class Action {
 
-    tableID: number;
+    constructor() {
+    }
 
 }

@@ -1,63 +1,59 @@
 ﻿import { Table } from "./table";
-import { Game } from "../../games/game";
 import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
-import { CommandResult } from "../../commands/command-result";
 import { RequestSeatCommand } from "../../commands/table/request-seat-command";
 import { Player } from "../../players/player";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
 import { StartGameCommand } from "../../commands/table/start-game-command";
 import { OpenState } from "./states/open-state";
 import { StartHandState } from "./states/start-hand-state";
-import { ActionBroadcaster } from "../../actions/action-broadcaster";
 import { Action } from "../../actions/action";
-import { PlayerSeatedAction } from "../../actions/table/player-seated-action";
-import { MoveButtonAction } from "../../actions/table/move-button-action";
-import { AddChipsAction } from "../../actions/players/add-chips-action";
+import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
+import { MoveButtonAction } from "../../actions/table/game/move-button-action";
 import { DealState } from "./states/deal-state";
 import { DealtCard } from "../../hands/dealt-card";
-import { DealCardAction } from "../../actions/game/deal-card-action";
 import { Hand } from "../../hands/hand";
 import { BetState } from "./states/betting/bet-state";
 import { ShowdownState } from "./states/showdown-state";
 import { HandCompleteState } from "./states/hand-complete-state";
 import { HandWinner } from "../../games/hand-winner";
-import { BetTurnAction } from "../../actions/game/bet-turn-action";
-import { FlipCardsAction } from "../../actions/game/flip-cards-action";
-import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
-import { SetHandAction } from "../../actions/game/set-hand-action";
-import { AnteAction } from "../../actions/betting/ante-action";
-import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
-import { WinPotAction } from "../../actions/game/win-pot-action";
+import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
+import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
+import { WinPotAction } from "../../actions/table/game/win-pot-action";
 import { IChipFormatter } from "../chips/chip-formatter";
 import { MoneyFormatter } from "../chips/money-formatter";
-import { StackUpdateAction } from "../../actions/players/stack-update-action";
+import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
 import { BetCommand } from "../../commands/table/bet-command";
 import { Seat } from "./seat";
 import { Bet } from "./betting/bet";
-import { BetAction } from "../../actions/betting/bet-action";
-import { BetReturnedAction } from "../../actions/game/bet-returned-action";
 import { FoldCommand } from "../../commands/table/fold-command";
 import { Fold } from "./betting/fold";
-import { FoldAction } from "../../actions/betting/fold-action";
 import { Logger } from "../../logging/logger";
-import { TableState } from "./states/table-state";
-import { ActionHandler } from "../../actions/action-handler";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";
-import { CreateTableCommand } from "../../commands/table/create-table-command";
-import { PrivateActionHandler } from "../../actions/private-action-handler";
-import { PrivateActionBroadcaster } from "../../actions/private-action-broadcaster";
-import { PrivateAction } from "../../actions/private-action";
+import { MessageBroadcaster } from "../../messages/message-broadcaster";
+import { MessageHandler } from "../../messages/message-handler";
+import { Message } from "../../messages/message";
+import { ActionMessage } from "../../messages/action-message";
+import { AddChipsAction } from "../../actions/table/players/add-chips-action";
+import { BetAction } from "../../actions/table/betting/bet-action";
+import { SetHandAction } from "../../actions/table/game/set-hand-action";
+import { FoldAction } from "../../actions/table/betting/fold-action";
+import { TableState } from "./states/table-state";
+import { AnteAction } from "../../actions/table/betting/ante-action";
+import { DealCardAction } from "../../actions/table/game/deal-card-action";
+import { BetTurnAction } from "../../actions/table/game/bet-turn-action";
+import { BetReturnedAction } from "../../actions/table/game/bet-returned-action";
+import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
 
 const logger: Logger = new Logger();
 
 
-export class TableManager implements CommandHandler, PrivateActionBroadcaster {
+export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly ALL_ACCESS: number = -1;
 
     private table: Table;
-    private actionHandlers: PrivateActionHandler[];
+    private messageHandlers: MessageHandler[];
 
     private betTimer: ReturnType<typeof setTimeout>;
 
@@ -70,38 +66,54 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
         this.table = table;
 
-        this.actionHandlers = new Array<PrivateActionHandler>();
+        this.messageHandlers = new Array<MessageHandler>();
 
         this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
     }
 
 
-    public registerPrivateActionHandler(handler: PrivateActionHandler) {
+    public registerMessageHandler(handler: MessageHandler): void {
 
-        this.actionHandlers.push(handler);
+        this.messageHandlers.push(handler);
 
-    }   // register
+    }   // registerMessageHandler
 
 
-    public unregisterPrivateActionHandler(handler: PrivateActionHandler) {
+    public unregisterMessageHandler(handler: MessageHandler): void {
 
-        this.actionHandlers = this.actionHandlers.filter(o => o != handler);
+        this.messageHandlers = this.messageHandlers.filter(o => o != handler);
 
     }
 
 
-    private broadcastAction(publicAction: Action, privateAction?: PrivateAction): void {
+    private broadcastMessage(publicMessage: Message, privateMessage?: Message): void {
 
-        for (let observer of this.actionHandlers) {
+        for (let observer of this.messageHandlers) {
 
-            observer.handleAction(publicAction, privateAction);
+            observer.handleMessage(publicMessage, privateMessage);
 
         }
 
-    }   // broadcastAction
+    }   // broadcastMessage
+
+    private sendPrivateMessage(privateMessage: Message): void {
+
+        for (let observer of this.messageHandlers) {
+
+            observer.handleMessage(null, privateMessage);
+
+        }
+
+    }   // sendPrivateMessage
+
+    private broadcastAction(action: Action) {
+
+        this.broadcastMessage(new ActionMessage(action));
+
+    }
 
 
-    public async handleCommand(command: Command): Promise<CommandResult> {
+    public handleCommand(command: Command): void {
 
         logger.debug(`TableManager received ${command.constructor.name}`);
 
@@ -196,7 +208,7 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
     }  // createTableSnapshot
 
 
-    private async seatPlayer(command: RequestSeatCommand): Promise<CommandResult> {
+    private seatPlayer(command: RequestSeatCommand): void {
 
         let seatIndex = command.seatIndex;
         if (seatIndex === null) {
@@ -214,7 +226,7 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
         if (seatIndex === null) {
 
-            return new CommandResult(false, 'No seats available');
+            return this.sendPrivateMessage(new Message('No seats available', command.user.id));
 
         }
 
@@ -228,15 +240,13 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
                 this.broadcastAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
 
-                return new CommandResult(true, `${seat.player.name} sits at seat ${(seatIndex+1)}`);
-
             }
 
-            return new CommandResult(false, `Seat ${(seatIndex+1)} is already taken`);
+            return this.sendPrivateMessage(new Message(`Seat ${(seatIndex + 1)} is already taken`, command.user.id));
 
         }
 
-        return new CommandResult(false, `Could not find seat ${seatIndex}`);
+        return this.sendPrivateMessage(new Message(`Could not find seat ${seatIndex}`, command.user.id));
 
     }
 
@@ -258,19 +268,21 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
 
 
-    private async addChips(command: AddChipsCommand): Promise<CommandResult> {
+    private addChips(command: AddChipsCommand): void {
 
-        let player: Player = this.findPlayer(command.playerID);
+        let player: Player = this.findPlayer(command.userID);
 
         if (!player) {
-            return new CommandResult(false, 'Player is not sitting at table');
+            return this.sendPrivateMessage(new Message('Player is not sitting at table', command.userID));
         }
 
         if (this.table.state.isHandInProgress()) {
 
             // we can't add the chips right now, but they will be added before the next hand
             player.chipsToAdd += command.amount;
-            return new CommandResult(true, `${player.name} has bought in for ${command.amount} on the next hand`);
+
+            // TODO: create delayed AddChips action
+            return this.sendPrivateMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`));
 
         }
 
@@ -278,31 +290,29 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
         this.broadcastAction(new AddChipsAction(this.table.id, player.userID, command.amount));
 
-        return new CommandResult(true, `${player.name} has added ${command.amount} in chips`);
-
     }  // addChips
 
 
-    private async startGame(command: StartGameCommand): Promise<CommandResult> {
+    private startGame(command: StartGameCommand): void {
 
         if (this.table.state instanceof OpenState) {
 
-            this.goToNextState();
-            return new CommandResult(true, "Started game");
+            logger.info("Started game");
+            return this.goToNextState();
 
         }
 
-        return new CommandResult(false, "Game is already in progress");
+        logger.info("Game is already in progress");
 
-    }  // addChips
+    }  // startGame
 
 
 
-    private async bet(command: BetCommand): Promise<CommandResult> {
+    private bet(command: BetCommand): void {
 
         if (this.table.state instanceof BetState) {
 
-            let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.userID == command.playerID);
+            let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
 
             let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount);
 
@@ -320,21 +330,25 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
             }
             else {
-                return new CommandResult(bet.isValid, bet.message);
+
+                // TODO: Send action indicating invalid bet so that the UI can reset itself
+                return this.sendPrivateMessage(new Message(bet.message, command.userID));
+
             }
 
         }
 
-        return new CommandResult(false, "It is not time to bet");
+        // TODO: Send action indicating invalid bet so that the UI can reset itself
+        return this.sendPrivateMessage(new Message('It is not time to bet', command.userID));
 
     }  // bet
 
 
-    private async fold(command: FoldCommand): Promise<CommandResult> {
+    private fold(command: FoldCommand): void {
 
         if (this.table.state instanceof BetState) {
 
-            let folderSeat: Seat = this.table.seats.find(seat => seat.hand && seat.player && seat.player.userID == command.playerID);
+            let folderSeat: Seat = this.table.seats.find(seat => seat.hand && seat.player && seat.player.userID == command.userID);
 
             let fold: Fold = this.table.betTracker.fold(folderSeat);
 
@@ -353,27 +367,30 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
 
                 this.advanceBetTurn();
 
+                return;
+
             }
             else {
-                return new CommandResult(fold.isValid, fold.message);
+
+                return this.sendPrivateMessage(new Message(fold.message, command.userID));
+
             }
 
         }
 
-        return new CommandResult(false, "It is not time to bet");
+        return this.sendPrivateMessage(new Message('It is not time to bet', command.userID));
 
     }  // fold
 
 
-    private async tableSnapshot(command: TableSnapshotCommand): Promise<CommandResult> {
-
-        let table: Table = this.createTableSnapshot(command.userID);
-        let tableAction: TableSnapshotAction = new TableSnapshotAction(table.id, command.userID, table);
+    private tableSnapshot(command: TableSnapshotCommand): void {
 
         // Create a snapshot of the table situation, from the given player's perspective
-        this.broadcastAction(null, tableAction);
+        let table: Table = this.createTableSnapshot(command.userID);
 
-        return new CommandResult(true, null);
+        let tableAction: TableSnapshotAction = new TableSnapshotAction(table.id, table);
+
+        this.sendPrivateMessage(new ActionMessage(tableAction, command.userID));
 
     }
 
@@ -561,6 +578,7 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
         }  // for each seat
 
         this.table.betTracker.gatherBets();
+
         this.broadcastAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         this.checkBetsToReturn();
@@ -655,13 +673,16 @@ export class TableManager implements CommandHandler, PrivateActionBroadcaster {
             if (dealtCard.isFaceUp) {
 
                 // It's face-up, so there is only a public action
-                this.broadcastAction(new DealCardAction(this.table.id, userID, seatIndex, card));
+                this.broadcastAction(new DealCardAction(this.table.id, seatIndex, card));
 
             }
             else {
 
                 // It's face-down, so the public action does not include the card info, whereas the private action does
-                this.broadcastAction(new DealCardAction(this.table.id, userID, seatIndex, null), new DealCardAction(this.table.id, userID, seatIndex, card));
+                let publicAction = new ActionMessage(new DealCardAction(this.table.id, seatIndex, null));
+                let privateAction = new ActionMessage(new DealCardAction(this.table.id, seatIndex, card), userID);
+
+                this.broadcastMessage(publicAction, privateAction);
 
             }
 

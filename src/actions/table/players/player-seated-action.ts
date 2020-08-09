@@ -1,15 +1,16 @@
-﻿import { Action } from "../action";
-import { Player } from "../../players/player";
+﻿import { TableAction } from "../table-action";
+import { Player } from "../../../players/player";
 
-export class PlayerSeatedAction implements Action {
+export class PlayerSeatedAction extends TableAction {
 
-    public tableID: number;
     public player: Player;
     public seatIndex: number;
 
 
     constructor(tableID: number, player: Player, seatIndex: number) {
-        this.tableID = tableID;
+
+        super(tableID);
+
         this.player = player;
         this.seatIndex = seatIndex;
     }

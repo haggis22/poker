@@ -3,12 +3,12 @@
 export class FoldCommand implements Command {
 
     public tableID: number;
-    public playerID: number;
+    public userID: number;
 
 
-    constructor(tableID: number, playerID: number) {
+    constructor(tableID: number, userID: number) {
         this.tableID = tableID;
-        this.playerID = playerID;
+        this.userID = userID;
     }
 
 }

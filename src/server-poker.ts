@@ -44,15 +44,15 @@ function createTable(): Table {
 
     let clientManager: ClientManager = new ClientManager();
 
-    tableManager.registerPrivateActionHandler(clientManager);
+    tableManager.registerMessageHandler(clientManager);
     clientManager.registerCommandHandler(tableManager);
 
     let gameClient: GameClient = new GameClient();
     let tableWatcher: TableWatcher = new TableWatcher(tableManager, table.id, new MoneyFormatter());
     let clientUI: ClientUI = new ClientUI();
 
-    gameClient.registerActionHandler(tableWatcher);
-    gameClient.registerActionHandler(clientUI);
+    gameClient.registerMessageHandler(tableWatcher);
+    gameClient.registerMessageHandler(clientUI);
     clientUI.registerCommandHandler(gameClient);
 
     let danny = new User(1, 'Danny', 10000);

@@ -1,14 +1,14 @@
-﻿import { Action } from "../action";
-import { Hand } from "../../hands/hand";
+﻿import { TableAction } from "../table-action";
 
-export class SetHandAction implements Action {
+export class SetHandAction extends TableAction {
 
-    public tableID: number;
     public seatIndex: number;
     public hasHand: boolean;
 
     constructor(tableID: number, seatIndex: number, hasHand: boolean) {
-        this.tableID = tableID;
+
+        super(tableID);
+
         this.seatIndex = seatIndex;
         this.hasHand = hasHand;
     }

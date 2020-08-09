@@ -1,26 +1,24 @@
-﻿import { ActionHandler } from "../actions/action-handler";
-import { ActionBroadcaster } from "../actions/action-broadcaster";
-import { CommandHandler } from "../commands/command-handler";
+﻿import { CommandHandler } from "../commands/command-handler";
 import { CommandBroadcaster } from "../commands/command-broadcaster";
-import { Action } from "../actions/action";
 import { Command } from "../commands/command";
 import { ClientManager } from "./client-manager";
-import { CommandResult } from "../commands/command-result";
-import { PrivateAction } from "../actions/private-action";
+import { MessageHandler } from "../messages/message-handler";
+import { MessageBroadcaster } from "../messages/message-broadcaster";
+import { Message } from "../messages/message";
 
-export class ServerClient implements ActionHandler, ActionBroadcaster, CommandHandler, CommandBroadcaster {
+export class ServerClient implements MessageHandler, MessageBroadcaster, CommandHandler, CommandBroadcaster {
 
     public userID: number;
 
     private commandHandler: CommandHandler;
-    private actionHandler: ActionHandler;
+    private messageHandler: MessageHandler;
 
     constructor(userID: number, clientManager: ClientManager) {
 
         this.userID = userID;
 
         this.registerCommandHandler(clientManager);
-        clientManager.registerActionHandler(this);
+        clientManager.registerMessageHandler(this);
 
     }
 
@@ -38,36 +36,35 @@ export class ServerClient implements ActionHandler, ActionBroadcaster, CommandHa
         }
     }
 
-    handleCommand(command: Command): Promise<CommandResult> {
+    handleCommand(command: Command): void {
 
         if (this.commandHandler != null) {
             this.commandHandler.handleCommand(command);
         }
 
-        return null;
     }
 
-    registerActionHandler(handler: ActionHandler) {
-        this.actionHandler = handler;
+    registerMessageHandler(handler: MessageHandler) {
+        this.messageHandler = handler;
     }
 
-    unregisterActionHandler(handler: ActionHandler) {
+    unregisterMessageHandler(handler: MessageHandler) {
 
-        if (this.actionHandler === handler) {
+        if (this.messageHandler === handler) {
 
-            this.actionHandler = null;
+            this.messageHandler = null;
 
         }
     }
 
-    handleAction(publicAction: Action, privateAction?: PrivateAction): void {
+    handleMessage(publicMessage: Message, privateMessage?: Message): void {
 
-        if (this.actionHandler != null) {
+        if (this.messageHandler != null) {
 
-            // ServerClient objects only get the action object that is suitable for passing down the link.
-            // The privateAction will always be null because the ClientManager will have decided whether this
-            // serverClient is allowed to have the private action (if there was one)
-            this.actionHandler.handleAction(publicAction);
+            // ServerClient objects only get the message object that is suitable for passing down the link.
+            // The privateMessage will always be null because the ClientManager will have decided whether this
+            // serverClient is allowed to have the private message (if there was one)
+            this.messageHandler.handleMessage(publicMessage);
 
         }
 

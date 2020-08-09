@@ -1,46 +1,41 @@
-﻿import { ActionHandler } from "../actions/action-handler";
-import { CommandBroadcaster } from "../commands/command-broadcaster";
-import { Action } from "../actions/action";
-import { PrivateAction } from "../actions/private-action";
+﻿import { CommandBroadcaster } from "../commands/command-broadcaster";
 import { CommandHandler } from "../commands/command-handler";
 import { Command } from "../commands/command";
 import { ServerClient } from "./server-client";
-import { ActionBroadcaster } from "../actions/action-broadcaster";
-import { CommandResult } from "../commands/command-result";
-import { PrivateActionHandler } from "../actions/private-action-handler";
+import { MessageBroadcaster } from "../messages/message-broadcaster";
+import { MessageHandler } from "../messages/message-handler";
+import { Message } from "../messages/message";
 
-export class ClientManager implements PrivateActionHandler, ActionBroadcaster, CommandHandler, CommandBroadcaster {
+export class ClientManager implements MessageHandler, MessageBroadcaster, CommandHandler, CommandBroadcaster {
 
 
     private commandHandlers: CommandHandler[];
-    private actionHandlers: ActionHandler[];
+    private messageHandlers: MessageHandler[];
 
 
     constructor()
     {
 
         this.commandHandlers = new Array<CommandHandler>();
-        this.actionHandlers = new Array<ActionHandler>();
+        this.messageHandlers = new Array<MessageHandler>();
     }
 
-    handleCommand(command: Command): Promise<CommandResult> {
+    handleCommand(command: Command): void {
 
         for (let handler of this.commandHandlers) {
             handler.handleCommand(command);
         }
 
-        return null;
-
     }
 
-    registerActionHandler(handler: ActionHandler) {
+    registerMessageHandler(handler: MessageHandler) {
 
-        this.actionHandlers.push(handler);
+        this.messageHandlers.push(handler);
     }
 
-    unregisterActionHandler(handler: ActionHandler) {
+    unregisterMessageHandler(handler: MessageHandler) {
 
-        this.actionHandlers = this.actionHandlers.filter(ah => ah !== handler);
+        this.messageHandlers = this.messageHandlers.filter(ah => ah !== handler);
 
     }
 
@@ -62,30 +57,36 @@ export class ClientManager implements PrivateActionHandler, ActionBroadcaster, C
 
     }
 
-    public handleAction(publicAction: Action, privateAction?: PrivateAction): void {
+    public handleMessage(publicMessage: Message, privateMessage?: Message): void {
 
-        for (let handler of this.actionHandlers) {
+        for (let handler of this.messageHandlers) {
 
             if (handler instanceof ServerClient) {
 
-                if (privateAction && privateAction instanceof PrivateAction) {
+                if (privateMessage) {
 
-                    if (handler.userID === privateAction.userID) {
-                        handler.handleAction(privateAction);
+                    if (handler.userID === privateMessage.userID) {
+                        handler.handleMessage(privateMessage);
                     }
                     else {
-                        handler.handleAction(publicAction);
+
+                        if (publicMessage) {
+
+                            handler.handleMessage(publicMessage);
+
+                        }
+
                     }
 
                 }
                 else {
-                    // there is no private action, so just send them the publicly-available one
-                    handler.handleAction(publicAction);
+                    // there is no private message, so just send them the publicly-available one
+                    handler.handleMessage(publicMessage);
                 }
 
             }
             else {
-                handler.handleAction(publicAction);
+                handler.handleMessage(publicMessage);
             }
 
         }

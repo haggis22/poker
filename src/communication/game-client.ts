@@ -1,26 +1,45 @@
-﻿import { ActionBroadcaster } from "../actions/action-broadcaster";
-import { CommandHandler } from "../commands/command-handler";
-import { ActionHandler } from "../actions/action-handler";
-import { Action } from "../actions/action";
+﻿import { CommandHandler } from "../commands/command-handler";
 import { Command } from "../commands/command";
+import { MessageBroadcaster } from "../messages/message-broadcaster";
+import { MessageHandler } from "../messages/message-handler";
 
-export class GameClient implements ActionBroadcaster, CommandHandler {
+export class GameClient implements MessageBroadcaster, CommandHandler {
 
-    handleCommand(command: Command): Promise<import("../commands/command-result").CommandResult> {
-        throw new Error("Method not implemented.");
+
+    private commandHandler: CommandHandler;
+    private messageHandlers: MessageHandler[];
+
+
+    constructor() {
+
+        this.messageHandlers = new Array<MessageHandler>();
+
     }
 
-    registerActionHandler(handler: ActionHandler) {
-        throw new Error("Method not implemented.");
+    registerMessageHandler(handler: MessageHandler) {
+
+        this.messageHandlers.push(handler);
+
     }
 
-    unregisterActionHandler(handler: ActionHandler) {
-        throw new Error("Method not implemented.");
+    unregisterMessageHandler(handler: MessageHandler) {
+
+        this.messageHandlers = this.messageHandlers.filter(mh => mh !== handler);
+
     }
 
-    broadcastAction(action: Action) {
-        throw new Error("Method not implemented.");
+
+    handleCommand(command: Command): void {
+
+        if (this.commandHandler) {
+
+            this.commandHandler.handleCommand(command);
+
+        }
+
     }
+
+
 
 
 

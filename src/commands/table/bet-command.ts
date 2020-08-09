@@ -3,13 +3,13 @@
 export class BetCommand implements Command {
 
     public tableID: number;
-    public playerID: number;
+    public userID: number;
     public amount: number;
 
 
-    constructor(tableID: number, playerID: number, amount: number) {
+    constructor(tableID: number, userID: number, amount: number) {
         this.tableID = tableID;
-        this.playerID = playerID;
+        this.userID = userID;
         this.amount = amount;
     }
 
