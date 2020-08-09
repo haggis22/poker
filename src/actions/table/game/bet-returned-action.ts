@@ -1,14 +1,14 @@
-﻿import { Action } from "../action";
+﻿import { TableAction } from "../table-action";
 
-export class BetReturnedAction implements Action {
+export class BetReturnedAction extends TableAction {
 
-    public tableID: number;
     public seatIndex: number;
     public amount: number;
 
     constructor(tableID: number, seatIndex: number, amount: number) {
 
-        this.tableID = tableID;
+        super(tableID);
+
         this.seatIndex = seatIndex;
         this.amount = amount;
 

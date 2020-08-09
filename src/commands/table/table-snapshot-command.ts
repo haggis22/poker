@@ -1,6 +1,7 @@
-﻿import { Command } from "../command";
+﻿import { User } from "../../players/user";
+import { Command } from "../command";
 
-export class FoldCommand implements Command {
+export class TableSnapshotCommand implements Command {
 
     public tableID: number;
     public userID: number;

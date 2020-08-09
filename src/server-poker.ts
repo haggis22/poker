@@ -12,71 +12,110 @@ import { StartGameCommand } from "./commands/table/start-game-command";
 import { TableWatcher } from "./casino/clients/table-watcher";
 import { TableRules } from "./casino/tables/table-rules";
 import { Stakes } from "./casino/tables/stakes";
+import { TableSnapshotCommand } from "./commands/table/table-snapshot-command";
+import { ClientManager } from "./communication/client-manager";
+import { GameClient } from "./communication/game-client";
+import { ClientUI } from "./casino/clients/client-ui";
+import { ServerClient } from "./communication/server-client";
+
+
+function createTable(): Table {
+
+    let tableID = 1;
+
+    // # seats, # secods to act
+    let rules = new TableRules(6, 0.1);
+
+    // blinds, ante, minRaise
+    let stakes = new Stakes(new Array<number>(), 50, 200);
+
+    let table: Table = new Table(tableID, new PokerGameFiveCardStud(), stakes, rules, new Deck());
+
+    return table;
+
+}
 
 
 (async function () {
 
-    const TABLE_ID = 1;
-
-    let blinds = new Array<number>();
-
-    let stakes = new Stakes(blinds, 50, 200);
-    // 6 seats
-    // 1 second to act
-    let rules = new TableRules(6, 2);
-
-    let table = new Table(TABLE_ID, stakes, rules, new Deck());
-
-    let tableManager = new TableManager(table, new PokerGameFiveCardStud());
-
     let danny = new User(1, 'Danny', 10000);
+
+    let table: Table = createTable();
+    let tableManager: TableManager = new TableManager(table);
+
+    let clientManager: ClientManager = new ClientManager();
+
+    tableManager.registerMessageHandler(clientManager);
+    clientManager.registerCommandHandler(tableManager);
+
+    let gameClient: GameClient = new GameClient();
+    let tableWatcher: TableWatcher = new TableWatcher(tableManager, table.id, new MoneyFormatter());
+    let clientUI: ClientUI = new ClientUI(danny);
+
+    gameClient.registerMessageHandler(tableWatcher);
+    gameClient.registerMessageHandler(clientUI);
+    clientUI.registerCommandHandler(gameClient);
+
+
+    let dannyServerClient: ServerClient = new ServerClient(danny.id, clientManager);
+    // set up this server object to listen to the gameClient so that it will receive commands
+    dannyServerClient.registerCommandHandler(gameClient);
+
+    // set up the client manager to receive commands from the ServerClient
+    clientManager.registerCommandHandler(dannyServerClient);
+
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
 
-    let watcher = new TableWatcher(tableManager, table.id, danny.id, new MoneyFormatter());
 
-    tableManager.register(watcher);
+    tableManager.handleCommand(new TableSnapshotCommand(table.id, danny.id));
 
     {
-        let requestSeatCommand = new RequestSeatCommand(TABLE_ID, danny, null);
+        let requestSeatCommand = new RequestSeatCommand(table.id, danny, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
     }
 
     {
-        let requestSeatCommand = new RequestSeatCommand(TABLE_ID, mark, null);
+        let requestSeatCommand = new RequestSeatCommand(table.id, mark, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
     }
 
     {
-        let requestSeatCommand = new RequestSeatCommand(TABLE_ID, paul, null);
+        let requestSeatCommand = new RequestSeatCommand(table.id, paul, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
     }
 
     {
-        let requestSeatCommand = new RequestSeatCommand(TABLE_ID, joe, null);
+        let requestSeatCommand = new RequestSeatCommand(table.id, joe, null);
         let result = await tableManager.handleCommand(requestSeatCommand);
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 1, 700));
+        let requestSeatCommand = new RequestSeatCommand(table.id, sekhar, null);
+        let result = await tableManager.handleCommand(requestSeatCommand);
+    }
+
+
+    {
+        tableManager.handleCommand(new AddChipsCommand(table.id, 1, 700));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 2, 500));
+        tableManager.handleCommand(new AddChipsCommand(table.id, 2, 500));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 3, 600));
+        tableManager.handleCommand(new AddChipsCommand(table.id, 3, 600));
     }
 
     {
-        tableManager.handleCommand(new AddChipsCommand(TABLE_ID, 4, 400));
+        tableManager.handleCommand(new AddChipsCommand(table.id, 4, 400));
     }
 
     {
-        let result = await tableManager.handleCommand(new StartGameCommand(TABLE_ID));
+        let result = await tableManager.handleCommand(new StartGameCommand(table.id));
     }
 
 

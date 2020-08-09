@@ -1,8 +1,7 @@
-﻿import { Action } from "../action";
-import { Card } from "../../cards/card";
-import { Seat } from "../../casino/tables/seat";
+﻿import { TableAction } from "../table-action";
+import { Card } from "../../../cards/card";
 
-export class DealCardAction implements Action {
+export class DealCardAction extends TableAction {
 
     public tableID: number;
     public seatIndex: number;
@@ -10,7 +9,8 @@ export class DealCardAction implements Action {
 
     constructor(tableID: number, seatIndex: number, card: Card) {
 
-        this.tableID = tableID;
+        super(tableID);
+
         this.seatIndex = seatIndex;
         this.card = card;
 

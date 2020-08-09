@@ -3,7 +3,7 @@
 export class Player {
 
 
-    public id: number;
+    public userID: number;
     public name: string;
 
     public chips: number;
@@ -12,9 +12,9 @@ export class Player {
     public isActive: boolean;
 
 
-    constructor(id: number, name: string) {
+    constructor(userID: number, name: string) {
 
-        this.id = id;
+        this.userID = userID;
         this.name = name;
 
         this.chips = this.chipsToAdd = 0;

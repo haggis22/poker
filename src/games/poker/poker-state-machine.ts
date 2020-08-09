@@ -1,6 +1,5 @@
 ﻿import { TableStateMachine } from "../../casino/tables/states/table-state-machine";
 import { Table } from "../../casino/tables/table";
-import { Command } from "../../commands/command";
 import { TableState } from "../../casino/tables/states/table-state";
 
 export class PokerStateMachine implements TableStateMachine {

@@ -1,41 +1,43 @@
-﻿import { TableObserver } from "../tables/table-observer";
-import { Action } from "../../actions/action";
-import { PlayerSeatedAction } from "../../actions/table/player-seated-action";
-import { MoveButtonAction } from "../../actions/table/move-button-action";
-import { AddChipsAction } from "../../actions/players/add-chips-action";
+﻿import { Action } from "../../actions/action";
+import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
+import { MoveButtonAction } from "../../actions/table/game/move-button-action";
 import { Player } from "../../players/player";
 import { IChipFormatter } from "../chips/chip-formatter";
 import { DealtCard } from "../../hands/dealt-card";
-import { DealCardAction } from "../../actions/game/deal-card-action";
 import { Seat } from "../tables/seat";
 import { Table } from "../tables/table";
-import { BetTurnAction } from "../../actions/game/bet-turn-action";
-import { FlipCardsAction } from "../../actions/game/flip-cards-action";
-import { TableSnapshotAction } from "../../actions/table/table-snapshot-action";
-import { SetHandAction } from "../../actions/game/set-hand-action";
+import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
 import { Hand } from "../../hands/hand";
-import { AnteAction } from "../../actions/betting/ante-action";
-import { UpdateBetsAction } from "../../actions/betting/update-bets-action";
-import { WinPotAction } from "../../actions/game/win-pot-action";
+import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
+import { WinPotAction } from "../../actions/table/game/win-pot-action";
 import { HandDescriber } from "../../games/hand-describer";
 import { PokerHandDescriber } from "../../games/poker/poker-hand-describer";
-import { StackUpdateAction } from "../../actions/players/stack-update-action";
+import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
 import { BetCommand } from "../../commands/table/bet-command";
 import { CommandHandler } from "../../commands/command-handler";
 import { BetTracker } from "../tables/betting/bet-tracker";
-import { BetAction } from "../../actions/betting/bet-action";
 import { Bet } from "../tables/betting/bet";
-import { BetReturnedAction } from "../../actions/game/bet-returned-action";
-import { FoldAction } from "../../actions/betting/fold-action";
 import { FoldCommand } from "../../commands/table/fold-command";
 import { Logger } from "../../logging/logger";
+import { MessageHandler } from "../../messages/message-handler";
+import { MessageBroadcaster } from "../../messages/message-broadcaster";
+import { Message } from "../../messages/message";
+import { ActionMessage } from "../../messages/action-message";
+import { TableAction } from "../../actions/table/table-action";
+import { SetHandAction } from "../../actions/table/game/set-hand-action";
+import { AddChipsAction } from "../../actions/table/players/add-chips-action";
+import { DealCardAction } from "../../actions/table/game/deal-card-action";
+import { BetTurnAction } from "../../actions/table/game/bet-turn-action";
+import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
+import { AnteAction } from "../../actions/table/betting/ante-action";
+import { BetAction } from "../../actions/table/betting/bet-action";
+import { FoldAction } from "../../actions/table/betting/fold-action";
+import { BetReturnedAction } from "../../actions/table/game/bet-returned-action";
 
 const logger: Logger = new Logger();
 
-export class TableWatcher implements TableObserver {
+export class TableWatcher implements MessageHandler, MessageBroadcaster {
 
-
-    public playerID: number;
 
     private commandHandler: CommandHandler;
 
@@ -47,36 +49,84 @@ export class TableWatcher implements TableObserver {
     // Maps playerID to Player object
     private playerMap: Map<number, Player>;
 
+    private messageHandlers: MessageHandler[];
 
-    constructor(commandHandler: CommandHandler, tableID: number, playerID: number, chipFormatter: IChipFormatter) {
+
+
+    constructor(commandHandler: CommandHandler, tableID: number, chipFormatter: IChipFormatter) {
 
         this.commandHandler = commandHandler;
 
         this.tableID = tableID;
         this.table = null;
 
-        this.playerID = playerID;
         this.chipFormatter = chipFormatter;
 
         this.playerMap = new Map<number, Player>();
 
+        this.messageHandlers = new Array<MessageHandler>();
+
+    }
+
+    registerMessageHandler(handler: MessageHandler): void {
+
+        this.messageHandlers.push(handler);
+
+    }
+
+    unregisterMessageHandler(handler: MessageHandler): void {
+
+        this.messageHandlers = this.messageHandlers.filter(mh => mh !== handler);
+
+    }
+
+    private broadcastMessage(message: Message): void {
+
+        for (let handler of this.messageHandlers) {
+            handler.handleMessage(message);
+        }
+
     }
 
 
-    notify(action: Action): void {
+    public handleMessage(publicMessage: Message, privateMessage?: Message): void {
 
-        if (this.tableID != action.tableID) {
+        // By the time it gets here, there should never be a privateMessage
 
-            // Not my table - I don't care
+        // Pass it along
+        this.broadcastMessage(publicMessage);
+
+        let message: ActionMessage = publicMessage as ActionMessage;
+
+        if (!message) {
+
+            // Not an ActionMessage, so we don't care
             return;
 
         }
 
-        if (action instanceof TableSnapshotAction) {
+        let action: TableAction = message.action as TableAction;
 
-            return this.grabTableData(action);
+        if (!action || action.tableID !== this.tableID) {
+
+            // Not a TableAction, or not my table - I don't care
+            return;
 
         }
+
+        if (this.table == null) {
+
+            if (action instanceof TableSnapshotAction) {
+
+                return this.grabTableData(action);
+
+            }
+
+            // we don't have a table yet, so we can't do anything
+            return;
+
+        }
+
 
         if (action instanceof PlayerSeatedAction) {
 
@@ -160,11 +210,11 @@ export class TableWatcher implements TableObserver {
     }
 
 
-    private findPlayer(playerID: number): Player {
+    private findPlayer(userID: number): Player {
 
         for (let seat of this.table.seats) {
 
-            if (seat.player && seat.player.id == playerID) {
+            if (seat.player && seat.player.userID == userID) {
 
                 return seat.player;
 
@@ -190,10 +240,10 @@ export class TableWatcher implements TableObserver {
 
         if (seat) {
 
-            seat.player = new Player(action.player.id, action.player.name);
+            seat.player = new Player(action.player.userID, action.player.name);
             Object.assign(seat.player, action.player);
 
-            this.playerMap.set(action.player.id, seat.player);
+            this.playerMap.set(action.player.userID, seat.player);
             logger.info(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
 
 
@@ -234,7 +284,7 @@ export class TableWatcher implements TableObserver {
 
     private addChips(action: AddChipsAction): void {
 
-        let player = this.findPlayer(action.playerID);
+        let player = this.findPlayer(action.userID);
 
         if (player) {
 
@@ -313,7 +363,7 @@ export class TableWatcher implements TableObserver {
 
                         // This represents a call (possibly all-in)
                         let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
-                        let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+                        let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
                         this.commandHandler.handleCommand(betCommand);
                         return;
@@ -322,7 +372,7 @@ export class TableWatcher implements TableObserver {
                     else {
 
                         // We're folding!
-                        let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.id);
+                        let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
 
                         this.commandHandler.handleCommand(foldCommand);
                         return;
@@ -334,7 +384,7 @@ export class TableWatcher implements TableObserver {
 
                     // This represents a bet out (or a check, if the player has no chips)
                     let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
-                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.id, betAmount);
+                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
                     this.commandHandler.handleCommand(betCommand);
                     return;
