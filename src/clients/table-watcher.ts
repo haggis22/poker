@@ -1,10 +1,7 @@
-﻿import { Action } from "../actions/action";
-import { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
+﻿import { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 import { MoveButtonAction } from "../actions/table/game/move-button-action";
 import { Player } from "../players/player";
-import { IChipFormatter } from "../casino/chips/chip-formatter";
 import { DealtCard } from "../hands/dealt-card";
-import { Seat } from "../casino/tables/seat";
 import { Table } from "../casino/tables/table";
 import { TableSnapshotAction } from "../actions/table/state/table-snapshot-action";
 import { Hand } from "../hands/hand";
@@ -33,6 +30,7 @@ import { AnteAction } from "../actions/table/betting/ante-action";
 import { BetAction } from "../actions/table/betting/bet-action";
 import { FoldAction } from "../actions/table/betting/fold-action";
 import { BetReturnedAction } from "../actions/table/game/bet-returned-action";
+import { IChipFormatter } from "./chips/chip-formatter";
 
 const logger: Logger = new Logger();
 

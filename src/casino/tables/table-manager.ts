@@ -20,7 +20,6 @@ import { HandWinner } from "../../games/hand-winner";
 import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
 import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
 import { WinPotAction } from "../../actions/table/game/win-pot-action";
-import { IChipFormatter } from "../chips/chip-formatter";
 import { MoneyFormatter } from "../../clients/chips/money-formatter";
 import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
 import { BetCommand } from "../../commands/table/bet-command";
@@ -44,6 +43,7 @@ import { DealCardAction } from "../../actions/table/game/deal-card-action";
 import { BetTurnAction } from "../../actions/table/game/bet-turn-action";
 import { BetReturnedAction } from "../../actions/table/game/bet-returned-action";
 import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
+import { IChipFormatter } from "../../clients/chips/chip-formatter";
 
 const logger: Logger = new Logger();
 

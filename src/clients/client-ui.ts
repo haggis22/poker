@@ -1,10 +1,10 @@
-﻿import { CommandBroadcaster } from "../../commands/command-broadcaster";
-import { CommandHandler } from "../../commands/command-handler";
-import { Command } from "../../commands/command";
-import { MessageHandler } from "../../messages/message-handler";
-import { Message } from "../../messages/message";
-import { User } from "../../players/user";
-import { ActionMessage } from "../../messages/action-message";
+﻿import { MessageHandler } from "../messages/message-handler";
+import { CommandBroadcaster } from "../commands/command-broadcaster";
+import { User } from "../players/user";
+import { CommandHandler } from "../commands/command-handler";
+import { Message } from "../messages/message";
+import { ActionMessage } from "../messages/action-message";
+import { Command } from "../commands/command";
 
 export class ClientUI implements MessageHandler, CommandBroadcaster {
 

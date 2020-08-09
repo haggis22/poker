@@ -15,8 +15,8 @@ import { Stakes } from "./casino/tables/betting/stakes";
 import { TableSnapshotCommand } from "./commands/table/table-snapshot-command";
 import { ClientManager } from "./communication/server-side/client-manager";
 import { GameClient } from "./communication/client-side/game-client";
-import { ClientUI } from "./casino/clients/client-ui";
-import { ServerClient } from "./communication/server-client";
+import { ClientUI } from "./clients/client-ui";
+import { ServerClient } from "./communication/server-side/server-client";
 
 
 function createTable(): Table {
