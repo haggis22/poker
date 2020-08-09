@@ -13,12 +13,9 @@ export class ServerClient implements MessageHandler, MessageBroadcaster, Command
     private commandHandler: CommandHandler;
     private messageHandler: MessageHandler;
 
-    constructor(userID: number, clientManager: ClientManager) {
+    constructor(userID: number) {
 
         this.userID = userID;
-
-        this.registerCommandHandler(clientManager);
-        clientManager.registerMessageHandler(this);
 
     }
 

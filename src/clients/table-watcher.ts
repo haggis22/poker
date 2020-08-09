@@ -30,39 +30,29 @@ import { AnteAction } from "../actions/table/betting/ante-action";
 import { BetAction } from "../actions/table/betting/bet-action";
 import { FoldAction } from "../actions/table/betting/fold-action";
 import { BetReturnedAction } from "../actions/table/game/bet-returned-action";
-import { IChipFormatter } from "./chips/chip-formatter";
+import { CommandBroadcaster } from "../commands/command-broadcaster";
+import { Command } from "../commands/command";
 
 const logger: Logger = new Logger();
 
-export class TableWatcher implements MessageHandler, MessageBroadcaster {
+export class TableWatcher implements CommandHandler, CommandBroadcaster, MessageHandler, MessageBroadcaster {
 
-
-    private commandHandler: CommandHandler;
-
-    private chipFormatter: IChipFormatter;
 
     private tableID: number;
     private table: Table;
 
-    // Maps playerID to Player object
-    private playerMap: Map<number, Player>;
-
+    private commandHandlers: CommandHandler[];
     private messageHandlers: MessageHandler[];
 
 
 
-    constructor(commandHandler: CommandHandler, tableID: number, chipFormatter: IChipFormatter) {
-
-        this.commandHandler = commandHandler;
+    constructor(tableID: number) {
 
         this.tableID = tableID;
         this.table = null;
 
-        this.chipFormatter = chipFormatter;
-
-        this.playerMap = new Map<number, Player>();
-
         this.messageHandlers = new Array<MessageHandler>();
+        this.commandHandlers = new Array<CommandHandler>();
 
     }
 
@@ -86,6 +76,33 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
 
     }
 
+    registerCommandHandler(handler: CommandHandler): void {
+
+        this.commandHandlers.push(handler);
+
+    }
+
+    unregisterCommandHandler(handler: CommandHandler): void {
+
+        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+
+    }
+
+    broadcastCommand(command: Command): void {
+
+        for (let handler of this.commandHandlers) {
+            handler.handleCommand(command);
+        }
+
+    }
+
+    handleCommand(command: Command): void {
+
+        // TODO: validate the command is lawful
+        // This probably means combining the table-watcher and table-manager.  Sigh...
+        this.broadcastCommand(command);
+
+    }
 
     public handleMessage(publicMessage: Message, privateMessage?: Message): void {
 
@@ -241,10 +258,6 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
             seat.player = new Player(action.player.userID, action.player.name);
             Object.assign(seat.player, action.player);
 
-            this.playerMap.set(action.player.userID, seat.player);
-            logger.info(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex+1)}`);
-
-
         }
 
     }
@@ -287,7 +300,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
         if (player) {
 
             player.chips += action.amount;
-            logger.info(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips - now has ${this.chipFormatter.format(player.chips)}`);
+//            logger.info(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips - now has ${this.chipFormatter.format(player.chips)}`);
 
         }
 
@@ -301,7 +314,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
         if (player) {
 
             player.chips = action.chips;
-            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
+//            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
 
         }
 
@@ -363,7 +376,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
                         let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
                         let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
-                        this.commandHandler.handleCommand(betCommand);
+                        this.broadcastCommand(betCommand);
                         return;
 
                     }
@@ -372,7 +385,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
                         // We're folding!
                         let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
 
-                        this.commandHandler.handleCommand(foldCommand);
+                        this.broadcastCommand(foldCommand);
                         return;
 
                     }
@@ -384,7 +397,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
                     let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
                     let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
-                    this.commandHandler.handleCommand(betCommand);
+                    this.broadcastCommand(betCommand);
                     return;
 
                 }
@@ -433,6 +446,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
 
     private ante(action: AnteAction): void {
 
+/*
         let seat = this.table.seats[action.seatIndex];
 
         if (seat) {
@@ -451,12 +465,14 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
             throw new Error(`Ante: Seat index out of range: ${action.seatIndex}`);
 
         }
+*/
 
     }  // ante
 
 
     private bet(action: BetAction): void {
 
+/*
         let seat = this.table.seats[action.seatIndex];
 
         if (seat) {
@@ -495,6 +511,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
             throw new Error(`Bet: Seat index out of range: ${action.seatIndex}`);
 
         }
+*/
 
     }  // bet
 
@@ -520,7 +537,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
     private updateBets(action: UpdateBetsAction): void {
 
         this.table.betTracker = action.betTracker;
-
+/*
         for (let pot of this.table.betTracker.pots) {
 
             logger.info(`Pot ${(pot.index + 1)}: ${this.chipFormatter.format(pot.amount)} - ${pot.seats.size} player${pot.seats.size == 1 ? '' : 's'}`);
@@ -538,12 +555,14 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
         }
 
         logger.info(`   Bets: [ ${betString} ]`);
+*/
 
     }  // updateBets
 
 
     private winPot(action: WinPotAction): void {
 
+/*
         let seat = this.table.seats[action.seatIndex];
 
         if (seat) {
@@ -570,12 +589,14 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
             throw new Error(`WinPot: Seat index out of range: ${action.seatIndex}`);
 
         }
+*/
 
     }  // winPot
 
 
     private returnBet(action: BetReturnedAction): void {
 
+/*
         let seat = this.table.seats[action.seatIndex];
 
         if (seat) {
@@ -595,6 +616,7 @@ export class TableWatcher implements MessageHandler, MessageBroadcaster {
             throw new Error(`BetReturned: Seat index out of range: ${action.seatIndex}`);
 
         }
+*/
 
     }  // returnBet
 

@@ -15,7 +15,7 @@ import { Stakes } from "./casino/tables/betting/stakes";
 import { TableSnapshotCommand } from "./commands/table/table-snapshot-command";
 import { ClientManager } from "./communication/server-side/client-manager";
 import { GameClient } from "./communication/client-side/game-client";
-import { ClientUI } from "./clients/client-ui";
+import { TableUI } from "./clients/table-ui";
 import { ServerClient } from "./communication/server-side/server-client";
 
 
@@ -41,28 +41,35 @@ function createTable(): Table {
     let danny = new User(1, 'Danny', 10000);
 
     let table: Table = createTable();
+
+    // Create the components, working from the UI all the way to the TableManager on the server
+
+    // Client Side
+    let dannyUI: TableUI = new TableUI(danny, new MoneyFormatter());
+    let tableWatcher: TableWatcher = new TableWatcher(table.id);
+    let gameClient: GameClient = new GameClient();
+
+    // Server Side
+    let dannyServerClient: ServerClient = new ServerClient(danny.id);
+    let clientManager: ClientManager = new ClientManager();
     let tableManager: TableManager = new TableManager(table);
 
-    let clientManager: ClientManager = new ClientManager();
+    // Now join all the links in the chain
+    dannyUI.registerCommandHandler(tableWatcher);
 
-    tableManager.registerMessageHandler(clientManager);
-    clientManager.registerCommandHandler(tableManager);
-
-    let gameClient: GameClient = new GameClient();
-    let tableWatcher: TableWatcher = new TableWatcher(tableManager, table.id, new MoneyFormatter());
-    let clientUI: ClientUI = new ClientUI(danny);
+    tableWatcher.registerMessageHandler(dannyUI);
+    tableWatcher.registerCommandHandler(gameClient);
 
     gameClient.registerMessageHandler(tableWatcher);
-    gameClient.registerMessageHandler(clientUI);
-    clientUI.registerCommandHandler(gameClient);
+    gameClient.registerCommandHandler(dannyServerClient);
 
+    dannyServerClient.registerMessageHandler(gameClient);
+    dannyServerClient.registerCommandHandler(clientManager);
 
-    let dannyServerClient: ServerClient = new ServerClient(danny.id, clientManager);
-    // set up this server object to listen to the gameClient so that it will receive commands
-    dannyServerClient.registerCommandHandler(gameClient);
+    clientManager.registerMessageHandler(dannyServerClient);
+    clientManager.registerCommandHandler(tableManager);
 
-    // set up the client manager to receive commands from the ServerClient
-    clientManager.registerCommandHandler(dannyServerClient);
+    tableManager.registerMessageHandler(clientManager);
 
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);

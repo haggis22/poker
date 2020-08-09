@@ -154,7 +154,7 @@
     <TypeScriptCompile Include="src\clients\chips\chip-formatter.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\clients\client-ui.ts">
+    <TypeScriptCompile Include="src\clients\table-ui.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\clients\table-watcher.ts">
