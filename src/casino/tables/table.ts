@@ -8,9 +8,12 @@ import { TableRules } from "./table-rules";
 import { BetTracker } from "./betting/bet-tracker";
 import { Stakes } from "./betting/stakes";
 import { Game } from "../../games/game";
+import { Serializable } from "../../communication/serializable";
 
 
-export class Table {
+export class Table implements Serializable {
+
+    public isSerializable: boolean = true;
 
     public id: number;
 

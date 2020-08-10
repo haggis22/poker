@@ -1,8 +1,10 @@
 ﻿import { Hand } from "../hands/hand";
 import { User } from "./user";
+import { Serializable } from "../communication/serializable";
 
-export class Player {
+export class Player implements Serializable {
 
+    public isSerializable: boolean = true;
 
     public userID: number;
     public name: string;
@@ -13,10 +15,10 @@ export class Player {
     public isActive: boolean;
 
 
-    constructor(user: User) {
+    constructor() {
 
-        this.userID = user.id;
-        this.name = user.name;
+        // this.userID = user.id;
+        // this.name = user.name;
 
         this.chips = this.chipsToAdd = 0;
 

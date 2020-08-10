@@ -1,4 +1,5 @@
 ﻿import { Action } from "../action";
+import { Serializable } from "../../communication/serializable";
 
 export class TableAction extends Action {
 
@@ -10,16 +11,6 @@ export class TableAction extends Action {
 
         this.tableID = tableID;
 
-    }
-
-    serialize(): string {
-
-        return JSON.stringify(['TableAction', { tableID: this.tableID }]);
-
-    }
-
-    deserialize(txt: string) {
-        throw new Error("Method not implemented.");
     }
 
 

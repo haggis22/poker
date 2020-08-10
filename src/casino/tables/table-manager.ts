@@ -139,6 +139,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (action instanceof PlayerSeatedAction) {
 
+            this.log(` yes - it is a PlayerSeatedAction`);
             return this.seatPlayer(action);
 
         }
@@ -237,6 +238,8 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             this.log(` set player for seat ${seat.index}`);
 
             seat.player = action.player;
+
+            this.log(` updated seat: ${seat.getName()}`);
 
         }
 
@@ -439,7 +442,10 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             if (seat.player == null) {
 
-                let player:Player = new Player(command.user);
+                // let player:Player = new Player(command.user);
+                let player: Player = new Player();
+                player.userID = command.user.id;
+                player.name = command.user.name;
 
                 return this.handleAction(new PlayerSeatedAction(this.table.id, player, seatIndex));
 

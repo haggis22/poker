@@ -5,6 +5,7 @@ import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
 import { DannySocket } from "../danny-socket";
 import { Serializer } from "../serializer";
+import { ActionMessage } from "../../messages/action-message";
 
 export class GameClient implements MessageBroadcaster, CommandHandler, DannySocket {
 
@@ -38,11 +39,25 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
     receive(msgType: string, msg: string): void {
 
-        console.log(`GameClient: received ${msgType} : ${msg}`);
+        console.log(`GameClient: received ${msgType}`);
 
         let o: any = this.serializer.deserialize(msg);
 
+        console.log(`GameClient deserialization of type ${o.constructor.name} SUCCESS`);
+
         if (o && o instanceof Message) {
+
+            console.log('Yes, it is a Message');
+
+            let message: ActionMessage = o as ActionMessage;
+
+            if (message) {
+
+                console.log(`Yes, it is an ActionMessage, action class = ${message.action.constructor.name}`);
+
+                // && message.action instanceof TableAction) 
+            }
+
 
             // Pass the message along
             for (let handler of this.messageHandlers) {
@@ -52,6 +67,13 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
             }
 
         }
+
+        else {
+
+            console.log('No, it is NOT a Message');
+
+        }
+   
 
     }
 

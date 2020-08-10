@@ -1,7 +1,10 @@
 ﻿import { Message } from "./message";
 import { Action } from "../actions/action";
+import { Serializable } from "../communication/serializable";
 
-export class ActionMessage extends Message {
+export class ActionMessage extends Message implements Serializable {
+
+    public isSerializable: boolean = true;
 
     public action: Action;
 
