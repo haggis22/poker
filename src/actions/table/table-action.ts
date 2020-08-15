@@ -1,5 +1,4 @@
 ﻿import { Action } from "../action";
-import { Serializable } from "../../communication/serializable";
 
 export class TableAction extends Action {
 

@@ -1,9 +1,6 @@
 ﻿import { DealtCard } from "./dealt-card";
-import { Serializable } from "../communication/serializable";
 
-export class Hand implements Serializable {
-
-    public isSerializable: boolean = true;
+export class Hand {
 
     public cards: Array<DealtCard>;
 

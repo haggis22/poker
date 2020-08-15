@@ -1,4 +1,5 @@
-﻿export { Seat } from "../casino/tables/seat";
+﻿export { TableAction } from "../actions/table/table-action";
+export { Seat } from "../casino/tables/seat";
 export { Hand } from "../hands/hand";
 export { Table } from "../casino/tables/table";
 export { TableSnapshotAction } from "../actions/table/state/table-snapshot-action";
@@ -9,9 +10,5 @@ export { ActionMessage } from "../messages/action-message";
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 
 
-export interface Serializable {
 
-    isSerializable: boolean;
-
-}
 

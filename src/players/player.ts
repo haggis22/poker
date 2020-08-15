@@ -1,10 +1,7 @@
 ﻿import { Hand } from "../hands/hand";
 import { User } from "./user";
-import { Serializable } from "../communication/serializable";
 
-export class Player implements Serializable {
-
-    public isSerializable: boolean = true;
+export class Player {
 
     public userID: number;
     public name: string;

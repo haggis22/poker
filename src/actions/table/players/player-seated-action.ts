@@ -1,10 +1,7 @@
 ﻿import { TableAction } from "../table-action";
 import { Player } from "../../../players/player";
-import { Serializable } from "../../../communication/serializable";
 
-export class PlayerSeatedAction extends TableAction implements Serializable {
-
-    public isSerializable: boolean = true;
+export class PlayerSeatedAction extends TableAction {
 
     public player: Player;
     public seatIndex: number;
