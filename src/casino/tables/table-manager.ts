@@ -275,7 +275,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private broadcastAction(action: Action) {
 
-        logger.debug(`${(this.isMaster ? 'Server' : 'Client')} TableManager broadcast ${action.constructor.name} to ${this.messageHandlers.length} listeners`);
+        this.log(`broadcast ${action.constructor.name} to ${this.messageHandlers.length} listeners`);
 
         this.broadcastMessage(new ActionMessage(action));
 
@@ -309,7 +309,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     public handleCommand(command: Command): void {
 
-        logger.debug(`${(this.isMaster ? 'Server' : 'Client')} TableManager received ${ command.constructor.name }`);
+        this.log(`received ${ command.constructor.name }`);
 
         // Pass it along
         this.broadcastCommand(command);
@@ -413,7 +413,14 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private log(message: string): void {
 
-        logger.debug(`${(this.isMaster ? 'Server' : 'Client')} TableManager ${message}`);
+        let color: string = this.isMaster ? '\x1b[31m%s\x1b[0m' : '\x1b[32m%s\x1b[0m';
+
+        let msg = `${(this.isMaster ? 'Server' : 'Client')} TableManager ${message}`;
+
+        console.log(color, msg);
+
+        // logger.debug();
+
 
     }
 
@@ -648,7 +655,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.table.state = state;
 
-        logger.debug(`TableState: ${state.constructor.name}`);
+        this.log(`TableState: ${state.constructor.name}`);
 
         if (state instanceof StartHandState) {
 

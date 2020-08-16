@@ -197,7 +197,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private log(message: string): void {
 
-        logger.info(`${this.user.name}: ${message}`);
+        console.log('\x1b[32m%s\x1b[0m', `${this.user.name}: ${message}`);
+
+        //logger.info();
 
     }
 
