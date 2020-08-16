@@ -289,6 +289,13 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             this.log(` ${action.player.name} sat in ${seat.getName()}`);
 
+            if (this.isMaster) {
+
+                this.checkStartHand();
+
+            }
+
+
         }
 
     }
@@ -579,18 +586,16 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
 
 
-    private startGame(command: StartGameCommand): void {
+    private checkStartHand(): void {
 
-        if (this.table.state instanceof OpenState) {
+        if (this.table.state == null || this.table.state instanceof OpenState && this.isReadyForHand()) {
 
-            this.log(`Started game`);
+            this.log(`Starting new hand`);
             return this.goToNextState();
 
         }
 
-        // logger.info("Game is already in progress");
-
-    }  // startGame
+    }  // checkStartHand
 
 
 
@@ -699,12 +704,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private changeTableState(action: TableStateAction): void {
 
-        let state = action.state;
+        let state = action.state || new OpenState();
+
         this.table.state = state;
         this.log(`TableState: ${state.constructor.name}`);
 
-        if (state == null) {
-
+        if (state instanceof OpenState) {
 
             if (this.isReadyForHand()) {
 
@@ -714,8 +719,8 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             }
             else {
 
-                this.log('Table not ready - putting into open state');
-                return this.handleAction(new TableStateAction(this.table.id, new OpenState()));
+                this.log('Table not ready - leaving in OpenState');
+                return;
 
             }
 
@@ -1180,13 +1185,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         for (let pot of this.table.betTracker.pots) {
 
-            if (pot.seats.size === 1) {
+            if (pot.getNumPlayers() === 1) {
 
                 // Convert the set (of 1 element) to an array, and take its first element
-                let seat = this.table.seats[[...pot.seats][0]];
+                let seat = this.table.seats[pot.getSeatsInPot()[0]];
 
                 if (seat) {
-
 
                     potIndexesToKill.add(pot.index);
 
@@ -1251,7 +1255,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             for (let winner of winners) {
 
-                if (pot.seats.has(winner.seatIndex)) {
+                if (pot.isInPot(winner.seatIndex)) {
 
                     if (potWinningHand == null) {
 

@@ -2,14 +2,14 @@
 
     public index: number;
     public amount: number;
-    public seats: Set<number>;
+    public seats: object;
 
 
     constructor(index: number)
     {
         this.index = index;
         this.amount = 0;
-        this.seats = new Set<number>();
+        this.seats = {};
     }
 
     addChips(chips: number, seatIndex: number) {
@@ -17,14 +17,32 @@
         if (chips > 0) {
 
             this.amount += chips;
-            this.seats.add(seatIndex);
+            this.seats[seatIndex] = true;
 
         }
 
     }
 
     foldPlayer(seatIndex: number) {
-        this.seats.delete(seatIndex);
+        delete this.seats[seatIndex];
+    }
+
+    getNumPlayers(): number {
+
+        return Object.keys(this.seats).length;
+
+    }
+
+    isInPot(seatIndex: number): boolean {
+
+        return this.seats[seatIndex] || false;
+
+    }
+
+    getSeatsInPot(): any[] {
+
+        return Object.keys(this.seats);
+
     }
 
 }

@@ -40,7 +40,7 @@ export class PokerHandEvaluator implements HandEvaluator {
         for (let card of cards) {
 
             byValue[card.value.value] = (byValue[card.value.value] || 0) + 1;
-            bySuit[card.suit.value] (bySuit[card.suit.value] || 0) + 1;
+            bySuit[card.suit.value] = (bySuit[card.suit.value] || 0) + 1;
 
             if (bySuit[card.suit.value] === this.numCardsRequiredForStraightAndFlushes) {
                 isFlush = true;

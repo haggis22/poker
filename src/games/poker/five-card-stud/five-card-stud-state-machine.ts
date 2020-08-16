@@ -4,6 +4,7 @@ import { BetState } from "../../../casino/tables/states/betting/bet-state";
 import { ShowdownState } from "../../../casino/tables/states/showdown-state";
 import { HandCompleteState } from "../../../casino/tables/states/hand-complete-state";
 import { StartHandState } from "../../../casino/tables/states/start-hand-state";
+import { OpenState } from "../../../casino/tables/states/open-state";
 
 export class FiveCardStudStateMachine extends PokerStateMachine {
 

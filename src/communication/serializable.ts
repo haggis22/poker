@@ -1,4 +1,18 @@
-﻿export { StackUpdateAction } from "../actions/table/players/stack-update-action";
+﻿export { WinPotAction } from "../actions/table/game/win-pot-action";
+
+export { FlipCardsAction } from "../actions/table/game/flip-cards-action";
+export { PokerHandEvaluation } from "../games/poker/poker-hand-evaluation";
+
+export { BetAction } from "../actions/table/betting/bet-action";
+export { BetTurnAction } from "../actions/table/game/bet-turn-action";
+
+export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
+export { AnteAction } from "../actions/table/betting/ante-action";
+export { SetHandAction } from "../actions/table/game/set-hand-action";
+export { MoveButtonAction } from "../actions/table/game/move-button-action";
+export { DealCardAction } from "../actions/table/game/deal-card-action";
+
+export { StackUpdateAction } from "../actions/table/players/stack-update-action";
 export { AddChipsAction } from "../actions/table/players/add-chips-action";
 export { AddChipsCommand } from "../commands/table/add-chips-command";
 
@@ -38,7 +52,10 @@ export { Card } from "../cards/card";
 export { CardValue } from "../cards/card-value";
 export { CardSuit } from "../cards/card-suit";
 
+export { TableState } from "../casino/tables/states/table-state";
 export { TableStateMachine } from "../casino/tables/states/table-state-machine";
+export { TableStateAction } from "../actions/table/state/table-state-action";
+
 export { BestHandSelector } from "../games/hand-selectors/best-hand-selector";
 export { HandEvaluator } from "../games/hand-evaluator";
 export { HandDescriber } from "../games/hand-describer";
@@ -46,7 +63,6 @@ export { HandDescriber } from "../games/hand-describer";
 export { Game } from "../games/game";
 export { Stakes } from "../casino/tables/betting/stakes";
 export { TableRules } from "../casino/tables/table-rules";
-export { TableState } from "../casino/tables/states/table-state";
 export { Board } from "../casino/tables/boards/board";
 export { Deck } from "../cards/deck";
 export { BetTracker } from "../casino/tables/betting/bet-tracker";

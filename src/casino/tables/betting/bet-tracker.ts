@@ -198,7 +198,7 @@ export class BetTracker {
         // that everyone in the most recent pot should also be in this one
         let needsNew = false;
 
-        for (let previousBettorIndex of pot.seats) {
+        for (let previousBettorIndex of pot.getSeatsInPot()) {
             if (this.bets[previousBettorIndex] || 0 === 0) {
                 needsNew = true;
                 break;
