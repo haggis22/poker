@@ -88,55 +88,10 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
     clientManager.setTableManager(serverTableManager);
 
     clientManager.addClient(createClient(table.id, danny, clientManager));
+    clientManager.addClient(createClient(table.id, mark, clientManager));
     clientManager.addClient(createClient(table.id, paul, clientManager));
-
-
-
-/*
-
-    {
-        let requestSeatCommand = new RequestSeatCommand(table.id, mark, null);
-        serverTableManager.handleCommand(requestSeatCommand);
-    }
-
-    {
-        let requestSeatCommand = new RequestSeatCommand(table.id, paul, null);
-        serverTableManager.handleCommand(requestSeatCommand);
-    }
-
-    {
-        let requestSeatCommand = new RequestSeatCommand(table.id, joe, null);
-        serverTableManager.handleCommand(requestSeatCommand);
-    }
-
-    {
-        let requestSeatCommand = new RequestSeatCommand(table.id, sekhar, null);
-        serverTableManager.handleCommand(requestSeatCommand);
-    }
-
-
-    {
-        serverTableManager.handleCommand(new AddChipsCommand(table.id, 1, 700));
-    }
-
-    {
-        serverTableManager.handleCommand(new AddChipsCommand(table.id, 2, 500));
-    }
-
-    {
-        serverTableManager.handleCommand(new AddChipsCommand(table.id, 3, 600));
-    }
-
-    {
-        serverTableManager.handleCommand(new AddChipsCommand(table.id, 4, 400));
-    }
-
-    {
-        serverTableManager.handleCommand(new StartGameCommand(table.id));
-    }
-
-*/
-
+    clientManager.addClient(createClient(table.id, joe, clientManager));
+    clientManager.addClient(createClient(table.id, sekhar, clientManager));
 
 })();
 
