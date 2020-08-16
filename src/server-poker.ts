@@ -41,45 +41,55 @@ function createTable(): Table {
 }
 
 
+function createClient(tableID: number, user: User, clientManager: ClientManager): ServerClient {
+
+    // Client Side
+    let ui: TableUI = new TableUI(user, new MoneyFormatter());
+    let tableWatcher: TableManager = new TableManager(false, tableID, null, null);
+    let gameClient: GameClient = new GameClient();
+
+    // Server Side
+    let serverClient: ServerClient = new ServerClient(user.id);
+
+    // Now join all the links in the chain
+    ui.registerCommandHandler(tableWatcher);
+
+    tableWatcher.registerMessageHandler(ui);
+    tableWatcher.registerCommandHandler(gameClient);
+
+    gameClient.registerMessageHandler(tableWatcher);
+    gameClient.connect(serverClient);
+
+    serverClient.connect(gameClient);
+
+    return serverClient;
+
+}  // createClient
+
+
 (async function () {
 
      // testSerializer();
      // return;
 
-    let danny = new User(1, 'Danny', 10000);
-
     let table: Table = createTable();
 
     // Create the components, working from the UI all the way to the TableManager on the server
 
-    // Client Side
-    let dannyUI: TableUI = new TableUI(danny, new MoneyFormatter());
-    let tableWatcher: TableManager = new TableManager(false, table.id, null, null);
-    let gameClient: GameClient = new GameClient();
-
-    // Server Side
-    let dannyServerClient: ServerClient = new ServerClient(danny.id);
     let clientManager: ClientManager = new ClientManager();
     let serverTableManager: TableManager = new TableManager(true, table.id, table, new Deck());
 
-    // Now join all the links in the chain
-    dannyUI.registerCommandHandler(tableWatcher);
-
-    tableWatcher.registerMessageHandler(dannyUI);
-    tableWatcher.registerCommandHandler(gameClient);
-
-    gameClient.registerMessageHandler(tableWatcher);
-    gameClient.connect(dannyServerClient);
-
-    dannyServerClient.connect(gameClient);
-
-    clientManager.setTableManager(serverTableManager);
-    clientManager.addClient(dannyServerClient);
-
+    let danny = new User(1, 'Danny', 10000);
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
+
+    clientManager.setTableManager(serverTableManager);
+
+    clientManager.addClient(createClient(table.id, danny, clientManager));
+    clientManager.addClient(createClient(table.id, paul, clientManager));
+
 
 
 /*
