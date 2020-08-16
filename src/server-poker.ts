@@ -5,14 +5,9 @@ import { PokerGameFiveCardDraw } from "./games/poker/five-card-draw/poker-game-f
 import { PokerGameFiveCardStud } from "./games/poker/five-card-stud/poker-game-five-card-stud";
 import { MoneyFormatter } from "./clients/chips/money-formatter";
 import { TableManager } from "./casino/tables/table-manager";
-import { RequestSeatCommand } from "./commands/table/request-seat-command";
 import { User } from "./players/user";
-import { AddChipsCommand } from "./commands/table/add-chips-command";
-import { StartGameCommand } from "./commands/table/start-game-command";
-import { TableWatcher } from "./clients/table-watcher";
 import { TableRules } from "./casino/tables/table-rules";
 import { Stakes } from "./casino/tables/betting/stakes";
-import { TableSnapshotCommand } from "./commands/table/table-snapshot-command";
 import { ClientManager } from "./communication/server-side/client-manager";
 import { GameClient } from "./communication/client-side/game-client";
 import { TableUI } from "./clients/table-ui";
