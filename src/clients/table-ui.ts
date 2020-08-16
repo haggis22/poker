@@ -15,7 +15,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction } from "../communication/serializable";
 
 
 const logger: Logger = new Logger();
@@ -64,8 +64,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let action: Action = message.action;
 
-        this.log(`Heard ${action.constructor.name}`);
-
         if (action instanceof TableConnectedAction) {
 
             // we are connected, so request a snapshot of the table for this user
@@ -109,6 +107,25 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.updateStack(action);
         }
 
+        if (action instanceof TableStateAction) {
+
+            return this.changeTableState();
+
+        }
+
+        if (action instanceof AnteAction) {
+
+            return this.ante(action);
+
+        }
+
+        if (action instanceof BetAction) {
+
+//            return this.bet(action);
+
+        }
+
+
 
 /*
 
@@ -141,17 +158,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        if (action instanceof AnteAction) {
-
-            return this.ante(action);
-
-        }
-
-        if (action instanceof BetAction) {
-
-            return this.bet(action);
-
-        }
 
         if (action instanceof FoldAction) {
 
@@ -178,6 +184,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
 */
+        this.log(`Heard ${action.constructor.name}`);
 
     }
 
@@ -289,9 +296,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // updateStack
 
 
-
-
-
     private log(message: string): void {
 
         // For now, only log from Danny's POV
@@ -302,5 +306,59 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         //logger.info();
 
     }
+
+
+    private changeTableState(): void {
+
+        let state = this.table.state;
+
+        if (state instanceof StartHandState) {
+
+            return this.startHand();
+
+        }
+
+    }  // changeTableState
+
+
+
+    private startHand(): void {
+
+        for (let seat of this.table.seats) {
+
+            if (seat.player) {
+
+                this.log(`${seat.getName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
+
+            }
+
+        }
+
+    }   // startHand
+
+    private ante(action: AnteAction): void {
+
+        let seat = this.table.seats[action.seatIndex];
+        
+        if (seat) {
+        
+            let message = `${seat.getName()} antes ${this.chipFormatter.format(action.ante.chipsAdded)}`;
+        
+            if (action.ante.isAllIn) {
+                message += ' and is all-in';
+            }
+        
+            this.log(message);
+        
+        }
+        else {
+        
+            throw new Error(`Ante: Seat index out of range: ${action.seatIndex}`);
+        
+        }
+
+    }  // ante
+
+
 
 }

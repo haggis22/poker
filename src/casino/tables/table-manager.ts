@@ -198,6 +198,19 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         }
 
+        if (action instanceof AnteAction) {
+
+            // This is just a pass-through notification; only update the bets on an UpdateBetsAction
+            return;
+
+        }
+
+        if (action instanceof UpdateBetsAction) {
+
+//            return this.updateBets(action);
+
+        }
+
 
         /*
         if (action instanceof MoveButtonAction) {
@@ -229,11 +242,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         }
 
-        if (action instanceof AnteAction) {
-
-            return this.ante(action);
-
-        }
 
         if (action instanceof BetAction) {
 
@@ -248,11 +256,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         }
 
 
-        if (action instanceof UpdateBetsAction) {
-
-            return this.updateBets(action);
-
-        }
 
         if (action instanceof WinPotAction) {
 
@@ -709,6 +712,13 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         this.table.state = state;
         this.log(`TableState: ${state.constructor.name}`);
 
+        if (!this.isMaster) {
+
+            // only the server TableManager drives the activity
+            return;
+
+        }
+
         if (state instanceof OpenState) {
 
             if (this.isReadyForHand()) {
@@ -769,8 +779,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private startHand() {
 
-        let chipFormatter: IChipFormatter = new MoneyFormatter();
-
         for (let seat of this.table.seats) {
 
             if (seat.player) {
@@ -797,17 +805,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             }
 
         }
-
-        for (let seat of this.table.seats) {
-
-            if (seat.player) {
-
-                logger.info(`${seat.getName()}: ${chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
-
-            }
-
-        }
-
 
         this.deck.shuffle();
 
@@ -1319,7 +1316,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         // This will preserve the `this` reference in the call
         setTimeout(() => {
 
-            this.goToNextState();
+//             this.goToNextState();
 
         }, 2000);
 
@@ -1331,10 +1328,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         this.handleAction(new TableStateAction(this.table.id, this.table.game.stateMachine.nextState()));
 
     }
-
-
-
-
 
 
 

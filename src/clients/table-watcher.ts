@@ -213,30 +213,6 @@ export class TableWatcher {
     }  // flipCards
 
 
-    private ante(action: AnteAction): void {
-
-/*
-        let seat = this.table.seats[action.seatIndex];
-
-        if (seat) {
-
-            let message = `${seat.getName()} antes ${this.chipFormatter.format(action.ante.chipsAdded)}`;
-
-            if (action.ante.isAllIn) {
-                message += ' and is all-in';
-            }
-
-            logger.info(message);
-
-        }
-        else {
-
-            throw new Error(`Ante: Seat index out of range: ${action.seatIndex}`);
-
-        }
-*/
-
-    }  // ante
 
 
     private bet(action: BetAction): void {
