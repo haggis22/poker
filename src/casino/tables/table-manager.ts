@@ -295,7 +295,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private sendPrivateMessage(privateMessage: Message): void {
 
-        this.log(`I have ${this.messageHandlers.length} message handlers`);
+        // this.log(`I have ${this.messageHandlers.length} message handlers`);
         for (let handler of this.messageHandlers) {
 
             handler.handleMessage(null, privateMessage);
@@ -307,7 +307,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private broadcastAction(action: Action) {
 
-        this.log(`broadcast ${action.constructor.name} to ${this.messageHandlers.length} listeners`);
+        // this.log(`broadcast ${action.constructor.name} to ${this.messageHandlers.length} listeners`);
 
         this.broadcastMessage(new ActionMessage(action));
 
@@ -365,11 +365,13 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         }
 
+        /*
         if (command instanceof StartGameCommand) {
 
             return this.startGame(command);
 
         }
+        */
 
         if (command instanceof BetCommand) {
 
@@ -550,12 +552,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (this.table.state instanceof OpenState) {
 
-            logger.info("Started game");
+            this.log(`Started game`);
             return this.goToNextState();
 
         }
 
-        logger.info("Game is already in progress");
+        // logger.info("Game is already in progress");
 
     }  // startGame
 
@@ -677,7 +679,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             }
             else {
 
-                logger.info('Table not ready - putting into open state');
+                this.log('Table not ready - putting into open state');
                 this.table.state = new OpenState();
                 return;
 
