@@ -10,50 +10,39 @@ export class Serializer {
 
     public serialize(o: any): string {
 
-        let constructorName = o.constructor.name;
+        if (o === null) {
+
+            return JSON.stringify(o);
+
+        }
+
+        // if it's a primitive type, then just JSONify it
+        if (isPrimitive(o)) {
+            return JSON.stringify(o);
+        }
+
+        if (Array.isArray(o)) {
+
+            return JSON.stringify(o.map(arrayItem => this.serialize(arrayItem)));
+
+        }
 
         let so: any = {};
-        so[serializedConstructorName] = constructorName;
+
+        if (isSerializable(o)) {
+
+            so[serializedConstructorName] = o.constructor.name;
+
+        }
 
         for (let propKey of Object.keys(o)) {
 
-            let propValue: any = o[propKey];
-
-            if (propKey == 'action') {
-
-                console.log(`It's an action, is it PlayerSeatedAction: ${propValue instanceof PlayerSeatedAction}, isSerializable: ${isSerializable(propValue)}`);
-
-            }
-
-            if (isSerializable(propValue)) {
-
-                so[propKey] = this.serialize(propValue);
-            }
-            else if (o[propKey] != null) {
-                so[propKey] = JSON.stringify(propValue);
-
-            }
+            so[propKey] = this.serialize(o[propKey]);
 
         }
 
         let msg = JSON.stringify(so);
-
-        // console.log(`Serialization: ${msg}`);
-
-        if (o instanceof ActionMessage) {
-
-            console.log(`Serializing ${constructorName}, action is ${o.action.constructor.name}`);
-            console.log(`Serialized object: ${msg}`);
-
-        }
-        else if (o instanceof PlayerSeatedAction) {
-
-            console.log(`Serializing ${constructorName}`);
-            console.log(`Serialized object: ${msg}`);
-
-        }
-
-
+        // console.log(`Serialized object: ${msg}`);
         return msg;
 
     }   // serialize
@@ -61,7 +50,30 @@ export class Serializer {
 
     public deserialize(msg: string): any {
 
-        let outerObj:any = JSON.parse(msg);
+        let outerObj: any = null;
+
+        try {
+
+            outerObj = JSON.parse(msg);
+
+        }
+        catch (error) {
+            console.log(`Could not parse JSON from ${msg}`);
+            throw error;
+        }
+
+        if (outerObj == null || isPrimitive(outerObj)) {
+            return outerObj;
+        }
+
+        if (Array.isArray(outerObj)) {
+
+            // Each item in the array was serialized independently, so we need to deserialize it from its string
+            return outerObj.map(arrayItem => this.deserialize(arrayItem));
+
+        }
+
+        let prototype: any = null;
 
         if (outerObj.hasOwnProperty(serializedConstructorName)) {
 
@@ -69,34 +81,38 @@ export class Serializer {
 
             if (serializableType != null) {
 
-                let obj: any = Object.create(serializableType.prototype);
-
-                for (let propKey of Object.keys(outerObj)) {
-
-                    // Don't copy the property that specified the serialized class constructor - there's just no need
-                    if (propKey != serializedConstructorName) {
-
-                        obj[propKey] = this.deserialize(outerObj[propKey]);
-
-                    }
-
-                    // console.log(`Setting ${objArray[0]}.${objProp} to be (${typeof objValue}) ${objValue}`);
-
-                }
-
-                return obj;
+                prototype = serializableType.prototype;
 
             }
             else {
 
-                console.log(`Type not deserializable: ${outerObj[serializedConstructorName]}`);
+                throw new Error(`Type not deserializable: ${outerObj[serializedConstructorName]}`);
 
             }
 
         }
+        else {
 
-        // This was not an object with special serialization, so just parsing it from the JSON is fine
-        return outerObj;
+            prototype = outerObj;
+
+        }
+
+        let obj: any = Object.create(prototype);
+
+        for (let propKey of Object.keys(outerObj)) {
+
+            // Don't copy the property that specified the serialized class constructor, if it's there - there's just no need
+            if (propKey != serializedConstructorName) {
+
+                obj[propKey] = this.deserialize(outerObj[propKey]);
+
+            }
+
+            // console.log(`Setting ${objArray[0]}.${objProp} to be (${typeof objValue}) ${objValue}`);
+
+        }
+
+        return obj;
 
     }
 
@@ -129,6 +145,24 @@ function isDeserializable(obj: any): boolean {
     return obj.hasOwnProperty(serializedConstructorName) && serialization[obj[serializedConstructorName]];
 
 }
+
+
+function isPrimitive(obj) {
+
+    switch (typeof obj) {
+
+        case 'undefined':
+        case 'boolean':
+        case 'number':
+        case 'bigint':
+        case 'string':
+            return true;
+
+    }
+
+    return false;
+
+}   // isPrimitive
 
 
 

@@ -1,4 +1,14 @@
-﻿export { Pot } from "../casino/tables/betting/pot";
+﻿export { PokerHandEvaluator } from "../games/poker/poker-hand-evaluator";
+export { PokerHandDescriber } from "../games/poker/poker-hand-describer";
+export { NoBoard } from "../casino/tables/boards/no-board";
+export { Best5InHandSelector } from "../games/hand-selectors/best-5-in-hand-selector";
+export { FiveCardStudStateMachine } from "../games/poker/five-card-stud/five-card-stud-state-machine";
+
+export { HandEvaluation } from "../games/hand-evaluation";
+
+export { User } from "../players/user";
+
+export { Pot } from "../casino/tables/betting/pot";
 export { Bet } from "../casino/tables/betting/bet";
 export { Fold } from "../casino/tables/betting/fold";
 export { FoldAction } from "../actions/table/betting/fold-action";
@@ -21,6 +31,8 @@ export { TableState } from "../casino/tables/states/table-state";
 export { Board } from "../casino/tables/boards/board";
 export { Deck } from "../cards/deck";
 export { BetTracker } from "../casino/tables/betting/bet-tracker";
+
+
 export { TableAction } from "../actions/table/table-action";
 export { Seat } from "../casino/tables/seat";
 export { Hand } from "../hands/hand";
@@ -31,5 +43,6 @@ export { Command } from "../commands/command";
 export { Message } from "../messages/message";
 export { ActionMessage } from "../messages/action-message";
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
+
 
 

@@ -4,7 +4,7 @@ import { CardSuit } from "./card-suit";
 
 export class Deck {
 
-    private cards: Array<Card>
+    public cards: Array<Card>
 
     constructor() {
 
