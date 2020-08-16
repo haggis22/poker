@@ -32,17 +32,17 @@ export class PokerHandEvaluator implements HandEvaluator {
 
         this.sort(cards);
 
-        let byValue: Map<number, number> = new Map<number, number>();
-        let bySuit: Map<number, number> = new Map<number, number>();
+        let byValue: object = {};
+        let bySuit: object = {};
 
         let isFlush: boolean = false;
 
         for (let card of cards) {
 
-            byValue.set(card.value.value, (byValue.get(card.value.value) || 0) + 1);
-            bySuit.set(card.suit.value, (bySuit.get(card.suit.value) || 0) + 1);
+            byValue[card.value.value] = (byValue[card.value.value] || 0) + 1;
+            bySuit[card.suit.value] (bySuit[card.suit.value] || 0) + 1;
 
-            if (bySuit.get(card.suit.value) == this.numCardsRequiredForStraightAndFlushes) {
+            if (bySuit[card.suit.value] === this.numCardsRequiredForStraightAndFlushes) {
                 isFlush = true;
             }
 
@@ -52,15 +52,15 @@ export class PokerHandEvaluator implements HandEvaluator {
         let numThrees = 0;
         let numFours = 0;
 
-        for (let [value, numValue] of byValue) {
+        for (let cardValue of Object.keys(byValue)) {
 
-            if (numValue == 2) {
+            if (byValue[cardValue] === 2) {
                 numPairs++;
             }
-            else if (numValue == 3) {
+            else if (byValue[cardValue] === 3) {
                 numThrees++;
             }
-            else if (numValue == 4) {
+            else if (byValue[cardValue] === 4) {
                 numFours++;
             }
 
@@ -73,15 +73,19 @@ export class PokerHandEvaluator implements HandEvaluator {
 
         if (numFours > 0) {
 
-            for (let [value, numValue] of byValue) {
+            for (let cardValue of Object.keys(byValue)) {
 
-                if (numValue == 4) {
-                    // Always put the four-of-a-kind value at the start
-                    values.unshift(CardValue.lookup(value));
-                }
-                else {
-                    // put the non-four-of-a-kind at the end
-                    values.push(CardValue.lookup(value));
+                if (typeof cardValue === 'number') {
+
+                    if (byValue[cardValue] === 4) {
+                        // Always put the four-of-a-kind value at the start
+                        values.unshift(CardValue.lookup(cardValue));
+                    }
+                    else {
+                        // put the non-four-of-a-kind at the end
+                        values.push(CardValue.lookup(cardValue));
+                    }
+
                 }
 
             }
@@ -92,15 +96,19 @@ export class PokerHandEvaluator implements HandEvaluator {
 
         if (numThrees > 0 && numPairs > 0) {
 
-            for (let [value, numValue] of byValue) {
+            for (let cardValue of Object.keys(byValue)) {
 
-                if (numValue == 3) {
-                    // Always put the three-of-a-kind value at the start
-                    values.unshift(CardValue.lookup(value));
-                }
-                else {
-                    // put the two-of-a-kind at the end
-                    values.push(CardValue.lookup(value));
+                if (typeof cardValue === 'number') {
+
+                    if (byValue[cardValue] === 3) {
+                        // Always put the three-of-a-kind value at the start
+                        values.unshift(CardValue.lookup(cardValue));
+                    }
+                    else {
+                        // put the two-of-a-kind at the end
+                        values.push(CardValue.lookup(cardValue));
+                    }
+
                 }
 
             }
@@ -113,15 +121,19 @@ export class PokerHandEvaluator implements HandEvaluator {
 
             let kickers = new Array<number>();
 
-            for (let [value, numValue] of byValue) {
+            for (let cardValue of Object.keys(byValue)) {
 
-                if (numValue == 3) {
-                    // Always put the three-of-a-kind value at the start
-                    values.unshift(CardValue.lookup(value));
-                }
-                else {
-                    // remember the kickers and we'll sort them in order
-                    kickers.push(value);
+                if (typeof cardValue === 'number') {
+
+                    if (byValue[cardValue] === 3) {
+                        // Always put the three-of-a-kind value at the start
+                        values.unshift(CardValue.lookup(cardValue));
+                    }
+                    else {
+                        // remember the kickers and we'll sort them in order
+                        kickers.push(cardValue);
+                    }
+
                 }
 
             }
@@ -140,15 +152,19 @@ export class PokerHandEvaluator implements HandEvaluator {
             let pairs = new Array<number>();
             let kickers = new Array<number>();
 
-            for (let [value, numValue] of byValue) {
+            for (let cardValue of Object.keys(byValue)) {
 
-                if (numValue == 2) {
-                    // Remember the pair(s) and we'll sort them in order
-                    pairs.push(value);
-                }
-                else {
-                    // remember the kickers and we'll sort them in order
-                    kickers.push(value);
+                if (typeof cardValue === 'number') {
+
+                    if (byValue[cardValue] === 2) {
+                        // Remember the pair(s) and we'll sort them in order
+                        pairs.push(cardValue);
+                    }
+                    else {
+                        // remember the kickers and we'll sort them in order
+                        kickers.push(cardValue);
+                    }
+
                 }
 
             }
@@ -193,9 +209,11 @@ export class PokerHandEvaluator implements HandEvaluator {
         if (isFlush) {
 
             let kickers = new Array<number>();
-            for (let [value, numValue] of byValue) {
+            for (let value of Object.keys(byValue)) {
 
-                kickers.push(value);
+                if (typeof value === 'number') {
+                    kickers.push(value);
+                } 
 
             }
 
@@ -208,9 +226,13 @@ export class PokerHandEvaluator implements HandEvaluator {
 
 
         let kickers = new Array<number>();
-        for (let [value, numValue] of byValue) {
+        for (let value of Object.keys(byValue)) {
 
-            kickers.push(value);
+            if (typeof value === 'number') {
+
+                kickers.push(value);
+
+            }
 
         }
 

@@ -16,14 +16,14 @@ export class BetTracker {
     public timeToAct: number;
 
     // Tracks how much each seat has bet so far in this round
-    public bets: Map<number, number>;
+    public bets: object;
 
     public pots: Pot[];
 
     constructor() {
 
         this.pots = [];
-        this.bets = new Map<number, number>();
+        this.bets = {};
 
     }
 
@@ -38,7 +38,11 @@ export class BetTracker {
     public clearBets(): void {
 
         this.seatIndexInitiatingAction = null;
-        this.bets.clear();
+
+        for (const prop of Object.getOwnPropertyNames(this.bets)) {
+            delete this.bets[prop];
+        }
+
         this.currentBet = 0;
         this.isDeadRaise = false;
         this.seatIndex = null;
@@ -92,7 +96,7 @@ export class BetTracker {
         }
 
         // TODO: Make sure the bet is enough to call, or put the player all-in
-        let playerCurrentBet: number = this.bets.has(seat.index) ? this.bets.get(seat.index) : 0;
+        let playerCurrentBet: number = this.bets[seat.index] || 0;
 
         // If they tried to bet more than they have, then reduce it to an all-in
         totalBetAmount = Math.min(totalBetAmount, playerCurrentBet + seat.player.chips);
@@ -150,7 +154,7 @@ export class BetTracker {
 
         if (playerTotalBet > 0) {
 
-            this.bets.set(seat.index, playerTotalBet);
+            this.bets[seat.index] = playerTotalBet;
 
         }
 
@@ -173,7 +177,7 @@ export class BetTracker {
 
     public gatherBets(): void {
 
-        if (this.bets.size === 0) {
+        if (Object.keys(this.bets).length === 0) {
 
             // No bets to gather. Dump out or we will create extra pots because people from the last one are not in the "no-bets" round
             return;
@@ -195,7 +199,7 @@ export class BetTracker {
         let needsNew = false;
 
         for (let previousBettorIndex of pot.seats) {
-            if (!this.bets.has(previousBettorIndex) || this.bets.get(previousBettorIndex) === 0) {
+            if (this.bets[previousBettorIndex] || 0 === 0) {
                 needsNew = true;
                 break;
             }
@@ -214,7 +218,7 @@ export class BetTracker {
 
             let smallestBet = Number.MAX_VALUE;
 
-            for (let amount of this.bets.values()) {
+            for (let amount of Object.values(this.bets)) {
 
                 smallestBet = Math.min(smallestBet, amount);
 
@@ -222,18 +226,18 @@ export class BetTracker {
 
             done = true;
 
-            for (let seatIndex of this.bets.keys()) {
+            for (let seatIndex of Object.keys(this.bets)) {
 
                 pot.addChips(smallestBet, seatIndex);
-                this.bets.set(seatIndex, this.bets.get(seatIndex) - smallestBet);
+                this.bets[seatIndex] = this.bets[seatIndex] - smallestBet;
 
-                if (this.bets.get(seatIndex) > 0) {
+                if ((this.bets[seatIndex] || 0) > 0) {
 
                     done = false;
 
                 }
                 else {
-                    this.bets.delete(seatIndex);
+                    delete this.bets[seatIndex];
                 }
 
             }

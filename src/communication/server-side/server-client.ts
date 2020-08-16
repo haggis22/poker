@@ -35,7 +35,7 @@ export class ServerClient implements MessageHandler, CommandBroadcaster, DannySo
     private send(o: any): void {
 
         if (this.socket) {
-            this.socket.receive(o.constructor.name, this.serializer.serialize(o));
+            this.socket.receive(this.serializer.serialize(o));
         }
 
     }

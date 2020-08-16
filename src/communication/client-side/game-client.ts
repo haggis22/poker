@@ -6,6 +6,7 @@ import { Message } from "../../messages/message";
 import { DannySocket } from "../danny-socket";
 import { Serializer } from "../serializer";
 import { ActionMessage } from "../../messages/action-message";
+import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 
 export class GameClient implements MessageBroadcaster, CommandHandler, DannySocket {
 
@@ -32,18 +33,16 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
     private send(o: any): void {
 
         if (this.socket) {
-            this.socket.receive(o.constructor.name, this.serializer.serialize(o));
+            this.socket.receive(this.serializer.serialize(o));
         }
 
     }
 
-    receive(msgType: string, msg: string): void {
-
-        this.log(`GameClient: received ${msgType}`);
+    receive(msg: string): void {
 
         let o: any = this.serializer.deserialize(msg);
 
-        this.log(`GameClient deserialization of type ${o.constructor.name} SUCCESS`);
+        this.log(`GameClient received ${o.constructor.name}`);
 
         if (o && o instanceof Message) {
 
@@ -53,15 +52,15 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
             if (message) {
 
-                // this.log(`Yes, it is an ActionMessage, action class = ${message.action.constructor.name}`);
+                this.log(`GameClient received action ${message.action.constructor.name}`);
 
-                // && message.action instanceof TableAction) 
             }
 
 
             // Pass the message along
             for (let handler of this.messageHandlers) {
 
+                this.log(`Passed message to ${handler.constructor.name}`);
                 handler.handleMessage(o);
 
             }

@@ -72,25 +72,15 @@ function createTable(): Table {
     gameClient.connect(dannyServerClient);
 
     dannyServerClient.connect(gameClient);
-    dannyServerClient.registerCommandHandler(clientManager);
 
-    clientManager.registerMessageHandler(dannyServerClient);
-    clientManager.registerCommandHandler(serverTableManager);
-
-    serverTableManager.registerMessageHandler(clientManager);
+    clientManager.setTableManager(serverTableManager);
+    clientManager.addClient(dannyServerClient);
 
     let mark = new User(2, 'Mark', 10000);
     let paul = new User(3, 'Paul', 10000);
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
 
-
-    serverTableManager.handleCommand(new TableSnapshotCommand(table.id, danny.id));
-
-    {
-        let requestSeatCommand = new RequestSeatCommand(table.id, danny, null);
-        serverTableManager.handleCommand(requestSeatCommand);
-    }
 
 /*
 

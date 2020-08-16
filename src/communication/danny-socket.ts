@@ -1,5 +1,5 @@
 ﻿export interface DannySocket {
 
-    receive(msgType: string, msg: string): void;
+    receive(msg: string): void;
 
 }

@@ -11,6 +11,9 @@ import { TableSnapshotAction } from "../actions/table/state/table-snapshot-actio
 import { Action } from "../actions/action";
 import { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 import { Logger } from "../logging/logger";
+import { TableConnectedAction } from "../actions/table/state/table-connected-action";
+import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
+import { RequestSeatCommand } from "../commands/table/request-seat-command";
 
 
 const logger: Logger = new Logger();
@@ -59,16 +62,30 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let action: Action = message.action;
 
+        this.log(`Heard ${action.constructor.name}`);
+
+        if (action instanceof TableConnectedAction) {
+
+            // we are connected, so request a snapshot of the table for this user
+            this.broadcastCommand(new TableSnapshotCommand(action.tableID, this.user.id))
+            return;
+
+        }
+
         if (this.table == null) {
 
             if (action instanceof TableSnapshotAction) {
 
                 this.table = action.table;
+
+                // request a seat at the table - the null parameter means any seat will do
+                this.broadcastCommand(new RequestSeatCommand(this.table.id, this.user, null));
+
                 return;
 
             }
 
-            // we don't have a table yet, so we can't do anything
+            // we don't have a table yet, so we can't do anything else
             return;
 
         }
@@ -173,6 +190,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private broadcastCommand(command: Command) {
 
+        this.log(`Sent ${command.constructor.name}`);
+
         for (let handler of this.commandHandlers) {
 
             handler.handleCommand(command);
@@ -189,6 +208,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             this.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`);
+            this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
         }
 
@@ -197,7 +217,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private log(message: string): void {
 
-        console.log('\x1b[32m%s\x1b[0m', `${this.user.name}: ${message}`);
+        console.log(`${this.user.name}: ${message}`);
 
         //logger.info();
 

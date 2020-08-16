@@ -19,7 +19,8 @@ export class Seat {
 
     public getName(): string {
 
-        return this.player ? this.player.name : `Seat ${(this.index + 1)}`;
+        // return this.player ? this.player.name : `Seat ${(this.index + 1)}`;
+        return `Seat ${(this.index + 1)}`;
 
     }
 

@@ -56,7 +56,8 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     private readonly ALL_ACCESS: number = -1;
 
     private isMaster: boolean;
-    private tableID: number;
+    public tableID: number;
+
     private table: Table;
     private deck: Deck;
 
@@ -106,25 +107,26 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (message && message.action instanceof TableAction) {
 
-            this.handleAction(message.action);
+            if (this.handleAction(message.action)) {
 
-            // We have handled it
-            return;
+                // We have handled it
+                return;
+
+            }
 
         }
-
 
         // Pass it along
         this.broadcastMessage(publicMessage);
 
     }
 
-    private handleAction(action: TableAction): void {
+    private handleAction(action: TableAction): boolean {
 
         if (!action || action.tableID !== this.tableID) {
 
             // Not a TableAction, or not my table - I don't care
-            return;
+            return false;
 
         }
 
@@ -132,19 +134,21 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             if (action instanceof TableSnapshotAction) {
 
-                return this.grabTableData(action);
+                this.grabTableData(action);
+                return true;
 
             }
 
             // we don't have a table yet, so we can't do anything
-            return;
+            return false;
 
         }
 
         if (action instanceof PlayerSeatedAction) {
 
-            this.log(` yes - it is a PlayerSeatedAction`);
-            return this.seatPlayer(action);
+            // this.log(` yes - it is a PlayerSeatedAction`);
+            this.seatPlayer(action);
+            return true;
 
         }
 
@@ -222,6 +226,9 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             return this.returnBet(action);
         }
 */
+
+        return false;
+
     }
 
 
@@ -229,21 +236,23 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.table = action.table;
 
+        this.broadcastAction(action);
+
     }
 
     private seatPlayer(action: PlayerSeatedAction): void {
 
-        this.log(' in seatPlayer (action)');
+        // this.log(' in seatPlayer (action)');
 
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
         if (seat) {
 
-            this.log(` set player for seat ${seat.index}`);
+            // this.log(` set player for seat ${seat.index}`);
 
             seat.player = action.player;
 
-            this.log(` updated seat: ${seat.getName()}`);
+            this.log(` ${action.player.name} sat in ${seat.getName()}`);
 
         }
 
@@ -264,9 +273,10 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private sendPrivateMessage(privateMessage: Message): void {
 
-        for (let observer of this.messageHandlers) {
+        this.log(`I have ${this.messageHandlers.length} message handlers`);
+        for (let handler of this.messageHandlers) {
 
-            observer.handleMessage(null, privateMessage);
+            handler.handleMessage(null, privateMessage);
 
         }
 
@@ -363,14 +373,8 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private createTableSnapshot(userID: number): Table {
 
+        let table: Table = new Table(this.table.id, this.table.game, this.table.stakes, this.table.rules);
 
-        let game = Object.assign({}, this.table.game);
-        let stakes = Object.assign({}, this.table.stakes);
-        let rules = Object.assign({}, this.table.rules);
-
-        let table: Table = new Table(this.table.id, game, stakes, rules);
-
-        // TODO: make shallow copies of all these instead
         table.betTracker = this.table.betTracker;
         table.buttonIndex = this.table.buttonIndex;
         table.board = this.table.board;
@@ -379,7 +383,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             table.seats[s].player = this.table.seats[s].player;
 
-            let hand = null;
+            let hand:Hand = null;
 
             if (this.table.seats[s].hand != null) {
 
@@ -417,7 +421,11 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         let msg = `${(this.isMaster ? 'Server' : 'Client')} TableManager ${message}`;
 
-        console.log(color, msg);
+        if (this.isMaster) {
+
+            console.log(color, msg);
+
+        }
 
         // logger.debug();
 
@@ -457,11 +465,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
                 player.userID = command.user.id;
                 player.name = command.user.name;
 
-                return this.handleAction(new PlayerSeatedAction(this.table.id, player, seatIndex));
+                this.handleAction(new PlayerSeatedAction(this.table.id, player, seatIndex));
+                return;
 
             }
 
-            return this.sendPrivateMessage(new Message(`Seat ${(seatIndex + 1)} is already taken`, command.user.id));
+            return this.sendPrivateMessage(new Message(`${seat.getName()} is already taken`, command.user.id));
 
         }
 
@@ -602,6 +611,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         let tableAction: TableSnapshotAction = new TableSnapshotAction(table.id, table);
 
+        this.log('Generating private snapshot message');
         this.sendPrivateMessage(new ActionMessage(tableAction, command.userID));
 
     }

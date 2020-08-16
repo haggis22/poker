@@ -2,93 +2,107 @@
 import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { ServerClient } from "./server-client";
-import { MessageBroadcaster } from "../../messages/message-broadcaster";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
+import { TableManager } from "../../casino/tables/table-manager";
+import { ActionMessage } from "../../messages/action-message";
+import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 
-export class ClientManager implements MessageHandler, MessageBroadcaster, CommandHandler, CommandBroadcaster {
+export class ClientManager implements MessageHandler, CommandHandler {
 
 
-    private commandHandlers: CommandHandler[];
-    private messageHandlers: MessageHandler[];
+    private tableManager: TableManager;
+
+    private clients: ServerClient[];
 
 
     constructor()
     {
-
-        this.commandHandlers = new Array<CommandHandler>();
-        this.messageHandlers = new Array<MessageHandler>();
+        this.clients = new Array<ServerClient>();
     }
+
+    setTableManager(tableManager: TableManager) {
+
+        this.tableManager = tableManager;
+
+        this.tableManager.registerMessageHandler(this);
+
+        for (let client of this.clients) {
+
+            client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableManager.tableID)));
+
+        }
+
+    }
+
+    addClient(client: ServerClient) {
+
+        this.clients.push(client);
+
+        // Set this manager to listen to commands from this new client
+        client.registerCommandHandler(this);
+
+        this.log(`Connected client for userID ${client.userID}`);
+
+        client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableManager.tableID)));
+
+    }
+
+    removeClient(client: ServerClient) {
+
+        this.clients = this.clients.filter(c => c !== client);
+
+    }
+
+
+    private log(msg: string): void {
+
+        console.log('\x1b[33m%s\x1b[0m', msg);
+    }
+
 
     handleCommand(command: Command): void {
 
         console.log(`ClientManager heard: ${command.constructor.name}`);
 
-        for (let handler of this.commandHandlers) {
-            handler.handleCommand(command);
-        }
+        this.broadcastCommand(command);
 
     }
 
-    registerMessageHandler(handler: MessageHandler) {
-
-        this.messageHandlers.push(handler);
-    }
-
-    unregisterMessageHandler(handler: MessageHandler) {
-
-        this.messageHandlers = this.messageHandlers.filter(ah => ah !== handler);
-
-    }
-
-
-
-    public registerCommandHandler(handler: CommandHandler) {
-        this.commandHandlers.push(handler);
-    }
-
-    public unregisterCommandHandler(handler: CommandHandler) {
-        this.commandHandlers = this.commandHandlers.filter(ch => ch != handler);
-    }
 
     private broadcastCommand(command: Command) {
 
-        for (let handler of this.commandHandlers) {
-            handler.handleCommand(command);
+        if (this.tableManager) {
+            this.tableManager.handleCommand(command);
         }
 
     }
 
     public handleMessage(publicMessage: Message, privateMessage?: Message): void {
 
-        for (let handler of this.messageHandlers) {
+        for (let client of this.clients) {
 
-            if (handler instanceof ServerClient) {
+            if (privateMessage) {
 
-                if (privateMessage) {
+                if (client.userID === privateMessage.userID) {
 
-                    if (handler.userID === privateMessage.userID) {
-                        handler.handleMessage(privateMessage);
-                    }
-                    else {
-
-                        if (publicMessage) {
-
-                            handler.handleMessage(publicMessage);
-
-                        }
-
-                    }
+                    client.handleMessage(privateMessage);
 
                 }
                 else {
-                    // there is no private message, so just send them the publicly-available one
-                    handler.handleMessage(publicMessage);
+
+                    if (publicMessage) {
+
+                        client.handleMessage(publicMessage);
+
+                    }
+
                 }
 
             }
             else {
-                handler.handleMessage(publicMessage);
+                // there is no private message, so just send them the publicly-available one
+                client.handleMessage(publicMessage);
             }
 
         }

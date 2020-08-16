@@ -5,6 +5,9 @@ import { PlayerSeatedAction } from "../actions/table/players/player-seated-actio
 
 const serializedConstructorName: string = "__serializedClass";
 
+const MAP_ENTRIES: string = '__mapEntries:';
+
+
 export class Serializer {
 
     private log(msg: string): void {
@@ -33,6 +36,7 @@ export class Serializer {
 
         }
 
+
         let so: any = {};
 
         if (isSerializable(o)) {
@@ -40,11 +44,25 @@ export class Serializer {
             so[serializedConstructorName] = o.constructor.name;
 
         }
+        else if (o instanceof Map) {
+
+            so[serializedConstructorName] = 'Map';
+
+            so[MAP_ENTRIES] = Array.from(o.entries()).map(entry => [this.serialize(entry[0]), this.serialize(entry[1])]);
+
+            // We can let it drop through since a Map has no properties
+
+        }
         else {
-            this.log(`WARN: Cannot serialize ${o.constructor.name}`);
+            // this.log(`WARN: Cannot serialize ${o.constructor.name}`);
         }
 
         for (let propKey of Object.keys(o)) {
+
+            if (o[propKey] != null && !isSerializable(o[propKey]) && typeof o[propKey] === 'object' && !Array.isArray(o[propKey]))
+            {
+                this.log(`WARN: ${o.constructor.name}.${propKey} is being serialized as a plain object`);
+            }
 
             so[propKey] = this.serialize(o[propKey]);
 
@@ -91,6 +109,11 @@ export class Serializer {
             if (serializableType != null) {
 
                 prototype = serializableType.prototype;
+
+            }
+            else if (outerObj[serializedConstructorName] == 'Map') {
+
+                throw new Error('Map is currently not deserializable');
 
             }
             else {
