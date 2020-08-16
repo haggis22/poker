@@ -57,13 +57,14 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
     private log(msg: string): void {
 
-        console.log('\x1b[33m%s\x1b[0m', msg);
+        // console.log('\x1b[33m%s\x1b[0m', msg);
+
     }
 
 
     handleCommand(command: Command): void {
 
-        console.log(`ClientManager heard: ${command.constructor.name}`);
+        this.log(`heard: ${command.constructor.name}`);
 
         this.broadcastCommand(command);
 

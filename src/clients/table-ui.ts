@@ -217,7 +217,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private log(message: string): void {
 
-        console.log(`${this.user.name}: ${message}`);
+        // For now, only log from Danny's POV
+        if (this.user.id === 1) {
+            console.log(`${this.user.name}: ${message}`);
+        }
 
         //logger.info();
 
