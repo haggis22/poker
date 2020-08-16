@@ -33,6 +33,9 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
     private send(o: any): void {
 
         if (this.socket) {
+
+            this.log(`Sending ${o.constructor.name}`);
+
             this.socket.receive(this.serializer.serialize(o));
         }
 
