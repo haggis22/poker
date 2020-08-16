@@ -34,7 +34,7 @@ function createTable(): Table {
     // blinds, ante, minRaise
     let stakes = new Stakes(new Array<number>(), 50, 200);
 
-    let table: Table = new Table(tableID, new PokerGameFiveCardStud(), stakes, rules, new Deck());
+    let table: Table = new Table(tableID, new PokerGameFiveCardStud(), stakes, rules);
 
     return table;
 
@@ -54,13 +54,13 @@ function createTable(): Table {
 
     // Client Side
     let dannyUI: TableUI = new TableUI(danny, new MoneyFormatter());
-    let tableWatcher: TableManager = new TableManager(false, table.id, null);
+    let tableWatcher: TableManager = new TableManager(false, table.id, null, null);
     let gameClient: GameClient = new GameClient();
 
     // Server Side
     let dannyServerClient: ServerClient = new ServerClient(danny.id);
     let clientManager: ClientManager = new ClientManager();
-    let serverTableManager: TableManager = new TableManager(true, table.id, table);
+    let serverTableManager: TableManager = new TableManager(true, table.id, table, new Deck());
 
     // Now join all the links in the chain
     dannyUI.registerCommandHandler(tableWatcher);

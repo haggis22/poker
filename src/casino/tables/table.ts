@@ -1,5 +1,4 @@
-﻿import { Deck } from "../../cards/deck";
-import { Board } from "./boards/board";
+﻿import { Board } from "./boards/board";
 
 import { TableState } from "./states/table-state";
 import { OpenState } from "./states/open-state";
@@ -22,7 +21,6 @@ export class Table {
     public seats: Array<Seat>;
 
     public board: Board;
-    public deck: Deck;
 
     public betTracker: BetTracker;
 
@@ -30,7 +28,7 @@ export class Table {
     public buttonIndex: number;
 
 
-    constructor(id: number, game: Game, stakes: Stakes, rules: TableRules, deck: Deck) {
+    constructor(id: number, game: Game, stakes: Stakes, rules: TableRules) {
 
         this.id = id;
 
@@ -46,8 +44,6 @@ export class Table {
 
         // Button is not yet assigned
         this.buttonIndex = null;
-
-        this.deck = deck;
 
         this.betTracker = new BetTracker();
 

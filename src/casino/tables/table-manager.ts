@@ -46,6 +46,7 @@ import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
 import { IChipFormatter } from "../../clients/chips/chip-formatter";
 import { CommandBroadcaster } from "../../commands/command-broadcaster";
 import { TableAction } from "../../actions/table/table-action";
+import { Deck } from "../../cards/deck";
 
 const logger: Logger = new Logger();
 
@@ -57,6 +58,8 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     private isMaster: boolean;
     private tableID: number;
     private table: Table;
+    private deck: Deck;
+
 
     private commandHandlers: CommandHandler[];
     private messageHandlers: MessageHandler[];
@@ -68,11 +71,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     private numTimersKilled: number;
 
 
-    constructor(isMaster: boolean, tableID: number, table: Table) {
+    constructor(isMaster: boolean, tableID: number, table: Table, deck: Deck) {
 
         this.isMaster = isMaster;
         this.tableID = tableID;
         this.table = table;
+        this.deck = deck;
 
         this.commandHandlers = new Array<CommandHandler>();
         this.messageHandlers = new Array<MessageHandler>();
@@ -363,9 +367,8 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         let game = Object.assign({}, this.table.game);
         let stakes = Object.assign({}, this.table.stakes);
         let rules = Object.assign({}, this.table.rules);
-        let deck = null;
 
-        let table: Table = new Table(this.table.id, game, stakes, rules, deck);
+        let table: Table = new Table(this.table.id, game, stakes, rules);
 
         // TODO: make shallow copies of all these instead
         table.betTracker = this.table.betTracker;
@@ -720,7 +723,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         }
 
 
-        this.table.deck.shuffle();
+        this.deck.shuffle();
 
         this.table.betTracker.reset();
 
@@ -864,7 +867,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         for (let seatIndex of seatsNeedingCards) {
 
-            let card = this.table.deck.deal();
+            let card = this.deck.deal();
             let seat = this.table.seats[seatIndex];
             let userID = seat.player.userID;
 
