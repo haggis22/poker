@@ -15,7 +15,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction } from "../communication/serializable";
 
 
 const logger: Logger = new Logger();
@@ -119,15 +119,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        if (action instanceof BetAction) {
+        if (action instanceof UpdateBetsAction) {
 
-//            return this.bet(action);
+            return this.updateBets(action);
 
         }
 
 
 
+
 /*
+        if (action instanceof BetAction) {
+
+//          return this.bet(action);
+
+        }
+
 
         if (action instanceof MoveButtonAction) {
 
@@ -166,11 +173,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
 
-        if (action instanceof UpdateBetsAction) {
-
-            return this.updateBets(action);
-
-        }
 
         if (action instanceof WinPotAction) {
 
@@ -358,6 +360,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }  // ante
+
+    private updateBets(action: UpdateBetsAction): void {
+
+        for (let pot of this.table.betTracker.pots) {
+        
+            let potDesc = `${pot.getName()}: ${this.chipFormatter.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
+            potDesc += pot.getSeatsInPot().map(seatIndex => this.table.seats[seatIndex].getName()).join(", ");
+            this.log(potDesc);
+        
+        }
+        
+    }  // updateBets
+
 
 
 

@@ -279,32 +279,6 @@ export class TableWatcher {
     }  // fold
 
 
-    private updateBets(action: UpdateBetsAction): void {
-
-        this.table.betTracker = action.betTracker;
-/*
-        for (let pot of this.table.betTracker.pots) {
-
-            logger.info(`Pot ${(pot.index + 1)}: ${this.chipFormatter.format(pot.amount)} - ${pot.seats.size} player${pot.seats.size == 1 ? '' : 's'}`);
-
-        }
-
-        let betString = '';
-        let comma = '';
-
-        for (let [key, value] of this.table.betTracker.bets) {
-
-            betString += `${comma}${this.table.seats[key].getName()}: ${this.chipFormatter.format(value)}`;
-            comma = ', ';
-
-        }
-
-        logger.info(`   Bets: [ ${betString} ]`);
-*/
-
-    }  // updateBets
-
-
     private winPot(action: WinPotAction): void {
 
 /*

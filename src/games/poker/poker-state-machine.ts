@@ -29,7 +29,7 @@ export class PokerStateMachine implements TableStateMachine {
         if (this.currentStateIndex >= this.states.length) {
             this.currentStateIndex = null;
 
-            // we are done with the hand - no more state
+            // we are done with the hand - no more states
             return null;
         }
 

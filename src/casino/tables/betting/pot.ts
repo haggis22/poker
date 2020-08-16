@@ -45,4 +45,10 @@
 
     }
 
+    getName(): string {
+
+        return (this.index === 0) ? 'the main pot' : `side pot #${this.index}`;
+    }
+
+
 }

@@ -207,7 +207,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (action instanceof UpdateBetsAction) {
 
-//            return this.updateBets(action);
+            return this.updateBets(action);
 
         }
 
@@ -810,7 +810,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.table.betTracker.reset();
 
-        this.broadcastAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+        this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         for (let seat of this.table.seats) {
 
@@ -837,9 +837,9 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                     if (ante.isValid) {
 
-                        this.broadcastAction(new AnteAction(this.table.id, seat.index, ante));
-                        this.broadcastAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
-                        this.broadcastAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                        this.handleAction(new AnteAction(this.table.id, seat.index, ante));
+                        this.handleAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+                        this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
                     }  // valid ante
                     else {
@@ -855,19 +855,19 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             else {
 
-                logger.info(`${seat.getName()} is sitting out`);
+                // logger.info(`${seat.getName()} is sitting out`);
                 seat.hand = null;
 
             }
 
             // This will tell watchers whether or not the given seat is in the hand
-            this.broadcastAction(new SetHandAction(this.table.id, seat.index, seat.hand != null));
+            this.handleAction(new SetHandAction(this.table.id, seat.index, seat.hand != null));
 
         }  // for each seat
 
         this.table.betTracker.gatherBets();
 
-        this.broadcastAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+        this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         this.checkBetsToReturn();
 
@@ -882,7 +882,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.table.buttonIndex = this.findNextOccupiedSeatIndex(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
 
-        this.broadcastAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
+        this.handleAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
 
     }
 
@@ -1191,12 +1191,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                     potIndexesToKill.add(pot.index);
 
-                    this.broadcastAction(new BetReturnedAction(this.table.id, seat.index, pot.amount));
+                    this.handleAction(new BetReturnedAction(this.table.id, seat.index, pot.amount));
 
                     if (seat.player) {
 
                         seat.player.chips += pot.amount;
-                        this.broadcastAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+                        this.handleAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
 
                     }  // if player is not null
 
@@ -1209,7 +1209,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         if (potIndexesToKill.size > 0) {
 
             this.table.betTracker.killPots(potIndexesToKill);
-            this.broadcastAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+            this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         }
 
@@ -1328,6 +1328,15 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         this.handleAction(new TableStateAction(this.table.id, this.table.game.stateMachine.nextState()));
 
     }
+
+
+    private updateBets(action: UpdateBetsAction): void {
+
+        this.table.betTracker = action.betTracker;
+
+    }  // updateBets
+
+
 
 
 
