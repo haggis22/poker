@@ -47,6 +47,7 @@ import { IChipFormatter } from "../../clients/chips/chip-formatter";
 import { CommandBroadcaster } from "../../commands/command-broadcaster";
 import { TableAction } from "../../actions/table/table-action";
 import { Deck } from "../../cards/deck";
+import { TableStateAction } from "../../actions/table/state/table-state-action";
 
 const logger: Logger = new Logger();
 
@@ -71,6 +72,9 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     private numTimersElapsed: number;
     private numTimersKilled: number;
 
+    private messageQueue: Message[];
+    private commandQueue: Command[];
+
 
     constructor(isMaster: boolean, tableID: number, table: Table, deck: Deck) {
 
@@ -81,6 +85,9 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.commandHandlers = new Array<CommandHandler>();
         this.messageHandlers = new Array<MessageHandler>();
+
+        this.messageQueue = new Array<Message>();
+        this.commandQueue = new Array<Command>();
 
         this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
     }
@@ -107,62 +114,88 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (message && message.action instanceof TableAction) {
 
-            if (this.handleAction(message.action)) {
+            // handleAction will add the action/message to the queue, if it is relevant
+            this.handleAction(message.action);
 
-                // We have handled it
-                return;
+        }
+        else {
 
-            }
+            // Pass it along
+            this.messageQueue.push(publicMessage);
 
         }
 
-        // Pass it along
-        this.broadcastMessage(publicMessage);
+        this.pumpQueues();
 
     }
 
-    private handleAction(action: TableAction): boolean {
+
+    private pumpQueues(): void {
+
+        while (this.messageQueue.length) {
+
+            this.broadcastMessage(this.messageQueue.shift());
+
+        }
+
+        while (this.commandQueue.length) {
+
+            this.broadcastCommand(this.commandQueue.shift());
+
+        }
+
+    }
+
+
+    private handleAction(action: TableAction): void {
 
         if (!action || action.tableID !== this.tableID) {
 
             // Not a TableAction, or not my table - I don't care
-            return false;
+            return;
 
         }
+
+        // add the message to the queue first, to keep things in order
+        this.messageQueue.push(new ActionMessage(action));
 
         if (this.table == null) {
 
             if (action instanceof TableSnapshotAction) {
 
                 this.grabTableData(action);
-                return true;
 
             }
 
-            // we don't have a table yet, so we can't do anything
-            return false;
+            // we don't have a table yet, so we can't do anything else
+            return;
 
         }
 
         if (action instanceof PlayerSeatedAction) {
 
             // this.log(` yes - it is a PlayerSeatedAction`);
-            this.seatPlayer(action);
-            return true;
+            return this.seatPlayer(action);
 
         }
 
         if (action instanceof AddChipsAction) {
 
             // This is just a pass-through notification; only update the chip count on a StackUpdateAction
-            this.broadcastAction(action);
-            return true;
+            return;
+
         }
 
         if (action instanceof StackUpdateAction) {
 
-            this.updateStack(action);
-            return true;
+            return this.updateStack(action);
+
+        }
+
+        if (action instanceof TableStateAction) {
+
+            return this.changeTableState(action);
+
         }
 
 
@@ -233,16 +266,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         }
 */
 
-        return false;
-
     }
 
 
     private grabTableData(action: TableSnapshotAction): void {
 
         this.table = action.table;
-
-        this.broadcastAction(action);
 
     }
 
@@ -262,8 +291,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         }
 
-        this.broadcastAction(action);
-
     }
 
 
@@ -277,8 +304,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             //            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
 
         }
-
-        this.broadcastAction(action);
 
     }  // updateStack
 
@@ -338,20 +363,26 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     }
 
 
-
     public handleCommand(command: Command): void {
 
-        this.log(`received ${ command.constructor.name }`);
+        this.log(`received ${command.constructor.name}`);
 
         // Pass it along
-        this.broadcastCommand(command);
+        this.commandQueue.push(command);
 
-        if (!this.isMaster) {
+        if (this.isMaster) {
 
-            // don't actually process the command yourself
-            return;
+            this.processCommand(command);
 
         }
+
+        this.pumpQueues();
+
+    }   // handleCommand
+
+
+
+    private processCommand(command: Command): void {
 
         if (command instanceof RequestSeatCommand) {
 
@@ -666,7 +697,11 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     }  // countPlayersInHand
 
 
-    private changeTableState(state: TableState): void {
+    private changeTableState(action: TableStateAction): void {
+
+        let state = action.state;
+        this.table.state = state;
+        this.log(`TableState: ${state.constructor.name}`);
 
         if (state == null) {
 
@@ -680,8 +715,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             else {
 
                 this.log('Table not ready - putting into open state');
-                this.table.state = new OpenState();
-                return;
+                return this.handleAction(new TableStateAction(this.table.id, new OpenState()));
 
             }
 
@@ -696,10 +730,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             }
 
         }
-
-        this.table.state = state;
-
-        this.log(`TableState: ${state.constructor.name}`);
 
         if (state instanceof StartHandState) {
 
@@ -1294,7 +1324,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private goToNextState(): void {
 
-        this.changeTableState(this.table.game.stateMachine.nextState());
+        this.handleAction(new TableStateAction(this.table.id, this.table.game.stateMachine.nextState()));
 
     }
 
