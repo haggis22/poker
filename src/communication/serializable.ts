@@ -1,4 +1,8 @@
-﻿export { PokerGameFiveCardDraw } from "../games/poker/five-card-draw/poker-game-five-card-draw";
+﻿export { StackUpdateAction } from "../actions/table/players/stack-update-action";
+export { AddChipsAction } from "../actions/table/players/add-chips-action";
+export { AddChipsCommand } from "../commands/table/add-chips-command";
+
+export { PokerGameFiveCardDraw } from "../games/poker/five-card-draw/poker-game-five-card-draw";
 export { PokerGameFiveCardStud } from "../games/poker/five-card-stud/poker-game-five-card-stud";
 
 export { StartHandState } from "../casino/tables/states/start-hand-state";
@@ -58,6 +62,7 @@ export { Command } from "../commands/command";
 export { Message } from "../messages/message";
 export { ActionMessage } from "../messages/action-message";
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
+
 
 
 

@@ -152,6 +152,20 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         }
 
+        if (action instanceof AddChipsAction) {
+
+            // This is just a pass-through notification; only update the chip count on a StackUpdateAction
+            this.broadcastAction(action);
+            return true;
+        }
+
+        if (action instanceof StackUpdateAction) {
+
+            this.updateStack(action);
+            return true;
+        }
+
+
         /*
         if (action instanceof MoveButtonAction) {
 
@@ -163,15 +177,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             return this.setHand(action);
         }
 
-        if (action instanceof AddChipsAction) {
 
-            return this.addChips(action);
-        }
-
-        if (action instanceof StackUpdateAction) {
-
-            return this.updateStack(action);
-        }
 
         if (action instanceof DealCardAction) {
 
@@ -261,6 +267,22 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     }
 
 
+    private updateStack(action: StackUpdateAction): void {
+
+        let player = this.findPlayer(action.playerID);
+
+        if (player) {
+
+            player.chips = action.chips;
+            //            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
+
+        }
+
+        this.broadcastAction(action);
+
+    }  // updateStack
+
+
     private broadcastMessage(publicMessage: Message, privateMessage?: Message): void {
 
         for (let observer of this.messageHandlers) {
@@ -339,7 +361,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (command instanceof AddChipsCommand) {
 
-            return this.addChips(command);
+            return this.commandAddChips(command);
 
         }
 
@@ -489,7 +511,14 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
 
 
-    private addChips(command: AddChipsCommand): void {
+    private commandAddChips(command: AddChipsCommand): void {
+
+        if (command.amount <= 0) {
+
+            // Nothing to do here. Either a waste of time or someone trying to get sneaky
+            return;
+
+        }
 
         let player: Player = this.findPlayer(command.userID);
 
@@ -503,15 +532,18 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             player.chipsToAdd += command.amount;
 
             // TODO: create delayed AddChips action
-            return this.sendPrivateMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`));
+            this.sendPrivateMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`));
+            return;
 
         }
 
-        player.chips += command.amount;
-
         this.broadcastAction(new AddChipsAction(this.table.id, player.userID, command.amount));
 
-    }  // addChips
+        player.chips += command.amount;
+        this.broadcastAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
+
+    }
+
 
 
     private startGame(command: StartGameCommand): void {
@@ -710,10 +742,10 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                     // Add their chips "to-be-added" to their currents stack
                     seat.player.chips += seat.player.chipsToAdd;
-                    this.broadcastAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
+                    this.handleAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
 
                     seat.player.chipsToAdd = 0;
-                    this.broadcastAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+                    this.handleAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
 
                 }   // they have chips waiting to add
 

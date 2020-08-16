@@ -14,6 +14,8 @@ import { Logger } from "../logging/logger";
 import { TableConnectedAction } from "../actions/table/state/table-connected-action";
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
+import { AddChipsCommand } from "../commands/table/add-chips-command";
+import { AddChipsAction, Player, StackUpdateAction } from "../communication/serializable";
 
 
 const logger: Logger = new Logger();
@@ -97,6 +99,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof AddChipsAction) {
+
+            return this.addChips(action);
+        }
+
+        if (action instanceof StackUpdateAction) {
+
+            return this.updateStack(action);
+        }
+
+
 /*
 
         if (action instanceof MoveButtonAction) {
@@ -109,15 +122,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.setHand(action);
         }
 
-        if (action instanceof AddChipsAction) {
 
-            return this.addChips(action);
-        }
-
-        if (action instanceof StackUpdateAction) {
-
-            return this.updateStack(action);
-        }
 
         if (action instanceof DealCardAction) {
 
@@ -201,6 +206,29 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
+    private calculateBuyIn(): number {
+
+        switch (this.user.name) {
+
+            case 'Danny':
+                return 700;
+
+            case 'Mark':
+                return 500;
+
+            case 'Paul':
+                return 600;
+
+            case 'Joe':
+                return 400;
+
+        }
+
+        return 0;
+
+    }
+
+
     private seatPlayer(action: PlayerSeatedAction): void {
 
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
@@ -210,9 +238,58 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`);
             this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
+            if (seat.player.userID === this.user.id) {
+
+                let chips = Math.min(this.user.chips, this.calculateBuyIn());
+
+                // this.log(`I have a seat, so I am requesting ${this.chipFormatter.format(chips)} in chips`);
+
+                this.broadcastCommand(new AddChipsCommand(this.table.id, this.user.id, chips));
+
+            }
+
         }
 
-    }
+    }  // seatPlayer
+
+
+    private findPlayer(userID: number): Player {
+
+        let seat = this.table.seats.find(s => s.player && s.player.userID == userID);
+        return seat ? seat.player : null;
+
+    }   // findPlayer
+
+
+    private addChips(action: AddChipsAction): void {
+
+        let player: Player = this.findPlayer(action.userID);
+
+        if (player) {
+
+            this.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
+
+        }
+
+    }   // addChips
+
+
+
+    private updateStack(action: StackUpdateAction): void {
+
+        let player = this.findPlayer(action.playerID);
+
+        if (player) {
+
+            player.chips = action.chips;
+            this.log(`${player.name} now has ${this.chipFormatter.format(action.chips)}`);
+    
+        }
+
+    }  // updateStack
+
+
+
 
 
     private log(message: string): void {

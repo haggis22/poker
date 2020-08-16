@@ -59,9 +59,9 @@ export class Serializer {
 
         for (let propKey of Object.keys(o)) {
 
-            if (o[propKey] != null && !isSerializable(o[propKey]) && typeof o[propKey] === 'object' && !Array.isArray(o[propKey]))
+            if (o[propKey] != null && !isSerializable(o[propKey]) && typeof o[propKey] === 'object' && !Array.isArray(o[propKey]) && (o[propKey].constructor.name !== 'Object'))
             {
-                this.log(`WARN: ${o.constructor.name}.${propKey} is being serialized as a plain object`);
+                this.log(`WARN: ${o.constructor.name}.${propKey} is being serialized as a plain object - it is actually ${o[propKey].constructor.name}`);
             }
 
             so[propKey] = this.serialize(o[propKey]);

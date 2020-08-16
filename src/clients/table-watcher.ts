@@ -89,33 +89,6 @@ export class TableWatcher {
     }  // setHand
 
 
-    private addChips(action: AddChipsAction): void {
-
-        let player = this.findPlayer(action.userID);
-
-        if (player) {
-
-            player.chips += action.amount;
-//            logger.info(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips - now has ${this.chipFormatter.format(player.chips)}`);
-
-        }
-
-    }  // addChips
-
-
-    private updateStack(action: StackUpdateAction): void {
-
-        let player = this.findPlayer(action.playerID);
-
-        if (player) {
-
-            player.chips = action.chips;
-//            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
-
-        }
-
-    }  // updateStack
-
 
     private dealCard(action: DealCardAction): void {
 
