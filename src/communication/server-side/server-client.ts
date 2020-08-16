@@ -72,12 +72,10 @@ export class ServerClient implements MessageHandler, CommandBroadcaster, DannySo
     }
 
 
-    handleMessage(publicMessage: Message, privateMessage?: Message): void {
+    handleMessage(message: Message): void {
 
-        // ServerClient objects only get the message object that is suitable for passing down the link.
-        // The privateMessage will always be null because the ClientManager will have decided whether this
-        // serverClient is allowed to have the private message (if there was one)
-        this.send(publicMessage);
+        // ServerClient objects only get the message object that is suitable for passing down the link, so ship it!
+        this.send(message);
 
     }
 

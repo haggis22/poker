@@ -1,5 +1,4 @@
-﻿import { CommandBroadcaster } from "../../commands/command-broadcaster";
-import { CommandHandler } from "../../commands/command-handler";
+﻿import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { ServerClient } from "./server-client";
 import { MessageHandler } from "../../messages/message-handler";
@@ -7,6 +6,7 @@ import { Message } from "../../messages/message";
 import { TableManager } from "../../casino/tables/table-manager";
 import { ActionMessage } from "../../messages/action-message";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
+import { MessagePair } from "../../messages/message-pair";
 
 export class ClientManager implements MessageHandler, CommandHandler {
 
@@ -79,31 +79,35 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
     }
 
-    public handleMessage(publicMessage: Message, privateMessage?: Message): void {
+    public handleMessage(message: Message | MessagePair): void {
 
         for (let client of this.clients) {
 
-            if (privateMessage) {
+            if (message instanceof MessagePair) {
 
-                if (client.userID === privateMessage.userID) {
+                if (client.userID === message.privateMessage.userID) {
 
-                    client.handleMessage(privateMessage);
+                    // just send the private message to this client
+                    client.handleMessage(message.privateMessage);
 
                 }
-                else {
+                else if (message.publicMessage) {
 
-                    if (publicMessage) {
-
-                        client.handleMessage(publicMessage);
-
-                    }
+                    // If there is a public message, then send it instead to this client
+                    client.handleMessage(message.publicMessage);
 
                 }
 
             }
             else {
-                // there is no private message, so just send them the publicly-available one
-                client.handleMessage(publicMessage);
+
+                if (message.userID == null || message.userID == client.userID) {
+
+                    // this is either a public message, or it is marked for this client
+                    client.handleMessage(message);
+
+                }
+
             }
 
         }

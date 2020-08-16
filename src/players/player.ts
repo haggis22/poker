@@ -12,10 +12,10 @@ export class Player {
     public isActive: boolean;
 
 
-    constructor() {
+    constructor(userID: number, name: string) {
 
-        // this.userID = user.id;
-        // this.name = user.name;
+        this.userID = userID;
+        this.name = name;
 
         this.chips = this.chipsToAdd = 0;
 

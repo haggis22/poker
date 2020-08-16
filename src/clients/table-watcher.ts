@@ -32,15 +32,20 @@ import { FoldAction } from "../actions/table/betting/fold-action";
 import { BetReturnedAction } from "../actions/table/game/bet-returned-action";
 import { CommandBroadcaster } from "../commands/command-broadcaster";
 import { Command } from "../commands/command";
+import { TableStateAction, OpenState } from "../communication/serializable";
 
 const logger: Logger = new Logger();
 
-export class TableWatcher {
+export class TableWatcher implements CommandHandler, MessageHandler, CommandBroadcaster {
 
 
     private tableID: number;
     private table: Table;
 
+    private commandHandlers: CommandHandler[];
+    private messageHandlers: MessageHandler[];
+
+    private messageQueue: Message[];
 
 
     constructor(tableID: number) {
@@ -48,8 +53,293 @@ export class TableWatcher {
         this.tableID = tableID;
         this.table = null;
 
+        this.commandHandlers = new Array<CommandHandler>();
+        this.messageHandlers = new Array<MessageHandler>();
+
+        this.messageQueue = new Array<Message>();
+
 
     }
+
+
+    public registerMessageHandler(handler: MessageHandler): void {
+
+        this.messageHandlers.push(handler);
+
+    }   // registerMessageHandler
+
+
+    public unregisterMessageHandler(handler: MessageHandler): void {
+
+        this.messageHandlers = this.messageHandlers.filter(o => o != handler);
+
+    }  // unregisterMessageHandler
+
+    public registerCommandHandler(handler: CommandHandler): void {
+
+        this.commandHandlers.push(handler);
+
+    }  // registerCommandHandler
+
+    public unregisterCommandHandler(handler: CommandHandler): void {
+
+        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+
+    }  // unregisterCommandHandler
+
+
+    public handleCommand(command: Command): void {
+
+        // For now, just pass it through
+        this.broadcastCommand(command);
+
+    }
+
+    public handleMessage(message: Message): void {
+
+        // For ActionMessages, we want to handle them ourselves first, so that it can update the model
+        // from which the UI reads, and then we will pass them along
+        let actionMessage: ActionMessage = message as ActionMessage;
+
+        if (actionMessage && actionMessage.action instanceof TableAction) {
+
+            this.log(`Heard ${message.constructor.name} with ${actionMessage.action.constructor.name}`);
+
+            if (actionMessage.action.tableID === this.tableID) {
+
+                this.messageQueue.push(message);
+                this.handleAction(actionMessage.action);
+
+            }
+
+        }
+        else {
+
+            // Won't update the model, so we can add it to the queue directly
+            this.messageQueue.push(message);
+
+        }
+
+        this.pumpQueues();
+
+    }
+
+
+    private pumpQueues(): void {
+
+        while (this.messageQueue.length) {
+
+            this.broadcastMessage(this.messageQueue.shift());
+
+        }
+
+    }  // pumpQueues
+
+
+    private broadcastMessage(message: Message): void {
+
+        for (let handler of this.messageHandlers) {
+
+            handler.handleMessage(message);
+
+        }
+
+    }   // broadcastMessage
+
+
+    private broadcastCommand(command: Command): void {
+
+        for (let handler of this.commandHandlers) {
+
+            handler.handleCommand(command);
+
+        }
+
+    }   // broadcastCommand
+
+
+
+    private handleAction(action: TableAction): void {
+
+        if (!action || action.tableID !== this.tableID) {
+
+            // Not a TableAction, or not my table - I don't care
+            return;
+
+        }
+
+        if (this.table == null) {
+
+            if (action instanceof TableSnapshotAction) {
+
+                this.grabTableData(action);
+
+            }
+
+            // we don't have a table yet, so we can't do anything else
+            return;
+
+        }
+
+        if (action instanceof PlayerSeatedAction) {
+
+            // this.log(` yes - it is a PlayerSeatedAction`);
+            return this.seatPlayer(action);
+
+        }
+
+        if (action instanceof AddChipsAction) {
+
+            // This is just a pass-through notification; only update the chip count on a StackUpdateAction
+            return;
+
+        }
+
+        if (action instanceof StackUpdateAction) {
+
+            return this.updateStack(action);
+
+        }
+
+        if (action instanceof TableStateAction) {
+
+            return this.changeTableState(action);
+
+        }
+
+        if (action instanceof AnteAction) {
+
+            // This is just a pass-through notification; only update the bets on an UpdateBetsAction
+            return;
+
+        }
+
+        if (action instanceof UpdateBetsAction) {
+
+            return this.updateBets(action);
+
+        }
+
+
+        /*
+        if (action instanceof MoveButtonAction) {
+
+            return this.moveButton(action);
+        }
+
+        if (action instanceof SetHandAction) {
+
+            return this.setHand(action);
+        }
+
+
+
+        if (action instanceof DealCardAction) {
+
+            return this.dealCard(action);
+        }
+
+        if (action instanceof BetTurnAction) {
+
+            return this.betTurn(action);
+
+        }
+
+        if (action instanceof FlipCardsAction) {
+
+            return this.flipCards(action);
+
+        }
+
+
+        if (action instanceof BetAction) {
+
+            return this.bet(action);
+
+        }
+
+        if (action instanceof FoldAction) {
+
+            return this.fold(action);
+
+        }
+
+
+
+        if (action instanceof WinPotAction) {
+
+            return this.winPot(action);
+
+        }
+
+        if (action instanceof BetReturnedAction) {
+
+            return this.returnBet(action);
+        }
+*/
+
+    }
+
+
+    private log(message: string): void {
+
+        console.log('\x1b[32m%s\x1b[0m', `TableWatcher ${message}`);
+
+    }
+
+
+    private grabTableData(action: TableSnapshotAction): void {
+
+        this.table = action.table;
+
+    }
+
+    private seatPlayer(action: PlayerSeatedAction): void {
+
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+
+        if (seat) {
+
+            seat.player = action.player;
+
+            this.log(` ${action.player.name} sat in ${seat.getSeatName()}`);
+
+        }
+
+    }
+
+
+    private updateStack(action: StackUpdateAction): void {
+
+        let player = this.findPlayer(action.playerID);
+
+        if (player) {
+
+            player.chips = action.chips;
+            //            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
+
+        }
+
+    }  // updateStack
+
+
+    private changeTableState(action: TableStateAction): void {
+
+        let state = action.state || new OpenState();
+
+        this.table.state = state;
+        this.log(`TableState: ${state.constructor.name}`);
+
+    }   // changeTableState
+
+
+    private updateBets(action: UpdateBetsAction): void {
+
+        this.table.betTracker = action.betTracker;
+
+    }  // updateBets
+
+
 
     private findPlayer(userID: number): Player {
 

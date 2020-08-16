@@ -48,22 +48,21 @@ import { CommandBroadcaster } from "../../commands/command-broadcaster";
 import { TableAction } from "../../actions/table/table-action";
 import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
+import { MessagePair } from "../../messages/message-pair";
 
 const logger: Logger = new Logger();
 
 
-export class TableManager implements CommandHandler, CommandBroadcaster, MessageBroadcaster, MessageHandler {
+export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly ALL_ACCESS: number = -1;
 
-    private isMaster: boolean;
     public tableID: number;
 
     private table: Table;
     private deck: Deck;
 
-
-    private commandHandlers: CommandHandler[];
+    private messageQueue: Array<Message | MessagePair>;
     private messageHandlers: MessageHandler[];
 
     private betTimer: ReturnType<typeof setTimeout>;
@@ -72,22 +71,16 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     private numTimersElapsed: number;
     private numTimersKilled: number;
 
-    private messageQueue: Message[];
-    private commandQueue: Command[];
 
 
-    constructor(isMaster: boolean, tableID: number, table: Table, deck: Deck) {
+    constructor(tableID: number, table: Table, deck: Deck) {
 
-        this.isMaster = isMaster;
         this.tableID = tableID;
         this.table = table;
         this.deck = deck;
 
-        this.commandHandlers = new Array<CommandHandler>();
+        this.messageQueue = new Array<Message | MessagePair>();
         this.messageHandlers = new Array<MessageHandler>();
-
-        this.messageQueue = new Array<Message>();
-        this.commandQueue = new Array<Command>();
 
         this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
     }
@@ -106,30 +99,6 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
     }
 
 
-    public handleMessage(publicMessage: Message, privateMessage?: Message): void {
-
-        // By the time it gets here, there should never be a privateMessage
-
-        let message: ActionMessage = publicMessage as ActionMessage;
-
-        if (message && message.action instanceof TableAction) {
-
-            // handleAction will add the action/message to the queue, if it is relevant
-            this.handleAction(message.action);
-
-        }
-        else {
-
-            // Pass it along
-            this.messageQueue.push(publicMessage);
-
-        }
-
-        this.pumpQueues();
-
-    }
-
-
     private pumpQueues(): void {
 
         while (this.messageQueue.length) {
@@ -138,237 +107,43 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         }
 
-        while (this.commandQueue.length) {
+    }  // pumpQueues
 
-            this.broadcastCommand(this.commandQueue.shift());
 
-        }
+    private broadcastMessage(message: Message | MessagePair): void {
 
-    }
+        for (let handler of this.messageHandlers) {
 
-
-    private handleAction(action: TableAction): void {
-
-        if (!action || action.tableID !== this.tableID) {
-
-            // Not a TableAction, or not my table - I don't care
-            return;
-
-        }
-
-        // add the message to the queue first, to keep things in order
-        this.messageQueue.push(new ActionMessage(action));
-
-        if (this.table == null) {
-
-            if (action instanceof TableSnapshotAction) {
-
-                this.grabTableData(action);
-
-            }
-
-            // we don't have a table yet, so we can't do anything else
-            return;
-
-        }
-
-        if (action instanceof PlayerSeatedAction) {
-
-            // this.log(` yes - it is a PlayerSeatedAction`);
-            return this.seatPlayer(action);
-
-        }
-
-        if (action instanceof AddChipsAction) {
-
-            // This is just a pass-through notification; only update the chip count on a StackUpdateAction
-            return;
-
-        }
-
-        if (action instanceof StackUpdateAction) {
-
-            return this.updateStack(action);
-
-        }
-
-        if (action instanceof TableStateAction) {
-
-            return this.changeTableState(action);
-
-        }
-
-        if (action instanceof AnteAction) {
-
-            // This is just a pass-through notification; only update the bets on an UpdateBetsAction
-            return;
-
-        }
-
-        if (action instanceof UpdateBetsAction) {
-
-            return this.updateBets(action);
-
-        }
-
-
-        /*
-        if (action instanceof MoveButtonAction) {
-
-            return this.moveButton(action);
-        }
-
-        if (action instanceof SetHandAction) {
-
-            return this.setHand(action);
-        }
-
-
-
-        if (action instanceof DealCardAction) {
-
-            return this.dealCard(action);
-        }
-
-        if (action instanceof BetTurnAction) {
-
-            return this.betTurn(action);
-
-        }
-
-        if (action instanceof FlipCardsAction) {
-
-            return this.flipCards(action);
-
-        }
-
-
-        if (action instanceof BetAction) {
-
-            return this.bet(action);
-
-        }
-
-        if (action instanceof FoldAction) {
-
-            return this.fold(action);
-
-        }
-
-
-
-        if (action instanceof WinPotAction) {
-
-            return this.winPot(action);
-
-        }
-
-        if (action instanceof BetReturnedAction) {
-
-            return this.returnBet(action);
-        }
-*/
-
-    }
-
-
-    private grabTableData(action: TableSnapshotAction): void {
-
-        this.table = action.table;
-
-    }
-
-    private seatPlayer(action: PlayerSeatedAction): void {
-
-        // this.log(' in seatPlayer (action)');
-
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
-
-        if (seat) {
-
-            // this.log(` set player for seat ${seat.index}`);
-
-            seat.player = action.player;
-
-            this.log(` ${action.player.name} sat in ${seat.getName()}`);
-
-            if (this.isMaster) {
-
-                this.checkStartHand();
-
-            }
-
-
-        }
-
-    }
-
-
-    private updateStack(action: StackUpdateAction): void {
-
-        let player = this.findPlayer(action.playerID);
-
-        if (player) {
-
-            player.chips = action.chips;
-            //            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
-
-        }
-
-    }  // updateStack
-
-
-    private broadcastMessage(publicMessage: Message, privateMessage?: Message): void {
-
-        for (let observer of this.messageHandlers) {
-
-            observer.handleMessage(publicMessage, privateMessage);
+            handler.handleMessage(message);
 
         }
 
     }   // broadcastMessage
 
-    private sendPrivateMessage(privateMessage: Message): void {
 
-        // this.log(`I have ${this.messageHandlers.length} message handlers`);
-        for (let handler of this.messageHandlers) {
+    private queueAction(action: Action, userID?: number) {
 
-            handler.handleMessage(null, privateMessage);
+        this.queueMessage(new ActionMessage(action, userID));
+
+    }
+
+    private queueMessage(message: Message | MessagePair): void {
+
+        if (message instanceof ActionMessage) {
+
+            this.log(`Queueing ${message.action.constructor.name}`);
+
+        }
+        else if (message instanceof MessagePair) {
+
+            let publicMessage: string = message.publicMessage && message.publicMessage instanceof ActionMessage ? message.publicMessage.action.constructor.name : '[No public message]';
+            let privateMessage: string = message.privateMessage && message.privateMessage instanceof ActionMessage ? message.privateMessage.action.constructor.name : '[No private message]';
+
+            this.log(`Queueing public: ${publicMessage}, private: ${privateMessage} `);
 
         }
 
-    }   // sendPrivateMessage
-
-
-    private broadcastAction(action: Action) {
-
-        // this.log(`broadcast ${action.constructor.name} to ${this.messageHandlers.length} listeners`);
-
-        this.broadcastMessage(new ActionMessage(action));
-
-    }
-
-
-
-
-    registerCommandHandler(handler: CommandHandler): void {
-
-        this.commandHandlers.push(handler);
-
-    }
-
-    unregisterCommandHandler(handler: CommandHandler): void {
-
-        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
-
-    }
-
-
-    broadcastCommand(command: Command): void {
-
-        for (let handler of this.commandHandlers) {
-            handler.handleCommand(command);
-        }
+        this.messageQueue.push(message);
 
     }
 
@@ -377,14 +152,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.log(`received ${command.constructor.name}`);
 
-        // Pass it along
-        this.commandQueue.push(command);
-
-        if (this.isMaster) {
-
-            this.processCommand(command);
-
-        }
+        this.processCommand(command);
 
         this.pumpQueues();
 
@@ -396,13 +164,13 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (command instanceof RequestSeatCommand) {
 
-            return this.commandSeatPlayer(command);
+            return this.seatPlayer(command);
 
         }
 
         if (command instanceof AddChipsCommand) {
 
-            return this.commandAddChips(command);
+            return this.addChips(command);
 
         }
 
@@ -482,22 +250,11 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private log(message: string): void {
 
-        let color: string = this.isMaster ? '\x1b[31m%s\x1b[0m' : '\x1b[32m%s\x1b[0m';
-
-        let msg = `${(this.isMaster ? 'Server' : 'Client')} TableManager ${message}`;
-
-        if (this.isMaster) {
-
-            console.log(color, msg);
-
-        }
-
-        // logger.debug();
-
+        console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
 
     }
 
-    private commandSeatPlayer(command: RequestSeatCommand): void {
+    private seatPlayer(command: RequestSeatCommand): void {
 
         let seatIndex = command.seatIndex;
         if (seatIndex === null) {
@@ -515,7 +272,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         if (seatIndex === null) {
 
-            return this.sendPrivateMessage(new Message('No seats available', command.user.id));
+            return this.queueMessage(new Message('No seats available', command.user.id));
 
         }
 
@@ -525,21 +282,18 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             if (seat.player == null) {
 
-                // let player:Player = new Player(command.user);
-                let player: Player = new Player();
-                player.userID = command.user.id;
-                player.name = command.user.name;
+                seat.player = new Player(command.user.id, command.user.name);
 
-                this.handleAction(new PlayerSeatedAction(this.table.id, player, seatIndex));
+                this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
                 return;
 
             }
 
-            return this.sendPrivateMessage(new Message(`${seat.getName()} is already taken`, command.user.id));
+            return this.queueMessage(new Message(`${seat.getName()} is already taken`, command.user.id));
 
         }
 
-        return this.sendPrivateMessage(new Message(`Could not find seat ${seatIndex}`, command.user.id));
+        return this.queueMessage(new Message(`Could not find seat ${seatIndex}`, command.user.id));
 
     }
 
@@ -554,7 +308,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
 
 
-    private commandAddChips(command: AddChipsCommand): void {
+    private addChips(command: AddChipsCommand): void {
 
         if (command.amount <= 0) {
 
@@ -566,7 +320,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         let player: Player = this.findPlayer(command.userID);
 
         if (!player) {
-            return this.sendPrivateMessage(new Message('Player is not sitting at table', command.userID));
+            return this.queueMessage(new Message('Player is not sitting at table', command.userID));
         }
 
         if (this.table.state.isHandInProgress()) {
@@ -575,15 +329,15 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             player.chipsToAdd += command.amount;
 
             // TODO: create delayed AddChips action
-            this.sendPrivateMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`));
+            this.queueMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`, command.userID));
             return;
 
         }
 
-        this.broadcastAction(new AddChipsAction(this.table.id, player.userID, command.amount));
-
         player.chips += command.amount;
-        this.broadcastAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
+
+        this.queueAction(new AddChipsAction(this.table.id, player.userID, command.amount));
+        this.queueAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
 
     }
 
@@ -616,9 +370,9 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
                 this.numTimersKilled++;
                 this.logTimers();
 
-                this.broadcastAction(new BetAction(this.table.id, bettorSeat.index, bet));
-                this.broadcastAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
-                this.broadcastAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                this.queueAction(new BetAction(this.table.id, bettorSeat.index, bet));
+                this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
+                this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
                 this.advanceBetTurn();
 
@@ -626,14 +380,14 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             else {
 
                 // TODO: Send action indicating invalid bet so that the UI can reset itself
-                return this.sendPrivateMessage(new Message(bet.message, command.userID));
+                return this.queueMessage(new Message(bet.message, command.userID));
 
             }
 
         }
 
         // TODO: Send action indicating invalid bet so that the UI can reset itself
-        return this.sendPrivateMessage(new Message('It is not time to bet', command.userID));
+        return this.queueMessage(new Message('It is not time to bet', command.userID));
 
     }  // bet
 
@@ -656,8 +410,8 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
                 folderSeat.hand = null;
 
                 // This will tell watchers that the given seat is no longer in the hand
-                this.broadcastAction(new SetHandAction(this.table.id, folderSeat.index, false));
-                this.broadcastAction(new FoldAction(this.table.id, folderSeat.index, fold));
+                this.queueAction(new SetHandAction(this.table.id, folderSeat.index, false));
+                this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
 
                 this.advanceBetTurn();
 
@@ -666,13 +420,13 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             }
             else {
 
-                return this.sendPrivateMessage(new Message(fold.message, command.userID));
+                return this.queueMessage(new Message(fold.message, command.userID));
 
             }
 
         }
 
-        return this.sendPrivateMessage(new Message('It is not time to bet', command.userID));
+        return this.queueMessage(new Message('It is not time to bet', command.userID));
 
     }  // fold
 
@@ -685,7 +439,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         let tableAction: TableSnapshotAction = new TableSnapshotAction(table.id, table);
 
         this.log('Generating private snapshot message');
-        this.sendPrivateMessage(new ActionMessage(tableAction, command.userID));
+        this.queueMessage(new ActionMessage(tableAction, command.userID));
 
     }
 
@@ -712,12 +466,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         this.table.state = state;
         this.log(`TableState: ${state.constructor.name}`);
 
-        if (!this.isMaster) {
-
-            // only the server TableManager drives the activity
-            return;
-
-        }
+        this
 
         if (state instanceof OpenState) {
 
@@ -787,10 +536,10 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                     // Add their chips "to-be-added" to their currents stack
                     seat.player.chips += seat.player.chipsToAdd;
-                    this.handleAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
-
                     seat.player.chipsToAdd = 0;
-                    this.handleAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+
+                    this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
+                    this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
 
                 }   // they have chips waiting to add
 
@@ -810,7 +559,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.table.betTracker.reset();
 
-        this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         for (let seat of this.table.seats) {
 
@@ -837,9 +586,9 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                     if (ante.isValid) {
 
-                        this.handleAction(new AnteAction(this.table.id, seat.index, ante));
-                        this.handleAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
-                        this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                        this.queueAction(new AnteAction(this.table.id, seat.index, ante));
+                        this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+                        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
                     }  // valid ante
                     else {
@@ -861,13 +610,13 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             }
 
             // This will tell watchers whether or not the given seat is in the hand
-            this.handleAction(new SetHandAction(this.table.id, seat.index, seat.hand != null));
+            this.queueAction(new SetHandAction(this.table.id, seat.index, seat.hand != null));
 
         }  // for each seat
 
         this.table.betTracker.gatherBets();
 
-        this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         this.checkBetsToReturn();
 
@@ -882,7 +631,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         this.table.buttonIndex = this.findNextOccupiedSeatIndex(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
 
-        this.handleAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
+        this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
 
     }
 
@@ -961,16 +710,16 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
             if (dealtCard.isFaceUp) {
 
                 // It's face-up, so there is only a public action
-                this.broadcastAction(new DealCardAction(this.table.id, seatIndex, card));
+                this.queueAction(new DealCardAction(this.table.id, seatIndex, card));
 
             }
             else {
 
                 // It's face-down, so the public action does not include the card info, whereas the private action does
-                let publicAction = new ActionMessage(new DealCardAction(this.table.id, seatIndex, null));
-                let privateAction = new ActionMessage(new DealCardAction(this.table.id, seatIndex, card), userID);
+                let publicMessage = new ActionMessage(new DealCardAction(this.table.id, seatIndex, null));
+                let privateMessage = new ActionMessage(new DealCardAction(this.table.id, seatIndex, card), userID);
 
-                this.broadcastMessage(publicAction, privateAction);
+                this.queueMessage(new MessagePair(publicMessage, privateMessage));
 
             }
 
@@ -1030,7 +779,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
             if (check.isValid) {
 
-                this.broadcastAction(new BetAction(this.table.id, checkerSeat.index, check));
+                this.queueAction(new BetAction(this.table.id, checkerSeat.index, check));
                 this.advanceBetTurn();
 
             }
@@ -1044,7 +793,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
         }, this.table.rules.timeToAct * 1000);
 
-        this.broadcastAction(new BetTurnAction(this.table.id, this.table.betTracker));
+        this.queueAction(new BetTurnAction(this.table.id, this.table.betTracker));
 
     }  // setBetTurn
 
@@ -1071,7 +820,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
                 logger.info('Betting complete');
 
                 this.table.betTracker.gatherBets();
-                this.broadcastAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
                 this.checkBetsToReturn();
 
@@ -1191,12 +940,12 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                     potIndexesToKill.add(pot.index);
 
-                    this.handleAction(new BetReturnedAction(this.table.id, seat.index, pot.amount));
+                    this.queueAction(new BetReturnedAction(this.table.id, seat.index, pot.amount));
 
                     if (seat.player) {
 
                         seat.player.chips += pot.amount;
-                        this.handleAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+                        this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
 
                     }  // if player is not null
 
@@ -1209,7 +958,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
         if (potIndexesToKill.size > 0) {
 
             this.table.betTracker.killPots(potIndexesToKill);
-            this.handleAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
 
         }
 
@@ -1229,7 +978,7 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                     seat.hand.flipCards();
 
-                    this.broadcastAction(new FlipCardsAction(this.table.id, seat.index, seat.hand))
+                    this.queueAction(new FlipCardsAction(this.table.id, seat.index, seat.hand))
 
                 }
 
@@ -1286,11 +1035,11 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
                         let winnerEvaluation = isShowdownRequired ? winnerHand.evaluation : null;
 
-                        this.broadcastAction(new WinPotAction(this.table.id, seatIndex, pot.index, winnerEvaluation, equalShare + remainder));
+                        this.queueAction(new WinPotAction(this.table.id, seatIndex, pot.index, winnerEvaluation, equalShare + remainder));
 
                         player.chips += (equalShare + remainder);
 
-                        this.broadcastAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
+                        this.queueAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
 
                         remainder = 0;
 
@@ -1325,16 +1074,11 @@ export class TableManager implements CommandHandler, CommandBroadcaster, Message
 
     private goToNextState(): void {
 
-        this.handleAction(new TableStateAction(this.table.id, this.table.game.stateMachine.nextState()));
+        this.queueAction(new TableStateAction(this.table.id, this.table.game.stateMachine.nextState()));
 
     }
 
 
-    private updateBets(action: UpdateBetsAction): void {
-
-        this.table.betTracker = action.betTracker;
-
-    }  // updateBets
 
 
 

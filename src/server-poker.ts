@@ -17,6 +17,7 @@ import { Seat } from "./casino/tables/seat";
 import { Card } from "./cards/card";
 import { CardValue } from "./cards/card-value";
 import { CardSuit } from "./cards/card-suit";
+import { TableWatcher } from "./clients/table-watcher";
 
 
 function createTable(): Table {
@@ -40,7 +41,7 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
 
     // Client Side
     let ui: TableUI = new TableUI(user, new MoneyFormatter());
-    let tableWatcher: TableManager = new TableManager(false, tableID, null, null);
+    let tableWatcher: TableWatcher = new TableWatcher(tableID);
     let gameClient: GameClient = new GameClient();
 
     // Server Side
@@ -72,7 +73,7 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
     // Create the components, working from the UI all the way to the TableManager on the server
 
     let clientManager: ClientManager = new ClientManager();
-    let serverTableManager: TableManager = new TableManager(true, table.id, table, new Deck());
+    let serverTableManager: TableManager = new TableManager(table.id, table, new Deck());
 
     let danny = new User(1, 'Danny', 10000);
     let mark = new User(2, 'Mark', 10000);
@@ -156,9 +157,7 @@ function testSerializerPlayer() {
     let serializer: Serializer = new Serializer();
     let array: Seat[] = new Array<Seat>();
 
-    let danny: Player = new Player();
-    danny.userID = 1;
-    danny.name = "Danny";
+    let danny: Player = new Player(1, 'Danny');
     danny.chips = 500;
 
     let s1: Seat = new Seat(0);
@@ -166,9 +165,7 @@ function testSerializerPlayer() {
     s1.hand = null;
     array.push(s1);
 
-    let paul1: Player = new Player();
-    paul1.userID = 2;
-    paul1.name = "Paul";
+    let paul1: Player = new Player(2, 'Paul');
     paul1.chips = 200;
 
     let s2: Seat = new Seat(1);

@@ -109,6 +109,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\messages\action-message.ts" />
+    <TypeScriptCompile Include="src\messages\message-pair.ts" />
     <TypeScriptCompile Include="src\messages\message.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

@@ -1,7 +1,8 @@
 ﻿import { Message } from "./message";
+import { MessagePair } from "./message-pair";
 
 export interface MessageHandler {
 
-    handleMessage(publicMessage: Message, privateMessage?: Message): void;
+    handleMessage(message: Message | MessagePair): void;
 
 }

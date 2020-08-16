@@ -43,26 +43,27 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    handleMessage(publicMessage: Message, privateMessage?: Message): void {
+    handleMessage(message: Message): void {
 
-        // By the time it gets here, there should never be a privateMessage
+        if (message.text) {
 
-        if (publicMessage.text) {
-
-            this.log(publicMessage.text);
+            this.log(message.text);
 
         }
 
-        let message: ActionMessage = publicMessage as ActionMessage;
+        let actionMessage: ActionMessage = message as ActionMessage;
 
-        if (!message) {
+        if (!actionMessage) {
 
             // Not an ActionMessage, so nothing further to do
             return;
 
         }
 
-        let action: Action = message.action;
+        let action: Action = actionMessage.action;
+
+        this.log(`Heard ${action.constructor.name}`);
+
 
         if (action instanceof TableConnectedAction) {
 
