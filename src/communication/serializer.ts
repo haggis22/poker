@@ -7,6 +7,12 @@ const serializedConstructorName: string = "__serializedClass";
 
 export class Serializer {
 
+    private log(msg: string): void {
+
+        console.log('\x1b[37m\x1b[41m%s\x1b[0m', msg);
+
+    }
+
 
     public serialize(o: any): string {
 
@@ -33,6 +39,9 @@ export class Serializer {
 
             so[serializedConstructorName] = o.constructor.name;
 
+        }
+        else {
+            this.log(`WARN: Cannot serialize ${o.constructor.name}`);
         }
 
         for (let propKey of Object.keys(o)) {
