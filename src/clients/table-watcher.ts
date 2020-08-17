@@ -32,7 +32,7 @@ import { FoldAction } from "../actions/table/betting/fold-action";
 import { BetReturnedAction } from "../actions/table/game/bet-returned-action";
 import { CommandBroadcaster } from "../commands/command-broadcaster";
 import { Command } from "../commands/command";
-import { TableStateAction, OpenState } from "../communication/serializable";
+import { TableStateAction, OpenState, Seat } from "../communication/serializable";
 
 const logger: Logger = new Logger();
 
@@ -218,11 +218,10 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-
-        /*
         if (action instanceof MoveButtonAction) {
 
             return this.moveButton(action);
+
         }
 
         if (action instanceof SetHandAction) {
@@ -230,12 +229,17 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
             return this.setHand(action);
         }
 
-
-
         if (action instanceof DealCardAction) {
 
             return this.dealCard(action);
         }
+
+
+        /*
+
+
+
+
 
         if (action instanceof BetTurnAction) {
 
@@ -340,6 +344,16 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }  // updateBets
 
 
+    private findSeat(seatIndex: number): Seat {
+
+        if (seatIndex >= 0 && seatIndex < this.table.seats.length) {
+            return this.table.seats[seatIndex];
+        }
+
+        return null;
+
+    }  // findSeat
+
 
     private findPlayer(userID: number): Player {
 
@@ -350,24 +364,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private moveButton(action: MoveButtonAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        this.table.buttonIndex = action.seatIndex;
 
-        if (seat) {
-
-            logger.info(`${seat.getName()} now has the button at table ${this.table.id}`);
-
-        }
-        else {
-
-            logger.info(`Could not find seat ${action.seatIndex}`);
-        }
-
-    }
+    }  // moveButton
 
 
     private setHand(action: SetHandAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        let seat = this.findSeat(action.seatIndex);
 
         if (seat) {
 
@@ -382,31 +386,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private dealCard(action: DealCardAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        let seat = this.findSeat(action.seatIndex);
 
         if (seat) {
 
             let dealtCard = new DealtCard(action.card, action.card != null);
             seat.hand.deal(dealtCard);
-
-            if (dealtCard.isFaceUp) {
-
-                logger.info(`Client: ${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
-
-            }
-            else {
-
-                logger.info(`Client: ${seat.getName()} is dealt a card`);
-
-            }
-
-/*
-            if (seat.index == 0) {
-                logger.debug(`DEBUGGGGG: got DealCardAction: ${action}`);
-                logger.debug(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
-            }
-*/
-
 
         }
 

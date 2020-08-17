@@ -102,6 +102,9 @@
     <TypeScriptCompile Include="src\communication\danny-socket.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\deep-copier.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\serializable.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

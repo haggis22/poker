@@ -49,6 +49,7 @@ import { TableAction } from "../../actions/table/table-action";
 import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
+import { DeepCopier } from "../../communication/deep-copier";
 
 const logger: Logger = new Logger();
 
@@ -58,9 +59,10 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private readonly ALL_ACCESS: number = -1;
 
     public tableID: number;
-
     private table: Table;
     private deck: Deck;
+
+    private copier: DeepCopier;
 
     private messageQueue: Array<Message | MessagePair>;
     private messageHandlers: MessageHandler[];
@@ -79,10 +81,19 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.table = table;
         this.deck = deck;
 
+        this.copier = new DeepCopier();
+
         this.messageQueue = new Array<Message | MessagePair>();
         this.messageHandlers = new Array<MessageHandler>();
 
         this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
+    }
+
+
+    private snapshot(obj: any): any {
+
+        return this.copier.copy(obj);
+
     }
 
     public registerMessageHandler(handler: MessageHandler): void {
@@ -375,7 +386,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 this.queueAction(new BetAction(this.table.id, bettorSeat.index, bet));
                 this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
-                this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
                 this.advanceBetTurn();
 
@@ -560,7 +571,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         this.table.betTracker.reset();
 
-        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
         for (let seat of this.table.seats) {
 
@@ -576,20 +587,20 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 if (this.table.stakes.ante > 0) {
 
-                    // logger.info(`There is an ante, and ${seat.getName()} is playing`);
+                    // this.log(`There is an ante, and ${seat.getName()} is playing`);
 
                     // set the betting to the ante's seat or it will not be accepted
                     this.table.betTracker.seatIndex = seat.index;
 
                     let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante);
 
-                    // logger.info(`ante result: ${ante}`);
+                    // this.log(`ante result: ${ante}`);
 
                     if (ante.isValid) {
 
                         this.queueAction(new AnteAction(this.table.id, seat.index, ante));
                         this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
-                        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
                     }  // valid ante
                     else {
@@ -605,7 +616,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             else {
 
-                // logger.info(`${seat.getName()} is sitting out`);
+                // this.log(`${seat.getName()} is sitting out`);
                 seat.hand = null;
 
             }
@@ -617,7 +628,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         this.table.betTracker.gatherBets();
 
-        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
         this.checkBetsToReturn();
 
@@ -733,7 +744,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private makeYourBets(betState: BetState): void {
 
-        logger.info('In makeYourBets');
+        this.log('In makeYourBets');
 
         this.table.betTracker.clearBets();
         this.table.betTracker.minRaise = this.table.stakes.minRaise;
@@ -742,7 +753,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         if (firstSeatIndexWithAction == null) {
 
-            logger.info('No betting action this round');
+            this.log('No betting action this round');
             return this.goToNextState();
 
         }
@@ -756,7 +767,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private logTimers() {
 
-        // logger.info(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
+        // this.log(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
 
     }
 
@@ -794,18 +805,18 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }, this.table.rules.timeToAct * 1000);
 
-        this.queueAction(new BetTurnAction(this.table.id, this.table.betTracker));
+        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker)));
 
     }  // setBetTurn
 
 
     private advanceBetTurn(): void {
 
-        // logger.info('In advanceBetTurn');
+        // this.log('In advanceBetTurn');
         if (this.table.state instanceof HandCompleteState) {
 
             let error = new Error('Should not be here');
-            logger.info(error.stack);
+            this.log(error.stack);
             throw error;
 
         }
@@ -818,10 +829,10 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (nextSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
-                logger.info('Betting complete');
+                this.log('Betting complete');
 
                 this.table.betTracker.gatherBets();
-                this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+                this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
                 this.checkBetsToReturn();
 
@@ -959,7 +970,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         if (potIndexesToKill.size > 0) {
 
             this.table.betTracker.killPots(potIndexesToKill);
-            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betTracker));
+            this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
         }
 
@@ -991,7 +1002,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 /*
         for (let winner of winners) {
-            logger.info(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
+            this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
         }
 */
 

@@ -15,7 +15,8 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction } from "../communication/serializable";
+import { DealtCard } from "../hands/dealt-card";
 
 
 const logger: Logger = new Logger();
@@ -61,7 +62,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
         let action: Action = actionMessage.action;
-
 
         if (action instanceof TableConnectedAction) {
 
@@ -124,7 +124,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof MoveButtonAction) {
 
+            return this.moveButton(action);
+        }
+
+        if (action instanceof SetHandAction) {
+
+            return;
+        }
+
+        if (action instanceof DealCardAction) {
+
+            return this.dealCard(action);
+        }
 
 
 /*
@@ -135,22 +148,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
 
-        if (action instanceof MoveButtonAction) {
-
-            return this.moveButton(action);
-        }
-
-        if (action instanceof SetHandAction) {
-
-            return this.setHand(action);
-        }
 
 
 
-        if (action instanceof DealCardAction) {
 
-            return this.dealCard(action);
-        }
 
         if (action instanceof BetTurnAction) {
 
@@ -261,6 +262,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // seatPlayer
 
 
+    private findSeat(seatIndex: number): Seat {
+
+        if (seatIndex >= 0 && seatIndex < this.table.seats.length) {
+            return this.table.seats[seatIndex];
+        }
+
+        return null;
+
+    }  // findSeat
+     
     private findPlayer(userID: number): Player {
 
         let seat = this.table.seats.find(s => s.player && s.player.userID == userID);
@@ -329,7 +340,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player) {
 
-                this.log(`${seat.getName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
+                this.log(`${seat.getSeatName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
 
             }
 
@@ -360,6 +371,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }  // ante
 
+
     private updateBets(action: UpdateBetsAction): void {
 
         for (let pot of this.table.betTracker.pots) {
@@ -371,6 +383,47 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
         
     }  // updateBets
+
+
+    private moveButton(action: MoveButtonAction): void {
+
+        let seat = this.findSeat(this.table.buttonIndex);
+
+        if (seat) {
+
+            this.log(`${seat.getName()} now has the button`);
+
+        }
+        else {
+
+            this.log(`Could not find seat ${this.table.buttonIndex}`);
+        }
+
+    }   // moveButton
+
+
+    private dealCard(action: DealCardAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+
+        if (seat) {
+
+            let isFaceUp: boolean = action.card != null;
+
+            if (isFaceUp) {
+
+                this.log(`Client: ${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
+
+            }
+            else {
+
+                this.log(`Client: ${seat.getName()} is dealt a card`);
+
+            }
+
+        }
+
+    }   // dealCard
 
 
 
