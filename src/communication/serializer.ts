@@ -69,7 +69,9 @@ export class Serializer {
         }
 
         let msg = JSON.stringify(so);
-        // console.log(`Serialized object: ${msg}`);
+
+        // this.log(`Serialized object: ${msg}`);
+
         return msg;
 
     }   // serialize
@@ -85,7 +87,7 @@ export class Serializer {
 
         }
         catch (error) {
-            console.log(`Could not parse JSON from ${msg}`);
+            this.log(`Could not parse JSON from ${msg}`);
             throw error;
         }
 
@@ -140,7 +142,7 @@ export class Serializer {
 
             }
 
-            // console.log(`Setting ${objArray[0]}.${objProp} to be (${typeof objValue}) ${objValue}`);
+            // this.log(`Setting ${objArray[0]}.${objProp} to be (${typeof objValue}) ${objValue}`);
 
         }
 
