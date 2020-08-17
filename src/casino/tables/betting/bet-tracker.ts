@@ -77,7 +77,7 @@ export class BetTracker {
 
     public addBet(seat: Seat, totalBetAmount: number): Bet {
 
-        console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex}`);
+        // console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex}`);
 
         if (!seat || !seat.player) {
 
@@ -201,7 +201,7 @@ export class BetTracker {
         let needsNew = false;
 
         for (let previousBettorIndex of pot.getSeatsInPot()) {
-            if (this.bets[previousBettorIndex] || 0 === 0) {
+            if ((this.bets[previousBettorIndex] || 0) === 0) {
                 needsNew = true;
                 break;
             }
