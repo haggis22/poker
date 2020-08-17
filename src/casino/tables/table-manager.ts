@@ -267,7 +267,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private log(message: string): void {
 
-        console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
+        // console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
 
     }
 
@@ -396,7 +396,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                 this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
                 this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
-                this.advanceBetTurn();
+                return this.advanceBetTurn();
 
             }
             else {
