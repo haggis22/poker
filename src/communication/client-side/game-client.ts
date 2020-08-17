@@ -45,7 +45,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
         let o: any = this.serializer.deserialize(msg);
 
-        this.log(`GameClient received ${o.constructor.name}`);
+        this.log(`received ${o.constructor.name}: ${msg}`);
 
         if (o && o instanceof Message) {
 
@@ -55,7 +55,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
             if (message) {
 
-                this.log(`GameClient received action ${message.action.constructor.name}`);
+                this.log(`received action ${message.action.constructor.name}`);
 
             }
 
@@ -100,7 +100,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
     private log(msg: string): void {
 
-        // console.log('\x1b[36m%s\x1b[0m', msg);
+        console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
 
     }
 
