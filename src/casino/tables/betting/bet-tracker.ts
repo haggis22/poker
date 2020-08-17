@@ -77,6 +77,8 @@ export class BetTracker {
 
     public addBet(seat: Seat, totalBetAmount: number): Bet {
 
+        console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex}`);
+
         if (!seat || !seat.player) {
 
             return new Bet(false, 0, 0, false, Bet.INVALID, "There is no player in that seat");

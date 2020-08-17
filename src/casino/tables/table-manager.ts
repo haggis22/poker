@@ -144,6 +144,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             this.log(`Queueing ${message.action.constructor.name}`);
 
+            if (message.action instanceof BetTurnAction) {
+
+                this.log(`Queueing ${message.action.constructor.name} for ${message.action.bets.seatIndex}`);
+
+            }
+
         }
         else if (message instanceof MessagePair) {
 
@@ -372,9 +378,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private bet(command: BetCommand): void {
 
+        this.log(`Received BetCommand from ${command.userID}, tableState: ${this.table.state.constructor.name}`);
+
         if (this.table.state instanceof BetState) {
 
-            let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
+            let bettorSeat: Seat =  this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
 
             let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount);
 
@@ -813,7 +821,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private advanceBetTurn(): void {
 
         // this.log('In advanceBetTurn');
-        if (this.table.state instanceof HandCompleteState) {
+        if (!(this.table.state instanceof BetState)) {
 
             let error = new Error('Should not be here');
             this.log(error.stack);
@@ -855,7 +863,6 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         }  // while !done
 
         this.setBetTurn(nextSeatIndex);
-
 
     }   // advanceBetTurn
 

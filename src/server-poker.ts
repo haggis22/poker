@@ -24,8 +24,8 @@ function createTable(): Table {
 
     let tableID = 1;
 
-    // # seats, # secods to act
-    let rules = new TableRules(6, 0.1);
+    // # seats, # seconds to act
+    let rules = new TableRules(6, 15);
 
     // blinds, ante, minRaise
     let stakes = new Stakes(new Array<number>(), 50, 200);
@@ -73,7 +73,7 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
     // Create the components, working from the UI all the way to the TableManager on the server
 
     let clientManager: ClientManager = new ClientManager();
-    let serverTableManager: TableManager = new TableManager(table.id, table, new Deck());
+    let tableManager: TableManager = new TableManager(table.id, table, new Deck());
 
     let danny = new User(1, 'Danny', 10000);
     let mark = new User(2, 'Mark', 10000);
@@ -81,7 +81,7 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
 
-    clientManager.setTableManager(serverTableManager);
+    clientManager.setTableManager(tableManager);
 
     clientManager.addClient(createClient(table.id, danny, clientManager));
     clientManager.addClient(createClient(table.id, mark, clientManager));

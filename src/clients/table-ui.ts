@@ -15,7 +15,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet } from "../communication/serializable";
 import { DealtCard } from "../hands/dealt-card";
 
 
@@ -35,6 +35,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     constructor(user: User, chipFormatter: IChipFormatter) {
 
         this.user = user;
+
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
@@ -137,25 +138,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.dealCard(action);
         }
 
-
-/*
-        if (action instanceof BetAction) {
-
-//          return this.bet(action);
-
-        }
-
-
-
-
-
-
-
         if (action instanceof BetTurnAction) {
 
             return this.betTurn(action);
+        }
+
+        if (action instanceof BetAction) {
+
+            return this.bet(action);
 
         }
+
+
+/*
+
 
         if (action instanceof FlipCardsAction) {
 
@@ -309,8 +305,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private log(message: string): void {
 
         // For now, only log from Danny's POV
-        if (this.user.id === 1) {
-            console.log(`${this.user.name}: ${message}`);
+        if (this.user.id === 2) {
+            // console.log(`${this.user.name}: ${message}`);
+            console.log(`UI: ${message}`);
         }
 
         //logger.info();
@@ -379,8 +376,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(potDesc);
         
         }
+
+        let betsString = Object.keys(this.table.betTracker.bets).map(seatIndex => `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betTracker.bets[seatIndex])}`).join(", ");
+        if (betsString.length) {
+            this.log(`  Bets: ${betsString}`);
+        }
         
     }  // updateBets
+
 
 
     private moveButton(action: MoveButtonAction): void {
@@ -410,18 +413,142 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (isFaceUp) {
 
-                this.log(`Client: ${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
+                this.log(`${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
 
             }
             else {
 
-                this.log(`Client: ${seat.getName()} is dealt a card`);
+                this.log(`${seat.getName()} is dealt a card`);
 
             }
 
         }
 
     }   // dealCard
+
+
+    private betTurn(action: BetTurnAction): void {
+
+        let tracker = this.table.betTracker;
+        let seat = this.findSeat(this.table.betTracker.seatIndex);
+
+        if (seat) {
+
+            this.log(`It is ${seat.getName()}'s turn to act`);
+
+            if (seat.hand && seat.player) {
+
+                if (seat.player.userID === this.user.id) {
+
+                    if (tracker.currentBet > 0) {
+
+                        setTimeout(() => {
+
+
+                            if (Math.random() >= 0.20) {
+
+                                // This represents a call (possibly all-in)
+                                let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
+                                let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
+
+                                this.broadcastCommand(betCommand);
+                                return;
+
+                            }
+                            else {
+
+                                // We're folding!
+                                let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
+
+                                this.broadcastCommand(foldCommand);
+                                return;
+
+                            }
+
+                        }, 3000);
+                        return;
+
+
+                    }
+                    else {
+
+                        setTimeout(() => {
+
+                            // This represents a bet out (or a check, if the player has no chips)
+                            let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
+                            let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
+
+                            this.broadcastCommand(betCommand);
+
+                        }, 3000);
+
+                        return;
+
+                    }
+
+                }  // if it's my turn
+
+            }   // seat has a player
+            else {
+
+                this.log(`${seat.getName()} is MIA`);
+                return;
+
+            }
+
+        }
+        else {
+
+            throw new Error(`Seat index out of range: ${action.bets.seatIndex}`);
+
+        }
+
+    }  // betTurn
+
+
+    private bet(action: BetAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+
+        if (seat) {
+
+            let message = 'Unknown message';
+
+            switch (action.bet.betType) {
+
+                case Bet.CHECK:
+                    message = `${seat.getName()} checks`;
+                    break;
+
+                case Bet.OPEN:
+                    message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    break;
+
+                case Bet.CALL:
+                    message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    break;
+
+                case Bet.RAISE:
+                    message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    break;
+
+            }  // switch
+
+            if (action.bet.isAllIn) {
+                message += ' and is all-in';
+            }
+
+            this.log(message);
+
+        }
+        else {
+
+            throw new Error(`Bet: Seat index out of range: ${action.seatIndex}`);
+
+        }
+
+    }  // bet
+
 
 
 

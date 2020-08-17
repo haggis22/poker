@@ -234,6 +234,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
             return this.dealCard(action);
         }
 
+        if (action instanceof BetTurnAction) {
+
+            return this.betTurn(action);
+
+        }
+
 
         /*
 
@@ -241,11 +247,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
 
 
-        if (action instanceof BetTurnAction) {
-
-            return this.betTurn(action);
-
-        }
 
         if (action instanceof FlipCardsAction) {
 
@@ -287,7 +288,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private log(message: string): void {
 
-        console.log('\x1b[32m%s\x1b[0m', `TableWatcher ${message}`);
+        // console.log('\x1b[32m%s\x1b[0m', `TableWatcher ${message}`);
 
     }
 
@@ -400,68 +401,16 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private betTurn(action: BetTurnAction): void {
 
-        let seat = this.table.seats[action.bets.seatIndex];
-
-        if (seat) {
-
-            logger.info(`It is ${seat.getName()}'s turn to act`);
-
-            if (seat.hand && seat.player) {
-
-                logger.info(`${seat.getName()} is thinking`);
-
-                let tracker: BetTracker = action.bets;
-
-                if (tracker.currentBet > 0) {
-
-                    if (Math.random() >= 0.20) {
-
-                        // This represents a call (possibly all-in)
-                        let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
-                        let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
-
-                        // this.broadcastCommand(betCommand);
-                        return;
-
-                    }
-                    else {
-
-                        // We're folding!
-                        let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
-
-                        // this.broadcastCommand(foldCommand);
-                        return;
-
-                    }
-
-                }
-                else {
-
-                    // This represents a bet out (or a check, if the player has no chips)
-                    let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
-                    let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
-
-                    // this.broadcastCommand(betCommand);
-                    return;
-
-                }
-
-            }   // seat has a player
-            else {
-
-                logger.info(`${seat.getName()} is MIA`);
-                return;
-
-            }
-
-        }
-        else {
-
-            throw new Error(`Seat index out of range: ${action.bets.seatIndex}`);
-
-        }
+        this.table.betTracker = action.bets;
 
     }  // betTurn
+
+
+    private bet(action: BetAction): void {
+
+        // For now, we're not doing anything - we'll wait for the UpdateBetsAction
+
+    }  // bet
 
 
     private flipCards(action: FlipCardsAction): void {
@@ -490,50 +439,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
 
 
-    private bet(action: BetAction): void {
-
-/*
-        let seat = this.table.seats[action.seatIndex];
-
-        if (seat) {
-
-            let message = 'Unknown message';
-
-            switch (action.bet.betType) {
-
-                case Bet.CHECK:
-                    message = `${seat.getName()} checks`;
-                    break;
-
-                case Bet.OPEN:
-                    message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
-                    break;
-
-                case Bet.CALL:
-                    message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
-                    break;
-
-                case Bet.RAISE:
-                    message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
-                    break;
-
-            }  // switch
-
-            if (action.bet.isAllIn) {
-                message += ' and is all-in';
-            }
-
-            logger.info(message);
-
-        }
-        else {
-
-            throw new Error(`Bet: Seat index out of range: ${action.seatIndex}`);
-
-        }
-*/
-
-    }  // bet
 
 
     private fold(action: FoldAction): void {

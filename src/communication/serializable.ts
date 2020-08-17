@@ -6,7 +6,10 @@ export { PokerHandEvaluation } from "../games/poker/poker-hand-evaluation";
 export { BetAction } from "../actions/table/betting/bet-action";
 export { BetTurnAction } from "../actions/table/game/bet-turn-action";
 
+export { BetState } from "../casino/tables/states/betting/bet-state";
+export { BetReturnedAction } from "../actions/table/game/bet-returned-action";
 export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
+
 export { AnteAction } from "../actions/table/betting/ante-action";
 export { SetHandAction } from "../actions/table/game/set-hand-action";
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
@@ -21,7 +24,6 @@ export { PokerGameFiveCardStud } from "../games/poker/five-card-stud/poker-game-
 
 export { StartHandState } from "../casino/tables/states/start-hand-state";
 export { DealState } from "../casino/tables/states/deal-state";
-export { BetState } from "../casino/tables/states/betting/bet-state";
 export { ShowdownState } from "../casino/tables/states/showdown-state";
 export { HandCompleteState } from "../casino/tables/states/hand-complete-state";
 export { OpenState } from "../casino/tables/states/open-state";
