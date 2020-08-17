@@ -7,7 +7,6 @@ import { StartHandState } from "../../../casino/tables/states/start-hand-state";
 
 export class FiveCardDrawStateMachine extends PokerStateMachine {
 
-
     constructor() {
 
         super();

@@ -285,6 +285,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                 seat.player = new Player(command.user.id, command.user.name);
 
                 this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
+
+                this.checkStartHand();
+
                 return;
 
             }
@@ -345,7 +348,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private checkStartHand(): void {
 
-        if (this.table.state == null || this.table.state instanceof OpenState && this.isReadyForHand()) {
+        if ((this.table.state == null || this.table.state instanceof OpenState) && this.isReadyForHand()) {
 
             this.log(`Starting new hand`);
             return this.goToNextState();
@@ -459,14 +462,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // countPlayersInHand
 
 
-    private changeTableState(action: TableStateAction): void {
-
-        let state = action.state || new OpenState();
+    private changeTableState(state: TableState): void {
 
         this.table.state = state;
         this.log(`TableState: ${state.constructor.name}`);
 
-        this
+        this.queueAction(new TableStateAction(this.table.id, state));
 
         if (state instanceof OpenState) {
 
@@ -1074,7 +1075,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private goToNextState(): void {
 
-        this.queueAction(new TableStateAction(this.table.id, this.table.game.stateMachine.nextState()));
+        this.changeTableState(this.table.game.stateMachine.nextState());
 
     }
 

@@ -103,8 +103,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         if (actionMessage && actionMessage.action instanceof TableAction) {
 
-            this.log(`Heard ${message.constructor.name} with ${actionMessage.action.constructor.name}`);
-
             if (actionMessage.action.tableID === this.tableID) {
 
                 this.messageQueue.push(message);
@@ -278,6 +276,8 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         }
 */
 
+        this.log(`Heard ${action.constructor.name}`);
+
     }
 
 
@@ -302,7 +302,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
             seat.player = action.player;
 
-            this.log(` ${action.player.name} sat in ${seat.getSeatName()}`);
+            // this.log(` ${action.player.name} sat in ${seat.getSeatName()}`);
 
         }
 

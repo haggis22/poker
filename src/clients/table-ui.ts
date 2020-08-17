@@ -62,8 +62,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let action: Action = actionMessage.action;
 
-        this.log(`Heard ${action.constructor.name}`);
-
 
         if (action instanceof TableConnectedAction) {
 

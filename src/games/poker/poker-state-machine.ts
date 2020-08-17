@@ -1,6 +1,6 @@
 ﻿import { TableStateMachine } from "../../casino/tables/states/table-state-machine";
-import { Table } from "../../casino/tables/table";
 import { TableState } from "../../casino/tables/states/table-state";
+import { OpenState } from "../../casino/tables/states/open-state";
 
 export class PokerStateMachine implements TableStateMachine {
 
@@ -11,26 +11,23 @@ export class PokerStateMachine implements TableStateMachine {
     constructor() {
 
         this.states = new Array<TableState>();
-        this.currentStateIndex = null;
+
+        // All state machines start with OpenState
+        this.states.push(new OpenState());
+
+        this.currentStateIndex = 0;
 
     }
 
-    nextState(): TableState {
+    public nextState(): TableState {
 
-        if (this.currentStateIndex === null) {
-
-            this.currentStateIndex = 0;
-
-        }
-        else {
-            this.currentStateIndex++;
-        }
+        this.currentStateIndex++;
 
         if (this.currentStateIndex >= this.states.length) {
-            this.currentStateIndex = null;
 
-            // we are done with the hand - no more states
-            return null;
+            // Go back to the beginning
+            this.currentStateIndex = 0;
+
         }
 
         return this.states[this.currentStateIndex];
