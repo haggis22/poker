@@ -52,16 +52,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        let actionMessage: ActionMessage = message as ActionMessage;
-
-        if (!actionMessage) {
+        if (!(message instanceof ActionMessage)) {
 
             // Not an ActionMessage, so nothing further to do
             return;
 
         }
 
-        let action: Action = actionMessage.action;
+        let action: Action = message.action;
 
         if (action instanceof TableConnectedAction) {
 

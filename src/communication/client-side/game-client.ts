@@ -43,28 +43,27 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
     receive(msg: string): void {
 
-        let o: any = this.serializer.deserialize(msg);
+        let msgObj: any = this.serializer.deserialize(msg);
 
-        this.log(`received ${o.constructor.name}: ${msg}`);
+        this.log(`received ${msgObj.constructor.name}: ${msg}`);
 
-        if (o && o instanceof Message) {
+        if (msgObj instanceof Message) {
 
             // this.log('Yes, it is a Message');
 
-            let message: ActionMessage = o as ActionMessage;
+            if (msgObj instanceof ActionMessage) {
 
-            if (message) {
 
-                this.log(`received action ${message.action.constructor.name}`);
+                this.log(`received action ${msgObj.action.constructor.name}`);
+
 
             }
-
 
             // Pass the message along
             for (let handler of this.messageHandlers) {
 
                 this.log(`Passed message to ${handler.constructor.name}`);
-                handler.handleMessage(o);
+                handler.handleMessage(msgObj);
 
             }
 
@@ -100,7 +99,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler, DannySock
 
     private log(msg: string): void {
 
-        console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
+        // console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
 
     }
 
