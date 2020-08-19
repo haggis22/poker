@@ -18,6 +18,7 @@ import { Card } from "./cards/card";
 import { CardValue } from "./cards/card-value";
 import { CardSuit } from "./cards/card-suit";
 import { TableWatcher } from "./clients/table-watcher";
+import { DealtCard } from "./hands/dealt-card";
 
 
 function createTable(): Table {
@@ -65,8 +66,8 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
 
 (async function () {
 
-     // testSerializer();
-     // return;
+     //testSerializer();
+     //return;
 
     let table: Table = createTable();
 
@@ -128,7 +129,7 @@ function testSerializer() {
 
     let one: any =
     {
-        danny: new Card(CardValue.VALUES[0], CardSuit.VALUES[0])
+        danny: new DealtCard(new Card(CardValue.VALUES[0], CardSuit.VALUES[0]), true)
     };
 
     // console.log(JSON.stringify(one));
