@@ -252,15 +252,17 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-
-        /*
-
-
         if (action instanceof FlipCardsAction) {
 
             return this.flipCards(action);
 
         }
+
+
+
+        /*
+
+
 
 
 
@@ -405,22 +407,11 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private flipCards(action: FlipCardsAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        let seat = this.findSeat(action.seatIndex);
 
-        if (seat) {
+        if (seat.hand) {
 
-            if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
-
-                seat.hand = action.hand;
-
-                logger.info(`${seat.getName()} has ${seat.hand.cards.join(" ")}`);
-
-            }
-
-        }
-        else {
-
-            throw new Error(`Could not find seat ${action.seatIndex}`);
+            seat.hand = action.hand;
 
         }
 

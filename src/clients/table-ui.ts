@@ -15,11 +15,10 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction } from "../communication/serializable";
-import { DealtCard } from "../hands/dealt-card";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction } from "../communication/serializable";
 
 
-const MILLISECONDS_TO_THINK = 1200;
+const MILLISECONDS_TO_THINK = 250;
 
 const logger: Logger = new Logger();
 
@@ -157,15 +156,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-
-/*
-
-
         if (action instanceof FlipCardsAction) {
 
             return this.flipCards(action);
 
         }
+
+/*
+
+
 
 
 
@@ -434,7 +433,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                     setTimeout(() => {
 
 
-                        if (Math.random() >= 0.80) {
+                        if (Math.random() >= 0.02) {
 
                             // This represents a call (possibly all-in)
                             let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
@@ -532,6 +531,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.log(`${seat.getName()} folds`);
 
     }  // fold
+
+
+    private flipCards(action: FlipCardsAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+
+        if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
+
+            this.log(`${seat.getName()} has ${seat.hand.cards.map(card => card.toString()).join(" ")}`);
+
+        }
+
+    }  // flipCards
 
 
 
