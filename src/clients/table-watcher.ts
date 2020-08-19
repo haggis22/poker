@@ -258,17 +258,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-
-
-        /*
-
-
-
-
-
-
-
-
         if (action instanceof WinPotAction) {
 
             return this.winPot(action);
@@ -279,7 +268,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
             return this.returnBet(action);
         }
-*/
 
         this.log(`Heard ${action.constructor.name}`);
 
@@ -427,61 +415,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private winPot(action: WinPotAction): void {
 
-/*
-        let seat = this.table.seats[action.seatIndex];
-
-        if (seat) {
-
-            let describer: HandDescriber = new PokerHandDescriber();
-
-            let potDescription = action.potIndex > 0 ? `side pot #${action.potIndex}` : `the main pot`;
-
-            let handDescription = action.handEvaluation ? ` with ${describer.describe(action.handEvaluation)}` : '';
-
-            if (seat.player) {
-
-                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
-
-            }
-            else {
-                logger.info(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}, but the player is gone`);
-
-            }
-
-        }
-        else {
-
-            throw new Error(`WinPot: Seat index out of range: ${action.seatIndex}`);
-
-        }
-*/
+        // Nothing to do for this - it's mostly descriptive
 
     }  // winPot
 
 
     private returnBet(action: BetReturnedAction): void {
 
-/*
-        let seat = this.table.seats[action.seatIndex];
-
-        if (seat) {
-
-            if (seat.player) {
-
-                logger.info(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
-
-            }
-            else {
-                logger.info(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
-            }
-
-        }
-        else {
-
-            throw new Error(`BetReturned: Seat index out of range: ${action.seatIndex}`);
-
-        }
-*/
+        // Nothing to do for this - it's mostly descriptive
 
     }  // returnBet
 

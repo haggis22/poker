@@ -15,7 +15,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, HandDescriber, PokerHandDescriber, BetReturnedAction } from "../communication/serializable";
 
 
 const MILLISECONDS_TO_THINK = 250;
@@ -162,13 +162,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-/*
-
-
-
-
-
-
 
         if (action instanceof WinPotAction) {
 
@@ -181,7 +174,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.returnBet(action);
         }
 
-*/
         this.log(`Heard ${action.constructor.name}`);
 
     }
@@ -544,6 +536,45 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }  // flipCards
+
+
+    private winPot(action: WinPotAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+
+        let describer: HandDescriber = new PokerHandDescriber();
+        
+        let potDescription = action.potIndex > 0 ? `side pot #${action.potIndex}` : `the main pot`;
+        
+        let handDescription = action.handEvaluation ? ` with ${describer.describe(action.handEvaluation)}` : '';
+        
+        if (seat.player) {
+        
+            this.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
+        
+        }
+        else {
+            this.log(`${seat.getSeatName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
+        
+        }
+        
+    }  // winPot
+
+
+    private returnBet(action: BetReturnedAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+        
+        if (seat.player) {
+        
+            logger.info(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
+        
+        }
+        else {
+            logger.info(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
+        }
+        
+    }  // returnBet
 
 
 
