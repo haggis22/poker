@@ -240,21 +240,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-
-        /*
-
-
-
-
-
-
-        if (action instanceof FlipCardsAction) {
-
-            return this.flipCards(action);
-
-        }
-
-
         if (action instanceof BetAction) {
 
             return this.bet(action);
@@ -266,6 +251,19 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
             return this.fold(action);
 
         }
+
+
+        /*
+
+
+        if (action instanceof FlipCardsAction) {
+
+            return this.flipCards(action);
+
+        }
+
+
+
 
 
 
@@ -351,7 +349,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
             return this.table.seats[seatIndex];
         }
 
-        return null;
+        throw new Error(`Seat index out of range: ${seatIndex}`);
 
     }  // findSeat
 
@@ -374,12 +372,8 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         let seat = this.findSeat(action.seatIndex);
 
-        if (seat) {
-
-            // If the seat has a hand, create a blank hand and copy the values over from the action
-            seat.hand = action.hasHand ? new Hand() : null;
-
-        }
+        // If the seat has a hand, create a blank hand and copy the values over from the action
+        seat.hand = action.hasHand ? new Hand() : null;
 
     }  // setHand
 
@@ -389,12 +383,8 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         let seat = this.findSeat(action.seatIndex);
 
-        if (seat) {
-
-            let dealtCard = new DealtCard(action.card, action.card != null);
-            seat.hand.deal(dealtCard);
-
-        }
+        let dealtCard = new DealtCard(action.card, action.card != null);
+        seat.hand.deal(dealtCard);
 
     }   // dealCard
 
@@ -437,24 +427,9 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }  // flipCards
 
 
-
-
-
-
     private fold(action: FoldAction): void {
 
-        let seat = this.table.seats[action.seatIndex];
-
-        if (seat) {
-
-            logger.info(`${seat.getName()} folds`);
-
-        }
-        else {
-
-            throw new Error(`Fold: Seat index out of range: ${action.seatIndex}`);
-
-        }
+        // Nothing to do for this - the actual folding comes with the SetHandAction(null) action
 
     }  // fold
 
