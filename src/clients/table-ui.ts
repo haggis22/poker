@@ -434,7 +434,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                     setTimeout(() => {
 
 
-                        if (Math.random() >= 0.20) {
+                        if (Math.random() >= 0.80) {
 
                             // This represents a call (possibly all-in)
                             let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
@@ -464,7 +464,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                     setTimeout(() => {
 
                         // This represents a bet out (or a check, if the player has no chips)
-                        let betAmount: number = Math.min(tracker.minRaise, seat.player.chips);
+                        let desiredBet = (Math.random() > 0.40) ? tracker.minRaise : 0;
+
+                        let betAmount: number = Math.min(desiredBet, seat.player.chips);
                         let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
                         this.broadcastCommand(betCommand);
