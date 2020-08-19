@@ -1,4 +1,5 @@
-﻿export { WinPotAction } from "../actions/table/game/win-pot-action";
+﻿
+export { WinPotAction } from "../actions/table/game/win-pot-action";
 
 export { FlipCardsAction } from "../actions/table/game/flip-cards-action";
 export { PokerHandEvaluation } from "../games/poker/poker-hand-evaluation";
@@ -13,7 +14,13 @@ export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
 export { AnteAction } from "../actions/table/betting/ante-action";
 export { SetHandAction } from "../actions/table/game/set-hand-action";
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
+
 export { DealCardAction } from "../actions/table/game/deal-card-action";
+export { DealtCard } from "../hands/dealt-card";
+export { Card } from "../cards/card";
+export { CardValue } from "../cards/card-value";
+export { CardSuit } from "../cards/card-suit";
+
 
 export { StackUpdateAction } from "../actions/table/players/stack-update-action";
 export { AddChipsAction } from "../actions/table/players/add-chips-action";
@@ -50,9 +57,6 @@ export { FoldAction } from "../actions/table/betting/fold-action";
 export { FoldCommand } from "../commands/table/fold-command";
 export { BetCommand } from "../commands/table/bet-command";
 
-export { Card } from "../cards/card";
-export { CardValue } from "../cards/card-value";
-export { CardSuit } from "../cards/card-suit";
 
 export { TableState } from "../casino/tables/states/table-state";
 export { TableStateMachine } from "../casino/tables/states/table-state-machine";
