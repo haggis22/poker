@@ -1,5 +1,4 @@
-﻿
-export { WinPotAction } from "../actions/table/game/win-pot-action";
+﻿export { WinPotAction } from "../actions/table/game/win-pot-action";
 
 export { FlipCardsAction } from "../actions/table/game/flip-cards-action";
 export { PokerHandEvaluation } from "../games/poker/poker-hand-evaluation";
@@ -33,6 +32,7 @@ export { HandCompleteState } from "../casino/tables/states/hand-complete-state";
 export { OpenState } from "../casino/tables/states/open-state";
 
 export { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
+export { SetGameAction } from "../actions/table/game/set-game-action";
 
 export { RequestSeatCommand } from "../commands/table/request-seat-command";
 export { TableConnectedAction } from "../actions/table/state/table-connected-action";
@@ -76,9 +76,5 @@ export { Command } from "../commands/command";
 export { Message } from "../messages/message";
 export { ActionMessage } from "../messages/action-message";
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
-
-
-
-
 
 

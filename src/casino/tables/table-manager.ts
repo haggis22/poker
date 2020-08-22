@@ -79,11 +79,10 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(tableID: number, table: Table, game: Game, deck: Deck) {
+    constructor(tableID: number, table: Table, deck: Deck) {
 
         this.tableID = tableID;
         this.table = table;
-        this.setGame(game);
         this.deck = deck;
 
         this.copier = new DeepCopier();
@@ -225,7 +224,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }
 
 
-    private setGame(game: Game): void {
+    public setGame(game: Game): void {
 
         this.game = game;
         this.queueAction(new SetGameAction(this.table.id, game.id));

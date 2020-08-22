@@ -72,12 +72,12 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
      //return;
 
     let table: Table = createTable();
-    let game: Game = (new GameFactory()).create(PokerGameFiveCardStud.ID);
 
     // Create the components, working from the UI all the way to the TableManager on the server
 
     let clientManager: ClientManager = new ClientManager();
-    let tableManager: TableManager = new TableManager(table.id, table, game, new Deck());
+    let tableManager: TableManager = new TableManager(table.id, table, new Deck());
+    tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
 
     let danny = new User(1, 'Danny', 10000);
     let mark = new User(2, 'Mark', 10000);
