@@ -33,6 +33,9 @@ import { BetReturnedAction } from "../actions/table/game/bet-returned-action";
 import { CommandBroadcaster } from "../commands/command-broadcaster";
 import { Command } from "../commands/command";
 import { TableStateAction, OpenState, Seat } from "../communication/serializable";
+import { SetGameAction } from "../actions/table/game/set-game-action";
+import { Game } from "../games/game";
+import { GameFactory } from "../games/game-factory";
 
 const logger: Logger = new Logger();
 
@@ -41,6 +44,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private tableID: number;
     private table: Table;
+    private game: Game;
 
     private commandHandlers: CommandHandler[];
     private messageHandlers: MessageHandler[];
@@ -179,6 +183,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
+        if (action instanceof SetGameAction) {
+
+            return this.setGame(action);
+
+        }
+
         if (action instanceof PlayerSeatedAction) {
 
             // this.log(` yes - it is a PlayerSeatedAction`);
@@ -286,6 +296,15 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         this.table = action.table;
 
     }
+
+
+    private setGame(action: SetGameAction): void {
+
+        // Looks up the rules for the game based on ID, rather than passing a game object through the pipes
+        this.game = (new GameFactory()).create(action.gameID);
+
+    }   // setGame
+
 
     private seatPlayer(action: PlayerSeatedAction): void {
 
