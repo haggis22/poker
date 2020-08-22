@@ -50,6 +50,9 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
+import { PokerHandDescriber } from "../../communication/serializable";
+import { Game } from "../../games/game";
+import { SetGameAction } from "../../actions/table/game/set-game-action";
 
 const logger: Logger = new Logger();
 
@@ -60,6 +63,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     public tableID: number;
     private table: Table;
+    private game: Game;
     private deck: Deck;
 
     private copier: DeepCopier;
@@ -75,10 +79,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(tableID: number, table: Table, deck: Deck) {
+    constructor(tableID: number, table: Table, game: Game, deck: Deck) {
 
         this.tableID = tableID;
         this.table = table;
+        this.setGame(game);
         this.deck = deck;
 
         this.copier = new DeepCopier();
@@ -220,10 +225,17 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }
 
 
+    private setGame(game: Game): void {
+
+        this.game = game;
+        this.queueAction(new SetGameAction(this.table.id, game.id));
+
+    }
+
 
     private createTableSnapshot(userID: number): Table {
 
-        let table: Table = new Table(this.table.id, this.table.game, this.table.stakes, this.table.rules);
+        let table: Table = new Table(this.table.id, this.table.stakes, this.table.rules);
 
         table.betTracker = this.table.betTracker;
         table.buttonIndex = this.table.buttonIndex;
@@ -462,6 +474,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         this.log('Generating private snapshot message');
         this.queueMessage(new ActionMessage(tableAction, command.userID));
+
+        // Tell the user which game we are playing at this table
+        this.queueMessage(new ActionMessage(new SetGameAction(table.id, this.game.id), command.userID));
 
     }
 
@@ -908,7 +923,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             if (seat.hand) {
 
                 // Put their best hand on the list
-                handWinners.push(new HandWinner(this.table.game.handSelector.select(this.table.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
+                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
 
             }
 
@@ -1007,11 +1022,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         let winners: HandWinner[] = this.findWinners();
 
-/*
+        let describer: PokerHandDescriber = new PokerHandDescriber();
+
         for (let winner of winners) {
-            this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
+            console.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${describer.describe(winner.evaluation)}`);
         }
-*/
 
         for (let pot of this.table.betTracker.pots) {
 
@@ -1093,7 +1108,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private goToNextState(): void {
 
-        this.changeTableState(this.table.game.stateMachine.nextState());
+        this.changeTableState(this.game.stateMachine.nextState());
 
     }
 

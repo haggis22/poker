@@ -19,6 +19,8 @@ import { CardValue } from "./cards/card-value";
 import { CardSuit } from "./cards/card-suit";
 import { TableWatcher } from "./clients/table-watcher";
 import { DealtCard } from "./hands/dealt-card";
+import { GameFactory } from "./games/game-factory";
+import { Game } from "./games/game";
 
 
 function createTable(): Table {
@@ -31,7 +33,7 @@ function createTable(): Table {
     // blinds, ante, minRaise
     let stakes = new Stakes(new Array<number>(), 50, 200);
 
-    let table: Table = new Table(tableID, new PokerGameFiveCardStud(), stakes, rules);
+    let table: Table = new Table(tableID, stakes, rules);
 
     return table;
 
@@ -70,11 +72,12 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
      //return;
 
     let table: Table = createTable();
+    let game: Game = (new GameFactory()).create(PokerGameFiveCardStud.ID);
 
     // Create the components, working from the UI all the way to the TableManager on the server
 
     let clientManager: ClientManager = new ClientManager();
-    let tableManager: TableManager = new TableManager(table.id, table, new Deck());
+    let tableManager: TableManager = new TableManager(table.id, table, game, new Deck());
 
     let danny = new User(1, 'Danny', 10000);
     let mark = new User(2, 'Mark', 10000);

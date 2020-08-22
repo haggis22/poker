@@ -15,7 +15,10 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, HandDescriber, PokerHandDescriber, BetReturnedAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction } from "../communication/serializable";
+import { Game } from "../games/game";
+import { SetGameAction } from "../actions/table/game/set-game-action";
+import { GameFactory } from "../games/game-factory";
 
 
 const MILLISECONDS_TO_THINK = 250;
@@ -31,6 +34,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private chipFormatter: IChipFormatter;
 
     private table: Table;
+    private game: Game;
 
 
     constructor(user: User, chipFormatter: IChipFormatter) {
@@ -89,6 +93,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof SetGameAction) {
+
+            return this.setGame(action);
+
+        }
 
         if (action instanceof PlayerSeatedAction) {
 
@@ -224,6 +233,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         return 0;
 
     }
+
+
+    private setGame(action: SetGameAction): void {
+
+        // Looks up the rules for the game based on ID, rather than passing a game object through the pipes
+        this.game = (new GameFactory()).create(action.gameID);
+
+    }   // setGame
 
 
     private seatPlayer(action: PlayerSeatedAction): void {
@@ -542,11 +559,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
-        let describer: HandDescriber = new PokerHandDescriber();
-        
         let potDescription = action.potIndex > 0 ? `side pot #${action.potIndex}` : `the main pot`;
-        
-        let handDescription = action.handEvaluation ? ` with ${describer.describe(action.handEvaluation)}` : '';
+
+        let handDescription = action.handEvaluation ? ` with ${this.game.handDescriber.describe(action.handEvaluation)}` : '';
         
         if (seat.player) {
         
@@ -567,11 +582,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         
         if (seat.player) {
         
-            logger.info(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
+            this.log(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
         
         }
         else {
-            logger.info(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
+            this.log(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
         }
         
     }  // returnBet

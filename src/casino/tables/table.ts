@@ -13,7 +13,6 @@ export class Table {
 
     public id: number;
 
-    public game: Game;
     public stakes: Stakes;
     public rules: TableRules;
     public state: TableState;
@@ -28,11 +27,10 @@ export class Table {
     public buttonIndex: number;
 
 
-    constructor(id: number, game: Game, stakes: Stakes, rules: TableRules) {
+    constructor(id: number, stakes: Stakes, rules: TableRules) {
 
         this.id = id;
 
-        this.game = game;
         this.stakes = stakes;
         this.rules = rules;
 

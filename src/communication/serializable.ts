@@ -26,9 +26,6 @@ export { StackUpdateAction } from "../actions/table/players/stack-update-action"
 export { AddChipsAction } from "../actions/table/players/add-chips-action";
 export { AddChipsCommand } from "../commands/table/add-chips-command";
 
-export { PokerGameFiveCardDraw } from "../games/poker/five-card-draw/poker-game-five-card-draw";
-export { PokerGameFiveCardStud } from "../games/poker/five-card-stud/poker-game-five-card-stud";
-
 export { StartHandState } from "../casino/tables/states/start-hand-state";
 export { DealState } from "../casino/tables/states/deal-state";
 export { ShowdownState } from "../casino/tables/states/showdown-state";
@@ -62,11 +59,6 @@ export { TableState } from "../casino/tables/states/table-state";
 export { TableStateMachine } from "../casino/tables/states/table-state-machine";
 export { TableStateAction } from "../actions/table/state/table-state-action";
 
-export { BestHandSelector } from "../games/hand-selectors/best-hand-selector";
-export { HandEvaluator } from "../games/hand-evaluator";
-export { HandDescriber } from "../games/hand-describer";
-
-export { Game } from "../games/game";
 export { Stakes } from "../casino/tables/betting/stakes";
 export { TableRules } from "../casino/tables/table-rules";
 export { Board } from "../casino/tables/boards/board";
