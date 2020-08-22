@@ -21,12 +21,12 @@ export class PokerHandEvaluation implements HandEvaluation {
 
     public rank: number;
     public values: Array<CardValue>;
-    hand: Hand;
+    public cards: Card[];
 
-    constructor(rank: number, values: Array<CardValue>, hand: Hand) {
+    constructor(rank: number, values: Array<CardValue>, cards: Card[]) {
         this.rank = rank;
         this.values = values;
-        this.hand = hand;
+        this.cards = [...cards];
     }
 
     public compareTo(h2: HandEvaluation): number {

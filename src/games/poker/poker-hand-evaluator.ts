@@ -26,9 +26,7 @@ export class PokerHandEvaluator implements HandEvaluator {
     }
 
 
-    public evaluate(hand: Hand): HandEvaluation {
-
-        let cards = [...hand.cards.map(dealtCard => dealtCard.card)];
+    public evaluate(cards: Card[]): HandEvaluation {
 
         this.sort(cards);
 
@@ -90,7 +88,7 @@ export class PokerHandEvaluator implements HandEvaluator {
 
             }
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FOUR_OF_A_KIND, values, hand);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FOUR_OF_A_KIND, values, cards);
 
         }
 
@@ -113,7 +111,7 @@ export class PokerHandEvaluator implements HandEvaluator {
 
             }
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FULL_HOUSE, values, hand);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FULL_HOUSE, values, cards);
 
         }
 
@@ -143,7 +141,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             values.push(CardValue.lookup(kickers[0]));
             values.push(CardValue.lookup(kickers[1]));
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.THREE_OF_A_KIND, values, hand);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.THREE_OF_A_KIND, values, cards);
 
         }
 
@@ -174,7 +172,7 @@ export class PokerHandEvaluator implements HandEvaluator {
 
             values = [...pairs.map(pairValue => CardValue.lookup(pairValue)), ...kickers.map(kickValue => CardValue.lookup(kickValue))];
 
-            return new PokerHandEvaluation(numPairs == 2 ? PokerHandEvaluation.RANK.TWO_PAIR : PokerHandEvaluation.RANK.PAIR, values, hand);
+            return new PokerHandEvaluation(numPairs == 2 ? PokerHandEvaluation.RANK.TWO_PAIR : PokerHandEvaluation.RANK.PAIR, values, cards);
 
         }
 
@@ -184,7 +182,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             // numbers, then we have a straight (or possibly a straight flush)
             values = [...cards.map(card => card.value)];
 
-            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values, hand);
+            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values, cards);
 
         }
 
@@ -202,7 +200,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             // ...then pop it off the front and push it on the back
             values.push(values.shift());
 
-            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values, hand);
+            return new PokerHandEvaluation(isFlush ? PokerHandEvaluation.RANK.STRAIGHT_FLUSH : PokerHandEvaluation.RANK.STRAIGHT, values, cards);
 
         }
 
@@ -220,7 +218,7 @@ export class PokerHandEvaluator implements HandEvaluator {
             kickers.sort((k1, k2) => k2 - k1);
             values = kickers.map(kickValue => CardValue.lookup(kickValue));
 
-            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FLUSH, values, hand);
+            return new PokerHandEvaluation(PokerHandEvaluation.RANK.FLUSH, values, cards);
 
         }
 
@@ -239,12 +237,12 @@ export class PokerHandEvaluator implements HandEvaluator {
         kickers.sort((k1, k2) => k2 - k1);
         values = kickers.map(kickValue => CardValue.lookup(kickValue));
 
-        return new PokerHandEvaluation(PokerHandEvaluation.RANK.HIGH_CARD, values, hand);
+        return new PokerHandEvaluation(PokerHandEvaluation.RANK.HIGH_CARD, values, cards);
 
     }
 
 
-    public compare(hand1: Hand, hand2: Hand): number {
+    public compare(hand1: Card[], hand2: Card[]): number {
 
         return this.evaluate(hand1).compareTo(this.evaluate(hand2));
 

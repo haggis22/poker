@@ -1,11 +1,11 @@
 ﻿import { CardValue } from "../cards/card-value";
-import { Hand } from "../hands/hand";
+import { Card } from "../cards/card";
 
 export interface HandEvaluation {
 
     rank: number;
     values: Array<CardValue>;
-    hand: Hand;
+    cards: Card[];
 
     compareTo(h2: HandEvaluation): number;
 

@@ -1,8 +1,8 @@
-﻿import { Hand } from "../hands/hand";
-import { HandEvaluation } from "./hand-evaluation";
+﻿import { HandEvaluation } from "./hand-evaluation";
+import { Card } from "../cards/card";
 
 export interface HandEvaluator {
 
-    evaluate(hand: Hand): HandEvaluation;
+    evaluate(cards: Card[]): HandEvaluation;
 
 }
