@@ -8,10 +8,12 @@ import { FiveCardDrawStateMachine } from "./five-card-draw-state-machine";
 
 export class PokerGameFiveCardDraw extends Game {
 
+    public static readonly ID: string = 'five-card-draw';
+
 
     constructor() {
 
-        super(new FiveCardDrawStateMachine(), new Best5InHandSelector(), new PokerHandEvaluator(), new PokerHandDescriber());
+        super(PokerGameFiveCardDraw.ID, new FiveCardDrawStateMachine(), new Best5InHandSelector(), new PokerHandEvaluator(), new PokerHandDescriber());
 
     }
 
