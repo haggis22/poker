@@ -237,8 +237,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private setGame(action: SetGameAction): void {
 
-        // Looks up the rules for the game based on ID, rather than passing a game object through the pipes
-        this.game = (new GameFactory()).create(action.gameID);
+        if (!this.game || this.game.id != action.gameID) {
+
+            // Looks up the rules for the game based on ID, rather than passing a game object through the pipes
+            this.game = (new GameFactory()).create(action.gameID);
+            this.log(`The game is ${this.game.getName()}`);
+
+        }
+
 
     }   // setGame
 

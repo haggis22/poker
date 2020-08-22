@@ -18,8 +18,12 @@ export class PokerGameFiveCardStud extends Game {
 
     }
 
-    newBoard(): Board {
+    public newBoard(): Board {
         return new NoBoard();
+    }
+
+    public getName(): string {
+        return 'Five Card Stud';
     }
 
 

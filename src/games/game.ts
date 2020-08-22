@@ -25,4 +25,6 @@ export abstract class Game {
 
     abstract newBoard(): Board;
 
+    abstract getName(): string;
+
 }
