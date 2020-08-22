@@ -278,7 +278,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private log(message: string): void {
 
-        // console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
+        console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
 
     }
 
@@ -1107,7 +1107,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private goToNextState(): void {
 
-        this.changeTableState(this.game.stateMachine.nextState());
+        let nextState: TableState = this.game.stateMachine.nextState();
+
+        console.log(`Changing to next state: ${(nextState == null ? 'null' : nextState.constructor.name)}`);
+
+        this.changeTableState(nextState);
 
     }
 
