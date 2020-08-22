@@ -3,6 +3,7 @@ import { HandDescriber } from "./hand-describer";
 import { Board } from "../casino/tables/boards/board";
 import { BestHandSelector } from "./hand-selectors/best-hand-selector";
 import { TableStateMachine } from "../casino/tables/states/table-state-machine";
+import { TableState } from "../communication/serializable";
 
 export abstract class Game {
 
@@ -12,11 +13,12 @@ export abstract class Game {
     public handEvaluator: HandEvaluator;
     public handDescriber: HandDescriber;
 
-    constructor(id: string, stateMachine: TableStateMachine, selector: BestHandSelector, evaluator: HandEvaluator, describer: HandDescriber) {
+    constructor(id: string, selector: BestHandSelector, evaluator: HandEvaluator, describer: HandDescriber) {
 
         this.id = id;
 
-        this.stateMachine = stateMachine;
+        this.stateMachine = new TableStateMachine(this.getStates());
+
         this.handSelector = selector;
         this.handEvaluator = evaluator;
         this.handDescriber = describer;
@@ -26,5 +28,7 @@ export abstract class Game {
     abstract newBoard(): Board;
 
     abstract getName(): string;
+
+    protected abstract getStates(): TableState[];
 
 }

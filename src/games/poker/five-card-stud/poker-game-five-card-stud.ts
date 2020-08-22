@@ -5,7 +5,7 @@ import { PokerHandDescriber } from "../poker-hand-describer";
 import { Board } from "../../../casino/tables/boards/board";
 import { NoBoard } from "../../../casino/tables/boards/no-board";
 import { Best5InHandSelector } from "../../hand-selectors/best-5-in-hand-selector";
-import { FiveCardStudStateMachine } from "./five-card-stud-state-machine";
+import { TableState, HandCompleteState, ShowdownState, BetState, DealState, StartHandState } from "../../../communication/serializable";
 
 export class PokerGameFiveCardStud extends Game {
 
@@ -14,7 +14,7 @@ export class PokerGameFiveCardStud extends Game {
 
     constructor() {
 
-        super(PokerGameFiveCardStud.ID, new FiveCardStudStateMachine(), new Best5InHandSelector(), new PokerHandEvaluator(), new PokerHandDescriber());
+        super(PokerGameFiveCardStud.ID, new Best5InHandSelector(), new PokerHandEvaluator(), new PokerHandDescriber());
 
     }
 
@@ -25,6 +25,35 @@ export class PokerGameFiveCardStud extends Game {
     public getName(): string {
         return 'Five Card Stud';
     }
+
+    protected getStates(): TableState[] {
+
+        return [
+
+            new StartHandState(),
+
+            new DealState(false),
+
+            new DealState(true),
+            new BetState(BetState.BEST_HAND),
+
+            new DealState(true),
+            new BetState(BetState.BEST_HAND),
+
+            new DealState(true),
+            new BetState(BetState.BEST_HAND),
+
+            new DealState(true),
+            new BetState(BetState.BEST_HAND),
+
+            new ShowdownState(),
+
+            new HandCompleteState()
+
+        ];
+
+    }
+
 
 
 }

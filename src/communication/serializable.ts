@@ -41,7 +41,6 @@ export { PokerHandEvaluator } from "../games/poker/poker-hand-evaluator";
 export { PokerHandDescriber } from "../games/poker/poker-hand-describer";
 export { NoBoard } from "../casino/tables/boards/no-board";
 export { Best5InHandSelector } from "../games/hand-selectors/best-5-in-hand-selector";
-export { FiveCardStudStateMachine } from "../games/poker/five-card-stud/five-card-stud-state-machine";
 
 export { HandEvaluation } from "../games/hand-evaluation";
 
@@ -56,7 +55,6 @@ export { BetCommand } from "../commands/table/bet-command";
 
 
 export { TableState } from "../casino/tables/states/table-state";
-export { TableStateMachine } from "../casino/tables/states/table-state-machine";
 export { TableStateAction } from "../actions/table/state/table-state-action";
 
 export { Stakes } from "../casino/tables/betting/stakes";

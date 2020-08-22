@@ -1098,7 +1098,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         // This will preserve the `this` reference in the call
         setTimeout(() => {
 
-//             this.goToNextState();
+             this.goToNextState();
 
         }, 2000);
 
