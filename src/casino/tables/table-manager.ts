@@ -4,7 +4,6 @@ import { Command } from "../../commands/command";
 import { RequestSeatCommand } from "../../commands/table/request-seat-command";
 import { Player } from "../../players/player";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
-import { StartGameCommand } from "../../commands/table/start-game-command";
 import { OpenState } from "./states/open-state";
 import { StartHandState } from "./states/start-hand-state";
 import { Action } from "../../actions/action";
@@ -20,7 +19,6 @@ import { HandWinner } from "../../games/hand-winner";
 import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
 import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
 import { WinPotAction } from "../../actions/table/game/win-pot-action";
-import { MoneyFormatter } from "../../clients/chips/money-formatter";
 import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
 import { BetCommand } from "../../commands/table/bet-command";
 import { Seat } from "./seat";
@@ -43,9 +41,6 @@ import { DealCardAction } from "../../actions/table/game/deal-card-action";
 import { BetTurnAction } from "../../actions/table/game/bet-turn-action";
 import { BetReturnedAction } from "../../actions/table/game/bet-returned-action";
 import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
-import { IChipFormatter } from "../../clients/chips/chip-formatter";
-import { CommandBroadcaster } from "../../commands/command-broadcaster";
-import { TableAction } from "../../actions/table/table-action";
 import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
@@ -570,11 +565,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 if (seat.player.chipsToAdd) {
 
+                    this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
+
                     // Add their chips "to-be-added" to their currents stack
                     seat.player.chips += seat.player.chipsToAdd;
                     seat.player.chipsToAdd = 0;
 
-                    this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
                     this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
 
                 }   // they have chips waiting to add
