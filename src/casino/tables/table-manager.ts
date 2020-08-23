@@ -1026,7 +1026,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         let describer: PokerHandDescriber = new PokerHandDescriber();
 
         for (let winner of winners) {
-            console.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${describer.describe(winner.evaluation)}`);
+            this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${describer.describe(winner.evaluation)}`);
         }
 
         for (let pot of this.table.betTracker.pots) {
