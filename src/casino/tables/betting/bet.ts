@@ -6,6 +6,7 @@
     public static readonly OPEN: number = 1;
     public static readonly CALL: number = 2;
     public static readonly RAISE: number = 3;
+    public static readonly DEAD_RAISE: number = 4;
 
     public isValid: boolean;
 
@@ -18,18 +19,17 @@
     public message: string;
 
     constructor(isValid: boolean,
-        totalBet: number, chipsAdded: number, isAllIn: boolean,
-        betType: number,
-        message: string) {
+                totalBet: number,
+                chipsAdded: number,
+                isAllIn: boolean,
+                betType: number,
+                message: string) {
 
         this.isValid = isValid;
-
         this.totalBet = totalBet;
         this.chipsAdded = chipsAdded;
         this.isAllIn = isAllIn;
-
         this.betType = betType;
-
         this.message = message;
 
     }

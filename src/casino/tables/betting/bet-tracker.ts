@@ -9,10 +9,10 @@ export class BetTracker {
     public seatIndexInitiatingAction: number;
     public seatIndex: number;
 
+    public lastLiveBet: number;
     public currentBet: number;
     public minRaise: number;
 
-    public isDeadRaise: boolean;
     public timeToAct: number;
 
     // Tracks how much each seat has bet so far in this round
@@ -43,8 +43,7 @@ export class BetTracker {
             delete this.bets[prop];
         }
 
-        this.currentBet = 0;
-        this.isDeadRaise = false;
+        this.currentBet = this.lastLiveBet = 0;
         this.seatIndex = null;
 
     }   // clearBets
@@ -97,73 +96,101 @@ export class BetTracker {
 
         }
 
-        // TODO: Make sure the bet is enough to call, or put the player all-in
+/*    
+        public seatIndexInitiatingAction: number;
+    public seatIndex: number;
+
+    public lastLiveBet: number;
+    public currentBet: number;
+    public minRaise: number;
+*/
+
         let playerCurrentBet: number = this.bets[seat.index] || 0;
+
+        if (totalBetAmount < playerCurrentBet) {
+
+            return new Bet(false, playerCurrentBet, 0, false, Bet.INVALID, 'You cannot reduce your bet');
+
+        }
 
         // If they tried to bet more than they have, then reduce it to an all-in
         totalBetAmount = Math.min(totalBetAmount, playerCurrentBet + seat.player.chips);
 
         let chipsRequired: number = totalBetAmount - playerCurrentBet;
 
-        let isAllIn: boolean = false;
+        // See how many chips they would have left if they made this bet
+        let chipsRemaining: number = seat.player.chips - chipsRequired;
 
-        if (chipsRequired >= seat.player.chips) {
-
-            chipsRequired = seat.player.chips;
-
-            // they have to have put in some chips with this bet to get marked as all-in. If they were previously all-in
-            // and they're not putting in any chips this round, then don't mark them all-in again
-            if (chipsRequired > 0) {
-                isAllIn = true;
-            }
-
-        }
-
-        seat.player.chips -= chipsRequired;
-
-        let playerTotalBet = playerCurrentBet + chipsRequired;
+        // they have to have put in some chips with this bet to get marked as all-in. If they were previously all-in
+        // and they're not putting in any chips this round, then don't mark them all-in again
+        let isAllIn: boolean = (chipsRemaining === 0) && (chipsRequired > 0);
 
         let betType: number = null;
 
-        if (playerTotalBet > this.currentBet) {
+        if (totalBetAmount < this.currentBet) {
 
-            this.isDeadRaise = playerTotalBet < this.minRaise;
+            if (chipsRemaining > 0) {
 
-            if (this.currentBet === 0) {
-
-                betType = Bet.OPEN;
-
-            }
-            else {
-
-                betType = Bet.RAISE;
+                // They are trying to bet less than the current, but they still have chips left
+                return new Bet(false, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
 
             }
-
-            this.currentBet = playerTotalBet;
-
-        }
-        else if (this.currentBet === 0) {
-
-            betType = Bet.CHECK;
-
-        }
-        else {
 
             betType = Bet.CALL;
 
         }
 
-        if (playerTotalBet > 0) {
+        else if (totalBetAmount > this.currentBet) {
 
-            this.bets[seat.index] = playerTotalBet;
+            if (totalBetAmount < this.lastLiveBet + this.minRaise) {
+
+                if (chipsRemaining > 0) {
+
+                    // They are trying to raise less than the minimum amount, but they still have chips left
+                    return new Bet(false, 0, 0, false, Bet.INVALID, `You cannot ${(this.currentBet == 0 ? 'bet' : 'raise')} less than the minimum`);
+
+                }
+                else {
+
+                    // We are raising the current amount, but NOT the lastLiveAmount since it is a dead raise
+                    this.currentBet = totalBetAmount;
+                    betType = Bet.DEAD_RAISE;
+
+                }
+
+            }
+            else {
+
+                // They have bet/raise at least the mininum, so mark them as the new betting actor
+                this.seatIndexInitiatingAction = seat.index;
+
+                betType = this.currentBet === 0 ? Bet.OPEN : Bet.RAISE;
+
+                // This is a live bet/raise, so update both metrics
+                this.currentBet = totalBetAmount;
+                this.lastLiveBet = totalBetAmount;
+
+            }
+
+        }
+
+        else {
+
+            betType = this.currentBet === 0 ? Bet.CHECK : Bet.CALL;
+
+        }
+
+        seat.player.chips -= chipsRequired;
+
+        if (totalBetAmount > 0) {
+
+            this.bets[seat.index] = totalBetAmount;
 
         }
 
         // console.log(`BetType is ${betType}`);
 
-        return new Bet(true, playerTotalBet, chipsRequired, isAllIn, betType, null);
-
+        return new Bet(true, totalBetAmount, chipsRequired, isAllIn, betType, null);
 
     }   // addBet
 
