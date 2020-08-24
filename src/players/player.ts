@@ -1,7 +1,4 @@
-﻿import { Hand } from "../hands/hand";
-import { User } from "./user";
-
-export class Player {
+﻿export class Player {
 
     public userID: number;
     public name: string;

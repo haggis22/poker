@@ -74,7 +74,7 @@ export class BetTracker {
     }   // fold
 
 
-    public addBet(seat: Seat, totalBetAmount: number): Bet {
+    public addBet(seat: Seat, totalBetAmount: number, minimumBet: number): Bet {
 
         // console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex}`);
 
@@ -96,14 +96,6 @@ export class BetTracker {
 
         }
 
-/*    
-        public seatIndexInitiatingAction: number;
-    public seatIndex: number;
-
-    public lastLiveBet: number;
-    public currentBet: number;
-    public minRaise: number;
-*/
 
         let playerCurrentBet: number = this.bets[seat.index] || 0;
 
@@ -142,7 +134,7 @@ export class BetTracker {
 
         else if (totalBetAmount > this.currentBet) {
 
-            if (totalBetAmount < this.lastLiveBet + this.minRaise) {
+            if (totalBetAmount < this.lastLiveBet + minimumBet) {
 
                 if (chipsRemaining > 0) {
 

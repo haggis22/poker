@@ -48,6 +48,7 @@ import { DeepCopier } from "../../communication/deep-copier";
 import { PokerHandDescriber } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
+import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
 
 const logger: Logger = new Logger();
 
@@ -373,7 +374,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private checkStartHand(): void {
 
-        if ((this.table.state == null || this.table.state instanceof OpenState) && this.isReadyForHand()) {
+        if ((this.table.state == null || this.table.state instanceof OpenState) && this.isReadyForNextHand()) {
 
             this.log(`Starting new hand`);
             return this.goToNextState();
@@ -392,7 +393,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             let bettorSeat: Seat =  this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
 
-            let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount);
+            let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.betTracker.minRaise);
 
             if (bet.isValid) {
 
@@ -478,11 +479,18 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    private isReadyForHand(): boolean {
+    private isReadyForNextHand(): boolean {
 
         return this.table.seats.filter(seat => seat.player && seat.player.isActive && (seat.player.chips + seat.player.chipsToAdd) > 0).length > 1;
 
     }
+
+    private isReadyForThisHand(): boolean {
+
+        return this.table.seats.filter(seat => seat.player && seat.player.isActive).length > 1;
+
+    }
+
 
 
     private countPlayersInHand(): number {
@@ -501,7 +509,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         if (state instanceof OpenState) {
 
-            if (this.isReadyForHand()) {
+            if (this.isReadyForNextHand()) {
 
                 // start the next hand
                 return this.goToNextState();
@@ -561,6 +569,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         for (let seat of this.table.seats) {
 
+
             if (seat.player) {
 
                 if (seat.player.chipsToAdd) {
@@ -579,7 +588,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                     seat.player.isActive = false;
 
-                    // TODO: Broadcast sitting out event
+                    // Tell the world this player is sitting out
+                    this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));
 
                 }
 
@@ -612,7 +622,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                     // set the betting to the ante's seat or it will not be accepted
                     this.table.betTracker.seatIndex = seat.index;
 
-                    let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante);
+                    // the minimum amoutn will be the ante - this doesn't respect the minimums for a regular betting round.
+                    let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante, this.table.stakes.ante);
 
                     // this.log(`ante result: ${ante}`);
 
@@ -625,8 +636,15 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                     }  // valid ante
                     else {
 
+                        // this.log(`${seat.getName()} had an invalid ante: ${ante.message} and is being marked as inactive`);
+
                         // they didn't pay the ante, so take away their (blank) cards
                         seat.hand = null;
+
+                        seat.player.isActive = false;
+
+                        // Tell the world this player is sitting out
+                        this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));
 
                     }
 
@@ -651,6 +669,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
         this.checkBetsToReturn();
+
+        if (!this.isReadyForThisHand()) {
+
+            // We don't have enough players, so go back to the open state
+            return this.changeTableState(new OpenState());
+
+        }
 
         this.setButton();
 
@@ -807,7 +832,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             let checkerSeat = this.table.seats[this.table.betTracker.seatIndex];
 
             // try to check
-            let check: Bet = this.table.betTracker.addBet(checkerSeat, null);
+            let check: Bet = this.table.betTracker.addBet(checkerSeat, null, this.table.betTracker.minRaise);
 
             if (check.isValid) {
 

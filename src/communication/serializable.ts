@@ -73,6 +73,11 @@ export { Player } from "../players/player";
 export { Command } from "../commands/command";
 export { Message } from "../messages/message";
 export { ActionMessage } from "../messages/action-message";
+
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
+export { PlayerActiveAction } from "../actions/table/players/player-active-action";
+
+
+
 
 

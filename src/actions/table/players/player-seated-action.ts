@@ -13,6 +13,7 @@ export class PlayerSeatedAction extends TableAction {
 
         this.player = player;
         this.seatIndex = seatIndex;
+
     }
 
 }
