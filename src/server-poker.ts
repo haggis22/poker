@@ -14,13 +14,8 @@ import { TableUI } from "./clients/table-ui";
 import { ServerClient } from "./communication/server-side/server-client";
 import { Serializer } from "./communication/serializer";
 import { Seat } from "./casino/tables/seat";
-import { Card } from "./cards/card";
-import { CardValue } from "./cards/card-value";
-import { CardSuit } from "./cards/card-suit";
 import { TableWatcher } from "./clients/table-watcher";
-import { DealtCard } from "./hands/dealt-card";
 import { GameFactory } from "./games/game-factory";
-import { Game } from "./games/game";
 import { BetTracker, Bet, Hand } from "./communication/serializable";
 
 
@@ -70,7 +65,6 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
 (async function () {
 
     // return testBetTracker();
-    // return testSerializer();
 
     let table: Table = createTable();
 
@@ -133,110 +127,4 @@ function testBetTracker() {
 
 }
 
-function testTableSerializer() {
 
-    let serializer: Serializer = new Serializer();
-
-    let table: Table = createTable();
-
-    console.log(JSON.stringify(table));
-
-    let mushed: string = serializer.serialize(table);
-
-    console.log(`Serialized: ${mushed}`);
-
-    let rabbit: any = serializer.deserialize(mushed);
-
-    console.log(JSON.stringify(rabbit));
-
-    if (rabbit instanceof Table) {
-        console.log('It IS a Table');
-    }
-    else {
-        console.log('It is NOT a Table');
-    }
-    
-
-}
-
-function testSerializer() {
-
-    let serializer: Serializer = new Serializer();
-
-    // let one: any = new Deck();
-    // let one: any = new Card(CardValue.VALUES[0], CardSuit.VALUES[0]);
-    // let one: any = CardValue.VALUES[0];
-
-    let one: any =
-    {
-        danny: new DealtCard(new Card(CardValue.VALUES[0], CardSuit.VALUES[0]), true)
-    };
-
-    // console.log(JSON.stringify(one));
-
-    let mushed: string = serializer.serialize(one);
-
-    console.log(`Serialized: ${mushed}`);
-
-    // let rabbit: any = serializer.deserialize(mushed);
-
-    // console.log(JSON.stringify(rabbit));
-
-    /*
-    let rules = 
-
-    // blinds, ante, minRaise
-    let stakes = 
-
-    let table: Table = new Table(tableID, new PokerGameFiveCardStud(), stakes, rules, );
-*/
-
-}
-
-function testSerializerPlayer() {
-
-    let serializer: Serializer = new Serializer();
-    let array: Seat[] = new Array<Seat>();
-
-    let danny: Player = new Player(1, 'Danny');
-    danny.chips = 500;
-
-    let s1: Seat = new Seat(0);
-    s1.player = danny;
-    s1.hand = null;
-    array.push(s1);
-
-    let paul1: Player = new Player(2, 'Paul');
-    paul1.chips = 200;
-
-    let s2: Seat = new Seat(1);
-    s2.player = danny;
-    s2.hand = null;
-    array.push(s2);
-
-    array.push(s2);
-
-
-    console.log(JSON.stringify(array));
-
-    let mushed: string = serializer.serialize(array);
-
-    console.log(`Serialized: ${mushed}`);
-
-    let rabbit: any = serializer.deserialize(mushed);
-
-    console.log(JSON.stringify(rabbit));
-
-    if (Array.isArray(rabbit)) {
-        console.log('It IS an array');
-        for (let x of rabbit) {
-
-            console.log(`Object is ${x.constructor.name}, instanceof Player? ${(x instanceof Player)}`);
-
-        }
-    }
-
-    return;
-
-
-}
