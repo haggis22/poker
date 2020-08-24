@@ -447,8 +447,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                     setTimeout(() => {
 
+                        let rnd:number = Math.random();
 
-                        if (Math.random() >= 0.02) {
+
+                        if (rnd >= 0.8) {
+
+                            // This represents a raise 
+                            let betAmount: number = Math.min(tracker.currentBet + this.table.stakes.minRaise, seat.player.chips);
+                            let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
+
+                            this.broadcastCommand(betCommand);
+                            return;
+
+                        }
+                        else if (rnd >= 0.02) {
 
                             // This represents a call (possibly all-in)
                             let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);

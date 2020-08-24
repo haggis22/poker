@@ -32,7 +32,7 @@ function createTable(): Table {
     let rules = new TableRules(6, 15);
 
     // blinds, ante, minRaise
-    let stakes = new Stakes(new Array<number>(), 50, 200);
+    let stakes = new Stakes(new Array<number>(), 25, 100);
 
     let table: Table = new Table(tableID, stakes, rules);
 
