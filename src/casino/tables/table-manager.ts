@@ -385,6 +385,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             let bettorSeat: Seat =  this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
 
+            let oldActionInitiator = this.table.betTracker.seatIndexInitiatingAction;
+
             let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.stakes.minRaise);
 
             if (bet.isValid) {
@@ -396,6 +398,14 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                 this.queueAction(new BetAction(this.table.id, bettorSeat.index, bet));
                 this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
                 this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+
+                if (bet.betType == Bet.RAISE) {
+
+                    let newActionInitiator = this.table.betTracker.seatIndexInitiatingAction;
+
+                    this.log(`**************************************** RAISE: oldActionInitiator = ${oldActionInitiator}, newActionInitiator = ${newActionInitiator}`);
+
+                }
 
                 return this.advanceBetTurn();
 
@@ -800,11 +810,48 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
-        this.table.betTracker.seatIndexInitiatingAction = firstSeatIndexWithAction;
-
-        this.setBetTurn(firstSeatIndexWithAction);
+        this.validateBettorOrMoveOn(firstSeatIndexWithAction);
 
     }   // makeYourBets
+
+
+    private validateBettorOrMoveOn(bettorSeatIndex: number): void {
+
+        let done: boolean = false;
+
+        while (!done) {
+
+            if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
+
+                this.log('Betting complete');
+
+                this.table.betTracker.gatherBets();
+                this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+
+                this.checkBetsToReturn();
+
+                return this.goToNextState();
+
+            }
+
+            if (this.table.seats[bettorSeatIndex].player && this.table.seats[bettorSeatIndex].player.chips > 0) {
+
+                done = true;
+
+            }
+            else {
+
+                // Otherwise, keep moving the marker
+                bettorSeatIndex = this.findNextOccupiedSeatIndex(bettorSeatIndex + 1);
+
+            }
+
+        }  // while !done
+
+        this.setBetTurn(bettorSeatIndex);
+
+
+    }  // validateBettorOrMoveOn
 
 
     private logTimers() {
@@ -866,44 +913,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
-        let oldIndex: number = this.table.betTracker.seatIndex;
-
-        let nextSeatIndex = this.findNextOccupiedSeatIndex(this.table.betTracker.seatIndex + 1);
-
-        // this.log(`advanceBetTurn: oldIndex = ${oldIndex}, nextSeatIndex = ${nextSeatIndex}, seatIndexInitiatingAction = ${this.table.betTracker.seatIndexInitiatingAction}`);
-
-        let done: boolean = false;
-
-        while (!done) {
-
-            if (nextSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
-
-                this.log('Betting complete');
-
-                this.table.betTracker.gatherBets();
-                this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
-
-                this.checkBetsToReturn();
-
-                return this.goToNextState();
-
-            }
-
-            if (this.table.seats[nextSeatIndex].player && this.table.seats[nextSeatIndex].player.chips > 0) {
-
-                done = true;
-
-            }
-            else {
-
-                // Otherwise, keep moving the marker
-                nextSeatIndex = this.findNextOccupiedSeatIndex(nextSeatIndex + 1);
-
-            }
-
-        }  // while !done
-
-        this.setBetTurn(nextSeatIndex);
+        this.validateBettorOrMoveOn(this.findNextOccupiedSeatIndex(this.table.betTracker.seatIndex + 1));
 
     }   // advanceBetTurn
 

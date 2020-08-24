@@ -79,6 +79,13 @@ export class BetTracker {
     }   // fold
 
 
+    public getCurrentBet(seatIndex: number): number {
+
+        return this.bets[seatIndex] || 0;
+
+    }
+
+
     public addBet(seat: Seat, totalBetAmount: number, minimumBet: number): Bet {
 
         // console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex} for amount ${totalBetAmount}, currentBet = ${this.currentBet}, lastLiveBet = ${this.lastLiveBet}, seatIndexInitiatingAction = ${this.seatIndexInitiatingAction}`);
@@ -112,7 +119,7 @@ export class BetTracker {
         }
 
 
-        let playerCurrentBet: number = this.bets[seat.index] || 0;
+        let playerCurrentBet: number = this.getCurrentBet(seat.index);
 
         if (totalBetAmount < playerCurrentBet) {
 
@@ -250,7 +257,7 @@ export class BetTracker {
         let needsNew = false;
 
         for (let previousBettorIndex of pot.getSeatsInPot()) {
-            if ((this.bets[previousBettorIndex] || 0) === 0) {
+            if ((this.getCurrentBet(previousBettorIndex)) === 0) {
                 needsNew = true;
                 break;
             }
@@ -277,12 +284,13 @@ export class BetTracker {
 
             done = true;
 
+            // TODO: Clean this up - we shouldn't need to parse the seatIndex from a string to number
             for (let seatIndex of Object.keys(this.bets)) {
 
                 pot.addChips(smallestBet, seatIndex);
                 this.bets[seatIndex] = this.bets[seatIndex] - smallestBet;
 
-                if ((this.bets[seatIndex] || 0) > 0) {
+                if ((this.getCurrentBet(parseInt(seatIndex, 10))) > 0) {
 
                     done = false;
 

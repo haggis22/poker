@@ -54,6 +54,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
+    <Content Include="src\games\game-factory.ts">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="tsconfig.json">
       <SubType>Code</SubType>
     </Content>
@@ -92,6 +95,8 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\players\player-active-action.ts" />
     <TypeScriptCompile Include="src\actions\table\state\table-state-action.ts" />
     <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
@@ -267,20 +272,11 @@
     <TypeScriptCompile Include="src\games\hand-selectors\best-hand-selector.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\five-card-draw\five-card-draw-state-machine.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\poker\five-card-draw\poker-game-five-card-draw.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\five-card-stud\five-card-stud-state-machine.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\poker\five-card-stud\poker-game-five-card-stud.ts" />
     <TypeScriptCompile Include="src\games\hand-winner.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\poker-state-machine.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\hands\dealt-card.ts">

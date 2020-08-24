@@ -15,4 +15,10 @@ export class BetCommand extends TableCommand {
     }
 
 
+    public toString(): string {
+
+        return `[ BetCommand, userID: ${this.userID}, amount: ${this.amount} ]`;
+
+    }
+
 }

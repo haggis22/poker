@@ -203,6 +203,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`Sent ${command.constructor.name}`);
 
+        if (command instanceof BetCommand)
+        {
+            this.log(`  ${command.toString()}`);
+        }
+
+
         for (let handler of this.commandHandlers) {
 
             handler.handleCommand(command);
@@ -323,11 +329,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // For now, only log from Danny's POV
         if (this.user.id === 2) {
-            // console.log(`${this.user.name}: ${message}`);
             console.log(`UI: ${message}`);
         }
 
-        //logger.info();
+/*
+        if (message == 'You cannot bet less than the current bet') {
+
+            for (let x: number = 0; x < 20; x++) {
+
+                console.log(`${this.user.name} UI: ${message}`);
+
+            }
+
+        }
+
+        console.log(`${this.user.name} UI: ${message}`);
+*/
 
     }
 
@@ -449,11 +466,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                         let rnd:number = Math.random();
 
-
                         if (rnd >= 0.8) {
 
                             // This represents a raise 
-                            let betAmount: number = Math.min(tracker.currentBet + this.table.stakes.minRaise, seat.player.chips);
+                            let betAmount: number = Math.min(tracker.currentBet + this.table.stakes.minRaise, seat.player.chips + tracker.getCurrentBet(seat.index));
+
+                            this.log(`tracker.currentBet = ${tracker.currentBet}, stakes.minRaise = ${this.table.stakes.minRaise}, playerChips = ${seat.player.chips}, playerCurrentBet = ${tracker.getCurrentBet(seat.index)}`);
+
                             let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
                             this.broadcastCommand(betCommand);
@@ -463,7 +482,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                         else if (rnd >= 0.02) {
 
                             // This represents a call (possibly all-in)
-                            let betAmount: number = Math.min(tracker.currentBet, seat.player.chips);
+                            let betAmount: number = Math.min(tracker.currentBet, tracker.getCurrentBet(seat.index) + seat.player.chips);
                             let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
                             this.broadcastCommand(betCommand);
