@@ -423,6 +423,24 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // bet
 
 
+    private foldPlayer(folderSeat: Seat, fold: Fold): void {
+
+        clearTimeout(this.betTimer);
+        this.numTimersKilled++;
+        this.logTimers();
+
+        // Take away their cards
+        folderSeat.hand = null;
+
+        // This will tell watchers that the given seat is no longer in the hand
+        this.queueAction(new SetHandAction(this.table.id, folderSeat.index, false));
+        this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
+
+        this.advanceBetTurn();
+
+    }   // foldPlayer
+
+
     private fold(command: FoldCommand): void {
 
         if (this.table.state instanceof BetState) {
@@ -433,27 +451,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (fold.isValid) {
 
-                clearTimeout(this.betTimer);
-                this.numTimersKilled++;
-                this.logTimers();
-
-                // Take away their cards
-                folderSeat.hand = null;
-
-                // This will tell watchers that the given seat is no longer in the hand
-                this.queueAction(new SetHandAction(this.table.id, folderSeat.index, false));
-                this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
-
-                this.advanceBetTurn();
-
-                return;
+                return this.foldPlayer(folderSeat, fold);
 
             }
-            else {
 
-                return this.queueMessage(new Message(fold.message, command.userID));
-
-            }
+            return this.queueMessage(new Message(fold.message, command.userID));
 
         }
 
@@ -836,16 +838,19 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             if (check.isValid) {
 
                 this.queueAction(new BetAction(this.table.id, checkerSeat.index, check));
-                this.advanceBetTurn();
-
-            }
-            else {
-
-                // TODO: Fold player
-                this.advanceBetTurn();
+                return this.advanceBetTurn();
 
             }
 
+            let fold: Fold = this.table.betTracker.fold(checkerSeat);
+
+            if (fold.isValid) {
+
+                return this.foldPlayer(checkerSeat, fold);
+
+            }
+
+            throw new Error(`TableManager could not check or fold ${checkerSeat.getSeatName()}` );
 
         }, this.table.rules.timeToAct * 1000);
 
