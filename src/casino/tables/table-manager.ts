@@ -393,7 +393,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             let bettorSeat: Seat =  this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
 
-            let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.betTracker.minRaise);
+            let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.stakes.minRaise);
 
             if (bet.isValid) {
 
@@ -792,7 +792,6 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.log('In makeYourBets');
 
         this.table.betTracker.clearBets();
-        this.table.betTracker.minRaise = this.table.stakes.minRaise;
 
         let firstSeatIndexWithAction: number = this.findFirstToBet(betState.firstToBet);
 
@@ -832,7 +831,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             let checkerSeat = this.table.seats[this.table.betTracker.seatIndex];
 
             // try to check
-            let check: Bet = this.table.betTracker.addBet(checkerSeat, null, this.table.betTracker.minRaise);
+            let check: Bet = this.table.betTracker.addBet(checkerSeat, 0, this.table.stakes.minRaise);
 
             if (check.isValid) {
 
@@ -866,7 +865,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
+        let oldIndex: number = this.table.betTracker.seatIndex;
+
         let nextSeatIndex = this.findNextOccupiedSeatIndex(this.table.betTracker.seatIndex + 1);
+
+        // this.log(`advanceBetTurn: oldIndex = ${oldIndex}, nextSeatIndex = ${nextSeatIndex}, seatIndexInitiatingAction = ${this.table.betTracker.seatIndexInitiatingAction}`);
 
         let done: boolean = false;
 

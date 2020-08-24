@@ -21,6 +21,7 @@ import { TableWatcher } from "./clients/table-watcher";
 import { DealtCard } from "./hands/dealt-card";
 import { GameFactory } from "./games/game-factory";
 import { Game } from "./games/game";
+import { BetTracker, Bet, Hand } from "./communication/serializable";
 
 
 function createTable(): Table {
@@ -68,8 +69,8 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
 
 (async function () {
 
-     //testSerializer();
-     //return;
+    // return testBetTracker();
+    // return testSerializer();
 
     let table: Table = createTable();
 
@@ -95,6 +96,42 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
 
 })();
 
+
+function setupSeat(seatIndex: number, userID: number, name: string, chips: number): Seat {
+
+    let seat: Seat = new Seat(seatIndex);
+    seat.hand = new Hand();
+    seat.player = new Player(userID, name);
+    seat.player.chips = chips;
+
+    return seat;
+
+}
+
+
+function testBetTracker() {
+
+    const minBet: number = 20;
+
+    let tracker: BetTracker = new BetTracker();
+
+    tracker.reset();
+
+    let dannySeat: Seat = setupSeat(1, 1, 'Danny', 10);
+    let markSeat: Seat = setupSeat(2, 2, 'Mark', 100);
+
+    tracker.seatIndex = 1;
+    let bet: Bet = tracker.addBet(dannySeat, 10, minBet);
+    console.log(bet);
+    console.log(tracker.toString());
+
+    tracker.seatIndex = 2;
+    bet = tracker.addBet(markSeat, 0, minBet);
+    console.log(bet);
+    console.log(tracker.toString());
+
+
+}
 
 function testTableSerializer() {
 

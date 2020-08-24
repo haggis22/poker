@@ -11,7 +11,6 @@ export class BetTracker {
 
     public lastLiveBet: number;
     public currentBet: number;
-    public minRaise: number;
 
     public timeToAct: number;
 
@@ -24,6 +23,12 @@ export class BetTracker {
 
         this.pots = [];
         this.bets = {};
+
+    }
+
+    public toString(): string {
+
+        return `[BetTracker, seatIndex: ${this.seatIndex}, seatIndexInitiatingAction: ${this.seatIndexInitiatingAction}, lastLiveBet: ${this.lastLiveBet}, currentBet: ${this.currentBet} ]`;
 
     }
 
@@ -76,8 +81,9 @@ export class BetTracker {
 
     public addBet(seat: Seat, totalBetAmount: number, minimumBet: number): Bet {
 
-        // console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex}`);
+        // console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex} for amount ${totalBetAmount}, currentBet = ${this.currentBet}, lastLiveBet = ${this.lastLiveBet}, seatIndexInitiatingAction = ${this.seatIndexInitiatingAction}`);
 
+        
         if (!seat || !seat.player) {
 
             return new Bet(false, 0, 0, false, Bet.INVALID, "There is no player in that seat");
@@ -93,6 +99,15 @@ export class BetTracker {
         if (this.seatIndex != seat.index) {
 
             return new Bet(false, 0, 0, false, Bet.INVALID, "It is not your turn to act");
+
+        }
+
+        // If there is no bet specified, then have it be 0.00
+        totalBetAmount = totalBetAmount || 0;
+
+        if (totalBetAmount < 0) {
+
+            return new Bet(false, 0, 0, false, Bet.INVALID, "You cannot be a negative amount");
 
         }
 
@@ -142,6 +157,16 @@ export class BetTracker {
                     return new Bet(false, 0, 0, false, Bet.INVALID, `You cannot ${(this.currentBet == 0 ? 'bet' : 'raise')} less than the minimum`);
 
                 }
+
+                if (this.currentBet === 0) {
+
+                    // If there is no existing bet, then this functions as an opening bet, and resets the first actor and the last "live" bet
+                    this.seatIndexInitiatingAction = seat.index;
+                    this.lastLiveBet = totalBetAmount;
+                    this.currentBet = totalBetAmount;
+                    betType = Bet.OPEN;
+
+                }
                 else {
 
                     // We are raising the current amount, but NOT the lastLiveAmount since it is a dead raise
@@ -149,6 +174,7 @@ export class BetTracker {
                     betType = Bet.DEAD_RAISE;
 
                 }
+
 
             }
             else {
@@ -181,6 +207,10 @@ export class BetTracker {
         }
 
         // console.log(`BetType is ${betType}`);
+
+        if (this.seatIndexInitiatingAction == null) {
+            this.seatIndexInitiatingAction = seat.index;
+        }
 
         return new Bet(true, totalBetAmount, chipsRequired, isAllIn, betType, null);
 
