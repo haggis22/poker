@@ -18,6 +18,15 @@ export class TableStateMachine {
 
     }
 
+    public goToOpenState(): TableState {
+
+        this.currentStateIndex = 0;
+
+        // ALL state machines start with OpenState()
+        return this.states[this.currentStateIndex];
+
+    }
+
 
     public nextState(): TableState {
 

@@ -3,7 +3,7 @@
 export class HandCompleteState implements TableState {
 
     isHandInProgress(): boolean {
-        return false;
+        return true;
     }
 
     requiresMultiplePlayers(): boolean {

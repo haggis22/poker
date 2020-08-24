@@ -193,14 +193,6 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
-        /*
-        if (command instanceof StartGameCommand) {
-
-            return this.startGame(command);
-
-        }
-        */
-
         if (command instanceof BetCommand) {
 
             return this.bet(command);
@@ -374,7 +366,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private checkStartHand(): void {
 
-        if ((this.table.state == null || this.table.state instanceof OpenState) && this.isReadyForNextHand()) {
+        if (!this.table.state.isHandInProgress() && this.isReadyForNextHand()) {
 
             this.log(`Starting new hand`);
             return this.goToNextState();
@@ -483,7 +475,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private isReadyForNextHand(): boolean {
 
-        return this.table.seats.filter(seat => seat.player && seat.player.isActive && (seat.player.chips + seat.player.chipsToAdd) > 0).length > 1;
+        return this.table.seats.filter(seat => seat.player && seat.player.isActive && seat.player.chips > 0).length > 1;
 
     }
 
@@ -502,6 +494,40 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // countPlayersInHand
 
 
+    private doBetweenHandsBusiness() {
+
+        for (let seat of this.table.seats) {
+
+            if (seat.player) {
+
+                if (seat.player.chipsToAdd) {
+
+                    this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
+
+                    // Add their chips "to-be-added" to their currents stack
+                    seat.player.chips += seat.player.chipsToAdd;
+                    seat.player.chipsToAdd = 0;
+
+                    this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+
+                }   // they have chips waiting to add
+
+                if (seat.player.chips == 0) {
+
+                    seat.player.isActive = false;
+
+                    // Tell the world this player is sitting out
+                    this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));
+
+                }
+
+            }
+
+        }
+
+    }  // doBetweenHandsBusiness
+
+
     private changeTableState(state: TableState): void {
 
         this.table.state = state;
@@ -509,7 +535,19 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         this.queueAction(new TableStateAction(this.table.id, state));
 
-        if (state instanceof OpenState) {
+        if (state.requiresMultiplePlayers()) {
+
+            if (this.countPlayersInHand() < 2) {
+
+                // blow through this state since there is 0 or 1 person still in the hand at the table.
+                return this.goToNextState();
+            }
+
+        }
+
+        if (!state.isHandInProgress()) {
+
+            this.doBetweenHandsBusiness();
 
             if (this.isReadyForNextHand()) {
 
@@ -517,24 +555,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                 return this.goToNextState();
 
             }
-            else {
 
-                this.log('Table not ready - leaving in OpenState');
-                return;
-
-            }
+            this.log('Table not ready for next hand');
+            return;
 
         }
 
-        if (state.requiresMultiplePlayers()) {
-
-            if (this.countPlayersInHand()  < 2) {
-
-                // blow through this state since there is 0 or 1 person still in the hand at the table.
-                return this.goToNextState();
-            }
-
-        }
 
         if (state instanceof StartHandState) {
 
@@ -568,36 +594,6 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
     private startHand() {
-
-        for (let seat of this.table.seats) {
-
-
-            if (seat.player) {
-
-                if (seat.player.chipsToAdd) {
-
-                    this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
-
-                    // Add their chips "to-be-added" to their currents stack
-                    seat.player.chips += seat.player.chipsToAdd;
-                    seat.player.chipsToAdd = 0;
-
-                    this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
-
-                }   // they have chips waiting to add
-
-                if (seat.player.chips == 0) {
-
-                    seat.player.isActive = false;
-
-                    // Tell the world this player is sitting out
-                    this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));
-
-                }
-
-            }
-
-        }
 
         this.deck.shuffle();
 
@@ -675,7 +671,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         if (!this.isReadyForThisHand()) {
 
             // We don't have enough players, so go back to the open state
-            return this.changeTableState(new OpenState());
+            return this.changeTableState(this.game.stateMachine.goToOpenState());
 
         }
 
