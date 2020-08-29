@@ -49,7 +49,6 @@
     </Compile>
     <Compile Include="src\server-socket.ts.not" />
     <Content Include=".gitignore" />
-    <Content Include="poker.bat" />
     <Content Include="package.json" />
     <Content Include="public\index.html">
       <SubType>Code</SubType>
