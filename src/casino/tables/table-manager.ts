@@ -45,7 +45,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { PokerHandDescriber } from "../../communication/serializable";
+import { PokerHandDescriber, DeclareHandAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
@@ -694,13 +694,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private setButton(): void {
 
-        this.table.buttonIndex = this.findNextOccupiedSeatIndex(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
+        this.table.buttonIndex = this.findNextSeatWithAHand(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
 
         this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
 
     }
 
-    private findNextOccupiedSeatIndex(seatIndex: number): number {
+    private findNextSeatWithAHand(seatIndex: number): number {
 
         let nextPosition: number = seatIndex;
 
@@ -842,7 +842,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             else {
 
                 // Otherwise, keep moving the marker
-                bettorSeatIndex = this.findNextOccupiedSeatIndex(bettorSeatIndex + 1);
+                bettorSeatIndex = this.findNextSeatWithAHand(bettorSeatIndex + 1);
 
             }
 
@@ -913,7 +913,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
-        this.validateBettorOrMoveOn(this.findNextOccupiedSeatIndex(this.table.betTracker.seatIndex + 1));
+        this.validateBettorOrMoveOn(this.findNextSeatWithAHand(this.table.betTracker.seatIndex + 1));
 
     }   // advanceBetTurn
 
@@ -934,7 +934,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         
             case BetState.FIRST_POSITION:
                 {
-                    return this.findNextOccupiedSeatIndex(this.table.buttonIndex + 1);
+                    return this.findNextSeatWithAHand(this.table.buttonIndex + 1);
                 }
 
             case BetState.BEST_HAND:
@@ -1037,6 +1037,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private showdown(showdownState: ShowdownState) {
 
+
         let isShowdownRequired = this.countPlayersInHand() > 1;
 
         if (isShowdownRequired) {
@@ -1056,12 +1057,18 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
+        // We have to find the winners and evaluate hands AFTER we have flipped the cards face-up
         let winners: HandWinner[] = this.findWinners();
 
-        let describer: PokerHandDescriber = new PokerHandDescriber();
+        if (isShowdownRequired) {
+
+            this.declareHands(winners);
+
+        }
+
 
         for (let winner of winners) {
-            this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${describer.describe(winner.evaluation)}`);
+            this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
         }
 
         for (let pot of this.table.betTracker.pots) {
@@ -1081,7 +1088,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                     }
                     else if (winner.evaluation.compareTo(potWinningHand) >= 0) {
 
-                        // Should never be *greater*, since we're going to descending order of hand strength
+                        // Should never be *greater*, since we're going in descending order of hand strength
                         potWinnerSeatIndexes.add(winner.seatIndex);
 
                     }
@@ -1126,6 +1133,33 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
     }   // showdown
+
+
+    private declareHands(winners: HandWinner[]): void {
+
+        let declaredSet: Set<number> = new Set<number>();
+
+        let handIndex: number = this.findNextSeatWithAHand(this.table.buttonIndex+1);
+
+        while (!declaredSet.has(handIndex)) {
+
+            let handWinner: HandWinner = winners.find(w => w.seatIndex == handIndex);
+
+            if (handWinner) {
+
+                this.queueAction(new DeclareHandAction(this.table.id, handIndex, handWinner.evaluation));
+
+            }
+
+            // Mark it as seen for when we come back around
+            declaredSet.add(handIndex);
+
+            handIndex = this.findNextSeatWithAHand(handIndex+1);
+
+        }
+
+    }
+
 
 
     private completeHand(completeState: HandCompleteState) {
