@@ -1,1 +1,1 @@
-node build/server-poker
+node build/server/server
