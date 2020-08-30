@@ -20,4 +20,11 @@
 
     }
 
+
+    public toString(): string {
+
+        return `[ ${this.name}, chips: ${this.chips} ]`;
+
+    }
+
 }

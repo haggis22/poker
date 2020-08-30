@@ -71,10 +71,7 @@ gulp.task('client-html', () => {
 gulp.task('client-js', () => {
 
     // combines all the Angular code from /src along with the dual Angular/Node code from /js
-    return gulp.src(['src/client/**/*.js'])
-        .pipe(sortStream(putAppFirst))
-        .pipe(embedTemplates())
-        .pipe(concat('poker-js.js'))
+    return gulp.src(['src/client/**/*.js'], { base: './src/client' })
         .pipe(gulp.dest('build/client/js'));
 
 
@@ -82,15 +79,21 @@ gulp.task('client-js', () => {
 
 gulp.task('client-ts', () => {
 
-    // combines all the Angular code from /src along with the dual Angular/Node code from /js
-    return gulp.src(['src/client/**/*.js'])
-        .pipe(concat('poker-js.js'))
+    return gulp.src('src/**/*.ts')
+        .pipe(ts({
+            "esModuleInterop": true,
+            "module": "es6",
+            "target": "esnext",
+            "rootDir": "./src",
+            "sourceMap": false
+        }))
         .pipe(gulp.dest('build/client/js'));
-
 
 });
 
-gulp.task('client', gulp.parallel('client-html', 'client-js'));
+
+
+gulp.task('client', gulp.parallel('client-html', 'client-js', 'client-ts'));
 
 
 gulp.task('default',
