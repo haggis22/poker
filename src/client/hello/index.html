@@ -6,7 +6,12 @@
     <title></title>
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-resource.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-route.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-animate.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.13/angular-ui-router.js"></script>
+
 
 </head>
 <body>
@@ -14,9 +19,10 @@
     <h3>Hello, world!</h3>
 
 
-    <div ng-app="HelloApp" ng-controller="HelloCtrl" ng-cloak>
+    <div ng-app="HelloApp" ng-controller="HelloCtrl">
 
-        Hello, {{ name }} (Jackass)
+        
+        <div ui-view></div>
 
     </div>
 

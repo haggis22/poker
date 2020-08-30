@@ -44,6 +44,7 @@
     <Compile Include="src\classes\actions\table\players\add-chips-action.ts">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\client\hello\app\routes.js" />
     <Compile Include="src\index.ts.not">
       <SubType>Code</SubType>
     </Compile>
@@ -62,7 +63,8 @@
     <Content Include="src\classes\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\client\index.html">
+    <Content Include="src\client\hello\index.html" />
+    <Content Include="src\client\hello\main\index.html">
       <SubType>Code</SubType>
     </Content>
     <Content Include="tsconfig.json">
@@ -101,6 +103,8 @@
     <Folder Include="src\classes\" />
     <Folder Include="src\client\" />
     <Folder Include="src\client\hello\" />
+    <Folder Include="src\client\hello\app\" />
+    <Folder Include="src\client\hello\main\" />
     <Folder Include="src\server\" />
     <Folder Include="src\classes\players\" />
     <Folder Include="src\classes\casino\tables\states\" />
@@ -301,7 +305,7 @@
     <TypeScriptCompile Include="src\classes\casino\tables\table.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\hello\app.js">
+    <TypeScriptCompile Include="src\client\hello\app\app.js">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\hello\hello-controller.js">
