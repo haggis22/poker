@@ -100,6 +100,7 @@
     <Folder Include="src\classes\communication\" />
     <Folder Include="src\classes\" />
     <Folder Include="src\client\" />
+    <Folder Include="src\client\hello\" />
     <Folder Include="src\server\" />
     <Folder Include="src\classes\players\" />
     <Folder Include="src\classes\casino\tables\states\" />
@@ -298,6 +299,12 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\classes\casino\tables\table.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\client\hello\app.js">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\client\hello\hello-controller.js">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\datastore.ts">
