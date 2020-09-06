@@ -4,8 +4,8 @@
     "esModuleInterop": true,
     "downlevelIteration": true,
     "moduleResolution": "Node",
-    "module": "es6",
-    "target": "es5",
+    "module": "CommonJS",
+    "target": "esnext",
     "watch": false,
     "allowJs": true
   }

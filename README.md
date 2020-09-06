@@ -3,7 +3,7 @@
 
 To run original version
 
-`node build/classes/server-poker`
+`node dist/server-poker`
 
 
 To run new server from package.json

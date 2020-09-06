@@ -304,9 +304,6 @@
     <TypeScriptCompile Include="src\client\ui\index.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\datastore.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\poker\poker-hand-describer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

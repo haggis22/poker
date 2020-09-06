@@ -3,20 +3,20 @@ import { Player } from "./players/player";
 import { Table } from "./casino/tables/table";
 import { PokerGameFiveCardDraw } from "./games/poker/five-card-draw/poker-game-five-card-draw";
 import { PokerGameFiveCardStud } from "./games/poker/five-card-stud/poker-game-five-card-stud";
-import { MoneyFormatter } from "./clients/chips/money-formatter";
 import { TableManager } from "./casino/tables/table-manager";
 import { User } from "./players/user";
 import { TableRules } from "./casino/tables/table-rules";
 import { Stakes } from "./casino/tables/betting/stakes";
 import { ClientManager } from "./communication/server-side/client-manager";
 import { GameClient } from "./communication/client-side/game-client";
-import { TableUI } from "./clients/table-ui";
 import { ServerClient } from "./communication/server-side/server-client";
 import { Serializer } from "./communication/serializer";
 import { Seat } from "./casino/tables/seat";
-import { TableWatcher } from "./clients/table-watcher";
 import { GameFactory } from "./games/game-factory";
 import { BetTracker, Bet, Hand } from "./communication/serializable";
+import { TableWatcher } from "./client/table-watcher";
+import { TableUI } from "./client/table-ui";
+import { MoneyFormatter } from "./client/chips/money-formatter";
 
 
 function createTable(): Table {
