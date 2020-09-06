@@ -7,13 +7,18 @@ import { MoneyFormatter } from '../chips/money-formatter';
 import { TableWatcher } from '../table-watcher';
 import { GameClient } from '../../communication/client-side/game-client';
 import { User } from '../../players/user';
+import { Player } from '../../players/player';
+
 
 
 var app = new Vue({
+
     el: '#poker',
     data: {
-        name: 'Daniel',
-        message: 'Here we go again'
+        name: <string>'Daniel',
+        message: <string>'Here we go again',
+        players: <Player[]>null,
+        ui: <TableUI> null
     }
 });
 
@@ -36,6 +41,8 @@ tableWatcher.registerMessageHandler(ui);
 tableWatcher.registerCommandHandler(gameClient);
 
 gameClient.registerMessageHandler(tableWatcher);
+
+app.ui = ui;
 
 
 /*

@@ -27,14 +27,14 @@ const logger: Logger = new Logger();
 
 export class TableUI implements MessageHandler, CommandBroadcaster {
 
-    private user: User;
+    public user: User;
 
     private commandHandlers: CommandHandler[];
 
-    private chipFormatter: IChipFormatter;
+    public chipFormatter: IChipFormatter;
 
-    private table: Table;
-    private game: Game;
+    public table: Table;
+    public game: Game;
 
 
     constructor(user: User, chipFormatter: IChipFormatter) {
