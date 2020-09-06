@@ -26,6 +26,13 @@ var app = new Vue({
 console.log('Here I am');
 
 
+const ws = new WebSocket('ws://localhost:3000');
+
+ws.onmessage = (evt: MessageEvent) => {
+    const data: any = JSON.parse(evt.data);
+    console.log(data);
+};
+
 
 function createPlayer(name: string, numChips: number): Player {
 
