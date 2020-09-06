@@ -13,7 +13,6 @@ $table-width: 800px;
 
 
 body {
-    
     font-family: $font;
     background: aliceblue;
 
@@ -54,7 +53,6 @@ body {
         top: 150px;
 
         .betting-line {
-
             background: transparent;
             border-radius: 50%;
             height: 84%;
@@ -63,12 +61,38 @@ body {
             margin-top: 30px;
             position: relative;
             border: 0.75em solid rgba(255, 255, 255, 0.5);
+        }
+
+        .pots {
+            position: absolute;
+            top: 80px;
+            left: 50px;
+            background: transparent;
+            width: 600px;
+            height: 120px;
+            border: none;
+            color: white;
+            text-transform: uppercase;
+
+            .pot
+            {
+                margin: 10px 20px;
+                float: left;
+
+                .name, .chips
+                {
+                    text-align: center;
+                    height: 1.5em;
+                    line-height: 1.5em;
+                }
+
+            }
 
         }
 
         .board {
             position: absolute;
-            top: 40%;
+            top: 50%;
             left: 30%;
         }
 

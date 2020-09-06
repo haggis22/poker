@@ -21,6 +21,15 @@
                         <div class="chips"><span v-if="seat != null && seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
                     </div>
 
+                    <div class="pots">
+
+                        <div v-for="(pot, index) in ui.table.betTracker.pots" class="pot" :class="'pot-' + pot.index">
+                            <div class="name">{{ pot.getName() }}</div>
+                            <div class="chips">{{ ui.chipFormatter.format(pot.amount) }}</div>
+                        </div>
+
+                    </div>
+
                     <div class="board">
                         <div class="card-small">
                             <div class="value club">A</div>
@@ -47,7 +56,7 @@
                 </div>
 
 
-            </div>
+            </div><!-- table seats-6 -->
 
         </div>
         <div v-else>
