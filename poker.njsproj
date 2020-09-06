@@ -114,11 +114,12 @@
     <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\client\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\client-side\local-game-client.ts" />
-    <TypeScriptCompile Include="src\communication\danny-socket.ts">
+    <TypeScriptCompile Include="src\communication\fake-socket.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\deep-copier.ts">
