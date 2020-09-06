@@ -1,0 +1,19 @@
+﻿@import url("https://fonts.googleapis.com/css?family=Karla:weight@400;700&display=swap");
+
+$font: "Karla", sans-serif;
+
+.dutch, .scottish {
+    font-family: $font;
+}
+
+.dutch {
+    h1 {
+        color: orange;
+    }
+}
+
+.scottish {
+    h1 {
+        color: dodgerblue;
+    }
+}
