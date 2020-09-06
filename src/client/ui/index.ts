@@ -27,7 +27,7 @@ const ws = new WebSocket('ws://localhost:3000');
 
 ws.onopen = (evt: MessageEvent) => { console.log('Connection opened'); };
 
-let user = new User(1, 'Danny', 100000);
+let user = new User(5, 'Sekhar', 0);
 
 // Client Side
 let ui: TableUI = new TableUI(user, new MoneyFormatter());

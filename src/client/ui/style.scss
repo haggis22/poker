@@ -11,12 +11,11 @@ $diamond-color: red;
 $table-height: 500px;
 $table-width: 800px;
 
-$seat-color: maroon;
-
-
 
 body {
+    
     font-family: $font;
+    background: aliceblue;
 
 
     .table-colors {
@@ -29,7 +28,7 @@ body {
     .seat-colors {
         background-color: maroon;
         color: white;
-        border-radius: 50%;
+        border-radius: 6%;
         border: 0.25em solid black;
     }
 
@@ -52,6 +51,20 @@ body {
         height: $table-height;
         width: $table-width;
         position: relative;
+        top: 150px;
+
+        .betting-line {
+
+            background: transparent;
+            border-radius: 50%;
+            height: 84%;
+            width: 88%;
+            margin: 0 auto;
+            margin-top: 30px;
+            position: relative;
+            border: 0.75em solid rgba(255, 255, 255, 0.5);
+
+        }
 
         .board {
             position: absolute;
@@ -60,10 +73,24 @@ body {
         }
 
         .seat {
+
             @extend .seat-colors;
             position: absolute;
-            width: 10em;
-            height: 6em;
+            padding: 3px;
+            box-sizing: border-box;
+
+            .name, .chips {
+                text-align: center;
+                height: 1.5em;
+                line-height: 1.5em;
+            }
+
+            .avatar {
+                height: 100px;
+                width: 100px;
+                background: tan;
+                border: 2px solid black;
+            }
 
             table {
                 height: 100%;
@@ -82,33 +109,33 @@ body {
             .seat {
 
                 &.seat-0 {
-                    top: 80%;
-                    left: 0;
+                    top: 400px;
+                    left: 20px;
                 }
 
                 &.seat-1 {
-                    top: 40%;
-                    left: -15%;
+                    top: 120px;
+                    left: -150px;
                 }
 
                 &.seat-2 {
-                    top: 0;
-                    left: 0;
+                    top: -160px;
+                    left: 20px;
                 }
 
                 &.seat-3 {
-                    top: 0;
-                    left: 75%;
+                    top: -160px;
+                    left: 565px;
                 }
 
                 &.seat-4 {
-                    top: 40%;
-                    left: 95%;
+                    top: 120px;
+                    left: 740px;
                 }
 
                 &.seat-5 {
-                    top: 80%;
-                    left: 75%;
+                    top: 400px;
+                    left: 565px;
                 }
             }
         }

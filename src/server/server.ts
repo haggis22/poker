@@ -50,15 +50,15 @@ let clientManager: ClientManager = new ClientManager();
 let tableManager: TableManager = new TableManager(table.id, table, new Deck());
 tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
 
-let danny = new User(1, 'Danny', 1000000);
-let mark = new User(2, 'Mark', 1000000);
-let paul = new User(3, 'Paul', 1000000);
-let joe = new User(4, 'Joe', 1000000);
+let danny = new User(1, 'Danny', 1000);
+let mark = new User(2, 'Mark', 1000);
+let paul = new User(3, 'Paul', 1000);
+let joe = new User(4, 'Joe', 1000);
 let sekhar = new User(5, 'Sekhar', 0);
 
 clientManager.setTableManager(tableManager);
 
-// clientManager.addClient(createClient(table.id, danny));
+clientManager.addClient(createRoboClient(table.id, danny));
 clientManager.addClient(createRoboClient(table.id, mark));
 clientManager.addClient(createRoboClient(table.id, paul));
 clientManager.addClient(createRoboClient(table.id, joe));
@@ -66,7 +66,7 @@ clientManager.addClient(createRoboClient(table.id, joe));
 
 wss.on('connection', (socket: WebSocket) => {
 
-    let user: User = new User(1, 'Danny', 1000);
+    let user: User = new User(5, 'Sehkar', 0);
 
     let serverClient: ServerClient = new ServerClient(socket, user.id);
 

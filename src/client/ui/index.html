@@ -13,37 +13,39 @@
 
             <div class="table seats-6">
 
-                <div v-for="(seat, index) in ui.table.seats" class="seat" :class="'seat-'+seat.index">
-                    <table>
-                        <tbody v-if="seat != null && seat.player != null">
-                            <tr><td class="name">{{ seat.player.name }}</td></tr>
-                            <tr><td class="chips">{{ ui.chipFormatter.format(seat.player.chips) }}</td></tr>
-                        </tbody>
-                    </table>
+                <div class="betting-line">
+
+                    <div v-for="(seat, index) in ui.table.seats" class="seat" :class="'seat-'+seat.index">
+                        <div class="name"><span v-if="seat != null && seat.player != null">{{ seat.player.name }}</span></div>
+                        <div class="avatar">&nbsp;</div>
+                        <div class="chips"><span v-if="seat != null && seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
+                    </div>
+
+                    <div class="board">
+                        <div class="card-small">
+                            <div class="value club">A</div>
+                            <div class="suit club">&clubs;</div>
+                        </div>
+                        <div class="card-small">
+                            <div class="value spade">10</div>
+                            <div class="suit spade">&spades;</div>
+                        </div>
+                        <div class="card-small">
+                            <div class="value heart">K</div>
+                            <div class="suit heart">&hearts;</div>
+                        </div>
+                        <div class="card-small">
+                            <div class="value diamond">Q</div>
+                            <div class="suit diamond">&diams;</div>
+                        </div>
+                        <div class="card-small">
+                            <div class="value diamond">2</div>
+                            <div class="suit diamond">&diams;</div>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="board">
-                    <div class="card-small">
-                        <div class="value club">A</div>
-                        <div class="suit club">&clubs;</div>
-                    </div>
-                    <div class="card-small">
-                        <div class="value spade">10</div>
-                        <div class="suit spade">&spades;</div>
-                    </div>
-                    <div class="card-small">
-                        <div class="value heart">K</div>
-                        <div class="suit heart">&hearts;</div>
-                    </div>
-                    <div class="card-small">
-                        <div class="value diamond">Q</div>
-                        <div class="suit diamond">&diams;</div>
-                    </div>
-                    <div class="card-small">
-                        <div class="value diamond">2</div>
-                        <div class="suit diamond">&diams;</div>
-                    </div>
-                </div>
 
             </div>
 
