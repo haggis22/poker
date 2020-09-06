@@ -1,5 +1,4 @@
 ﻿import './style.scss';
-import { Player } from '../../players/player';
 
 import Vue from 'vue';
 

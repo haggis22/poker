@@ -1,4 +1,4 @@
-﻿export interface DannySocket {
+﻿export interface FakeSocket {
 
     receive(msg: string): void;
 

@@ -1,14 +1,14 @@
 ﻿import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { Message } from "../../messages/message";
-import { DannySocket } from "../danny-socket";
+import { FakeSocket } from "../fake-socket";
 import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
 
 export class LocalServerClient implements IServerClient
      {
 
-    private socket: DannySocket;
+    private socket: FakeSocket;
     private serializer: Serializer;
 
     public userID: number;
@@ -26,7 +26,7 @@ export class LocalServerClient implements IServerClient
 
     }
 
-    public connect(socket: DannySocket) {
+    public connect(socket: FakeSocket) {
         this.socket = socket;
     }
 

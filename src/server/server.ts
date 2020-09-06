@@ -19,6 +19,7 @@ import { TableWatcher } from '../client/table-watcher';
 import { ServerClient } from '../communication/server-side/server-client';
 import { LocalGameClient } from '../communication/client-side/local-game-client';
 import { LocalServerClient } from '../communication/server-side/local-server-client';
+import { RoboTableUI } from '../client/robo-table-ui';
 
 const app = express();
 
@@ -58,9 +59,9 @@ let sekhar = new User(5, 'Sekhar', 0);
 clientManager.setTableManager(tableManager);
 
 // clientManager.addClient(createClient(table.id, danny));
-clientManager.addClient(createLocalClient(table.id, mark));
-clientManager.addClient(createLocalClient(table.id, paul));
-clientManager.addClient(createLocalClient(table.id, joe));
+clientManager.addClient(createRoboClient(table.id, mark));
+clientManager.addClient(createRoboClient(table.id, paul));
+clientManager.addClient(createRoboClient(table.id, joe));
 
 
 wss.on('connection', (socket: WebSocket) => {
@@ -93,10 +94,10 @@ function createTable(): Table {
 }
 
 
-function createLocalClient(tableID: number, user: User): LocalServerClient {
+function createRoboClient(tableID: number, user: User): LocalServerClient {
 
     // Client Side
-    let ui: TableUI = new TableUI(user, new MoneyFormatter());
+    let ui: RoboTableUI = new RoboTableUI(user, new MoneyFormatter());
     let tableWatcher: TableWatcher = new TableWatcher(tableID);
     let gameClient: LocalGameClient = new LocalGameClient();
 

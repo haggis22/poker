@@ -3,14 +3,14 @@ import { Command } from "../../commands/command";
 import { MessageBroadcaster } from "../../messages/message-broadcaster";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
-import { DannySocket } from "../danny-socket";
+import { FakeSocket } from "../fake-socket";
 import { Serializer } from "../serializer";
 import { ActionMessage } from "../../messages/action-message";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 
-export class LocalGameClient implements MessageBroadcaster, CommandHandler, DannySocket {
+export class LocalGameClient implements MessageBroadcaster, CommandHandler, FakeSocket {
 
-    private socket: DannySocket;
+    private socket: FakeSocket;
     private serializer: Serializer;
 
     private messageHandlers: MessageHandler[];
@@ -24,7 +24,7 @@ export class LocalGameClient implements MessageBroadcaster, CommandHandler, Dann
     }
 
 
-    public connect(socket: DannySocket) {
+    public connect(socket: FakeSocket) {
 
         this.socket = socket;
 

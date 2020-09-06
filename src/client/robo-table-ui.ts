@@ -25,7 +25,7 @@ const MILLISECONDS_TO_THINK = 1500;
 
 const logger: Logger = new Logger();
 
-export class TableUI implements MessageHandler, CommandBroadcaster {
+export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private user: User;
 
@@ -334,7 +334,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // For now, only log from Danny's POV
         if (this.user.id === 1) {
-            console.log(message);
+            console.log(`UI: ${message}`);
         }
 
 /*
