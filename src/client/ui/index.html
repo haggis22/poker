@@ -7,25 +7,46 @@
 </head>
 <body>
 
-    <div class="dutch">
-        <h1>Welkom bij onze site!</h1>
-    </div>
-
-    <div class="scottish">
-        <h1>Welcome to oor site!</h1>
-    </div>
-
     <div id="poker">
-
-        <h5 :title="message">Hello, {{ name }}</h5>
 
         <div v-if="ui != null && ui.table != null">
 
-            <ul>
-                <li v-for="seat in ui.table.seats">
-                    {{ seat.getSeatName() }}: <span v-if="seat != null && seat.player != null">{{ seat.player.name }} {{ ui.chipFormatter.format(seat.player.chips) }}, isActive? {{ seat.player.isActive }}</span>
-                </li>
-            </ul>
+            <div class="table seats-6">
+
+                <div v-for="(seat, index) in ui.table.seats" class="seat" :class="'seat-'+seat.index">
+                    <table>
+                        <tbody v-if="seat != null && seat.player != null">
+                            <tr><td class="name">{{ seat.player.name }}</td></tr>
+                            <tr><td class="chips">{{ ui.chipFormatter.format(seat.player.chips) }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="board">
+                    <div class="card-small">
+                        <div class="value club">A</div>
+                        <div class="suit club">&clubs;</div>
+                    </div>
+                    <div class="card-small">
+                        <div class="value spade">10</div>
+                        <div class="suit spade">&spades;</div>
+                    </div>
+                    <div class="card-small">
+                        <div class="value heart">K</div>
+                        <div class="suit heart">&hearts;</div>
+                    </div>
+                    <div class="card-small">
+                        <div class="value diamond">Q</div>
+                        <div class="suit diamond">&diams;</div>
+                    </div>
+                    <div class="card-small">
+                        <div class="value diamond">2</div>
+                        <div class="suit diamond">&diams;</div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
         <div v-else>
             We have no table yet.

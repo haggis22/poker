@@ -1,19 +1,165 @@
-﻿@import url("https://fonts.googleapis.com/css?family=Karla:weight@400;700&display=swap");
+﻿@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;700&display=swap');
 
-$font: "Karla", sans-serif;
+// $font: "IBM Plex Serif", serif;
+$font: "Times New Roman", serif;
+$felt: green;
+$spade-color: black;
+$club-color: black;
+$heart-color: red;
+$diamond-color: red;
 
-.dutch, .scottish {
+$table-height: 500px;
+$table-width: 800px;
+
+$seat-color: maroon;
+
+
+
+body {
     font-family: $font;
-}
 
-.dutch {
-    h1 {
-        color: orange;
+
+    .table-colors {
+        background-color: $felt;
+        border-radius: 50%;
+        border: 0.75em solid black;
+        margin: 0 auto;
+    }
+
+    .seat-colors {
+        background-color: maroon;
+        color: white;
+        border-radius: 50%;
+        border: 0.25em solid black;
+    }
+
+    .dutch {
+        h1 {
+            color: orange;
+        }
+    }
+
+    .scottish {
+        h1 {
+            color: dodgerblue;
+        }
+    }
+
+
+    .table {
+
+        @extend .table-colors;
+        height: $table-height;
+        width: $table-width;
+        position: relative;
+
+        .board {
+            position: absolute;
+            top: 40%;
+            left: 30%;
+        }
+
+        .seat {
+            @extend .seat-colors;
+            position: absolute;
+            width: 10em;
+            height: 6em;
+
+            table {
+                height: 100%;
+                width: 100%;
+                border: none;
+
+                td {
+                    text-align: center;
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        &.seats-6 {
+
+            .seat {
+
+                &.seat-0 {
+                    top: 80%;
+                    left: 0;
+                }
+
+                &.seat-1 {
+                    top: 40%;
+                    left: -15%;
+                }
+
+                &.seat-2 {
+                    top: 0;
+                    left: 0;
+                }
+
+                &.seat-3 {
+                    top: 0;
+                    left: 75%;
+                }
+
+                &.seat-4 {
+                    top: 40%;
+                    left: 95%;
+                }
+
+                &.seat-5 {
+                    top: 80%;
+                    left: 75%;
+                }
+            }
+        }
+    }
+
+    .spade {
+        color: $spade-color;
+    }
+
+    .club {
+        color: $club-color;
+    }
+
+    .heart {
+        color: $heart-color;
+    }
+
+    .diamond {
+        color: $diamond-color;
+    }
+
+    .card-small {
+        border: .2em solid black;
+        border-radius: 10%;
+        height: 4em;
+        width: 2.7em;
+        background-color: white;
+        float: left;
+
+        .value {
+            margin: 0;
+            margin-top: 0.12em;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 0;
+            line-height: 1em;
+        }
+
+        .suit {
+            text-align: center;
+            margin: 0;
+            font-size: 2em;
+            line-height: 1em;
+        }
+    }
+
+    .card-small + .card-small {
+        margin-left: 10px;
     }
 }
 
-.scottish {
-    h1 {
-        color: dodgerblue;
-    }
-}
+
+
