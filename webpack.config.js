@@ -4,11 +4,11 @@ const path = require('path');
 
 module.exports = {
 
-    entry: { index: path.resolve(__dirname, "./src/client", "index.ts") },
+    entry: { index: path.resolve(__dirname, "./src/client/ui", "index.ts") },
     devtool: 'inline-source-map',
     output: {
         filename: 'poker.js',
-        path: path.resolve(__dirname, "dist")
+        path: path.resolve(__dirname, "dist/client")
     },
 
     module: {
@@ -60,7 +60,7 @@ module.exports = {
 
     plugins: [
 
-        new HtmlWebpackPlugin({ template: path.resolve(__dirname, "src/client", "index.html") })
+        new HtmlWebpackPlugin({ template: path.resolve(__dirname, "src/client/ui", "index.html") })
 
     ],
 

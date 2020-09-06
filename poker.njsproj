@@ -325,7 +325,6 @@
     <TypeScriptCompile Include="src\server-poker.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\server\server.ts.not" />
     <TypeScriptCompile Include="src\server\server.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

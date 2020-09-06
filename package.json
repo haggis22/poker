@@ -7,7 +7,7 @@
     "name": "Daniel Shell"
   },
   "scripts": {
-    "start": "nodemon build/server/server",
+    "start": "nodemon dist/server/server",
     "build": "tsc",
     "gulp": "gulp",
     "dev": "webpack --mode development",
