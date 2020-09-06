@@ -21,7 +21,7 @@ import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 
 
-const MILLISECONDS_TO_THINK = 250;
+const MILLISECONDS_TO_THINK = 1500;
 
 const logger: Logger = new Logger();
 
@@ -228,16 +228,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         switch (this.user.name) {
 
             case 'Danny':
-                return 700;
+                return 70000;
 
             case 'Mark':
-                return 500;
+                return 50000;
 
             case 'Paul':
-                return 600;
+                return 60000;
 
             case 'Joe':
-                return 400;
+                return 40000;
 
         }
 
@@ -333,7 +333,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private log(message: string): void {
 
         // For now, only log from Danny's POV
-        if (this.user.id === 2) {
+        if (this.user.id === 1) {
             console.log(`UI: ${message}`);
         }
 

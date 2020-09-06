@@ -8,9 +8,9 @@
   },
   "scripts": {
     "start": "nodemon dist/server/server",
-    "gulp": "gulp",
-    "dev": "webpack --mode development",
-    "prod": "webpack --mode production"
+    "build-server": "gulp",
+    "build-client": "webpack --mode development",
+    "build-client-prod": "webpack --mode production"
   },
   "dependencies": {
     "express": "^4.17.1",

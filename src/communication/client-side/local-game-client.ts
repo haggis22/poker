@@ -3,33 +3,30 @@ import { Command } from "../../commands/command";
 import { MessageBroadcaster } from "../../messages/message-broadcaster";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
+import { DannySocket } from "../danny-socket";
 import { Serializer } from "../serializer";
 import { ActionMessage } from "../../messages/action-message";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 
-export class GameClient implements MessageBroadcaster, CommandHandler {
+export class LocalGameClient implements MessageBroadcaster, CommandHandler, DannySocket {
 
-    private socket: WebSocket;
+    private socket: DannySocket;
     private serializer: Serializer;
 
     private messageHandlers: MessageHandler[];
 
 
-    constructor(socket: WebSocket) {
-
-        this.socket = socket;
-
-        console.log('Setting up web socket listener');
-
-        this.socket.onmessage = (evt: MessageEvent) => {
-
-            this.receive(evt.data);
-
-        };
-
+    constructor() {
 
         this.messageHandlers = new Array<MessageHandler>();
         this.serializer = new Serializer();
+
+    }
+
+
+    public connect(socket: DannySocket) {
+
+        this.socket = socket;
 
     }
 
@@ -39,8 +36,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
             this.log(`Sending ${o.constructor.name}`);
 
-            this.socket.send(this.serializer.serialize(o));
-
+            this.socket.receive(this.serializer.serialize(o));
         }
 
     }

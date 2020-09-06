@@ -117,6 +117,7 @@
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\client-side\local-game-client.ts" />
     <TypeScriptCompile Include="src\communication\danny-socket.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -129,6 +130,10 @@
     <TypeScriptCompile Include="src\communication\serializer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\server-side\i-server-client.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\server-side\local-server-client.ts" />
     <TypeScriptCompile Include="src\messages\action-message.ts" />
     <TypeScriptCompile Include="src\messages\message-pair.ts" />
     <TypeScriptCompile Include="src\messages\message.ts">

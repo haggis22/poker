@@ -1171,7 +1171,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
              this.goToNextState();
 
-        }, 2000);
+        }, 3000);
 
     }   // completeHand
 

@@ -1,24 +1,24 @@
 ﻿import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
-import { ServerClient } from "./server-client";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
 import { TableManager } from "../../casino/tables/table-manager";
 import { ActionMessage } from "../../messages/action-message";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 import { MessagePair } from "../../messages/message-pair";
+import { IServerClient } from "./i-server-client";
 
 export class ClientManager implements MessageHandler, CommandHandler {
 
 
     private tableManager: TableManager;
 
-    private clients: ServerClient[];
+    private clients: IServerClient[];
 
 
     constructor()
     {
-        this.clients = new Array<ServerClient>();
+        this.clients = new Array<IServerClient>();
     }
 
     setTableManager(tableManager: TableManager) {
@@ -35,7 +35,7 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
     }
 
-    addClient(client: ServerClient) {
+    addClient(client: IServerClient) {
 
         this.clients.push(client);
 
@@ -48,7 +48,7 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
     }
 
-    removeClient(client: ServerClient) {
+    removeClient(client: IServerClient) {
 
         this.clients = this.clients.filter(c => c !== client);
 

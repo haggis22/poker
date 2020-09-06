@@ -1,27 +1,21 @@
-﻿import * as WebSocket from 'ws';
-
-import { CommandHandler } from "../../commands/command-handler";
+﻿import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { Message } from "../../messages/message";
+import { DannySocket } from "../danny-socket";
 import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
 
-export class ServerClient implements IServerClient {
+export class LocalServerClient implements IServerClient
+     {
 
-    private socket: WebSocket;
+    private socket: DannySocket;
     private serializer: Serializer;
 
     public userID: number;
 
     private commandHandlers: CommandHandler[];
 
-    constructor(socket: WebSocket, userID: number) {
-
-        this.socket = socket;
-
-        this.socket.on('message', (message: string) => {
-            this.receive(message);
-        });
+    constructor(userID: number) {
 
         this.userID = userID;
 
@@ -32,10 +26,14 @@ export class ServerClient implements IServerClient {
 
     }
 
+    public connect(socket: DannySocket) {
+        this.socket = socket;
+    }
+
     private send(o: any): void {
 
         if (this.socket) {
-            this.socket.send(this.serializer.serialize(o));
+            this.socket.receive(this.serializer.serialize(o));
         }
 
     }

@@ -8,8 +8,6 @@ import { User } from "./players/user";
 import { TableRules } from "./casino/tables/table-rules";
 import { Stakes } from "./casino/tables/betting/stakes";
 import { ClientManager } from "./communication/server-side/client-manager";
-import { GameClient } from "./communication/client-side/game-client";
-import { ServerClient } from "./communication/server-side/server-client";
 import { Serializer } from "./communication/serializer";
 import { Seat } from "./casino/tables/seat";
 import { GameFactory } from "./games/game-factory";
@@ -17,6 +15,8 @@ import { BetTracker, Bet, Hand } from "./communication/serializable";
 import { TableWatcher } from "./client/table-watcher";
 import { TableUI } from "./client/table-ui";
 import { MoneyFormatter } from "./client/chips/money-formatter";
+import { LocalGameClient } from "./communication/client-side/local-game-client";
+import { LocalServerClient } from "./communication/server-side/local-server-client";
 
 
 function createTable(): Table {
@@ -36,15 +36,15 @@ function createTable(): Table {
 }
 
 
-function createClient(tableID: number, user: User, clientManager: ClientManager): ServerClient {
+function createClient(tableID: number, user: User, clientManager: ClientManager): LocalServerClient {
 
     // Client Side
     let ui: TableUI = new TableUI(user, new MoneyFormatter());
     let tableWatcher: TableWatcher = new TableWatcher(tableID);
-    let gameClient: GameClient = new GameClient();
+    let gameClient: LocalGameClient = new LocalGameClient();
 
     // Server Side
-    let serverClient: ServerClient = new ServerClient(user.id);
+    let serverClient: LocalServerClient = new LocalServerClient(user.id);
 
     // Now join all the links in the chain
     ui.registerCommandHandler(tableWatcher);

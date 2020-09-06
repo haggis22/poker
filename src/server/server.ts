@@ -1,35 +1,30 @@
 ﻿import express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
+
 import { AddressInfo } from 'net';
-import Timer = NodeJS.Timer;
+
+import { ClientManager } from '../communication/server-side/client-manager';
+import { TableManager } from '../casino/tables/table-manager';
+import { Deck } from '../cards/deck';
+import { GameFactory } from '../games/game-factory';
+import { PokerGameFiveCardStud } from '../games/poker/five-card-stud/poker-game-five-card-stud';
+import { User } from '../players/user';
+import { Table } from '../casino/tables/table';
+import { TableRules } from '../casino/tables/table-rules';
+import { Stakes } from '../communication/serializable';
+import { TableUI } from '../client/table-ui';
+import { MoneyFormatter } from '../client/chips/money-formatter';
+import { TableWatcher } from '../client/table-watcher';
+import { ServerClient } from '../communication/server-side/server-client';
+import { LocalGameClient } from '../communication/client-side/local-game-client';
+import { LocalServerClient } from '../communication/server-side/local-server-client';
 
 const app = express();
 
 const server = http.createServer(app);
 
 const wss = new WebSocket.Server({ server });
-
-let timer: Timer;
-
-wss.on('connection', (ws: WebSocket) => {
-
-    let counter = 0;
-
-    timer = setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            const value = Math.sin(counter++ * 0.1);
-            const data = {
-                timestamp: Date.now(),
-                value
-            };
-            ws.send(JSON.stringify(data))
-        } else {
-            clearInterval(timer);
-        }
-    }, 1000); // ~ 256 Hz
-
-});
 
 const PORT: number = 3000;
 
@@ -45,3 +40,80 @@ console.log(`Serving files from client path ${clientPath}`);
 
 app.use(express.static(clientPath));
 
+
+let table: Table = createTable();
+
+// Create the components, working from the UI all the way to the TableManager on the server
+
+let clientManager: ClientManager = new ClientManager();
+let tableManager: TableManager = new TableManager(table.id, table, new Deck());
+tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+
+let danny = new User(1, 'Danny', 1000000);
+let mark = new User(2, 'Mark', 1000000);
+let paul = new User(3, 'Paul', 1000000);
+let joe = new User(4, 'Joe', 1000000);
+let sekhar = new User(5, 'Sekhar', 0);
+
+clientManager.setTableManager(tableManager);
+
+// clientManager.addClient(createClient(table.id, danny));
+clientManager.addClient(createLocalClient(table.id, mark));
+clientManager.addClient(createLocalClient(table.id, paul));
+clientManager.addClient(createLocalClient(table.id, joe));
+
+
+wss.on('connection', (socket: WebSocket) => {
+
+    let user: User = new User(1, 'Danny', 1000);
+
+    let serverClient: ServerClient = new ServerClient(socket, user.id);
+
+    clientManager.addClient(serverClient);
+
+
+});
+
+
+
+function createTable(): Table {
+
+    let tableID = 1;
+
+    // # seats, # seconds to act
+    let rules = new TableRules(6, 15);
+
+    // blinds, ante, minRaise
+    let stakes = new Stakes(new Array<number>(), 25, 100);
+
+    let table: Table = new Table(tableID, stakes, rules);
+
+    return table;
+
+}
+
+
+function createLocalClient(tableID: number, user: User): LocalServerClient {
+
+    // Client Side
+    let ui: TableUI = new TableUI(user, new MoneyFormatter());
+    let tableWatcher: TableWatcher = new TableWatcher(tableID);
+    let gameClient: LocalGameClient = new LocalGameClient();
+
+    // Server Side
+    let serverClient: LocalServerClient = new LocalServerClient(user.id);
+
+    // Now join all the links in the chain
+    ui.registerCommandHandler(tableWatcher);
+
+    tableWatcher.registerMessageHandler(ui);
+    tableWatcher.registerCommandHandler(gameClient);
+
+    gameClient.registerMessageHandler(tableWatcher);
+    gameClient.connect(serverClient);
+
+    serverClient.connect(gameClient);
+
+    return serverClient;
+
+}  // createLocalClient
