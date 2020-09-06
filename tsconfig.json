@@ -1,10 +1,12 @@
 ﻿{
   "compilerOptions": {
-    "esModuleInterop":  true,
-    "module": "commonjs",
-    "target": "esnext",
-    "rootDir": "./src",
-    "sourceMap": true,
-    "watch": false
+    "sourceMap":  true,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "moduleResolution": "Node",
+    "module": "es6",
+    "target": "es5",
+    "watch": false,
+    "allowJs": true
   }
 }

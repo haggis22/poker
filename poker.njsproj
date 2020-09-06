@@ -34,43 +34,37 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="gulpfile.js">
-      <SubType>Code</SubType>
-      <TestFramework>Jest</TestFramework>
-    </Compile>
+    <Compile Include="gulpfile.js" />
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\classes\actions\table\players\add-chips-action.ts">
+    <Compile Include="src\actions\table\players\add-chips-action.ts">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\client\hello\app\routes.js" />
-    <Compile Include="src\client\vue\announcer.js">
+    <Compile Include="webpack.config.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\index.ts.not">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="src\server-socket.ts.not" />
     <Content Include=".gitignore" />
+    <Content Include="babel.config.json">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="package.json" />
     <Content Include="public\index.html">
       <SubType>Code</SubType>
     </Content>
     <Content Include="README.md" />
-    <Content Include="src\classes\actions\table\game\flip-cards-action.ts" />
-    <Content Include="src\classes\clients\chips\money-formatter.ts">
+    <Content Include="src\actions\table\game\flip-cards-action.ts" />
+    <Content Include="src\client\chips\money-formatter.ts">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\classes\casino\tables\table-rules.ts" />
-    <Content Include="src\classes\games\game-factory.ts">
+    <Content Include="src\casino\tables\table-rules.ts" />
+    <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\client\hello\index.html" />
-    <Content Include="src\client\hello\main\index.html">
+    <Content Include="src\client\ui\index.html">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\client\vue\index.html">
+    <Content Include="src\client\ui\style.scss">
       <SubType>Code</SubType>
     </Content>
     <Content Include="tsconfig.json">
@@ -80,285 +74,271 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="public\" />
-    <Folder Include="src\classes\actions\table\game\" />
-    <Folder Include="src\classes\actions\table\betting\" />
-    <Folder Include="src\classes\communication\client-side\" />
-    <Folder Include="src\classes\communication\server-side\" />
-    <Folder Include="src\classes\messages\" />
-    <Folder Include="src\classes\actions\table\state\" />
-    <Folder Include="src\classes\actions\table\players\" />
-    <Folder Include="src\classes\actions\table\" />
-    <Folder Include="src\classes\cards\" />
-    <Folder Include="src\classes\clients\chips\" />
-    <Folder Include="src\classes\clients\" />
-    <Folder Include="src\classes\casino\tables\" />
-    <Folder Include="src\classes\casino\tables\boards\" />
-    <Folder Include="src\classes\casino\tables\betting\" />
-    <Folder Include="src\classes\commands\table\" />
-    <Folder Include="src\classes\games\" />
-    <Folder Include="src\classes\games\hand-selectors\" />
-    <Folder Include="src\classes\games\poker\" />
-    <Folder Include="src\classes\casino\" />
-    <Folder Include="src\classes\games\poker\five-card-draw\" />
-    <Folder Include="src\classes\games\poker\five-card-stud\" />
-    <Folder Include="src\classes\hands\" />
-    <Folder Include="src\classes\commands\" />
-    <Folder Include="src\classes\actions\" />
-    <Folder Include="src\classes\logging\" />
-    <Folder Include="src\classes\communication\" />
-    <Folder Include="src\classes\" />
+    <Folder Include="src\actions\table\game\" />
+    <Folder Include="src\actions\table\betting\" />
+    <Folder Include="src\client\ui\" />
+    <Folder Include="src\communication\client-side\" />
+    <Folder Include="src\communication\server-side\" />
+    <Folder Include="src\messages\" />
+    <Folder Include="src\actions\table\state\" />
+    <Folder Include="src\actions\table\players\" />
+    <Folder Include="src\actions\table\" />
+    <Folder Include="src\cards\" />
+    <Folder Include="src\client\chips\" />
+    <Folder Include="src\casino\tables\" />
+    <Folder Include="src\casino\tables\boards\" />
+    <Folder Include="src\casino\tables\betting\" />
+    <Folder Include="src\commands\table\" />
+    <Folder Include="src\games\" />
+    <Folder Include="src\games\hand-selectors\" />
+    <Folder Include="src\games\poker\" />
+    <Folder Include="src\casino\" />
+    <Folder Include="src\games\poker\five-card-draw\" />
+    <Folder Include="src\games\poker\five-card-stud\" />
+    <Folder Include="src\hands\" />
+    <Folder Include="src\commands\" />
+    <Folder Include="src\actions\" />
+    <Folder Include="src\logging\" />
+    <Folder Include="src\communication\" />
     <Folder Include="src\client\" />
-    <Folder Include="src\client\hello\" />
-    <Folder Include="src\client\hello\app\" />
-    <Folder Include="src\client\hello\main\" />
-    <Folder Include="src\client\vue\" />
     <Folder Include="src\server\" />
-    <Folder Include="src\classes\players\" />
-    <Folder Include="src\classes\casino\tables\states\" />
-    <Folder Include="src\classes\casino\tables\states\betting\" />
+    <Folder Include="src\players\" />
+    <Folder Include="src\casino\tables\states\" />
+    <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="src\classes\actions\table\game\set-game-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\game\declare-hand-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\players\player-active-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\state\table-state-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\state\table-connected-action.ts">
+    <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\players\player-active-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\state\table-state-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\table\table-command.ts">
+    <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\communication\danny-socket.ts">
+    <TypeScriptCompile Include="src\communication\danny-socket.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\communication\deep-copier.ts">
+    <TypeScriptCompile Include="src\communication\deep-copier.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\communication\serializable.ts">
+    <TypeScriptCompile Include="src\communication\serializable.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\communication\serializer.ts">
+    <TypeScriptCompile Include="src\communication\serializer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\messages\action-message.ts" />
-    <TypeScriptCompile Include="src\classes\messages\message-pair.ts" />
-    <TypeScriptCompile Include="src\classes\messages\message.ts">
+    <TypeScriptCompile Include="src\messages\action-message.ts" />
+    <TypeScriptCompile Include="src\messages\message-pair.ts" />
+    <TypeScriptCompile Include="src\messages\message.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\messages\message-broadcaster.ts">
+    <TypeScriptCompile Include="src\messages\message-broadcaster.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\messages\message-handler.ts">
+    <TypeScriptCompile Include="src\messages\message-handler.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\action.ts">
+    <TypeScriptCompile Include="src\actions\action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\betting\fold-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\betting\bet-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\betting\ante-action.ts">
+    <TypeScriptCompile Include="src\actions\table\betting\fold-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\betting\bet-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\betting\ante-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\betting\update-bets-action.ts">
+    <TypeScriptCompile Include="src\actions\table\betting\update-bets-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\game\bet-turn-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\game\deal-card-action.ts">
+    <TypeScriptCompile Include="src\actions\table\game\bet-turn-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\deal-card-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\game\set-hand-action.ts">
+    <TypeScriptCompile Include="src\actions\table\game\set-hand-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\game\bet-returned-action.ts" />
-    <TypeScriptCompile Include="src\classes\actions\table\game\win-pot-action.ts">
+    <TypeScriptCompile Include="src\actions\table\game\bet-returned-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\win-pot-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\players\stack-update-action.ts">
+    <TypeScriptCompile Include="src\actions\table\players\stack-update-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\game\move-button-action.ts">
+    <TypeScriptCompile Include="src\actions\table\game\move-button-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\players\player-seated-action.ts">
+    <TypeScriptCompile Include="src\actions\table\players\player-seated-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\state\table-snapshot-action.ts">
+    <TypeScriptCompile Include="src\actions\table\state\table-snapshot-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\actions\table\table-action.ts">
+    <TypeScriptCompile Include="src\actions\table\table-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\cards\card-value.ts">
+    <TypeScriptCompile Include="src\cards\card-value.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\cards\card-suit.ts">
+    <TypeScriptCompile Include="src\cards\card-suit.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\cards\card.ts">
+    <TypeScriptCompile Include="src\cards\card.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\cards\deck.ts">
+    <TypeScriptCompile Include="src\cards\deck.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\clients\chips\chip-formatter.ts">
+    <TypeScriptCompile Include="src\client\chips\chip-formatter.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\clients\table-ui.ts">
+    <TypeScriptCompile Include="src\client\table-ui.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\clients\table-watcher.ts">
+    <TypeScriptCompile Include="src\client\table-watcher.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\betting\fold.ts" />
-    <TypeScriptCompile Include="src\classes\casino\tables\betting\bet.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\fold.ts" />
+    <TypeScriptCompile Include="src\casino\tables\betting\bet.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\betting\bet-tracker.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\bet-tracker.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\boards\board.ts">
+    <TypeScriptCompile Include="src\casino\tables\boards\board.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\boards\no-board.ts">
+    <TypeScriptCompile Include="src\casino\tables\boards\no-board.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\betting\pot.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\pot.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\seat.ts">
+    <TypeScriptCompile Include="src\casino\tables\seat.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\betting\stakes.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\stakes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\states\start-hand-state.ts" />
-    <TypeScriptCompile Include="src\classes\casino\tables\states\hand-complete-state.ts">
+    <TypeScriptCompile Include="src\casino\tables\states\start-hand-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\states\hand-complete-state.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\states\table-state-machine.ts">
+    <TypeScriptCompile Include="src\casino\tables\states\table-state-machine.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\table-manager.ts">
+    <TypeScriptCompile Include="src\casino\tables\table-manager.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\command-broadcaster.ts">
+    <TypeScriptCompile Include="src\commands\command-broadcaster.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\command-handler.ts">
+    <TypeScriptCompile Include="src\commands\command-handler.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\command.ts">
+    <TypeScriptCompile Include="src\commands\command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\table\add-chips-command.ts">
+    <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\table\create-table-command.ts">
+    <TypeScriptCompile Include="src\commands\table\create-table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\table\fold-command.ts" />
-    <TypeScriptCompile Include="src\classes\commands\table\bet-command.ts">
+    <TypeScriptCompile Include="src\commands\table\fold-command.ts" />
+    <TypeScriptCompile Include="src\commands\table\bet-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\table\start-game-command.ts">
+    <TypeScriptCompile Include="src\commands\table\start-game-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\table\request-seat-command.ts">
+    <TypeScriptCompile Include="src\commands\table\request-seat-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\commands\table\table-snapshot-command.ts">
+    <TypeScriptCompile Include="src\commands\table\table-snapshot-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\communication\server-side\client-manager.ts">
+    <TypeScriptCompile Include="src\communication\server-side\client-manager.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\communication\client-side\game-client.ts">
+    <TypeScriptCompile Include="src\communication\client-side\game-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\communication\server-side\server-client.ts">
+    <TypeScriptCompile Include="src\communication\server-side\server-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\game.ts">
+    <TypeScriptCompile Include="src\games\game.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\hand-describer.ts">
+    <TypeScriptCompile Include="src\games\hand-describer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\hand-evaluation.ts">
+    <TypeScriptCompile Include="src\games\hand-evaluation.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\hand-evaluator.ts">
+    <TypeScriptCompile Include="src\games\hand-evaluator.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\hand-selectors\best-5-in-hand-selector.ts">
+    <TypeScriptCompile Include="src\games\hand-selectors\best-5-in-hand-selector.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\hand-selectors\best-hand-selector.ts">
+    <TypeScriptCompile Include="src\games\hand-selectors\best-hand-selector.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\poker\five-card-draw\poker-game-five-card-draw.ts">
+    <TypeScriptCompile Include="src\games\poker\five-card-draw\poker-game-five-card-draw.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\poker\five-card-stud\poker-game-five-card-stud.ts" />
-    <TypeScriptCompile Include="src\classes\games\hand-winner.ts">
+    <TypeScriptCompile Include="src\games\poker\five-card-stud\poker-game-five-card-stud.ts" />
+    <TypeScriptCompile Include="src\games\hand-winner.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\hands\dealt-card.ts">
+    <TypeScriptCompile Include="src\hands\dealt-card.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\hands\hand.ts">
+    <TypeScriptCompile Include="src\hands\hand.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\table.ts">
+    <TypeScriptCompile Include="src\casino\tables\table.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\hello\app\app.js">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\hello\hello-controller.js">
+    <TypeScriptCompile Include="src\client\ui\index.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\datastore.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\poker\poker-hand-describer.ts">
+    <TypeScriptCompile Include="src\games\poker\poker-hand-describer.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\poker\poker-hand-evaluation.ts">
+    <TypeScriptCompile Include="src\games\poker\poker-hand-evaluation.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\games\poker\poker-hand-evaluator.ts">
+    <TypeScriptCompile Include="src\games\poker\poker-hand-evaluator.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\logging\logger.ts">
+    <TypeScriptCompile Include="src\logging\logger.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\players\player.ts">
+    <TypeScriptCompile Include="src\players\player.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\players\user.ts">
+    <TypeScriptCompile Include="src\players\user.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\server-poker.ts">
+    <TypeScriptCompile Include="src\server-poker.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\server\server.ts.not" />
     <TypeScriptCompile Include="src\server\server.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\simple-api.ts">
+    <TypeScriptCompile Include="src\casino\tables\states\betting\bet-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\states\deal-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\states\open-state.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\states\betting\bet-state.ts" />
-    <TypeScriptCompile Include="src\classes\casino\tables\states\deal-state.ts" />
-    <TypeScriptCompile Include="src\classes\casino\tables\states\open-state.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\classes\casino\tables\states\showdown-state.ts" />
-    <TypeScriptCompile Include="src\classes\casino\tables\states\table-state.ts" />
-    <TypeScriptCompile Include="src\vehicles.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\states\showdown-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\states\table-state.ts" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
