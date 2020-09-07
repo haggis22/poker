@@ -122,6 +122,27 @@ body {
             position: absolute;
         }
 
+        .button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid black;
+            background: grey;
+            position: absolute;
+            line-height: 40px;
+
+            .text {
+                text-align: center;
+                text-transform: uppercase;
+                color: black;
+                margin: 0;
+                font-size: 0.5em;
+                font-weight: bold;
+                line-height: 40px;
+            }
+        }
+
+
         &.seats-6 {
 
             .seat {
@@ -187,6 +208,45 @@ body {
                 &.seat-5 {
                     top: 310px;
                     left: 500px;
+                }
+            }
+
+            .button {
+
+                &.seat-0 {
+                    top: 385px;
+                    left: 160px;
+                    transform: rotate(15deg);
+                }
+
+                &.seat-1 {
+                    top: 220px;
+                    left: -45px;
+                    transform: rotate(-45deg);
+                }
+
+                &.seat-2 {
+                    top: 22px;
+                    left: 75px;
+                    transform: rotate(30deg);
+                }
+
+                &.seat-3 {
+                    top: 40px;
+                    left: 620px;
+                    transform: rotate(60deg);
+                }
+
+                &.seat-4 {
+                    top: 240px;
+                    left: 695px;
+                    transform: rotate(-20deg);
+                }
+
+                &.seat-5 {
+                    top: 380px;
+                    left: 530px;
+                    transform: rotate(50deg);
                 }
             }
         }

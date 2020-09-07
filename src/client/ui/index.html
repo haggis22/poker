@@ -49,6 +49,10 @@
                         <div>Bet: {{ ui.chipFormatter.format(betAmount) }}</div>
                     </div>
 
+                    <div v-for="(seat, seatIndex) in ui.table.seats" class="button" :class="'seat-'+seatIndex" v-if="ui.table.buttonIndex === seatIndex">
+                        <div class="text">button</div>
+                    </div>
+
                     <div v-if="false" class="board">
                         <div class="card-small">
                             <div class="value club">A</div>
