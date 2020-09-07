@@ -74,20 +74,16 @@ body {
             color: white;
             text-transform: uppercase;
 
-            .pot
-            {
+            .pot {
                 margin: 10px 20px;
                 float: left;
 
-                .name, .chips
-                {
+                .name, .chips {
                     text-align: center;
                     height: 1.5em;
                     line-height: 1.5em;
                 }
-
             }
-
         }
 
         .board {
@@ -128,6 +124,15 @@ body {
             }
         }
 
+        .chips-stage {
+            border: solid 1px black;
+            color: white;
+            font-weight: bold;
+            width: 120px;
+            height: 40px;
+            position: absolute;
+        }
+
         &.seats-6 {
 
             .seat {
@@ -160,6 +165,41 @@ body {
                 &.seat-5 {
                     top: 400px;
                     left: 565px;
+                }
+            }
+
+            .chips-stage {
+
+                &.seat-0 {
+                    top: 310px;
+                    left: 120px;
+                }
+
+                &.seat-1 {
+                    top: 160px;
+                    left: -15px;
+                }
+
+                &.seat-2 {
+                    top: 20px;
+                    left: 120px;
+                }
+
+                &.seat-3 {
+                    top: 20px;
+                    left: 500px;
+                }
+
+                &.seat-4 {
+                    top: 160px;
+                    left: 600px;
+                    background: orange;
+                }
+
+                &.seat-5 {
+                    top: 310px;
+                    left: 500px;
+                    background: yellow;
                 }
             }
         }

@@ -30,6 +30,11 @@
 
                     </div>
 
+                    <div v-for="(betAmount, seatIndex) in ui.table.betTracker.bets" class="chips-stage" :class="'seat-'+seatIndex">
+                        <div>Seat {{ seatIndex }}</div>
+                        <div>Bet: {{ ui.chipFormatter.format(betAmount) }}</div>
+                    </div>
+
                     <div class="board">
                         <div class="card-small">
                             <div class="value club">A</div>
