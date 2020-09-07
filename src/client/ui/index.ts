@@ -8,6 +8,7 @@ import { TableWatcher } from '../table-watcher';
 import { GameClient } from '../../communication/client-side/game-client';
 import { User } from '../../players/user';
 import { Player } from '../../players/player';
+import { DealtCard } from '../../hands/dealt-card';
 
 
 
@@ -19,7 +20,25 @@ var app = new Vue({
         message: <string>'Here we go again',
         players: <Player[]>null,
         ui: <TableUI> null
+    },
+    methods: {
+
+        getCardClass: function (dealtCard: DealtCard) {
+
+            if (!dealtCard) {
+                return null;
+            }
+
+            if (dealtCard.isFaceUp) {
+                return dealtCard.card.suit.text;
+            }
+
+            return 'face-down';
+
+        }   // getCardClass
+
     }
+
 });
 
 
