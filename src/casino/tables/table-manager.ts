@@ -57,6 +57,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly ALL_ACCESS: number = -1;
 
+    private readonly TIME_DEAL_CARD: number = 1000;
+
     public tableID: number;
     private table: Table;
     private game: Game;
@@ -727,43 +729,17 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }   // findNextOccupiedSeatIndex
 
 
-    private dealRound(dealState: DealState) {
+    private checkNeedsCard(dealState: DealState, seatIndex: number): void {
 
-        let seatsNeedingCards = [];
+        if (seatIndex >= this.table.seats.length) {
 
-        let seatIndex = this.table.buttonIndex + 1;
-        let hasGoneAround = false;
-
-        while (!hasGoneAround) {
-
-            if (seatIndex >= this.table.seats.length) {
-                seatIndex = 0;
-            }
-
-            if (this.table.seats[seatIndex].hand) {
-
-                seatsNeedingCards.push(seatIndex);
-
-            }
-
-            if (seatIndex == this.table.buttonIndex) {
-                hasGoneAround = true;
-            }
-            else {
-
-                seatIndex++;
-
-                if (seatIndex >= this.table.seats.length) {
-                    seatIndex = 0;
-                }
-
-            }
-
+            seatIndex = 0;
 
         }
 
-        for (let seatIndex of seatsNeedingCards) {
+        if (this.table.seats[seatIndex].hand) {
 
+            // deal this player a card
             let card = this.deck.deal();
             let seat = this.table.seats[seatIndex];
             let userID = seat.player.userID;
@@ -788,11 +764,44 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
-        }  // for each seatIndex in seatsNeedingCards
+            setTimeout(() => {
 
-        this.goToNextState();
+                this.postDealtCard(dealState, seatIndex);
+
+            }, this.TIME_DEAL_CARD);
+
+            return;
+
+        }
+
+        // we didn't do anything with this place, but see if we need to keep going
+        return this.postDealtCard(dealState, seatIndex);
+
+    }  // checkNeedsCard
+
+
+    private postDealtCard(dealState: DealState, dealtSeatIndex: number) : void {
+
+        if (dealtSeatIndex == this.table.buttonIndex) {
+
+            // we are done with the button's position (card dealt or not)
+            return this.goToNextState();
+
+        }
+
+        this.checkNeedsCard(dealState, dealtSeatIndex + 1);
+
+    }  // postDealtCard
+
+
+    private dealRound(dealState: DealState): void {
+
+        // start one past the button
+        this.checkNeedsCard(dealState, this.table.buttonIndex + 1);
 
     }   // dealRound
+
+
 
 
     private makeYourBets(betState: BetState): void {
