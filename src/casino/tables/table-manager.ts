@@ -57,7 +57,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly ALL_ACCESS: number = -1;
 
-    private readonly TIME_DEAL_CARD: number = 1000;
+    private readonly TIME_DEAL_CARD: number = 750;
 
     public tableID: number;
     private table: Table;
@@ -1137,9 +1137,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }  // for each Pot
 
+        // clear the pots
+        this.table.betTracker.reset();
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
         this.goToNextState();
-
 
     }   // showdown
 
