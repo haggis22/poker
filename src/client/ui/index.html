@@ -15,7 +15,7 @@
 
                 <div class="betting-line">
 
-                    <div v-for="(seat, index) in ui.table.seats" class="seat" :class="'seat-'+seat.index">
+                    <div v-for="(seat, index) in ui.table.seats" class="seat" :class="[ 'seat-'+seat.index, { 'action-on': ui.table.betTracker.seatIndex == index }]">
                         <div class="name"><span v-if="seat != null && seat.player != null">{{ seat.player.name }}</span></div>
                         <div class="avatar">
                             <div class="action-container">
