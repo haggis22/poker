@@ -2,11 +2,11 @@
     <h3>Mijn naam is {{ name }}, bucko</h3>
 </template>
 
-<script>
+<script lang="ts">
 
 import Vue from 'vue';
 
-export default Vue.component({
+const PlayerComponent = Vue.extend ({
 
     props: {
         name: {
@@ -14,7 +14,9 @@ export default Vue.component({
             required: true
         }
     }
+
 });
 
+export default PlayerComponent;
 
 </script>

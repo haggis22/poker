@@ -11,6 +11,7 @@ import { Player } from '../../players/player';
 import { DealtCard } from '../../hands/dealt-card';
 
 
+import PlayerComponent from './components/PlayerComponent';
 
 
 var app = new Vue({
@@ -23,6 +24,7 @@ var app = new Vue({
         ui: <TableUI> null
     },
     components: {
+        PlayerComponent
     },
     methods: {
 
