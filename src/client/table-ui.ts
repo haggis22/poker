@@ -21,8 +21,6 @@ import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 
 
-const MILLISECONDS_TO_THINK = 1500;
-
 const logger: Logger = new Logger();
 
 export class TableUI implements MessageHandler, CommandBroadcaster {

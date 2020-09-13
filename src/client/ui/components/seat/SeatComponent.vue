@@ -24,16 +24,19 @@
     </div>
 </template>
 
+
 <script lang="ts">
 
     console.log('Building SeatComponent');
 
+    import './seat.scss';
+
 import Vue from 'vue';
 
-import { Seat } from '../../../casino/tables/seat';
-import { BetTracker } from '../../../casino/tables/betting/bet-tracker';
-import { TableUI } from '../../table-ui';
-import { DealtCard } from '../../../hands/dealt-card';
+import { Seat } from '../../../../casino/tables/seat';
+import { BetTracker } from '../../../../casino/tables/betting/bet-tracker';
+import { TableUI } from '../../../table-ui';
+import { DealtCard } from '../../../../hands/dealt-card';
 
 const SeatComponent = Vue.extend ({
 

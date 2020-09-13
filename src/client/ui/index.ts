@@ -10,7 +10,7 @@ import { User } from '../../players/user';
 import { Player } from '../../players/player';
 
 
-import SeatComponent from './components/SeatComponent';
+import SeatComponent from './components/seat/SeatComponent';
 
 
 var app = new Vue({

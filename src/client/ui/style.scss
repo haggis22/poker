@@ -24,13 +24,6 @@ body {
         margin: 0 auto;
     }
 
-    .seat-colors {
-        background-color: slategrey;
-        color: white;
-        border-radius: 6%;
-        border: 0.25em solid black;
-    }
-
     .table {
 
         @extend .table-colors;
@@ -79,68 +72,7 @@ body {
             left: 30%;
         }
 
-        .seat {
 
-            @extend .seat-colors;
-            position: absolute;
-            padding: 3px;
-            box-sizing: border-box;
-
-            &.action-on {
-
-                background-color: lightgreen;
-                color: black;
-                transition: background-color 0.25s, color 0.25s;
-
-            }
-
-            .name, .chips {
-                text-align: center;
-                height: 1.5em;
-                line-height: 1.5em;
-                font-variant: small-caps;
-            }
-
-            .avatar {
-                display: table;
-                box-sizing: border-box;
-                height: 100px;
-                width: 200px;
-                background: lightgrey;
-                border: 2px solid black;
-
-                .action-container {
-                    display: table-cell;
-                    vertical-align: middle;
-                    text-align: center;
-                    width: 100%;
-                    margin: 0;
-
-                    .action {
-                        margin-left: auto;
-                        margin-right: auto;
-                        display: inline-block;
-                        padding: 5px 12px;
-                        background: white;
-                        border: 2px solid black;
-                        color: black;
-                        text-transform: uppercase;
-                    }
-                }
-            }
-
-            .cards {
-                text-align: center;
-                height: 4.2em;
-                width: 200px;
-                white-space: nowrap;
-                padding-bottom: 5px;
-
-                .card-small-2 + .card-small-2 {
-                    margin-left: -30px;
-                }
-            }
-        }
 
         .chips-stage {
             border: solid 1px black;

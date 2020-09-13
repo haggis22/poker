@@ -58,7 +58,8 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
-    <Content Include="src\client\ui\components\SeatComponent.vue" />
+    <Content Include="src\client\ui\components\seat\SeatComponent.vue" />
+    <Content Include="src\client\ui\components\seat\seat.scss" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
@@ -79,6 +80,7 @@
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\client\ui\" />
     <Folder Include="src\client\ui\components\" />
+    <Folder Include="src\client\ui\components\seat\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
     <Folder Include="src\messages\" />
