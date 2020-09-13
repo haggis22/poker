@@ -94,10 +94,35 @@ body {
             }
 
             .avatar {
+
+                display: table;
+                box-sizing: border-box;
                 height: 100px;
                 width: 200px;
                 background: lightgrey;
                 border: 2px solid black;
+
+                .action-container {
+                    display: table-cell;
+                    vertical-align: middle;
+                    text-align: center;
+                    width: 100%;
+                    margin: 0;
+
+                    .action
+                    {
+                        margin-left: auto;
+                        margin-right: auto;
+                        display: inline-block;
+                        padding: 5px 12px;
+                        background: white;
+                        border: 2px solid black;
+                        color: black;
+                        text-transform: uppercase;
+                    }
+
+                }
+
             }
 
             .cards {

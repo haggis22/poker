@@ -49,6 +49,7 @@ import { PokerHandDescriber, DeclareHandAction } from "../../communication/seria
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
+import { BettingCompleteAction } from "../../actions/table/betting/betting-complete-action";
 
 const logger: Logger = new Logger();
 
@@ -674,11 +675,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }  // for each seat
 
-        this.table.betTracker.gatherBets();
 
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
-
-        this.checkBetsToReturn();
+        this.bettingComplete();
 
         if (!this.isReadyForThisHand()) {
 
@@ -832,12 +830,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
-                this.log('Betting complete');
-
-                this.table.betTracker.gatherBets();
-                this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
-
-                this.checkBetsToReturn();
+                this.bettingComplete();
 
                 return this.goToNextState();
 
@@ -861,6 +854,19 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
     }  // validateBettorOrMoveOn
+
+
+    private bettingComplete() {
+
+        this.table.betTracker.gatherBets();
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+        this.checkBetsToReturn();
+
+        this.queueAction(new BettingCompleteAction(this.table.id));
+
+        this.log('Betting complete');
+
+    }  // bettingComplete
 
 
     private logTimers() {
@@ -1003,8 +1009,6 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
     private checkBetsToReturn() {
-
-        this.table.betTracker.gatherBets();
 
         let potIndexesToKill: Set<number> = new Set<number>();
 

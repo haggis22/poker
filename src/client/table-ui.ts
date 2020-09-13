@@ -15,7 +15,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -37,6 +37,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public game: Game;
 
 
+    public seatAction: Map<number, string>;
+
+
+
     constructor(user: User, chipFormatter: IChipFormatter) {
 
         this.user = user;
@@ -46,6 +50,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.commandHandlers = new Array<CommandHandler>();
 
         this.table = null;
+
+        this.seatAction = new Map<number, string>();
 
     }
 
@@ -186,6 +192,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof BetReturnedAction) {
 
             return this.returnBet(action);
+        }
+
+        if (action instanceof BettingCompleteAction) {
+
+            return this.bettingComplete(action);
+
         }
 
         this.log(`Heard ${action.constructor.name}`);
@@ -384,7 +396,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private ante(action: AnteAction): void {
 
-        let seat = this.table.seats[action.seatIndex];
+        let seat: Seat = this.table.seats[action.seatIndex];
         
         if (seat) {
         
@@ -395,6 +407,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             }
         
             this.log(message);
+
+            this.seatAction.set(seat.index, 'ANTE');
         
         }
         else {
@@ -550,22 +564,27 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             case Bet.CHECK:
                 message = `${seat.getName()} checks`;
+                this.seatAction.set(seat.index, 'CHECK');
                 break;
 
             case Bet.OPEN:
                 message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
+                this.seatAction.set(seat.index, 'BET');
                 break;
 
             case Bet.CALL:
                 message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
+                this.seatAction.set(seat.index, 'CALL');
                 break;
 
             case Bet.RAISE:
                 message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
+                this.seatAction.set(seat.index, 'RAISE');
                 break;
 
             case Bet.DEAD_RAISE:
                 message = `${seat.getName()} puts in a dead raise to ${this.chipFormatter.format(action.bet.totalBet)}`;
+                this.seatAction.set(seat.index, 'RAISE');
                 break;
 
         }  // switch
@@ -584,6 +603,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let seat = this.findSeat(action.seatIndex);
 
         this.log(`${seat.getName()} folds`);
+        this.seatAction.set(seat.index, 'FOLD');
 
     }  // fold
 
@@ -644,6 +664,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
         }
         
+    }  // returnBet
+
+
+    private bettingComplete(action: BettingCompleteAction): void {
+
+        this.seatAction.clear();
+
     }  // returnBet
 
 

@@ -1,4 +1,7 @@
-﻿export { DeclareHandAction } from "../actions/table/game/declare-hand-action";
+﻿export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
+
+
+export { DeclareHandAction } from "../actions/table/game/declare-hand-action";
 export { WinPotAction } from "../actions/table/game/win-pot-action";
 
 export { FlipCardsAction } from "../actions/table/game/flip-cards-action";
