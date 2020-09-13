@@ -107,6 +107,7 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\players\player-active-action.ts" />
