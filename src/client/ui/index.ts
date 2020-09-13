@@ -8,43 +8,27 @@ import { TableWatcher } from '../table-watcher';
 import { GameClient } from '../../communication/client-side/game-client';
 import { User } from '../../players/user';
 import { Player } from '../../players/player';
-import { DealtCard } from '../../hands/dealt-card';
 
 
 import PlayerComponent from './components/PlayerComponent';
+import SeatComponent from './components/SeatComponent';
 
 
 var app = new Vue({
 
     el: '#poker',
     data: {
-        name: <string>'Daniel',
-        message: <string>'Here we go again',
         players: <Player[]>null,
         ui: <TableUI> null
     },
     components: {
-        PlayerComponent
-    },
-    methods: {
-
-        getCardClass: function (dealtCard: DealtCard) {
-
-            if (!dealtCard) {
-                return null;
-            }
-
-            if (dealtCard.isFaceUp) {
-                return dealtCard.card.suit.text;
-            }
-
-            return 'face-down';
-
-        }   // getCardClass
-
+        'player-component': PlayerComponent,
+        'seat-component': SeatComponent
     }
 
 });
+
+
 
 
 const ws = new WebSocket('ws://localhost:3000');

@@ -34,9 +34,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="build\webpack.config.js">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="gulpfile.js" />
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
@@ -61,6 +58,7 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
+    <Content Include="src\client\ui\components\SeatComponent.vue" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
@@ -75,7 +73,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="build\" />
     <Folder Include="src\" />
     <Folder Include="public\" />
     <Folder Include="src\actions\table\game\" />
@@ -121,7 +118,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\robo-table-ui.ts" />
-    <TypeScriptCompile Include="src\client\ui\components\player-component.ts">
+    <TypeScriptCompile Include="src\client\ui\components\PlayerComponent.vue">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\table-command.ts">

@@ -17,29 +17,7 @@
 
                 <div class="betting-line">
 
-                    <div v-for="(seat, index) in ui.table.seats" class="seat" :class="[ 'seat-'+seat.index, { 'action-on': ui.table.betTracker.seatIndex == index }]">
-                        <div class="name"><span v-if="seat != null && seat.player != null">{{ seat.player.name }}</span></div>
-                        <div class="avatar">
-                            <div class="action-container">
-                                <div class="action" v-if="ui.seatAction.has(index)">{{ ui.seatAction.get(index) }}</div>
-                            </div>
-                        </div>
-                        <div class="chips"><span v-if="seat != null && seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
-                        <div class="cards">
-                            <div v-if="seat.hand">
-                                <div v-for="dealtCard in seat.hand.cards" class="card card-small-2" :class="getCardClass(dealtCard)">
-                                    <div v-if="dealtCard != null && dealtCard.isFaceUp" class="symbols left">
-                                        <div class="value">{{ dealtCard.card.value.symbol }}</div>
-                                        <div class="suit">{{ dealtCard.card.suit.symbol }}</div>
-                                    </div>
-                                    <div v-if="dealtCard != null && dealtCard.isFaceUp" class="symbols right">
-                                        <div class="value">{{ dealtCard.card.value.symbol }}</div>
-                                        <div class="suit">{{ dealtCard.card.suit.symbol }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <seat-component v-for="seat in ui.table.seats" :key="seat.index" :seat="seat" :ui="ui" :bet-tracker="ui.table.betTracker">hello</seat-component>
 
                     <div class="pots">
 
@@ -57,29 +35,6 @@
 
                     <div v-if="ui.table.buttonIndex != null" class="button" :class="'seat-'+ui.table.buttonIndex">
                         <div class="text">button</div>
-                    </div>
-
-                    <div v-if="false" class="board">
-                        <div class="card-small">
-                            <div class="value club">A</div>
-                            <div class="suit club">&clubs;</div>
-                        </div>
-                        <div class="card-small">
-                            <div class="value spade">10</div>
-                            <div class="suit spade">&spades;</div>
-                        </div>
-                        <div class="card-small">
-                            <div class="value heart">K</div>
-                            <div class="suit heart">&hearts;</div>
-                        </div>
-                        <div class="card-small">
-                            <div class="value diamond">Q</div>
-                            <div class="suit diamond">&diams;</div>
-                        </div>
-                        <div class="card-small">
-                            <div class="value diamond">2</div>
-                            <div class="suit diamond">&diams;</div>
-                        </div>
                     </div>
 
                 </div>
