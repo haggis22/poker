@@ -10,7 +10,6 @@ import { User } from '../../players/user';
 import { Player } from '../../players/player';
 
 
-import PlayerComponent from './components/PlayerComponent';
 import SeatComponent from './components/SeatComponent';
 
 
@@ -22,7 +21,6 @@ var app = new Vue({
         ui: <TableUI> null
     },
     components: {
-        'player-component': PlayerComponent,
         'seat-component': SeatComponent
     }
 
