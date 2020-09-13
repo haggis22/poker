@@ -59,6 +59,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private readonly ALL_ACCESS: number = -1;
 
     private readonly TIME_DEAL_CARD: number = 750;
+    private readonly TIME_BETTING_COMPLETE: number = 2000;
 
     public tableID: number;
     private table: Table;
@@ -676,18 +677,23 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         }  // for each seat
 
 
-        this.bettingComplete();
+        this.completeBetting();
 
-        if (!this.isReadyForThisHand()) {
+        setTimeout(() => {
 
-            // We don't have enough players, so go back to the open state
-            return this.changeTableState(this.game.stateMachine.goToOpenState());
+            if (!this.isReadyForThisHand()) {
 
-        }
+                // We don't have enough players, so go back to the open state
+                return this.changeTableState(this.game.stateMachine.goToOpenState());
 
-        this.setButton();
+            }
 
-        this.goToNextState();
+            this.setButton();
+
+            this.goToNextState();
+
+        }, this.TIME_BETTING_COMPLETE);
+
 
     }   // startHand
 
@@ -830,9 +836,16 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
-                this.bettingComplete();
+                this.completeBetting();
 
-                return this.goToNextState();
+                setTimeout(() => {
+
+                    return this.goToNextState();
+
+                }, this.TIME_BETTING_COMPLETE);
+
+
+                return;
 
             }
 
@@ -856,7 +869,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // validateBettorOrMoveOn
 
 
-    private bettingComplete() {
+    private completeBetting() {
 
         this.table.betTracker.gatherBets();
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
