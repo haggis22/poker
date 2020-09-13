@@ -34,6 +34,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="build\webpack.config.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="gulpfile.js" />
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
@@ -72,11 +75,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="build\" />
     <Folder Include="src\" />
     <Folder Include="public\" />
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\client\ui\" />
+    <Folder Include="src\client\ui\components\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
     <Folder Include="src\messages\" />
@@ -116,6 +121,9 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\robo-table-ui.ts" />
+    <TypeScriptCompile Include="src\client\ui\components\player-component.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
