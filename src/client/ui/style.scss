@@ -242,6 +242,8 @@ body {
 
             .button {
 
+                transition:  top 1s, left 1s, transform 1s;
+
                 &.seat-0 {
                     top: 385px;
                     left: 160px;

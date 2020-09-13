@@ -1,6 +1,6 @@
 ﻿const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 const path = require('path');
-// const webpack = require('webpack');
 
 module.exports = {
 
@@ -14,21 +14,21 @@ module.exports = {
     module: {
         rules: [
 
-            /*
-                        {
-                            test: /\.vue$/,
-                            loader: 'vue-loader',
-                            options: {
-                                loaders: {
-                                    // Since sass-loader (weirdly) has SCSS as its default parse mode, we map
-                                    // the "scss" and "sass" values for the lang attribute to the right configs here.
-                                    // other preprocessors should work out of the box, no loader config like this necessary.
-                                    'scss': 'vue-style-loader!css-loader!sass-loader',
-                                    'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax',
-                                }
-                                // other vue-loader options go here
-                            }
-                        },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader',
+                options: {
+                    loaders: {
+                        // Since sass-loader (weirdly) has SCSS as its default parse mode, we map
+                        // the "scss" and "sass" values for the lang attribute to the right configs here.
+                        // other preprocessors should work out of the box, no loader config like this necessary.
+                        'scss': 'vue-style-loader!css-loader!sass-loader',
+                        'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax',
+                    }
+                    // other vue-loader options go here
+                }
+            },
+/*
                         {
                             test: /\.css$/,
                             use: ["vue-style-loader", "css-loader"]
@@ -47,8 +47,11 @@ module.exports = {
             },
             {
                 test: /\.tsx?$/,
-                use: ["ts-loader"],
-                exclude: /node_modules/
+                exclude: /node_modules|vue\/src/,
+                loader: "ts-loader",
+                options: {
+                    appendTsSuffixTo: [/\.vue$/]
+                }
             }
 
         ]
@@ -60,7 +63,8 @@ module.exports = {
 
     plugins: [
 
-        new HtmlWebpackPlugin({ template: path.resolve(__dirname, "src/client/ui", "index.html") })
+        new HtmlWebpackPlugin({ template: path.resolve(__dirname, "src/client/ui", "index.html") }),
+        new VueLoaderPlugin()
 
     ],
 

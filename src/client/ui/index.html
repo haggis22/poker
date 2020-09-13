@@ -9,7 +9,7 @@
 
     <div id="poker">
 
-        <player-comp></player-comp>
+        <player-component name="Pieter"></player-component>
 
         <div v-if="ui != null && ui.table != null">
 
@@ -55,7 +55,7 @@
                         <div>Bet: {{ ui.chipFormatter.format(betAmount) }}</div>
                     </div>
 
-                    <div v-for="(seat, seatIndex) in ui.table.seats" class="button" :class="'seat-'+seatIndex" v-if="ui.table.buttonIndex === seatIndex">
+                    <div v-if="ui.table.buttonIndex != null" class="button" :class="'seat-'+ui.table.buttonIndex">
                         <div class="text">button</div>
                     </div>
 

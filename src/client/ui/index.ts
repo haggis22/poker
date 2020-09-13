@@ -12,6 +12,7 @@ import { DealtCard } from '../../hands/dealt-card';
 
 
 
+
 var app = new Vue({
 
     el: '#poker',
@@ -20,6 +21,8 @@ var app = new Vue({
         message: <string>'Here we go again',
         players: <Player[]>null,
         ui: <TableUI> null
+    },
+    components: {
     },
     methods: {
 
