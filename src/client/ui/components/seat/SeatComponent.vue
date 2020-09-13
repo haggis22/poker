@@ -9,16 +9,7 @@
         <div class="chips"><span v-if="seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
         <div class="cards">
             <div v-if="seat.hand">
-                <div v-for="dealtCard in seat.hand.cards" class="card card-small-2" :class="getCardClass(dealtCard)">
-                    <div v-if="dealtCard != null && dealtCard.isFaceUp" class="symbols left">
-                        <div class="value">{{ dealtCard.card.value.symbol }}</div>
-                        <div class="suit">{{ dealtCard.card.suit.symbol }}</div>
-                    </div>
-                    <div v-if="dealtCard != null && dealtCard.isFaceUp" class="symbols right">
-                        <div class="value">{{ dealtCard.card.value.symbol }}</div>
-                        <div class="suit">{{ dealtCard.card.suit.symbol }}</div>
-                    </div>
-                </div>
+                <card-component v-for="(card, index) in seat.hand.cards" :key="`card-${index}`" :dealt-card="card"></card-component>
             </div>
         </div>
     </div>
@@ -27,16 +18,16 @@
 
 <script lang="ts">
 
-    console.log('Building SeatComponent');
 
-    import './seat.scss';
+import './seat.scss';
 
 import Vue from 'vue';
 
 import { Seat } from '../../../../casino/tables/seat';
 import { BetTracker } from '../../../../casino/tables/betting/bet-tracker';
 import { TableUI } from '../../../table-ui';
-import { DealtCard } from '../../../../hands/dealt-card';
+
+    import CardComponent from '../card/CardComponent';
 
 const SeatComponent = Vue.extend ({
 
@@ -54,24 +45,9 @@ const SeatComponent = Vue.extend ({
             required: true
         }
     },
-    methods: {
-
-        getCardClass: function (dealtCard: DealtCard) {
-
-            if (!dealtCard) {
-                return null;
-            }
-
-            if (dealtCard.isFaceUp) {
-                return dealtCard.card.suit.text;
-            }
-
-            return 'face-down';
-
-        }   // getCardClass
-
+    components: {
+        'card-component': CardComponent
     }
-
 
 });
 
