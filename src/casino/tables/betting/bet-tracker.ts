@@ -235,6 +235,8 @@ export class BetTracker {
 
     public gatherBets(): void {
 
+        this.seatIndex = null;
+
         if (Object.keys(this.bets).length === 0) {
 
             // No bets to gather. Dump out or we will create extra pots because people from the last one are not in the "no-bets" round
