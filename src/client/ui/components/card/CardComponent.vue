@@ -24,6 +24,10 @@ import { DealtCard } from '../../../../hands/dealt-card';
 const CardComponent = Vue.extend ({
 
     props: {
+        index: {
+            type: Number,
+            required: true
+        },
         dealtCard: {
             type: DealtCard,
             required: true
@@ -35,17 +39,22 @@ const CardComponent = Vue.extend ({
     },
     methods: {
 
-        getCardClass: function (dealtCard: DealtCard) {
+        getCardClass: function (dealtCard: DealtCard, ui: TableUI) {
 
             if (!dealtCard) {
                 return null;
             }
 
+            let classes: string[] = [];
+
             if (dealtCard.isFaceUp) {
-                return dealtCard.card.suit.text;
+                classes.push(dealtCard.card.suit.text);
+            }
+            else {
+                classes.push('face-down');
             }
 
-            return 'face-down';
+            return classes;
 
         }   // getCardClass
 

@@ -9,7 +9,7 @@
         <div class="chips"><span v-if="seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
         <div class="cards">
             <div v-if="seat.hand">
-                <card-component v-for="(card, index) in seat.hand.cards" :key="`card-${index}`" :dealt-card="card"></card-component>
+                <card-component v-for="(card, index) in seat.hand.cards" :key="`card-${index}`" :dealt-card="card" :index="index"></card-component>
             </div>
         </div>
     </div>
