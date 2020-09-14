@@ -20,7 +20,7 @@ export class Deck {
 
             for (let suit of CardSuit.VALUES) {
 
-                    this.cards.push(new Card(value, suit));
+                    this.cards.push(new Card(value, suit, false));
 
             }
 

@@ -31,15 +31,11 @@ const CardComponent = Vue.extend ({
         dealtCard: {
             type: DealtCard,
             required: true
-        },
-        ui: {
-            type: TableUI,
-            required: true
         }
     },
     methods: {
 
-        getCardClass: function (dealtCard: DealtCard, ui: TableUI) {
+        getCardClass: function (dealtCard: DealtCard) {
 
             if (!dealtCard) {
                 return null;
@@ -52,6 +48,10 @@ const CardComponent = Vue.extend ({
             }
             else {
                 classes.push('face-down');
+            }
+
+            if (dealtCard.card.isDealt) {
+                classes.push('dealt');
             }
 
             return classes;

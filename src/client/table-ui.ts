@@ -36,7 +36,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
     public seatAction: Map<number, string>;
-    public dealtCards: Map<number, Array<boolean>>;
 
 
 
@@ -452,12 +451,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
-        if (action.hasHand) {
-
-            this.dealtCards.set(action.seatIndex, new Array<boolean>());
-
-        }
-
     }
 
 
@@ -478,15 +471,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        let seatCardArray: boolean[] = this.dealtCards.get(action.seatIndex);
-        let cardIndex = seatCardArray.length;
-
-        seatCardArray.push(false);
-
         // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
         setTimeout(() => {
 
-            seatCardArray[cardIndex] = true;
+            action.card.isDealt = true;
 
         }, 10);
 
