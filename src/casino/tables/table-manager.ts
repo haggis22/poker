@@ -614,6 +614,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.deck.shuffle();
 
         this.table.betTracker.reset();
+        this.table.betTracker.setAnte(this.table.stakes.ante);
 
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
@@ -636,7 +637,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                     // set the betting to the ante's seat or it will not be accepted
                     this.table.betTracker.seatIndex = seat.index;
 
-                    // the minimum amoutn will be the ante - this doesn't respect the minimums for a regular betting round.
+                    // the minimum amount will be the ante - this doesn't respect the minimums for a regular betting round.
                     let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante, this.table.stakes.ante);
 
                     // this.log(`ante result: ${ante}`);

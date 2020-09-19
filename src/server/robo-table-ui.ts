@@ -5,7 +5,6 @@ import { CommandHandler } from "../commands/command-handler";
 import { Message } from "../messages/message";
 import { ActionMessage } from "../messages/action-message";
 import { Command } from "../commands/command";
-import { IChipFormatter } from "./chips/chip-formatter";
 import { Table } from "../casino/tables/table";
 import { TableSnapshotAction } from "../actions/table/state/table-snapshot-action";
 import { Action } from "../actions/action";
@@ -19,6 +18,7 @@ import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandS
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
+import { IChipFormatter } from "../client/chips/chip-formatter";
 
 
 const MILLISECONDS_TO_THINK = 1500;
@@ -225,12 +225,18 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private calculateBuyIn(): number {
 
+
+        console.log(`Calculating buy-in for ${this.user.name}`);
+
         switch (this.user.name) {
 
             case 'Danny':
                 return 2000;
 
             case 'Mark':
+                return 2000;
+
+            case 'Matt':
                 return 2000;
 
             case 'Paul':

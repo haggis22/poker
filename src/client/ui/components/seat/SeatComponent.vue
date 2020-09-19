@@ -27,7 +27,7 @@ import { Seat } from '../../../../casino/tables/seat';
 import { BetTracker } from '../../../../casino/tables/betting/bet-tracker';
 import { TableUI } from '../../../table-ui';
 
-    import CardComponent from '../card/CardComponent';
+import CardComponent from '../card/CardComponent';
 
 const SeatComponent = Vue.extend ({
 

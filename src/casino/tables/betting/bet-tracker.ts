@@ -85,6 +85,13 @@ export class BetTracker {
 
     }
 
+    public setAnte(anteAmount: number): void {
+
+        // This will ensure that no-one can submit an ante less than the valid amount, unless they are all-in
+        this.currentBet = anteAmount;
+
+    }
+
 
     public addBet(seat: Seat, totalBetAmount: number, minimumBet: number): Bet {
 
@@ -118,7 +125,6 @@ export class BetTracker {
 
         }
 
-
         let playerCurrentBet: number = this.getCurrentBet(seat.index);
 
         if (totalBetAmount < playerCurrentBet) {
@@ -140,6 +146,13 @@ export class BetTracker {
         let isAllIn: boolean = (chipsRemaining === 0) && (chipsRequired > 0);
 
         let betType: number = null;
+
+        if (totalBetAmount == 0 && this.currentBet > 0) {
+
+            // They are trying to bet less than the current, but they still have chips left
+            return new Bet(false, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
+
+        }
 
         if (totalBetAmount < this.currentBet) {
 

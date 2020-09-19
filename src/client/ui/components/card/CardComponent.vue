@@ -50,9 +50,12 @@ const CardComponent = Vue.extend ({
                 classes.push('face-down');
             }
 
+/*
             if (dealtCard.card.isDealt) {
                 classes.push('dealt');
             }
+*/
+            classes.push('dealt');
 
             return classes;
 

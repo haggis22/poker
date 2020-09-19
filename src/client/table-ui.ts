@@ -471,10 +471,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        action.card.isDealt = true;
+
         // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
         setTimeout(() => {
 
-            action.card.isDealt = true;
 
         }, 10);
 

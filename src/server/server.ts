@@ -19,7 +19,7 @@ import { TableWatcher } from '../client/table-watcher';
 import { ServerClient } from '../communication/server-side/server-client';
 import { LocalGameClient } from '../communication/client-side/local-game-client';
 import { LocalServerClient } from '../communication/server-side/local-server-client';
-import { RoboTableUI } from '../client/robo-table-ui';
+import { RoboTableUI } from './robo-table-ui';
 
 const app = express();
 
@@ -51,17 +51,17 @@ let tableManager: TableManager = new TableManager(table.id, table, new Deck());
 tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
 
 let danny = new User(1, 'Danny', 1000);
-let mark = new User(2, 'Mark', 1000);
+let mark = new User(2, 'Matt', 1000);
 let paul = new User(3, 'Paul', 1000);
-let joe = new User(4, 'Joe', 1000);
-let sekhar = new User(5, 'Sekhar', 0);
+// let joe = new User(4, 'Joe', 1000);
+// let sekhar = new User(5, 'Sekhar', 0);
 
 clientManager.setTableManager(tableManager);
 
 clientManager.addClient(createRoboClient(table.id, danny));
 clientManager.addClient(createRoboClient(table.id, mark));
 clientManager.addClient(createRoboClient(table.id, paul));
-clientManager.addClient(createRoboClient(table.id, joe));
+// clientManager.addClient(createRoboClient(table.id, joe));
 
 
 wss.on('connection', (socket: WebSocket) => {

@@ -13,4 +13,11 @@
 
     }
 
+
+    public toString(): string {
+
+        return `[ User id ${this.id}, name ${this.name}, chips: ${this.chips} ]`;
+
+    }
+
 }
