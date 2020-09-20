@@ -19,6 +19,7 @@ import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandS
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
+import { CardUI } from "./ui/cards/card-ui";
 
 
 const logger: Logger = new Logger();
@@ -36,6 +37,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
     public seatAction: Map<number, string>;
+    public hands: Map<number, Array<CardUI>>;
 
 
 
@@ -50,6 +52,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.seatAction = new Map<number, string>();
+        this.hands = new Map<number, Array<CardUI>>();
 
     }
 
@@ -451,6 +454,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
+        if (action.hasHand) {
+
+            this.hands[action.seatIndex] = new Array<CardUI>();
+
+        }
+        else {
+
+            if (this.hands.has(action.seatIndex)) {
+                this.hands.delete(action.seatIndex);
+            }
+
+        }
+
     }
 
 
@@ -471,7 +487,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        action.card.isDealt = true;
+        let cardUI: CardUI = new CardUI(action.card);
 
         // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
         setTimeout(() => {

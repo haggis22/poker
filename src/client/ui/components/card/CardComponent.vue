@@ -19,7 +19,7 @@ import './card.scss';
 import Vue from 'vue';
 
 import { TableUI } from '../../../table-ui';
-import { DealtCard } from '../../../../hands/dealt-card';
+import { CardUI } from '../../cards/card-ui';
 
 const CardComponent = Vue.extend ({
 
@@ -28,35 +28,36 @@ const CardComponent = Vue.extend ({
             type: Number,
             required: true
         },
-        dealtCard: {
-            type: DealtCard,
+        card: {
+            type: CardUI,
             required: true
         }
     },
     methods: {
 
-        getCardClass: function (dealtCard: DealtCard) {
+        getCardClass: function (cardUI: CardUI) {
 
-            if (!dealtCard) {
+            if (!cardUI || !cardUI.card) {
                 return null;
             }
 
             let classes: string[] = [];
 
-            if (dealtCard.isFaceUp) {
-                classes.push(dealtCard.card.suit.text);
+            if (cardUI.card.isFaceUp) {
+                classes.push(cardUI.card.card.suit.text);
             }
             else {
                 classes.push('face-down');
             }
 
-/*
-            if (dealtCard.card.isDealt) {
+            if (cardUI.isDealt) {
                 classes.push('dealt');
             }
-*/
-            classes.push('dealt');
 
+            if (cardUI.isInHand) {
+                classes.push('in-hand');
+
+            }
             return classes;
 
         }   // getCardClass

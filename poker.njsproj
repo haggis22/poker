@@ -58,6 +58,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
+    <Content Include="src\client\ui\cards\card-ui.ts">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="src\client\ui\components\card\card.scss" />
     <Content Include="src\client\ui\components\card\CardComponent.vue" />
     <Content Include="src\client\ui\components\dealer\dealer-box.scss" />
@@ -88,6 +91,7 @@
     <Folder Include="src\client\ui\components\card\" />
     <Folder Include="src\client\ui\components\dealer\" />
     <Folder Include="src\client\ui\components\seat\" />
+    <Folder Include="src\client\ui\cards\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
     <Folder Include="src\messages\" />

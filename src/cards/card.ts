@@ -6,14 +6,12 @@ export class Card
     public sortValue: number;
     public value: CardValue;
     public suit: CardSuit;
-    public isDealt: boolean;
 
-    public constructor(value: CardValue, suit: CardSuit, isDealt: boolean)
+    public constructor(value: CardValue, suit: CardSuit)
     {
         this.value = value;
         this.suit = suit;
         this.sortValue = 0;
-        this.isDealt = isDealt;
     }
 
     public toString(): string {
