@@ -8,20 +8,23 @@
     position: relative;
     display: inline-block;
 
-    &:not(.dealt)
+    &.dealer-holding
     {
+        position: absolute;
         top: 3000px;
-        transition: top 0.2s;
+    }
+
+    &.dealing
+    {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: top 0.4s, left 0.4s;
     }
 
     &.face-down {
         border: .2em solid white;
-        border-radius: 10%;
-        height: 4em;
-        width: 2.7em;
         background-color: mediumblue;
-        position: relative;
-        display: inline-block;
     }
 
     .symbols {

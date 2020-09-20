@@ -10,7 +10,6 @@ import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
 import { MoveButtonAction } from "../../actions/table/game/move-button-action";
 import { DealState } from "./states/deal-state";
-import { DealtCard } from "../../hands/dealt-card";
 import { Hand } from "../../hands/hand";
 import { BetState } from "./states/betting/bet-state";
 import { ShowdownState } from "./states/showdown-state";
@@ -45,11 +44,12 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { PokerHandDescriber, DeclareHandAction } from "../../communication/serializable";
+import { PokerHandDescriber, DeclareHandAction, Card, ClearCardsAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
 import { BettingCompleteAction } from "../../actions/table/betting/betting-complete-action";
+import { FacedownCard } from "../../cards/face-down-card";
 
 const logger: Logger = new Logger();
 
@@ -248,16 +248,25 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 for (let card of this.table.seats[s].hand.cards) {
 
-                    if (card.isFaceUp) {
-                        hand.cards.push(card);
-                    }
-                    else if (this.table.seats[s].player.userID == userID) {
-                        hand.cards.push(card);
+                    // On the server, these should *always* be Card and not FacedownCard
+                    if (card instanceof Card) {
+
+                        if (card.isFaceUp || this.table.seats[s].player.userID == userID) {
+                            hand.cards.push(card);
+                        }
+                        else {
+                            // they get a card with no value, face-down
+                            hand.cards.push(new FacedownCard());
+                        }
+
                     }
                     else {
-                        // they get a card with no value, face-down
-                        hand.cards.push(new DealtCard(null, false));
+
+                        // shouldn't actually ever get here
+                        hand.cards.push(new FacedownCard());
+
                     }
+
 
                 }
 
@@ -755,11 +764,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             let seat = this.table.seats[seatIndex];
             let userID = seat.player.userID;
 
-            let dealtCard = new DealtCard(card, dealState.isFaceUp);
+            card.isFaceUp = dealState.isFaceUp;
 
-            this.table.seats[seatIndex].hand.deal(dealtCard);
+            this.table.seats[seatIndex].hand.deal(card);
 
-            if (dealtCard.isFaceUp) {
+            if (card.isFaceUp) {
 
                 // It's face-up, so there is only a public action
                 this.queueAction(new DealCardAction(this.table.id, seatIndex, card));
@@ -768,7 +777,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             else {
 
                 // It's face-down, so the public action does not include the card info, whereas the private action does
-                let publicMessage = new ActionMessage(new DealCardAction(this.table.id, seatIndex, null));
+                let publicMessage = new ActionMessage(new DealCardAction(this.table.id, seatIndex, new FacedownCard()));
                 let privateMessage = new ActionMessage(new DealCardAction(this.table.id, seatIndex, card), userID);
 
                 this.queueMessage(new MessagePair(publicMessage, privateMessage));
@@ -1209,7 +1218,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         // This will preserve the `this` reference in the call
         setTimeout(() => {
 
-             this.goToNextState();
+            this.queueAction(new ClearCardsAction(this.tableID));
+            this.goToNextState();
 
         }, 3000);
 

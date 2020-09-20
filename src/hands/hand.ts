@@ -1,13 +1,14 @@
-﻿import { DealtCard } from "./dealt-card";
+﻿import { FacedownCard } from "../cards/face-down-card";
+import { Card } from "../cards/card";
 
 export class Hand {
 
-    public cards: Array<DealtCard>;
+    public cards: Array<Card | FacedownCard>;
 
 
     constructor() {
 
-        this.cards = new Array<DealtCard>();
+        this.cards = new Array<Card | FacedownCard>();
 
     }
 
@@ -17,7 +18,7 @@ export class Hand {
 
     }
 
-    public deal(card: DealtCard) : void {
+    public deal(card: Card | FacedownCard): void {
 
         this.cards.push(card);
 
@@ -28,7 +29,11 @@ export class Hand {
 
         for (let card of this.cards) {
 
-            card.isFaceUp = true;
+            if (card instanceof Card) {
+
+                card.isFaceUp = true;
+
+            }
 
         }
 

@@ -161,7 +161,7 @@ function isSerializable(obj: any): boolean {
 
     }
 
-    // If the object appears in the export of the Serializable object, then we will be able to recreated it later, so let's use special serialization here
+    // If the object appears in the export of the Serializable object, then we will be able to recreate it later, so let's use special serialization here
     return serialization[obj.constructor.name] != null;
 
 }
