@@ -91,6 +91,7 @@ body {
             background: grey;
             position: absolute;
             line-height: 40px;
+            transition: top 0.6s, left 0.6s, transform 1s;
 
             .text {
                 text-align: center;
@@ -101,119 +102,11 @@ body {
                 font-weight: bold;
                 line-height: 40px;
             }
+
         }
 
-
-        &.seats-6 {
-
-            .seat {
-
-                &.seat-0 {
-                    top: 400px;
-                    left: -60px;
-                }
-
-                &.seat-1 {
-                    top: 90px;
-                    left: -260px;
-                }
-
-                &.seat-2 {
-                    top: -220px;
-                    left: -60px;
-                }
-
-                &.seat-3 {
-                    top: -220px;
-                    left: 600px;
-                }
-
-                &.seat-4 {
-                    top: 90px;
-                    left: 740px;
-                }
-
-                &.seat-5 {
-                    top: 390px;
-                    left: 580px;
-                }
-            }
-
-            .chips-stage {
-
-                &.seat-0 {
-                    top: 310px;
-                    left: 120px;
-                }
-
-                &.seat-1 {
-                    top: 160px;
-                    left: -15px;
-                }
-
-                &.seat-2 {
-                    top: 20px;
-                    left: 120px;
-                }
-
-                &.seat-3 {
-                    top: 20px;
-                    left: 500px;
-                }
-
-                &.seat-4 {
-                    top: 160px;
-                    left: 630px;
-                }
-
-                &.seat-5 {
-                    top: 310px;
-                    left: 500px;
-                }
-            }
-
-            .button {
-
-                transition:  top 0.6s, left 0.6s, transform 1s;
-
-                &.seat-0 {
-                    top: 385px;
-                    left: 160px;
-                    transform: rotate(15deg);
-                }
-
-                &.seat-1 {
-                    top: 220px;
-                    left: -45px;
-                    transform: rotate(-45deg);
-                }
-
-                &.seat-2 {
-                    top: 22px;
-                    left: 75px;
-                    transform: rotate(30deg);
-                }
-
-                &.seat-3 {
-                    top: 40px;
-                    left: 620px;
-                    transform: rotate(60deg);
-                }
-
-                &.seat-4 {
-                    top: 240px;
-                    left: 695px;
-                    transform: rotate(-20deg);
-                }
-
-                &.seat-5 {
-                    top: 380px;
-                    left: 530px;
-                    transform: rotate(50deg);
-                }
-            }
-        }
     }
+
 
     .spade {
         color: $spade-color;
