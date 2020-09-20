@@ -1,6 +1,5 @@
 ﻿export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
 
-
 export { DeclareHandAction } from "../actions/table/game/declare-hand-action";
 export { WinPotAction } from "../actions/table/game/win-pot-action";
 
@@ -19,10 +18,10 @@ export { SetHandAction } from "../actions/table/game/set-hand-action";
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 
 export { DealCardAction } from "../actions/table/game/deal-card-action";
-export { DealtCard } from "../hands/dealt-card";
 export { Card } from "../cards/card";
 export { CardValue } from "../cards/card-value";
 export { CardSuit } from "../cards/card-suit";
+export { FacedownCard } from "../cards/face-down-card";
 
 
 export { StackUpdateAction } from "../actions/table/players/stack-update-action";

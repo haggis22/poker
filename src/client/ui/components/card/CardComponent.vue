@@ -1,12 +1,12 @@
 ﻿<template>
-    <div class="card card-small-2" :class="getCardClass(dealtCard)">
-        <div v-if="dealtCard != null && dealtCard.isFaceUp" class="symbols left">
-            <div class="value">{{ dealtCard.card.value.symbol }}</div>
-            <div class="suit">{{ dealtCard.card.suit.symbol }}</div>
+    <div class="card card-small-2" :class="getCardClass(card)">
+        <div v-if="isFaceUp" class="symbols left">
+            <div class="value">{{ card.value.symbol }}</div>
+            <div class="suit">{{ card.suit.symbol }}</div>
         </div>
-        <div v-if="dealtCard != null && dealtCard.isFaceUp" class="symbols right">
-            <div class="value">{{ dealtCard.card.value.symbol }}</div>
-            <div class="suit">{{ dealtCard.card.suit.symbol }}</div>
+        <div v-if="isFaceUp" class="symbols right">
+            <div class="value">{{ card.value.symbol }}</div>
+            <div class="suit">{{ card.suit.symbol }}</div>
         </div>
     </div>
 </template>
@@ -19,23 +19,29 @@ import './card.scss';
 import Vue from 'vue';
 
 import { TableUI } from '../../../table-ui';
-import { DealtCard } from '../../../../hands/dealt-card';
+import { Card } from '../../../../cards/card';
+import { FacedownCard } from '../../../../cards/face-down-card';
 
 const CardComponent = Vue.extend ({
 
     props: {
-        index: {
-            type: Number,
-            required: true
-        },
-        dealtCard: {
-            type: DealtCard,
+        card: {
+            type: [Card, FacedownCard],
             required: true
         }
     },
+    computed: {
+
+        isFaceUp: function () {
+
+            return this.card instanceof Card;
+
+        }
+
+    },
     methods: {
 
-        getCardClass: function (dealtCard: DealtCard) {
+        getCardClass: function (dealtCard: Card | FacedownCard) {
 
             if (!dealtCard) {
                 return null;
@@ -43,8 +49,8 @@ const CardComponent = Vue.extend ({
 
             let classes: string[] = [];
 
-            if (dealtCard.isFaceUp) {
-                classes.push(dealtCard.card.suit.text);
+            if (dealtCard instanceof Card) {
+                classes.push(dealtCard.suit.text);
             }
             else {
                 classes.push('face-down');

@@ -9,7 +9,18 @@ export class Best5InHandSelector implements BestHandSelector {
 
     select(evaluator: HandEvaluator, playerHand: Hand, board: Board): HandEvaluation {
 
-        let cards: Card[] = playerHand.cards.reduce((cardArray, dealtCard) => { if (dealtCard.isFaceUp) { cardArray.push(dealtCard.card); } return cardArray; }, []);
+        let cards: Card[] = [];
+
+        for (let card of playerHand.cards) {
+
+            // Do not include FacedownCards
+            if (card instanceof Card) {
+
+                cards.push(card);
+
+            }
+
+        }
 
         if (cards.length > 5) {
 

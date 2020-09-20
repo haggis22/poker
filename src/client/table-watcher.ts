@@ -1,7 +1,6 @@
 ﻿import { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 import { MoveButtonAction } from "../actions/table/game/move-button-action";
 import { Player } from "../players/player";
-import { DealtCard } from "../hands/dealt-card";
 import { Table } from "../casino/tables/table";
 import { TableSnapshotAction } from "../actions/table/state/table-snapshot-action";
 import { Hand } from "../hands/hand";
@@ -392,8 +391,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         let seat = this.findSeat(action.seatIndex);
 
-        let dealtCard = new DealtCard(action.card, action.card != null);
-        seat.hand.deal(dealtCard);
+        seat.hand.deal(action.card);
 
     }   // dealCard
 
