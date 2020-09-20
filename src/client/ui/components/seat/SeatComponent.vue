@@ -8,12 +8,10 @@
         </div>
         <div class="chips"><span v-if="seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
         <div class="cards">
-            <div v-if="ui.handMap.has(seat.index)">
-                <card-component v-for="(card, index) in ui.handMap.get(seat.index)" 
+            <div v-if="seat.hand">
+                <card-component v-for="(card, index) in seat.hand.cards" 
                                     :key="`card-${index}`" 
-                                    :cardUI="card"
-                                    :isDealerHolding="card.isDealerHolding"
-                                    :isDealing="card.isDealing"></card-component>
+                                    :card="card"></card-component>
             </div>
         </div>
     </div>

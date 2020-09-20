@@ -1,12 +1,12 @@
 ﻿<template>
-    <div class="card card-small-2" :class="cardClass">
+    <div class="card card-small-2" :class="cardClasses">
         <div v-if="isFaceUp" class="symbols left">
-            <div class="value">{{ cardUI.card.value.symbol }}</div>
-            <div class="suit">{{ cardUI.card.suit.symbol }}</div>
+            <div class="value">{{ card.value.symbol }}</div>
+            <div class="suit">{{ card.suit.symbol }}</div>
         </div>
         <div v-if="isFaceUp" class="symbols right">
-            <div class="value">{{ cardUI.card.value.symbol }}</div>
-            <div class="suit">{{ cardUI.card.suit.symbol }}</div>
+            <div class="value">{{ card.value.symbol }}</div>
+            <div class="suit">{{ card.suit.symbol }}</div>
         </div>
     </div>
 </template>
@@ -19,45 +19,69 @@ import './card.scss';
 import Vue from 'vue';
 
 import { TableUI } from '../../../table-ui';
-import { CardUI } from '../../cards/card-ui';
 import { Card } from '../../../../cards/card';
+import { FacedownCard } from '../../../../cards/face-down-card';
 
 const CardComponent = Vue.extend ({
 
     props: {
-        cardUI: {
-            type: CardUI,
+        card: {
+            type: [ Card, FacedownCard],
             required: true
-        },
-        isDealerHolding: {
-            type: Boolean,
-            required: true
-        },
-        isDealing: {
-            type: Boolean,
-            required: true
-        },
+        }
+    },
+
+    data() {
+
+        let values =
+        {
+            isDealerHolding: true,
+            isDealing: false,
+            timer: ''
+        };
+
+        return values;
+
+    },
+    created() {
+
+        // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+        this.timer = setTimeout(() => {
+
+            console.log(`Moving from isDealerHolding to isDealing from ${this.card}`);
+            // In one stroke, set the card moving and take it out of the dealer's hand
+            this.isDealerHolding = !(this.isDealing = true);
+
+            this.timer = setTimeout(() => {
+
+                console.log(`Removing isDealing from ${this.card}`);
+                this.isDealing = false;
+
+            }, 400);
+
+        }, 400);
+
     },
     computed: {
 
         isFaceUp: function () {
 
-            return this.cardUI.card instanceof Card;
+            return this.card instanceof Card;
 
         },
-        cardClass: function () {
+        cardClasses: function () {
 
-            if (!this.cardUI || !this.cardUI.card) {
+            if (!this.card) {
                 return null;
             }
 
-            console.log(`In cardClass for ${this.cardUI.card}`);
+            console.log(`In cardClass for ${this.card}`);
 
             let classes: string[] = [];
 
-            if (this.cardUI.card instanceof Card) {
+            if (this.card instanceof Card) {
 
-                classes.push(this.cardUI.card.suit.text);
+                classes.push(this.card.suit.text);
 
             }
             else {
@@ -79,37 +103,9 @@ const CardComponent = Vue.extend ({
     },
     methods: {
 
-
-        cardClasses: function (cardUI) {
-
-            if (!cardUI || !cardUI.card) {
-                return null;
-            }
-
-            let classes: string[] = [];
-
-            if (cardUI.card instanceof Card) {
-
-                classes.push(cardUI.card.suit.text);
-
-            }
-            else {
-                classes.push('face-down');
-            }
-
-            if (cardUI.isDealerHolding) {
-                console.log(`Dealer is holding card`);
-                classes.push('dealer-holding');
-            }
-            else if (cardUI.isDealing) {
-                classes.push('dealing');
-            }
-
-            return classes;
-
-
-        }
-
+    },
+    beforeDestroy() {
+        clearTimeout(this.timer);
     }
 
 });

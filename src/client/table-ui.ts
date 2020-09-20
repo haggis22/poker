@@ -19,7 +19,6 @@ import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandS
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
-import { CardUI } from "./ui/cards/card-ui";
 
 
 const logger: Logger = new Logger();
@@ -37,7 +36,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
     public seatAction: Map<number, string>;
-    public handMap: Map<number, Array<CardUI>>;
 
 
 
@@ -52,7 +50,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.seatAction = new Map<number, string>();
-        this.handMap = new Map<number, Array<CardUI>>();
 
     }
 
@@ -460,19 +457,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
-        if (action.hasHand) {
-
-            this.handMap.set(action.seatIndex, new Array<CardUI>());
-
-        }
-        else {
-
-            if (this.handMap.has(action.seatIndex)) {
-                this.handMap.delete(action.seatIndex);
-            }
-
-        }
-
     }
 
 
@@ -491,35 +475,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        let cardUI: CardUI = new CardUI(action.card, true, false);
-        if (!this.handMap.has(seat.index)) {
-            this.handMap.set(seat.index, new Array<CardUI>());
-        }
-        this.handMap.get(action.seatIndex).push(cardUI);
-
-        // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
-        setTimeout(() => {
-
-            console.log(`Moving from isDealerHolding to isDealing from ${cardUI.card}`);
-            // In one stroke, set the card moving and take it out of the dealer's hand
-            cardUI.isDealerHolding = !(cardUI.isDealing = true);
-
-            setTimeout(() => {
-
-                console.log(`Removing isDealing from ${cardUI.card}`);
-                cardUI.isDealing = false;
-
-            }, 1400);
-
-        }, 1400);
-
-
     }   // dealCard
 
 
     private clearCards(action: ClearCardsAction): void {
 
-        this.handMap.clear();
 
     }  // clearCards
 
@@ -584,10 +544,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`${seat.getName()} folds`);
         this.seatAction.set(seat.index, 'FOLD');
-
-        if (this.handMap.has(action.seatIndex)) {
-            this.handMap.delete(action.seatIndex);
-        }
 
     }  // fold
 
