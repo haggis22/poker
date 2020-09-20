@@ -57,9 +57,9 @@ const CardComponent = Vue.extend ({
                 console.log(`Removing isDealing from ${this.card}`);
                 this.isDealing = false;
 
-            }, 400);
+            }, 200);
 
-        }, 400);
+        }, 200);
 
     },
     computed: {

@@ -11,6 +11,7 @@
     position: absolute;
     padding: 3px;
     box-sizing: border-box;
+    height: 240px;
 
     &.action-on {
         background-color: lightgreen;
@@ -59,6 +60,7 @@
         width: 200px;
         white-space: nowrap;
         padding-bottom: 5px;
+        position: absolute;
 
         .card-small-2 + .card-small-2 {
             margin-left: -30px;

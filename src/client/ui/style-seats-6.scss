@@ -7,16 +7,32 @@
             &.seat-0 {
                 top: 400px;
                 left: -60px;
+
+                .dealer-holding {
+                    top: -60px;
+                    left: 420px;
+                }
+
             }
 
             &.seat-1 {
                 top: 90px;
                 left: -260px;
+
+                .dealer-holding {
+                    top: 250px;
+                    left: 620px;
+                }
             }
 
             &.seat-2 {
                 top: -220px;
                 left: -60px;
+
+                .dealer-holding {
+                    top: 560px;
+                    left: 420px;
+                }
             }
 
             &.seat-3 {
@@ -106,18 +122,11 @@
                 left: 530px;
                 transform: rotate(50deg);
             }
-
         }
 
         .dealer-box {
-
             top: 480px;
             left: 235px;
-
         }
     }
-
 }
-
-
-
