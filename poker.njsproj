@@ -122,7 +122,7 @@
     <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\robo-table-ui.ts" />
+    <TypeScriptCompile Include="src\server\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
