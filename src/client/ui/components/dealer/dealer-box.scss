@@ -1,0 +1,17 @@
+﻿.dealer-colors {
+    background-color: saddlebrown;
+    color: white;
+    border-radius: 6%;
+    border: 0.25em solid black;
+}
+
+.dealer-box {
+
+    @extend .dealer-colors;
+    position: absolute;
+    padding: 3px;
+    box-sizing: border-box;
+    width: 250px;
+    height: 100px;
+    z-index: 3;
+}

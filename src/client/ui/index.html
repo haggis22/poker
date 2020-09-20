@@ -9,8 +9,6 @@
 
     <div id="poker">
 
-        <player-component name="Pieter"></player-component>
-
         <div v-if="ui != null && ui.table != null">
 
             <div class="table seats-6">
@@ -18,6 +16,7 @@
                 <div class="betting-line">
 
                     <seat-component v-for="seat in ui.table.seats" :key="seat.index" :seat="seat" :ui="ui" :bet-tracker="ui.table.betTracker">hello</seat-component>
+                    <dealer-box-component></dealer-box-component>
 
                     <div class="pots">
 
@@ -36,6 +35,7 @@
                     <div v-if="ui.table.buttonIndex != null" class="button" :class="'seat-'+ui.table.buttonIndex">
                         <div class="text">button</div>
                     </div>
+
 
                 </div>
 

@@ -60,15 +60,18 @@
     <Content Include="src\casino\tables\table-rules.ts" />
     <Content Include="src\client\ui\components\card\card.scss" />
     <Content Include="src\client\ui\components\card\CardComponent.vue" />
+    <Content Include="src\client\ui\components\dealer\dealer-box.scss" />
+    <Content Include="src\client\ui\components\dealer\DealerBoxComponent.vue" />
     <Content Include="src\client\ui\components\seat\SeatComponent.vue" />
     <Content Include="src\client\ui\components\seat\seat.scss" />
+    <Content Include="src\client\ui\style.scss" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\client\ui\index.html">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\client\ui\style.scss">
+    <Content Include="src\client\ui\style-seats-6.scss">
       <SubType>Code</SubType>
     </Content>
     <Content Include="tsconfig.json">
@@ -83,6 +86,7 @@
     <Folder Include="src\client\ui\" />
     <Folder Include="src\client\ui\components\" />
     <Folder Include="src\client\ui\components\card\" />
+    <Folder Include="src\client\ui\components\dealer\" />
     <Folder Include="src\client\ui\components\seat\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />

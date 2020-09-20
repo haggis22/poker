@@ -1,4 +1,5 @@
 ﻿import './style.scss';
+import './style-seats-6.scss';
 
 import Vue from 'vue';
 
@@ -11,6 +12,7 @@ import { Player } from '../../players/player';
 
 
 import SeatComponent from './components/seat/SeatComponent';
+import DealerBoxComponent from './components/dealer/DealerBoxComponent.vue';
 
 
 var app = new Vue({
@@ -21,7 +23,8 @@ var app = new Vue({
         ui: <TableUI> null
     },
     components: {
-        'seat-component': SeatComponent
+        'seat-component': SeatComponent,
+        'dealer-box-component': DealerBoxComponent
     }
 
 });
