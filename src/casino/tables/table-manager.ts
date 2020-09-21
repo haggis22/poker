@@ -58,7 +58,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly ALL_ACCESS: number = -1;
 
-    private readonly TIME_DEAL_CARD: number = 750;
+    private readonly TIME_DEAL_CARD: number = 500;
     private readonly TIME_BETTING_COMPLETE: number = 2000;
     private readonly TIME_SHOWDOWN: number = 3000;
     private readonly TIME_SET_BUTTON: number = 750;
