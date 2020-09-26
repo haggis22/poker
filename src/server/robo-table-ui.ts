@@ -422,7 +422,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         
         }
 
-        let betsString = Object.keys(this.table.betTracker.bets).map(seatIndex => `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betTracker.bets[seatIndex])}`).join(", ");
+        let betsString = Object.keys(this.table.betTracker.bets).map(seatIndex => `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betTracker.bets[seatIndex].totalBet)}`).join(", ");
         if (betsString.length) {
             this.log(`  Bets: ${betsString}`);
         }

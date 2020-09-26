@@ -42,4 +42,29 @@
     }
 
 
+    public getTypeName(): string {
+
+        switch (this.betType) {
+
+            case Bet.CHECK:
+                return 'Checks';
+
+            case Bet.OPEN:
+                return 'Bets';
+
+            case Bet.CALL:
+                return 'Calls';
+
+            case Bet.RAISE:
+            case Bet.DEAD_RAISE:
+                return 'Raises';
+
+        }   // switch
+
+        return '';
+
+    }
+
+
+
 }

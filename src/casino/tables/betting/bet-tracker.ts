@@ -15,6 +15,8 @@ export class BetTracker {
     public timeToAct: number;
 
     // Tracks how much each seat has bet so far in this round
+    // Key = seat index
+    // Value = Bet object
     public bets: object;
 
     public pots: Pot[];
@@ -81,7 +83,7 @@ export class BetTracker {
 
     public getCurrentBet(seatIndex: number): number {
 
-        return this.bets[seatIndex] || 0;
+        return this.bets[seatIndex] ? this.bets[seatIndex].totalBet : 0;
 
     }
 
@@ -220,11 +222,8 @@ export class BetTracker {
 
         seat.player.chips -= chipsRequired;
 
-        if (totalBetAmount > 0) {
-
-            this.bets[seat.index] = totalBetAmount;
-
-        }
+        let bet = new Bet(true, totalBetAmount, chipsRequired, isAllIn, betType, null);
+        this.bets[seat.index] = bet;
 
         // console.log(`BetType is ${betType}`);
 
@@ -232,7 +231,7 @@ export class BetTracker {
             this.seatIndexInitiatingAction = seat.index;
         }
 
-        return new Bet(true, totalBetAmount, chipsRequired, isAllIn, betType, null);
+        return bet;
 
     }   // addBet
 
@@ -291,21 +290,21 @@ export class BetTracker {
 
             let smallestBet = Number.MAX_VALUE;
 
-            for (let amount of Object.values(this.bets)) {
+            for (let bet of Object.values(this.bets)) {
 
-                smallestBet = Math.min(smallestBet, amount);
+                smallestBet = Math.min(smallestBet, bet.totalBet);
 
             }
 
             done = true;
 
-            // TODO: Clean this up - we shouldn't need to parse the seatIndex from a string to number
             for (let seatIndex of Object.keys(this.bets)) {
 
                 pot.addChips(smallestBet, seatIndex);
-                this.bets[seatIndex] = this.bets[seatIndex] - smallestBet;
 
-                if ((this.getCurrentBet(parseInt(seatIndex, 10))) > 0) {
+                this.bets[seatIndex].totalBet = this.bets[seatIndex].totalBet - smallestBet;
+
+                if (this.bets[seatIndex].totalBet > 0) {
 
                     done = false;
 

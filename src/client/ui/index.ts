@@ -13,6 +13,7 @@ import { Player } from '../../players/player';
 
 import SeatComponent from './components/seat/SeatComponent';
 import DealerBoxComponent from './components/dealer/DealerBoxComponent.vue';
+import BetComponent from './components/bet/BetComponent.vue';
 
 
 var app = new Vue({
@@ -24,7 +25,8 @@ var app = new Vue({
     },
     components: {
         'seat-component': SeatComponent,
-        'dealer-box-component': DealerBoxComponent
+        'dealer-box-component': DealerBoxComponent,
+        'bet-component': BetComponent
     }
 
 });
