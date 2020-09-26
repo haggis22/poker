@@ -1,6 +1,6 @@
 ﻿.seat-colors {
-    background-color: slategrey;
-    color: white;
+    background: linear-gradient(45deg, grey, lightgrey);
+    color: black;
     border-radius: 6%;
     border: 0.25em solid black;
 }
@@ -14,7 +14,7 @@
     height: 240px;
 
     &.action-on {
-        background-color: lightgreen;
+        background: linear-gradient(45deg, green, lightgreen);
         color: black;
         transition: background-color 0.25s, color 0.25s;
     }
@@ -66,5 +66,4 @@
             margin-left: -30px;
         }
     }
-
 }

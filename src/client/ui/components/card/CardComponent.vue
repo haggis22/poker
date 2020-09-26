@@ -1,12 +1,19 @@
 ﻿<template>
     <div class="card card-small-2" :class="cardClasses">
-        <div v-if="isFaceUp" class="symbols left">
-            <div class="value">{{ card.value.symbol }}</div>
-            <div class="suit">{{ card.suit.symbol }}</div>
-        </div>
-        <div v-if="isFaceUp" class="symbols right">
-            <div class="value">{{ card.value.symbol }}</div>
-            <div class="suit">{{ card.suit.symbol }}</div>
+        <div class="card-inner">
+            <div class="card-front">
+                <div v-if="isFaceUp" class="symbols left">
+                    <div class="value">{{ card.value.symbol }}</div>
+                    <div class="suit">{{ card.suit.symbol }}</div>
+                </div>
+                <div v-if="isFaceUp" class="symbols right">
+                    <div class="value">{{ card.value.symbol }}</div>
+                    <div class="suit">{{ card.suit.symbol }}</div>
+                </div>
+            </div>
+            <div class="card-back">
+                &nbsp;
+            </div>
         </div>
     </div>
 </template>
@@ -90,6 +97,7 @@ const CardComponent = Vue.extend ({
 
             if (this.isDealerHolding) {
                 classes.push('dealer-holding');
+                classes.push('face-down');
             }
             else if (this.isDealing) {
                 classes.push('dealing');
