@@ -45,7 +45,7 @@ export class PokerHandDescriber implements HandDescriber {
                 return `flush, ${evaluation.values[0].text}-high`;
 
             case PokerHandEvaluation.RANK.FULL_HOUSE:
-                return `full house, ${evaluation.values[0].plural} over ${evaluation.values[0].plural}`;
+                return `full house, ${evaluation.values[0].plural} over ${evaluation.values[1].plural}`;
 
             case PokerHandEvaluation.RANK.FOUR_OF_A_KIND:
                 return `four of a kind, ${evaluation.values[0].plural}`;
