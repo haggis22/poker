@@ -1,6 +1,6 @@
 ﻿.seat-colors {
-    background: linear-gradient(45deg, grey, lightgrey);
-    color: black;
+    background: linear-gradient(15deg, #0f5cc6, #6799de);
+    color: white;
     border-radius: 6%;
     border: 0.25em solid black;
 }
@@ -14,9 +14,14 @@
     height: 240px;
 
     &.action-on {
-        background: linear-gradient(45deg, green, lightgreen);
+        background: linear-gradient(45deg, lightgreen, lightyellow);
         color: black;
         transition: background-color 0.25s, color 0.25s;
+    }
+
+    .name 
+    {
+        font-size: 1.2em;
     }
 
     .name, .chips {
