@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { PokerHandDescriber, DeclareHandAction, Card, ClearCardsAction } from "../../communication/serializable";
+import { PokerHandDescriber, DeclareHandAction, Card, ClearCardsAction, GatherBetsAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
@@ -886,6 +886,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private completeBetting() {
 
+        this.queueAction(new GatherBetsAction(this.table.id));
         this.table.betTracker.gatherBets();
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
         this.checkBetsToReturn();

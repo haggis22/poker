@@ -15,7 +15,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, ClearCardsAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, ClearCardsAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -37,6 +37,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public seatAction: Map<number, string>;
 
+    public isGatheringBets: boolean;
+
+
 
 
     constructor(user: User, chipFormatter: IChipFormatter) {
@@ -50,6 +53,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.seatAction = new Map<number, string>();
+
+        this.isGatheringBets = false;
 
     }
 
@@ -134,6 +139,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof UpdateBetsAction) {
 
             return this.updateBets(action);
+
+        }
+
+        if (action instanceof GatherBetsAction) {
+
+            return this.gatherBets(action);
 
         }
 
@@ -442,6 +453,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // updateBets
 
 
+    private gatherBets(action: GatherBetsAction): void {
+
+        this.isGatheringBets = true;
+
+    }  // gatherBets
+
+
 
     private moveButton(action: MoveButtonAction): void {
 
@@ -609,6 +627,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private bettingComplete(action: BettingCompleteAction): void {
 
+        this.isGatheringBets = false;
         this.seatAction.clear();
 
     }  // returnBet

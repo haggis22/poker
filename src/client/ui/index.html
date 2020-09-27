@@ -27,13 +27,10 @@
 
                     </div>
 
-                    <bet-component v-for="(bet, seatIndex) in ui.table.betTracker.bets"
-                                   :key="seatIndex"
+                    <bet-component v-for="(bet, betName, index) in ui.table.betTracker.bets"
+                                   :key="index"
                                    :bet="bet"
-                                   :ui="ui" 
-                                   :seatIndex="seatIndex"
-                                   class="chips-stage"
-                                   :class="'seat-'+seatIndex">
+                                   :ui="ui">
                     </bet-component>
 
                     <div v-if="ui.table.buttonIndex != null" class="button" :class="'seat-'+ui.table.buttonIndex">

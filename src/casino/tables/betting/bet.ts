@@ -10,6 +10,7 @@
 
     public isValid: boolean;
 
+    public seatIndex: number;
     public totalBet: number;
     public chipsAdded: number;
     public isAllIn: boolean;
@@ -19,6 +20,7 @@
     public message: string;
 
     constructor(isValid: boolean,
+                seatIndex: number,
                 totalBet: number,
                 chipsAdded: number,
                 isAllIn: boolean,
@@ -26,6 +28,7 @@
                 message: string) {
 
         this.isValid = isValid;
+        this.seatIndex = seatIndex;
         this.totalBet = totalBet;
         this.chipsAdded = chipsAdded;
         this.isAllIn = isAllIn;

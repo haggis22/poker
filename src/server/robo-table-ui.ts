@@ -431,6 +431,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
 
 
+
+
     private moveButton(action: MoveButtonAction): void {
 
         let seat = this.findSeat(this.table.buttonIndex);

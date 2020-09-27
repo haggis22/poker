@@ -35,6 +35,13 @@ export class BetTracker {
     }
 
 
+    public getBets(): Bet[] {
+
+        return Object.values(this.bets);
+
+    }  // getBets
+
+
     public reset(): void {
 
         this.pots.length = 0;
@@ -102,19 +109,19 @@ export class BetTracker {
         
         if (!seat || !seat.player) {
 
-            return new Bet(false, 0, 0, false, Bet.INVALID, "There is no player in that seat");
+            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "There is no player in that seat");
 
         }
 
         if (!seat.hand) {
 
-            return new Bet(false, 0, 0, false, Bet.INVALID, "You are not in the hand");
+            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "You are not in the hand");
 
         }
 
         if (this.seatIndex != seat.index) {
 
-            return new Bet(false, 0, 0, false, Bet.INVALID, "It is not your turn to act");
+            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "It is not your turn to act");
 
         }
 
@@ -123,7 +130,7 @@ export class BetTracker {
 
         if (totalBetAmount < 0) {
 
-            return new Bet(false, 0, 0, false, Bet.INVALID, "You cannot be a negative amount");
+            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "You cannot be a negative amount");
 
         }
 
@@ -131,7 +138,7 @@ export class BetTracker {
 
         if (totalBetAmount < playerCurrentBet) {
 
-            return new Bet(false, playerCurrentBet, 0, false, Bet.INVALID, 'You cannot reduce your bet');
+            return new Bet(false, seat.index, playerCurrentBet, 0, false, Bet.INVALID, 'You cannot reduce your bet');
 
         }
 
@@ -152,7 +159,7 @@ export class BetTracker {
         if (totalBetAmount == 0 && this.currentBet > 0) {
 
             // They are trying to bet less than the current, but they still have chips left
-            return new Bet(false, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
+            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
 
         }
 
@@ -161,7 +168,7 @@ export class BetTracker {
             if (chipsRemaining > 0) {
 
                 // They are trying to bet less than the current, but they still have chips left
-                return new Bet(false, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
+                return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
 
             }
 
@@ -176,7 +183,7 @@ export class BetTracker {
                 if (chipsRemaining > 0) {
 
                     // They are trying to raise less than the minimum amount, but they still have chips left
-                    return new Bet(false, 0, 0, false, Bet.INVALID, `You cannot ${(this.currentBet == 0 ? 'bet' : 'raise')} less than the minimum`);
+                    return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, `You cannot ${(this.currentBet == 0 ? 'bet' : 'raise')} less than the minimum`);
 
                 }
 
@@ -222,7 +229,7 @@ export class BetTracker {
 
         seat.player.chips -= chipsRequired;
 
-        let bet = new Bet(true, totalBetAmount, chipsRequired, isAllIn, betType, null);
+        let bet = new Bet(true, seat.index, totalBetAmount, chipsRequired, isAllIn, betType, null);
         this.bets[seat.index] = bet;
 
         // console.log(`BetType is ${betType}`);

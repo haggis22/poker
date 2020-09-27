@@ -19,10 +19,6 @@ import { Bet } from '../../../../casino/tables/betting/bet';
 const BetComponent = Vue.extend ({
 
     props: {
-        seatIndex: {
-            type: Number,
-            required: true
-        },
         bet: {
             type: Bet,
             required: true
@@ -62,11 +58,18 @@ const BetComponent = Vue.extend ({
                 return null;
             }
 
-            let classes: string[] = ['seat-' + this.seatIndex];
+            let classes: string[] = ['seat-' + this.bet.seatIndex];
 
             if (this.isAnnounced) {
 
                 classes.push('announced');
+
+            }
+
+            if (this.ui.isGatheringBets) {
+
+                console.debug('Is applying gathering class');
+                classes.push('gathering');
 
             }
 
