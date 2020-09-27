@@ -249,29 +249,25 @@ export class BetTracker {
 
         this.seatIndex = null;
 
-        if (Object.keys(this.bets).length === 0) {
+        if (!Object.values(this.bets).find(bet => bet.totalBet > 0)) {
 
-            // No bets to gather. Dump out or we will create extra pots because people from the last one are not in the "no-bets" round
+            // No bets greater than 0 to gather. Dump out or we will create extra pots because people from the last one are not in the "no-bets" round
             return;
-        }
-
-        let pot = null;
-
-        if (this.pots.length == 0) {
-
-            pot = this.createPot();
 
         }
-        else {
-            pot = this.pots[this.pots.length - 1];
-        }
+
+        // Find the most recent pot, or create one, if necessary
+        let pot = this.pots.length == 0 ? this.createPot() : this.pots[this.pots.length - 1];
 
         // Everyone still betting should be active in the most recent pot, but it's not necessarily true
         // that everyone in the most recent pot should also be in this one
         let needsNew = false;
 
         for (let previousBettorIndex of pot.getSeatsInPot()) {
+
             if ((this.getCurrentBet(previousBettorIndex)) === 0) {
+
+                // we have non-zero bets in this pot, but this person didn't put in anything
                 needsNew = true;
                 break;
             }
@@ -300,7 +296,8 @@ export class BetTracker {
 
             for (let seatIndex of Object.keys(this.bets)) {
 
-                pot.addChips(smallestBet, seatIndex);
+                // iterating object keys will always give strings, but these are actually numbers
+                pot.addChips(parseInt(seatIndex, 10), smallestBet);
 
                 this.bets[seatIndex].totalBet = this.bets[seatIndex].totalBet - smallestBet;
 

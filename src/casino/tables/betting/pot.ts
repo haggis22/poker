@@ -12,7 +12,7 @@
         this.seats = {};
     }
 
-    addChips(chips: number, seatIndex: number) {
+    addChips(seatIndex: number, chips: number) {
 
         if (chips > 0) {
 

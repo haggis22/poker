@@ -59,7 +59,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private readonly ALL_ACCESS: number = -1;
 
     private readonly TIME_DEAL_CARD: number = 300;
-    private readonly TIME_BETTING_COMPLETE: number = 2000;
+    private readonly TIME_BETTING_COMPLETE: number = 1250;
     private readonly TIME_SHOWDOWN: number = 3000;
     private readonly TIME_SET_BUTTON: number = 750;
 
@@ -852,10 +852,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
-                this.completeBetting();
-
                 setTimeout(() => {
 
+                    this.completeBetting();
                     return this.goToNextState();
 
                 }, this.TIME_BETTING_COMPLETE);
@@ -891,11 +890,18 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
         this.checkBetsToReturn();
 
-        this.queueAction(new BettingCompleteAction(this.table.id));
+        console.log('Server: betting is complete');
 
-        this.log('Betting complete');
+        // give it a minute before clearing out all the actions
+        setTimeout(() => {
 
-    }  // bettingComplete
+            console.log('Server: sending BettingCompleteAction');
+            this.queueAction(new BettingCompleteAction(this.table.id));
+            this.log('Betting complete');
+
+        }, this.TIME_BETTING_COMPLETE);
+
+    }  // completeBetting
 
 
     private logTimers() {
