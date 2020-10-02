@@ -41,10 +41,12 @@ const BetComponent = Vue.extend ({
     },
     created() {
 
+
+        console.log(`Created BetComponent for seatIndex ${this.bet.seatIndex}, amount ${this.bet.totalBet}`);
+
         // After only the briefest of pauses, we're going to have this bubble appear
         this.timer = setTimeout(() => {
 
-            // In one stroke, set the card moving and take it out of the dealer's hand
             this.isAnnounced = true;
 
         }, 10);
@@ -58,7 +60,7 @@ const BetComponent = Vue.extend ({
                 return null;
             }
 
-            let classes: string[] = ['seat-' + this.bet.seatIndex];
+            let classes: string[] = [];
 
             if (this.isAnnounced) {
 
@@ -68,8 +70,13 @@ const BetComponent = Vue.extend ({
 
             if (this.ui.isGatheringBets) {
 
-                console.debug('Is applying gathering class');
                 classes.push('gathering');
+
+            }
+            else {
+
+                classes.push(`seat-${this.bet.seatIndex}`);
+
 
             }
 

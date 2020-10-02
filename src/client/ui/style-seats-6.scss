@@ -12,7 +12,6 @@
                     top: -60px;
                     left: 420px;
                 }
-
             }
 
             &.seat-1 {
@@ -53,16 +52,14 @@
 
         .chips-stage {
 
+            &.gathering {
+                top: 200px;
+                left: 300px;
+            }
+
             &.seat-0 {
                 top: 350px;
                 left: 160px;
-
-                &.gathering {
-
-                    top: 200px;
-                    left: 300px;
-
-                }
             }
 
             &.seat-1 {
