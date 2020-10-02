@@ -27,8 +27,8 @@
 
                     </div>
 
-                    <bet-component v-for="(bet, betName, index) in ui.table.betTracker.bets"
-                                   :key="index"
+                    <bet-component v-for="bet in ui.table.betTracker.bets"
+                                   :key="'bet-' + bet.seatIndex"
                                    :bet="bet"
                                    :ui="ui">
                     </bet-component>
