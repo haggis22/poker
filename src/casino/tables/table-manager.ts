@@ -56,12 +56,14 @@ const logger: Logger = new Logger();
 
 export class TableManager implements CommandHandler, MessageBroadcaster {
 
-    private readonly ALL_ACCESS: number = -1;
+    private readonly TIME_SET_BUTTON: number = 750;
 
     private readonly TIME_DEAL_CARD: number = 300;
+
+    private readonly TIME_BET = 100;
     private readonly TIME_BETTING_COMPLETE: number = 1250;
     private readonly TIME_SHOWDOWN: number = 3000;
-    private readonly TIME_SET_BUTTON: number = 750;
+
     private readonly TIME_COMPLETE_HAND: number = 3000;
 
     public tableID: number;
@@ -420,6 +422,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                     this.log(`**************************************** RAISE: oldActionInitiator = ${oldActionInitiator}, newActionInitiator = ${newActionInitiator}`);
 
                 }
+
+                await this.wait(this.TIME_BET);
 
                 return await this.advanceBetTurn();
 
