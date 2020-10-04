@@ -127,7 +127,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
-    <TypeScriptCompile Include="src\actions\table\game\clear-cards-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\hand-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\players\player-active-action.ts" />
