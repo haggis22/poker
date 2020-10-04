@@ -62,6 +62,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private readonly TIME_BETTING_COMPLETE: number = 1250;
     private readonly TIME_SHOWDOWN: number = 3000;
     private readonly TIME_SET_BUTTON: number = 750;
+    private readonly TIME_COMPLETE_HAND: number = 3000;
 
     public tableID: number;
     private table: Table;
@@ -185,34 +186,34 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    private processCommand(command: Command): void {
+    private async processCommand(command: Command): Promise<void> {
 
         if (command instanceof RequestSeatCommand) {
 
-            return this.seatPlayer(command);
+            return await this.seatPlayer(command);
 
         }
 
         if (command instanceof AddChipsCommand) {
 
-            return this.addChips(command);
+            return await this.addChips(command);
 
         }
 
         if (command instanceof BetCommand) {
 
-            return this.bet(command);
+            return await this.bet(command);
 
         }
 
         if (command instanceof FoldCommand) {
 
-            return this.fold(command);
+            return await this.fold(command);
         }
 
         if (command instanceof TableSnapshotCommand) {
 
-            return this.tableSnapshot(command);
+            return await this.tableSnapshot(command);
 
         }
 
@@ -287,7 +288,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     }
 
-    private seatPlayer(command: RequestSeatCommand): void {
+    private async seatPlayer(command: RequestSeatCommand): Promise<void> {
 
         let seatIndex = command.seatIndex;
         if (seatIndex === null) {
@@ -319,9 +320,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
 
-                this.checkStartHand();
-
-                return;
+                return await this.checkStartHand();
 
             }
 
@@ -344,7 +343,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    private addChips(command: AddChipsCommand): void {
+    private async addChips(command: AddChipsCommand): Promise<void> {
 
         if (command.amount <= 0) {
 
@@ -379,12 +378,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    private checkStartHand(): void {
+    private async checkStartHand(): Promise<void> {
 
         if (!this.table.state.isHandInProgress() && this.isReadyForNextHand()) {
 
             this.log(`Starting new hand`);
-            return this.goToNextState();
+            return await this.goToNextState();
 
         }
 
@@ -392,7 +391,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    private bet(command: BetCommand): void {
+    private async bet(command: BetCommand): Promise<void> {
 
         this.log(`Received BetCommand from ${command.userID}, tableState: ${this.table.state.constructor.name}`);
 
@@ -422,7 +421,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 }
 
-                return this.advanceBetTurn();
+                return await this.advanceBetTurn();
 
             }
             else {
@@ -440,7 +439,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // bet
 
 
-    private foldPlayer(folderSeat: Seat, fold: Fold): void {
+    private async foldPlayer(folderSeat: Seat, fold: Fold): Promise<void> {
 
         clearTimeout(this.betTimer);
         this.numTimersKilled++;
@@ -453,12 +452,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.queueAction(new SetHandAction(this.table.id, folderSeat.index, false));
         this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
 
-        this.advanceBetTurn();
+        return await this.advanceBetTurn();
 
     }   // foldPlayer
 
 
-    private fold(command: FoldCommand): void {
+    private async fold(command: FoldCommand): Promise<void> {
 
         if (this.table.state instanceof BetState) {
 
@@ -468,7 +467,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (fold.isValid) {
 
-                return this.foldPlayer(folderSeat, fold);
+                return await this.foldPlayer(folderSeat, fold);
 
             }
 
@@ -553,7 +552,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // doBetweenHandsBusiness
 
 
-    private changeTableState(state: TableState): void {
+    private async changeTableState(state: TableState): Promise<void> {
 
         this.table.state = state;
         this.log(`TableState: ${state.constructor.name}`);
@@ -565,7 +564,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             if (this.countPlayersInHand() < 2) {
 
                 // blow through this state since there is 0 or 1 person still in the hand at the table.
-                return this.goToNextState();
+                return await this.goToNextState();
             }
 
         }
@@ -577,7 +576,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             if (this.isReadyForNextHand()) {
 
                 // start the next hand
-                return this.goToNextState();
+                return await this.goToNextState();
 
             }
 
@@ -589,36 +588,36 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         if (state instanceof StartHandState) {
 
-            return this.startHand();
+            return await this.startHand();
 
         }
 
         if (state instanceof DealState) {
 
-            return this.dealRound(state);
+            return await this.dealRound(state);
 
         }
 
         if (state instanceof BetState) {
 
-            return this.makeYourBets(state);
+            return await this.makeYourBets(state);
 
         }
 
         if (state instanceof ShowdownState) {
 
-            return this.showdown(state);
+            return await this.showdown(state);
         }
 
         if (state instanceof HandCompleteState) {
 
-            return this.completeHand(state);
+            return await this.completeHand(state);
         }
 
     }
 
 
-    private startHand() {
+    private async startHand(): Promise<void> {
 
         this.deck.shuffle();
 
@@ -689,36 +688,30 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         }  // for each seat
 
 
-        this.completeBetting();
+        await this.completeBetting();
 
-        setTimeout(() => {
+        if (!this.isReadyForThisHand()) {
 
-            if (!this.isReadyForThisHand()) {
+            // We don't have enough players, so go back to the open state
+            return await this.changeTableState(this.game.stateMachine.goToOpenState());
 
-                // We don't have enough players, so go back to the open state
-                return this.changeTableState(this.game.stateMachine.goToOpenState());
+        }
 
-            }
+        await this.setButton();
 
-            this.setButton();
-
-            setTimeout(() => {
-
-                this.goToNextState();
-
-            }, this.TIME_SET_BUTTON);
-
-        }, this.TIME_BETTING_COMPLETE);
-
+        return await this.goToNextState();
 
     }   // startHand
 
 
-    private setButton(): void {
+    private async setButton(): Promise<void> {
 
         this.table.buttonIndex = this.findNextSeatWithAHand(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
 
         this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
+
+        await this.wait(this.TIME_SET_BUTTON);
+
 
     }
 
@@ -749,13 +742,14 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }   // findNextOccupiedSeatIndex
 
 
-    private checkNeedsCard(dealState: DealState, seatIndex: number): void {
+    private async checkNeedsCard(dealState: DealState, seatIndex: number): Promise<void> {
 
         if (seatIndex >= this.table.seats.length) {
 
             seatIndex = 0;
 
         }
+
 
         if (this.table.seats[seatIndex].hand) {
 
@@ -784,47 +778,47 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
-            setTimeout(() => {
-
-                this.postDealtCard(dealState, seatIndex);
-
-            }, this.TIME_DEAL_CARD);
-
-            return;
+            await this.wait(this.TIME_DEAL_CARD);
 
         }
 
         // we didn't do anything with this place, but see if we need to keep going
-        return this.postDealtCard(dealState, seatIndex);
+        return await this.postDealtCard(dealState, seatIndex);
 
     }  // checkNeedsCard
 
 
-    private postDealtCard(dealState: DealState, dealtSeatIndex: number) : void {
+    private async postDealtCard(dealState: DealState, dealtSeatIndex: number) : Promise<void> {
 
         if (dealtSeatIndex == this.table.buttonIndex) {
 
             // we are done with the button's position (card dealt or not)
-            return this.goToNextState();
+            return await this.goToNextState();
 
         }
 
-        this.checkNeedsCard(dealState, dealtSeatIndex + 1);
+        await this.checkNeedsCard(dealState, dealtSeatIndex + 1);
 
     }  // postDealtCard
 
 
-    private dealRound(dealState: DealState): void {
+    private async dealRound(dealState: DealState): Promise<void> {
 
         // start one past the button
-        this.checkNeedsCard(dealState, this.table.buttonIndex + 1);
+        await this.checkNeedsCard(dealState, this.table.buttonIndex + 1);
 
     }   // dealRound
 
 
+    private async wait(milliseconds: number): Promise<void> {
+
+        return new Promise(res => setTimeout(res, milliseconds));
+
+    }
 
 
-    private makeYourBets(betState: BetState): void {
+
+    private async makeYourBets(betState: BetState): Promise<void> {
 
         this.log('In makeYourBets');
 
@@ -835,16 +829,16 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         if (firstSeatIndexWithAction == null) {
 
             this.log('No betting action this round');
-            return this.goToNextState();
+            return await this.goToNextState();
 
         }
 
-        this.validateBettorOrMoveOn(firstSeatIndexWithAction);
+        return await this.validateBettorOrMoveOn(firstSeatIndexWithAction);
 
     }   // makeYourBets
 
 
-    private validateBettorOrMoveOn(bettorSeatIndex: number): void {
+    private async validateBettorOrMoveOn(bettorSeatIndex: number): Promise<void> {
 
         let done: boolean = false;
 
@@ -852,15 +846,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
-                setTimeout(() => {
+                await this.completeBetting();
 
-                    this.completeBetting();
-                    return this.goToNextState();
-
-                }, this.TIME_BETTING_COMPLETE);
-
-
-                return;
+                return await this.goToNextState();
 
             }
 
@@ -878,29 +866,31 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }  // while !done
 
-        this.setBetTurn(bettorSeatIndex);
-
+        await this.setBetTurn(bettorSeatIndex);
 
     }  // validateBettorOrMoveOn
 
 
-    private completeBetting() {
+    private async completeBetting(): Promise<void> {
 
+        console.log('Server: gather bets');
         this.queueAction(new GatherBetsAction(this.table.id));
         this.table.betTracker.gatherBets();
+        console.log('Server: update bets');
+
+        // give it a minute before clearing out all the actions
+        await this.wait(this.TIME_BETTING_COMPLETE);
+
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
         this.checkBetsToReturn();
 
         console.log('Server: betting is complete');
 
-        // give it a minute before clearing out all the actions
-        setTimeout(() => {
+        console.log('Server: sending BettingCompleteAction');
+        this.queueAction(new BettingCompleteAction(this.table.id));
+        this.log('Betting complete');
 
-            console.log('Server: sending BettingCompleteAction');
-            this.queueAction(new BettingCompleteAction(this.table.id));
-            this.log('Betting complete');
-
-        }, this.TIME_BETTING_COMPLETE);
+//        return await this.wait(this.TIME_BETTING_COMPLETE);
 
     }  // completeBetting
 
@@ -911,7 +901,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     }
 
-    private setBetTurn(seatIndexToAct: number): void {
+    private async setBetTurn(seatIndexToAct: number): Promise<void> {
 
         this.table.betTracker.seatIndex = seatIndexToAct;
         this.table.betTracker.timeToAct = this.table.rules.timeToAct;
@@ -919,7 +909,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.numTimers++;
         this.logTimers();
 
-        this.betTimer = setTimeout(() => {
+        // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
+        this.betTimer = setTimeout(async () => {
 
             this.numTimersElapsed++;
             this.logTimers();
@@ -932,7 +923,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             if (check.isValid) {
 
                 this.queueAction(new BetAction(this.table.id, checkerSeat.index, check));
-                return this.advanceBetTurn();
+                return await this.advanceBetTurn();
 
             }
 
@@ -940,7 +931,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             if (fold.isValid) {
 
-                return this.foldPlayer(checkerSeat, fold);
+                return await this.foldPlayer(checkerSeat, fold);
 
             }
 
@@ -953,7 +944,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }  // setBetTurn
 
 
-    private advanceBetTurn(): void {
+    private async advanceBetTurn(): Promise<void> {
 
         // this.log('In advanceBetTurn');
         if (!(this.table.state instanceof BetState)) {
@@ -964,7 +955,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
-        this.validateBettorOrMoveOn(this.findNextSeatWithAHand(this.table.betTracker.seatIndex + 1));
+        return await this.validateBettorOrMoveOn(this.findNextSeatWithAHand(this.table.betTracker.seatIndex + 1));
 
     }   // advanceBetTurn
 
@@ -1084,7 +1075,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     } // checkBetsToReturn
 
 
-    private showdown(showdownState: ShowdownState) {
+    private async showdown(showdownState: ShowdownState): Promise<void> {
 
 
         let isShowdownRequired = this.countPlayersInHand() > 1;
@@ -1177,16 +1168,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }  // for each Pot
 
-        setTimeout(() => {
+        await this.wait(this.TIME_SHOWDOWN);
 
-            // clear the pots
-            this.table.betTracker.reset();
-            this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+        // clear the pots
+        this.table.betTracker.reset();
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
-            this.goToNextState();
-
-        }, this.TIME_SHOWDOWN);
-
+        return await this.goToNextState();
 
     }   // showdown
 
@@ -1218,28 +1206,26 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
 
-    private completeHand(completeState: HandCompleteState) {
+    private async completeHand(completeState: HandCompleteState): Promise<void> {
 
         // We're done with this hand - go to the next one
 
-        // This will preserve the `this` reference in the call
-        setTimeout(() => {
+        await this.wait(this.TIME_COMPLETE_HAND);
 
-            this.queueAction(new ClearCardsAction(this.tableID));
-            this.goToNextState();
+        this.queueAction(new ClearCardsAction(this.tableID));
 
-        }, 3000);
+        return await this.goToNextState();
 
     }   // completeHand
 
 
-    private goToNextState(): void {
+    private async goToNextState(): Promise<void> {
 
         let nextState: TableState = this.game.stateMachine.nextState();
 
         // this.log(`Changing to next state: ${(nextState == null ? 'null' : nextState.constructor.name)}`);
 
-        this.changeTableState(nextState);
+        await this.changeTableState(nextState);
 
      }
 
