@@ -882,6 +882,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private async completeBetting(): Promise<void> {
 
+        // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
+        this.table.betTracker.seatIndex = null;
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+
+
         console.log('Server: gather bets');
         this.queueAction(new GatherBetsAction(this.table.id));
         this.table.betTracker.gatherBets();
