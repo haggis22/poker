@@ -66,10 +66,9 @@
     <Content Include="src\client\ui\components\dealer\DealerBoxComponent.vue" />
     <Content Include="src\client\ui\components\pot\pot.scss" />
     <Content Include="src\client\ui\components\pot\PotComponent.vue" />
+    <Content Include="src\client\ui\components\pot\WonPotComponent.vue" />
     <Content Include="src\client\ui\components\seat\SeatComponent.vue" />
     <Content Include="src\client\ui\components\seat\seat.scss" />
-    <Content Include="src\client\ui\components\won-pot\won-pot.scss" />
-    <Content Include="src\client\ui\components\won-pot\WonPotComponent.vue" />
     <Content Include="src\client\ui\style.scss" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
@@ -94,7 +93,6 @@
     <Folder Include="src\client\ui\components\card\" />
     <Folder Include="src\client\ui\components\dealer\" />
     <Folder Include="src\client\ui\components\bet\" />
-    <Folder Include="src\client\ui\components\won-pot\" />
     <Folder Include="src\client\ui\components\pot\" />
     <Folder Include="src\client\ui\components\seat\" />
     <Folder Include="src\communication\client-side\" />
