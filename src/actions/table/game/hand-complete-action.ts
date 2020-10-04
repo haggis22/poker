@@ -1,6 +1,6 @@
 ﻿import { TableAction } from "../table-action";
 
-export class ClearCardsAction extends TableAction {
+export class HandCompleteAction extends TableAction {
 
     public tableID: number;
 

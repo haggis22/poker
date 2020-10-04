@@ -15,11 +15,12 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, ClearCardsAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 import { WonPot } from "../casino/tables/betting/won-pot";
+import { HandCompleteAction } from "../actions/table/game/hand-complete-action";
 
 
 const logger: Logger = new Logger();
@@ -166,9 +167,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.dealCard(action);
         }
 
-        if (action instanceof ClearCardsAction) {
+        if (action instanceof HandCompleteAction) {
 
-            return this.clearCards(action);
+            return this.completeHand(action);
 
         }
 
@@ -440,9 +441,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private updateBets(action: UpdateBetsAction): void {
 
-        // If we have pots, then we can't have any WonPots - clear 'em
-        this.wonPots.length = 0;
-
         for (let pot of this.table.betTracker.pots) {
         
             let potDesc = `${pot.getName()}: ${this.chipFormatter.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
@@ -502,8 +500,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // dealCard
 
 
-    private clearCards(action: ClearCardsAction): void {
+    private completeHand(action: HandCompleteAction): void {
 
+        // If we have pots, then we can't have any WonPots - clear 'em
+        this.wonPots.length = 0;
 
     }  // clearCards
 

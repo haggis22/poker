@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { PokerHandDescriber, DeclareHandAction, Card, ClearCardsAction, GatherBetsAction } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
@@ -66,8 +66,10 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_SHOWDOWN: number = 1000;
     private readonly TIME_WIN_POT: number = 2000;
+    private readonly TIME_POST_SHOWDOWN: number = 2000;
 
-    private readonly TIME_COMPLETE_HAND: number = 3000;
+    private readonly TIME_COMPLETE_HAND: number = 1000;
+
 
     public tableID: number;
     private table: Table;
@@ -1119,7 +1121,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
         }
 
-        for (let pot of this.table.betTracker.pots) {
+        while (this.table.betTracker.pots.length) {
+
+            let pot: Pot = this.table.betTracker.pots.shift();
 
             let potWinningHand = null;
             let potWinnerSeatIndexes = new Set<number>();
@@ -1173,9 +1177,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
+            // we have popped the pot off, so update that so it effectively gets replaced by the WonPot objects
+            this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+
             await this.wait(this.TIME_WIN_POT);
 
-        }  // for each Pot
+        }  // while we have pots to work through
 
 
         // Update all the player chip counts at once
@@ -1189,9 +1196,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
-        // clear the pots
+        // clear all betting action
         this.table.betTracker.reset();
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+
+        await this.wait(this.TIME_POST_SHOWDOWN);
 
         return await this.goToNextState();
 
@@ -1229,9 +1238,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         // We're done with this hand - go to the next one
 
+        this.queueAction(new HandCompleteAction(this.tableID));
         await this.wait(this.TIME_COMPLETE_HAND);
-
-        this.queueAction(new ClearCardsAction(this.tableID));
 
         return await this.goToNextState();
 

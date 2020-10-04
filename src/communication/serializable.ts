@@ -21,7 +21,7 @@ export { SetHandAction } from "../actions/table/game/set-hand-action";
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 
 export { DealCardAction } from "../actions/table/game/deal-card-action";
-export { ClearCardsAction } from "../actions/table/game/clear-cards-action";
+export { HandCompleteAction } from "../actions/table/game/hand-complete-action";
 export { Card } from "../cards/card";
 export { CardValue } from "../cards/card-value";
 export { CardSuit } from "../cards/card-suit";
