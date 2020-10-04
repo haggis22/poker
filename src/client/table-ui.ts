@@ -510,9 +510,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private betTurn(action: BetTurnAction): void {
 
-        let tracker = this.table.betTracker;
-        let seat = this.findSeat(this.table.betTracker.seatIndex);
+        // Map.delete is safe to use, even if the key does not already exist
+        this.seatAction.delete(action.betTracker.seatIndex);
 
+        let seat = this.findSeat(action.betTracker.seatIndex);
         this.log(`It is ${seat.getName()}'s turn to act`);
 
     }  // betTurn

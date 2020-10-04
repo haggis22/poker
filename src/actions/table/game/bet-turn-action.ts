@@ -4,13 +4,13 @@ import { BetTracker } from "../../../casino/tables/betting/bet-tracker";
 export class BetTurnAction extends TableAction {
 
     public tableID: number;
-    public bets: BetTracker;
+    public betTracker: BetTracker;
 
-    constructor(tableID: number, bets: BetTracker) {
+    constructor(tableID: number, betTracker: BetTracker) {
 
         super(tableID);
 
-        this.bets = bets;
+        this.betTracker = betTracker;
 
     }
 
