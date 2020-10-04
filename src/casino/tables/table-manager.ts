@@ -50,6 +50,7 @@ import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
 import { BettingCompleteAction } from "../../actions/table/betting/betting-complete-action";
 import { FacedownCard } from "../../cards/face-down-card";
+import { WonPot } from "./betting/won-pot";
 
 const logger: Logger = new Logger();
 
@@ -62,7 +63,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_BET = 100;
     private readonly TIME_BETTING_COMPLETE: number = 1250;
-    private readonly TIME_SHOWDOWN: number = 3000;
+
+    private readonly TIME_SHOWDOWN: number = 1000;
+    private readonly TIME_WIN_POT: number = 2000;
 
     private readonly TIME_COMPLETE_HAND: number = 3000;
 
@@ -1110,6 +1113,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
+        await this.wait(this.TIME_SHOWDOWN);
 
         for (let winner of winners) {
             this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
@@ -1156,11 +1160,10 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                         let winnerEvaluation = isShowdownRequired ? winnerHand.evaluation : null;
 
-                        this.queueAction(new WinPotAction(this.table.id, seatIndex, pot.index, winnerEvaluation, equalShare + remainder));
+                        let wonPot = new WonPot(pot.index, equalShare + remainder, seatIndex, winnerEvaluation);
+                        this.queueAction(new WinPotAction(this.table.id, wonPot));
 
                         player.chips += (equalShare + remainder);
-
-                        this.queueAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
 
                         remainder = 0;
 
@@ -1170,9 +1173,21 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
+            await this.wait(this.TIME_WIN_POT);
+
         }  // for each Pot
 
-        await this.wait(this.TIME_SHOWDOWN);
+
+        // Update all the player chip counts at once
+        for (let seat of this.table.seats) {
+
+            if (seat.player) {
+
+                this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+
+            }
+
+        }
 
         // clear the pots
         this.table.betTracker.reset();

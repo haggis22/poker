@@ -14,7 +14,8 @@ import { Player } from '../../players/player';
 import SeatComponent from './components/seat/SeatComponent';
 import DealerBoxComponent from './components/dealer/DealerBoxComponent.vue';
 import BetComponent from './components/bet/BetComponent.vue';
-
+import PotComponent from './components/pot/PotComponent.vue';
+import WonPotComponent from './components/pot/WonPotComponent.vue';
 
 var app = new Vue({
 
@@ -26,7 +27,9 @@ var app = new Vue({
     components: {
         'seat-component': SeatComponent,
         'dealer-box-component': DealerBoxComponent,
-        'bet-component': BetComponent
+        'bet-component': BetComponent,
+        'pot-component': PotComponent,
+        'won-pot-component': WonPotComponent
     }
 
 });

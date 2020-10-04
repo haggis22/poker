@@ -1,21 +1,15 @@
 ﻿import { TableAction } from "../table-action";
-import { HandEvaluation } from "../../../games/hand-evaluation";
+import { WonPot } from "../../../casino/tables/betting/won-pot";
 
 export class WinPotAction extends TableAction {
 
-    public seatIndex: number;
-    public potIndex: number;
-    public handEvaluation: HandEvaluation;
-    public amount: number;
+    public pot: WonPot;
 
-    constructor(tableID: number, seatIndex: number, potIndex: number, handEvaluation: HandEvaluation, amount: number) {
+    constructor(tableID: number, pot: WonPot) {
 
         super(tableID);
 
-        this.seatIndex = seatIndex;
-        this.potIndex = potIndex;
-        this.handEvaluation = handEvaluation;
-        this.amount = amount;
+        this.pot = pot;
 
     }
 

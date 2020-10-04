@@ -1,0 +1,38 @@
+﻿.pot {
+    color: white;
+    position: absolute;
+
+    .name, .chips {
+        text-align: center;
+        height: 1.5em;
+        line-height: 1.5em;
+        text-transform: uppercase
+    }
+    /* hide them at first and fade them in quickly */
+    opacity: 0;
+    z-index: 2;
+    transition: opacity 0.25s, top 1s, left 1s;
+
+    &.gathered {
+        opacity: 1;
+    }
+
+    &:not(.pushed) {
+
+        &.pot-0 {
+            top: 150px;
+            left: 50px;
+        }
+
+        &.pot-1 {
+            top: 150px;
+            left: 250px;
+        }
+
+        &.pot-2 {
+            top: 150px;
+            left: 40px;
+        }
+
+    }
+}

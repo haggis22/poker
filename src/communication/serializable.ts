@@ -2,6 +2,8 @@
 
 export { DeclareHandAction } from "../actions/table/game/declare-hand-action";
 export { WinPotAction } from "../actions/table/game/win-pot-action";
+export { WonPot } from "../casino/tables/betting/won-pot";
+
 
 export { FlipCardsAction } from "../actions/table/game/flip-cards-action";
 export { PokerHandEvaluation } from "../games/poker/poker-hand-evaluation";
@@ -82,8 +84,4 @@ export { ActionMessage } from "../messages/action-message";
 
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 export { PlayerActiveAction } from "../actions/table/players/player-active-action";
-
-
-
-
 

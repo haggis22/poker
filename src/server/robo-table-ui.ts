@@ -19,6 +19,7 @@ import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 import { IChipFormatter } from "../client/chips/chip-formatter";
+import { WonPot } from "../casino/tables/betting/won-pot";
 
 
 const MILLISECONDS_TO_THINK = 1500;
@@ -618,20 +619,22 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private winPot(action: WinPotAction): void {
 
-        let seat = this.findSeat(action.seatIndex);
+        let pot: WonPot = action.pot;
 
-        let potDescription = action.potIndex > 0 ? `side pot #${action.potIndex}` : `the main pot`;
+        let seat = this.findSeat(pot.seatIndex);
 
-        let handDescription = action.handEvaluation ? ` with ${this.game.handDescriber.describe(action.handEvaluation)}` : '';
-        
+        let potDescription = pot.potIndex > 0 ? `side pot #${pot.potIndex}` : `the main pot`;
+
+        let handDescription = pot.handEvaluation ? ` with ${this.game.handDescriber.describe(pot.handEvaluation)}` : '';
+
         if (seat.player) {
-        
-            this.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
-        
+
+            this.log(`${seat.getName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`);
+
         }
         else {
-            this.log(`${seat.getSeatName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
-        
+            this.log(`${seat.getSeatName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`);
+
         }
         
     }  // winPot

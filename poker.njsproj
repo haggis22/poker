@@ -64,8 +64,12 @@
     <Content Include="src\client\ui\components\card\CardComponent.vue" />
     <Content Include="src\client\ui\components\dealer\dealer-box.scss" />
     <Content Include="src\client\ui\components\dealer\DealerBoxComponent.vue" />
+    <Content Include="src\client\ui\components\pot\pot.scss" />
+    <Content Include="src\client\ui\components\pot\PotComponent.vue" />
     <Content Include="src\client\ui\components\seat\SeatComponent.vue" />
     <Content Include="src\client\ui\components\seat\seat.scss" />
+    <Content Include="src\client\ui\components\won-pot\won-pot.scss" />
+    <Content Include="src\client\ui\components\won-pot\WonPotComponent.vue" />
     <Content Include="src\client\ui\style.scss" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
@@ -90,6 +94,8 @@
     <Folder Include="src\client\ui\components\card\" />
     <Folder Include="src\client\ui\components\dealer\" />
     <Folder Include="src\client\ui\components\bet\" />
+    <Folder Include="src\client\ui\components\won-pot\" />
+    <Folder Include="src\client\ui\components\pot\" />
     <Folder Include="src\client\ui\components\seat\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
@@ -131,6 +137,7 @@
     <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
     <TypeScriptCompile Include="src\server\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>

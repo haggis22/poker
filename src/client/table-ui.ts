@@ -19,6 +19,7 @@ import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandS
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
+import { WonPot } from "../casino/tables/betting/won-pot";
 
 
 const logger: Logger = new Logger();
@@ -36,6 +37,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
     public seatAction: Map<number, string>;
+    public wonPots: WonPot[];
 
     public isGatheringBets: boolean;
 
@@ -53,6 +55,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.seatAction = new Map<number, string>();
+        this.wonPots = [];
 
         this.isGatheringBets = false;
 
@@ -437,6 +440,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private updateBets(action: UpdateBetsAction): void {
 
+        // If we have pots, then we can't have any WonPots - clear 'em
+        this.wonPots.length = 0;
+
         for (let pot of this.table.betTracker.pots) {
         
             let potDesc = `${pot.getName()}: ${this.chipFormatter.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
@@ -590,19 +596,23 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private winPot(action: WinPotAction): void {
 
-        let seat = this.findSeat(action.seatIndex);
+        let pot: WonPot = action.pot;
 
-        let potDescription = action.potIndex > 0 ? `side pot #${action.potIndex}` : `the main pot`;
+        this.wonPots.push(pot);
 
-        let handDescription = action.handEvaluation ? ` with ${this.game.handDescriber.describe(action.handEvaluation)}` : '';
+        let seat = this.findSeat(pot.seatIndex);
+
+        let potDescription = pot.potIndex > 0 ? `side pot #${pot.potIndex}` : `the main pot`;
+
+        let handDescription = pot.handEvaluation ? ` with ${this.game.handDescriber.describe(pot.handEvaluation)}` : '';
         
         if (seat.player) {
         
-            this.log(`${seat.getName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
+            this.log(`${seat.getName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`);
         
         }
         else {
-            this.log(`${seat.getSeatName()} wins ${this.chipFormatter.format(action.amount)} from ${potDescription}${handDescription}`);
+            this.log(`${seat.getSeatName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`);
         
         }
         

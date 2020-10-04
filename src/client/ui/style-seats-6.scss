@@ -50,12 +50,14 @@
             }
         }
 
-        .chips-stage {
+        .chips-stage.gathering {
 
-            &.gathering {
-                top: 200px;
-                left: 300px;
-            }
+            top: 200px;
+            left: 300px;
+        }
+
+        .chips-stage,
+        .pot.pushed {
 
             &.seat-0 {
                 top: 350px;

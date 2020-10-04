@@ -43,29 +43,6 @@ body {
             border: 0.6em solid rgba(255, 255, 255, 0.1);
         }
 
-        .pots {
-            position: absolute;
-            top: 80px;
-            left: 50px;
-            background: transparent;
-            width: 600px;
-            height: 120px;
-            border: none;
-            color: white;
-            text-transform: uppercase;
-
-            .pot {
-                margin: 10px 20px;
-                float: left;
-
-                .name, .chips {
-                    text-align: center;
-                    height: 1.5em;
-                    line-height: 1.5em;
-                }
-            }
-        }
-
         .board {
             position: absolute;
             top: 50%;
