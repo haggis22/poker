@@ -1,7 +1,6 @@
 ﻿<template>
-    <div class="chips-stage" :class="betClasses">
-        <div class="action">{{ bet.getTypeName() }}</div>
-        <div v-if="bet.totalBet > 0" class="amount">{{ ui.chipFormatter.format(bet.totalBet) }}</div>
+    <div v-if="bet.totalBet > 0" class="chips-stage" :class="betClasses">
+        {{ ui.chipFormatter.format(bet.totalBet) }}
     </div>
 </template>
 
