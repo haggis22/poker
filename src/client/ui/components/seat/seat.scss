@@ -19,6 +19,18 @@
         transition: background-color 0.25s, color 0.25s;
     }
 
+    &.sitting-out {
+
+        background: lightgrey;
+        color: grey;
+
+        .name
+        {
+            font-style: italic;
+        }
+
+    }
+
     .name 
     {
         font-size: 1.2em;
