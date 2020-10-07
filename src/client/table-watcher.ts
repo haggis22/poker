@@ -343,12 +343,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private updateStack(action: StackUpdateAction): void {
 
-        let player = this.findPlayer(action.playerID);
+        let player: Player = this.findPlayer(action.playerID);
 
         if (player) {
 
             player.chips = action.chips;
-            //            logger.info(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
+            // this.log(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
 
         }
 
@@ -385,9 +385,10 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private findPlayer(userID: number): Player {
 
-        return null;
+        let seat = this.table.seats.find(s => s.player && s.player.userID == userID);
+        return seat ? seat.player : null;
 
-    }
+    }   // findPlayer
 
 
     private moveButton(action: MoveButtonAction): void {
