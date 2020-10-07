@@ -1,6 +1,8 @@
 ﻿<template>
-    <div v-if="seat != null" class="seat" :class="[ 'seat-'+seat.index, { 'action-on': betTracker.seatIndex == seat.index }]">
-        <div class="name"><span v-if="seat.player != null">{{ seat.player.name }}</span></div>
+    <div v-if="seat != null" class="seat" :class="seatClasses">
+        <div class="name">
+            <span v-if="seat.player != null">{{ seat.player.name }}</span>
+        </div>
         <div class="avatar">
             <div class="action-container">
                 <div class="action" v-if="ui.seatAction.has(seat.index)">{{ ui.seatAction.get(seat.index) }}</div>
@@ -49,6 +51,27 @@ const SeatComponent = Vue.extend ({
     },
     components: {
         'card-component': CardComponent
+    },
+    computed: {
+
+        seatClasses: function () {
+
+            let classes = [`seat-${this.seat.index}`];
+
+            if (this.betTracker && this.betTracker.seatIndex == this.seat.index) {
+
+                classes.push('action-on');
+
+            }
+
+            if (this.seat.player && this.seat.player.isSittingOut) {
+                classes.push('sitting-out');
+            }
+
+            return classes;
+
+        }
+
     }
 
 });
