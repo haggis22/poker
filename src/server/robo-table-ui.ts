@@ -320,7 +320,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (action.userID === this.user.id) {
 
-                if (player.chips > 0) {
+                if (action.amount > 0) {
 
                     // I have chips now, so I would like to play
                     this.broadcastCommand(new SitInCommand(this.table.id, this.user.id));
@@ -360,20 +360,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         if (this.user.id === 1) {
             console.log(`UI: ${message}`);
         }
-
-/*
-        if (message == 'You cannot bet less than the current bet') {
-
-            for (let x: number = 0; x < 20; x++) {
-
-                console.log(`${this.user.name} UI: ${message}`);
-
-            }
-
-        }
-
-        console.log(`${this.user.name} UI: ${message}`);
-*/
 
     }
 
