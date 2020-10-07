@@ -2,9 +2,9 @@
 import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { RequestSeatCommand } from "../../commands/table/request-seat-command";
+import { SitInCommand } from "../../commands/table/sit-in-command";
 import { Player } from "../../players/player";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
-import { OpenState } from "./states/open-state";
 import { StartHandState } from "./states/start-hand-state";
 import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
@@ -202,6 +202,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
+        if (command instanceof SitInCommand) {
+
+            return await this.sitIn(command);
+
+        }
+
         if (command instanceof AddChipsCommand) {
 
             return await this.addChips(command);
@@ -339,6 +345,20 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         return this.queueMessage(new Message(`Could not find seat ${seatIndex}`, command.user.id));
 
     }
+
+
+    private async sitIn(command: SitInCommand): Promise<void> {
+
+        let player = this.findPlayer(command.userID);
+
+        if (player) {
+
+            player.isSittingOut = false;
+            this.queueAction(new PlayerActiveAction(this.table.id, command.userID, true));
+
+        }
+
+    }   // sitIn
 
 
     private findPlayer(userID: number): Player {
@@ -553,7 +573,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                     seat.player.isSittingOut = true;
 
                     // Tell the world this player is sitting out
-                    this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));
+                    this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, false));
 
                 }
 
@@ -685,7 +705,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                         seat.player.isSittingOut = true;
 
                         // Tell the world this player is sitting out
-                        this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));
+                        this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, false));
 
                     }
 

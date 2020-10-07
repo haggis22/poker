@@ -1,4 +1,5 @@
 ﻿import { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
+import { PlayerActiveAction } from "../actions/table/players/player-active-action";
 import { MoveButtonAction } from "../actions/table/game/move-button-action";
 import { Player } from "../players/player";
 import { Table } from "../casino/tables/table";
@@ -108,6 +109,8 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
             if (actionMessage.action.tableID === this.tableID) {
 
+                // Put them on the queue first in case handling it will *also* push messages onto the queue and we
+                // want to maintain the proper FIFO order
                 this.messageQueue.push(message);
                 this.handleAction(actionMessage.action);
 
@@ -192,6 +195,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
             // this.log(` yes - it is a PlayerSeatedAction`);
             return this.seatPlayer(action);
+
+        }
+
+        if (action instanceof PlayerActiveAction) {
+
+            return this.setPlayerActive(action);
 
         }
 
@@ -318,6 +327,18 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         }
 
     }
+
+    private setPlayerActive(action: PlayerActiveAction): void {
+
+        let player: Player = this.findPlayer(action.userID);
+
+        if (player) {
+
+            player.isSittingOut = !action.isActive;
+
+        }
+
+    }  // setPlayerActive
 
 
     private updateStack(action: StackUpdateAction): void {

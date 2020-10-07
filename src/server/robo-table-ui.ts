@@ -13,6 +13,7 @@ import { Logger } from "../logging/logger";
 import { TableConnectedAction } from "../actions/table/state/table-connected-action";
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
+import { SitInCommand } from "../commands/table/sit-in-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
 import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker } from "../communication/serializable";
 import { Game } from "../games/game";
@@ -317,7 +318,23 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             this.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
 
+            if (action.userID === this.user.id) {
+
+                if (player.chips > 0) {
+
+                    // I have chips now, so I would like to play
+                    this.broadcastCommand(new SitInCommand(this.table.id, this.user.id));
+
+                }
+
+
+            }
+
+
         }
+
+
+
 
     }   // addChips
 

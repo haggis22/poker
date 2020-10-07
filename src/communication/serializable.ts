@@ -43,6 +43,7 @@ export { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 export { SetGameAction } from "../actions/table/game/set-game-action";
 
 export { RequestSeatCommand } from "../commands/table/request-seat-command";
+export { SitInCommand } from "../commands/table/sit-in-command";
 export { TableConnectedAction } from "../actions/table/state/table-connected-action";
 
 export { PokerHandEvaluator } from "../games/poker/poker-hand-evaluator";

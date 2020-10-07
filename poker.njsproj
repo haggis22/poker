@@ -136,6 +136,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
+    <TypeScriptCompile Include="src\commands\table\sit-in-command.ts" />
     <TypeScriptCompile Include="src\server\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
