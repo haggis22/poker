@@ -61,6 +61,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_DEAL_CARD: number = 300;
 
+    private readonly TIME_ANTE = 1500;
     private readonly TIME_BET = 100;
     private readonly TIME_BETTING_COMPLETE: number = 1250;
 
@@ -508,13 +509,14 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private isReadyForNextHand(): boolean {
 
-        return this.table.seats.filter(seat => seat.player && seat.player.isActive && seat.player.chips > 0).length > 1;
+        // isSittingOut could either be undefined or false. If undefined then we will give them a chance to pay the ante/blind (if required)
+        return this.table.seats.filter(seat => seat.player && !seat.player.isSittingOut && seat.player.chips > 0).length > 1;
 
     }
 
     private isReadyForThisHand(): boolean {
 
-        return this.table.seats.filter(seat => seat.player && seat.player.isActive).length > 1;
+        return this.table.seats.filter(seat => seat.player && !seat.player.isSittingOut).length > 1;
 
     }
 
@@ -547,7 +549,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 if (seat.player.chips == 0) {
 
-                    seat.player.isActive = false;
+                    // if they have no chips then they are automatically sitting out
+                    seat.player.isSittingOut = true;
 
                     // Tell the world this player is sitting out
                     this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));
@@ -640,7 +643,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             // Start off without a hand for the seat...
             seat.hand = null;
 
-            if (seat.player && seat.player.isActive) {
+            if (seat.player && !seat.player.isSittingOut) {
+
+                // TODO: If isSittingOut is undefined then give them some time to pay the ante and make an actual decision
 
                 // assume they're in, at least until they fail to pay the ante.
                 // The table won't take the ante bet if they're not marked as in already.
@@ -665,6 +670,10 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                         this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
                         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
+                        await this.wait(this.TIME_ANTE);
+
+                        seat.player.isSittingOut = false;
+
                     }  // valid ante
                     else {
 
@@ -673,7 +682,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                         // they didn't pay the ante, so take away their (blank) cards
                         seat.hand = null;
 
-                        seat.player.isActive = false;
+                        seat.player.isSittingOut = true;
 
                         // Tell the world this player is sitting out
                         this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, seat.index, false));

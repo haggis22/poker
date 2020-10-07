@@ -6,7 +6,7 @@
     public chips: number;
     public chipsToAdd: number;
 
-    public isActive: boolean;
+    public isSittingOut: boolean;
 
 
     constructor(userID: number, name: string) {
@@ -16,7 +16,7 @@
 
         this.chips = this.chipsToAdd = 0;
 
-        this.isActive = true;
+        this.isSittingOut = undefined;
 
     }
 

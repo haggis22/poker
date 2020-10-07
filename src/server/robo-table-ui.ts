@@ -381,7 +381,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player) {
 
-                this.log(`${seat.getSeatName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isActive ? '' : ' [sitting out]'}`);
+                this.log(`${seat.getSeatName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isSittingOut ? ' [sitting out]' : ''}`);
 
             }
 
