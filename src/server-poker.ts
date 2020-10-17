@@ -24,7 +24,7 @@ function createTable(): Table {
     let tableID = 1;
 
     // # seats, # seconds to act
-    let rules = new TableRules(6, 15);
+    let rules = new TableRules(6, 5, 15);
 
     // blinds, ante, minRaise
     let stakes = new Stakes(new Array<number>(), 25, 100);

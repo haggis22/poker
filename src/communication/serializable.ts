@@ -8,16 +8,18 @@ export { WonPot } from "../casino/tables/betting/won-pot";
 export { FlipCardsAction } from "../actions/table/game/flip-cards-action";
 export { PokerHandEvaluation } from "../games/poker/poker-hand-evaluation";
 
-export { BetAction } from "../actions/table/betting/bet-action";
-export { BetTurnAction } from "../actions/table/game/bet-turn-action";
-
 export { BetState } from "../casino/tables/states/betting/bet-state";
+export { BetAction } from "../actions/table/betting/bet-action";
+export { BetTurnAction } from "../actions/table/betting/bet-turn-action";
+export { BetReturnedAction } from "../actions/table/betting/bet-returned-action";
+
 export { AnteState } from "../casino/tables/states/betting/ante-state";
-export { BetReturnedAction } from "../actions/table/game/bet-returned-action";
+export { AnteAction } from "../actions/table/antes/ante-action";
+export { AnteTurnAction } from "../actions/table/antes/ante-turn-action";
+
 export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
 export { GatherBetsAction } from "../actions/table/betting/gather-bets-action";
 
-export { AnteAction } from "../actions/table/betting/ante-action";
 export { SetHandAction } from "../actions/table/game/set-hand-action";
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 

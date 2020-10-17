@@ -12,6 +12,7 @@ import { MoveButtonAction } from "../../actions/table/game/move-button-action";
 import { DealState } from "./states/deal-state";
 import { Hand } from "../../hands/hand";
 import { BetState } from "./states/betting/bet-state";
+import { AnteState } from "./states/betting/ante-state";
 import { ShowdownState } from "./states/showdown-state";
 import { HandCompleteState } from "./states/hand-complete-state";
 import { HandWinner } from "../../games/hand-winner";
@@ -35,16 +36,16 @@ import { BetAction } from "../../actions/table/betting/bet-action";
 import { SetHandAction } from "../../actions/table/game/set-hand-action";
 import { FoldAction } from "../../actions/table/betting/fold-action";
 import { TableState } from "./states/table-state";
-import { AnteAction } from "../../actions/table/betting/ante-action";
+import { AnteAction } from "../../actions/table/antes/ante-action";
 import { DealCardAction } from "../../actions/table/game/deal-card-action";
-import { BetTurnAction } from "../../actions/table/game/bet-turn-action";
-import { BetReturnedAction } from "../../actions/table/game/bet-returned-action";
+import { BetTurnAction } from "../../actions/table/betting/bet-turn-action";
+import { BetReturnedAction } from "../../actions/table/betting/bet-returned-action";
 import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
 import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
@@ -630,6 +631,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
+        if (state instanceof AnteState) {
+
+            return await this.collectAntes(state);
+
+        }
+
         if (state instanceof BetState) {
 
             return await this.makeYourBets(state);
@@ -654,7 +661,6 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.deck.shuffle();
 
         this.table.betTracker.reset();
-        this.table.betTracker.setAnte(this.table.stakes.ante);
 
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
@@ -853,6 +859,131 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         return new Promise(res => setTimeout(res, milliseconds));
 
     }
+
+
+    private async collectAntes(anteState: AnteState): Promise<void> {
+
+        this.log('In collectAntes');
+
+        this.table.betTracker.clearBets();
+        this.table.betTracker.setAnte(this.table.stakes.ante);
+
+        if (this.table.stakes.ante === 0) {
+
+            this.log('No ante - moving on');
+            return await this.goToNextState();
+
+        }
+
+        return await this.validateAnteerOrMoveOn(this.table.buttonIndex + 1);
+
+    }   // collectAntes
+
+
+    private async validateAnteerOrMoveOn(bettorSeatIndex: number): Promise<void> {
+
+        let done: boolean = false;
+
+        while (!done) {
+
+            if (bettorSeatIndex >= this.table.seats.length) {
+                bettorSeatIndex = 0;
+            }
+
+            if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
+
+                // We're back to the beginning
+                // TODO: See how many people ante'd - if not at least 2 then don't continue
+
+                await this.completeBetting();
+
+                return await this.goToNextState();
+
+            }
+
+            if (this.table.betTracker.seatIndexInitiatingAction === null) {
+
+                this.table.betTracker.seatIndexInitiatingAction = bettorSeatIndex;
+
+            }
+
+            if (this.table.seats[bettorSeatIndex].player && !this.table.seats[bettorSeatIndex].player.isSittingOut) {
+
+                done = true;
+
+            }
+            else {
+
+                // Otherwise, keep moving the marker
+                bettorSeatIndex = bettorSeatIndex + 1;
+
+            }
+
+        }  // while !done
+
+        await this.setAnteTurn(bettorSeatIndex);
+
+    }  // validateAnteerOrMoveOn
+
+
+    private async setAnteTurn(seatIndexToAct: number): Promise<void> {
+
+        this.table.betTracker.seatIndex = seatIndexToAct;
+        this.table.betTracker.timeToAct = this.table.rules.timeToAnte;
+
+        this.numTimers++;
+        this.logTimers();
+
+        // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending an Ante command
+        this.betTimer = setTimeout(async () => {
+
+            this.numTimersElapsed++;
+            this.logTimers();
+
+            return this.rejectAnte(this.table.seats[this.table.betTracker.seatIndex]);
+
+        }, this.table.rules.timeToAnte * 1000);
+
+        this.queueAction(new AnteTurnAction(this.table.id, this.snapshot(this.table.betTracker)));
+
+    }  // setAnteTurn
+
+
+    private async rejectAnte(anteSeat: Seat): Promise<void> {
+
+        clearTimeout(this.betTimer);
+        this.numTimersKilled++;
+        this.logTimers();
+
+        this.log(`${anteSeat.getName()} did not ante - marking as sitting out`);
+
+        // they didn't pay the ante, so take away their (blank) cards
+        anteSeat.hand = null;
+        anteSeat.player.isSittingOut = true;
+
+        // Tell the world this player is sitting out
+        this.queueAction(new SetHandAction(this.table.id, anteSeat.index, false));
+        this.queueAction(new PlayerActiveAction(this.table.id, anteSeat.player.userID, false));
+
+        return await this.advanceAnteTurn();
+
+    }   // rejectAnte
+
+
+    private async advanceAnteTurn(): Promise<void> {
+
+        // this.log('In advanceAnteTurn');
+        if (!(this.table.state instanceof AnteState)) {
+
+            let error = new Error('Should not be here');
+            this.log(error.stack);
+            throw error;
+
+        }
+
+        return await this.validateAnteerOrMoveOn(this.table.betTracker.seatIndex + 1);
+
+    }   // advanceAnteTurn
 
 
 
