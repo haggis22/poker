@@ -15,7 +15,7 @@ import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { SitInCommand } from "../commands/table/sit-in-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker, AnteTurnAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -153,6 +153,11 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof BetTurnAction) {
 
             return this.betTurn(action);
+        }
+
+        if (action instanceof AnteTurnAction) {
+
+            return this.anteTurn(action);
         }
 
         if (action instanceof BetAction) {
@@ -549,6 +554,38 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }  // betTurn
+
+
+    private anteTurn(action: AnteTurnAction): void {
+
+        let tracker: BetTracker = action.betTracker;
+
+        let seat = this.findSeat(tracker.seatIndex);
+
+        this.log(`It is ${seat.getName()}'s turn to ante`);
+
+        if (seat.hand && seat.player) {
+
+            if (seat.player.userID === this.user.id) {
+
+                let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
+                let betCommand: AnteCommand = new AnteCommand(this.table.id, seat.player.userID, betAmount);
+
+                this.broadcastCommand(betCommand);
+
+                return;
+
+            }  // if it's my turn
+
+        }   // seat has a player
+        else {
+
+            this.log(`${seat.getName()} is MIA`);
+            return;
+
+        }
+
+    }  // anteTurn
 
 
     private bet(action: BetAction): void {

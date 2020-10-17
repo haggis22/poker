@@ -96,6 +96,7 @@
     <Folder Include="src\client\ui\components\bet\" />
     <Folder Include="src\client\ui\components\pot\" />
     <Folder Include="src\client\ui\components\seat\" />
+    <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
     <Folder Include="src\messages\" />
@@ -139,6 +140,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
+    <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
     <TypeScriptCompile Include="src\commands\table\sit-in-command.ts" />
     <TypeScriptCompile Include="src\server\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
@@ -278,7 +280,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\fold-command.ts" />
-    <TypeScriptCompile Include="src\commands\table\bet-command.ts">
+    <TypeScriptCompile Include="src\commands\table\betting\bet-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\start-game-command.ts">

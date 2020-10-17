@@ -1,6 +1,6 @@
-﻿import { TableCommand } from "./table-command";
+﻿import { TableCommand } from "../table-command";
 
-export class BetCommand extends TableCommand {
+export class AnteCommand extends TableCommand {
 
     public userID: number;
     public amount: number;
@@ -17,7 +17,7 @@ export class BetCommand extends TableCommand {
 
     public toString(): string {
 
-        return `[ BetCommand, userID: ${this.userID}, amount: ${this.amount} ]`;
+        return `[ AnteCommand, userID: ${this.userID}, amount: ${this.amount} ]`;
 
     }
 

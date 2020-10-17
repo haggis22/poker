@@ -20,7 +20,8 @@ import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-ac
 import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
 import { WinPotAction } from "../../actions/table/game/win-pot-action";
 import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
-import { BetCommand } from "../../commands/table/bet-command";
+import { AnteCommand } from "../../commands/table/betting/ante-command";
+import { BetCommand } from "../../commands/table/betting/bet-command";
 import { Seat } from "./seat";
 import { Bet } from "./betting/bet";
 import { FoldCommand } from "../../commands/table/fold-command";
@@ -221,6 +222,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
+        if (command instanceof AnteCommand) {
+
+            return await this.ante(command);
+
+        }
+
         if (command instanceof FoldCommand) {
 
             return await this.fold(command);
@@ -299,7 +306,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private log(message: string): void {
 
-        // console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
+        console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
 
     }
 
@@ -417,6 +424,49 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         }
 
     }  // checkStartHand
+
+
+    private async ante(command: AnteCommand): Promise<void> {
+
+        this.log(`Received AnteCommand from ${command.userID}, tableState: ${this.table.state.constructor.name}`);
+
+        if (this.table.state instanceof AnteState) {
+
+            let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
+
+            let ante: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.stakes.ante);
+
+            if (ante.isValid) {
+
+                clearTimeout(this.betTimer);
+                this.numTimersKilled++;
+                this.logTimers();
+
+                this.queueAction(new BetAction(this.table.id, bettorSeat.index, ante));
+                this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
+                this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+
+                await this.wait(this.TIME_ANTE);
+
+                // this was maybe undefined, so make sure it is false
+                bettorSeat.player.isSittingOut = false;
+
+                return await this.advanceAnteTurn();
+
+            }
+            else {
+
+                // TODO: Send action indicating invalid bet so that the UI can reset itself
+                return this.queueMessage(new Message(ante.message, command.userID));
+
+            }
+
+        }
+
+        // TODO: Send action indicating invalid bet so that the UI can reset itself
+        return this.queueMessage(new Message('It is not time to ante', command.userID));
+
+    }  // ante
 
 
 
@@ -537,7 +587,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private isReadyForThisHand(): boolean {
 
-        return this.table.seats.filter(seat => seat.player && !seat.player.isSittingOut).length > 1;
+        let numPlayers: number = this.table.seats.filter(seat => seat.player && !seat.player.isSittingOut).length;
+        this.log(`In isReadyForThisHand, numPlayers = ${numPlayers}`);
+        return numPlayers > 1;
 
     }
 
@@ -661,85 +713,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.deck.shuffle();
 
         this.table.betTracker.reset();
-
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
-
-        for (let seat of this.table.seats) {
-
-            // Start off without a hand for the seat...
-            seat.hand = null;
-
-            if (seat.player && !seat.player.isSittingOut) {
-
-                // TODO: If isSittingOut is undefined then give them some time to pay the ante and make an actual decision
-
-                // assume they're in, at least until they fail to pay the ante.
-                // The table won't take the ante bet if they're not marked as in already.
-                // They need to have a blank hand for the table to accept the ante as a bet
-                seat.hand = new Hand();
-
-                if (this.table.stakes.ante > 0) {
-
-                    // this.log(`There is an ante, and ${seat.getName()} is playing`);
-
-                    // set the betting to the ante's seat or it will not be accepted
-                    this.table.betTracker.seatIndex = seat.index;
-
-                    // the minimum amount will be the ante - this doesn't respect the minimums for a regular betting round.
-                    let ante: Bet = this.table.betTracker.addBet(seat, this.table.stakes.ante, this.table.stakes.ante);
-
-                    // this.log(`ante result: ${ante}`);
-
-                    if (ante.isValid) {
-
-                        this.queueAction(new AnteAction(this.table.id, seat.index, ante));
-                        this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
-                        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
-
-                        await this.wait(this.TIME_ANTE);
-
-                        seat.player.isSittingOut = false;
-
-                    }  // valid ante
-                    else {
-
-                        // this.log(`${seat.getName()} had an invalid ante: ${ante.message} and is being marked as inactive`);
-
-                        // they didn't pay the ante, so take away their (blank) cards
-                        seat.hand = null;
-
-                        seat.player.isSittingOut = true;
-
-                        // Tell the world this player is sitting out
-                        this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, false));
-
-                    }
-
-                }  // if there is an ante
-
-            }
-
-            else {
-
-                // this.log(`${seat.getName()} is sitting out`);
-                seat.hand = null;
-
-            }
-
-            // This will tell watchers whether or not the given seat is in the hand
-            this.queueAction(new SetHandAction(this.table.id, seat.index, seat.hand != null));
-
-        }  // for each seat
-
-
-        await this.completeBetting();
-
-        if (!this.isReadyForThisHand()) {
-
-            // We don't have enough players, so go back to the open state
-            return await this.changeTableState(this.game.stateMachine.goToOpenState());
-
-        }
 
         await this.setButton();
 
@@ -750,14 +724,41 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private async setButton(): Promise<void> {
 
-        this.table.buttonIndex = this.findNextSeatWithAHand(this.table.buttonIndex == null ? 0 : this.table.buttonIndex + 1);
+        if (!this.isReadyForThisHand()) {
+
+            // We don't have enough players, so go back to the open state
+            return await this.changeTableState(this.game.stateMachine.goToOpenState());
+
+        }
+
+        let foundButton = false;
+        let buttonIndex: number = this.table.buttonIndex == null ? 0 : (this.table.buttonIndex + 1);
+
+        while (!foundButton) {
+
+            if (buttonIndex >= this.table.seats.length) {
+
+                buttonIndex = 0;
+
+            }
+
+            if (this.table.seats[buttonIndex].player && !this.table.seats[buttonIndex].player.isSittingOut) {
+                foundButton = true;
+            }
+            else {
+                buttonIndex++;
+            }
+
+        }
+
+        this.table.buttonIndex = buttonIndex;
 
         this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
 
         await this.wait(this.TIME_SET_BUTTON);
 
+    }   // setButton
 
-    }
 
     private findNextSeatWithAHand(seatIndex: number): number {
 
@@ -893,9 +894,19 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
                 // We're back to the beginning
+
                 // TODO: See how many people ante'd - if not at least 2 then don't continue
+                // TODO: Return antes that have already been given if we're not continuing
 
                 await this.completeBetting();
+
+                if (!this.isReadyForThisHand()) {
+
+                    // We don't have enough players, so go back to the open state
+                    return await this.changeTableState(this.game.stateMachine.goToOpenState());
+
+                }
+
 
                 return await this.goToNextState();
 
@@ -927,6 +938,16 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
 
     private async setAnteTurn(seatIndexToAct: number): Promise<void> {
+
+        // assume they're in, at least until they fail to pay the ante.
+        // The table won't take the ante bet if they're not marked as in already.
+        // They need to have a blank hand for the table to accept the ante as a bet
+        let anteSeat: Seat = this.table.seats[seatIndexToAct];
+
+        anteSeat.hand = new Hand();
+
+        // Tell the world that this player at least has a placeholder hand
+        this.queueAction(new SetHandAction(this.table.id, anteSeat.index, true));
 
         this.table.betTracker.seatIndex = seatIndexToAct;
         this.table.betTracker.timeToAct = this.table.rules.timeToAnte;
