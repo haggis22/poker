@@ -374,10 +374,24 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }   // sitIn
 
 
+    private findSeatByPlayer(userID: number): Seat {
+
+        return this.table.seats.find(s => s.player && s.player.userID == userID);
+
+    }  // findSeatByPlayer
+
+
     private findPlayer(userID: number): Player {
 
-        let seat = this.table.seats.find(s => s.player && s.player.userID == userID);
-        return seat ? seat.player : null;
+        for (let seat of this.table.seats) {
+
+            if (seat.player && seat.player.userID == userID) {
+                return seat.player;
+            }
+
+        }
+
+        return null;
 
     }   // findPlayer
 
@@ -393,13 +407,23 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
-        let player: Player = this.findPlayer(command.userID);
+        let seat: Seat = this.findSeatByPlayer(command.userID);
 
-        if (!player) {
-            return this.queueMessage(new Message('Player is not sitting at table', command.userID));
-        }
+        if (seat) {
 
-        if (this.table.state.isHandInProgress()) {
+            let player: Player = seat.player;
+
+            if (!this.table.state.isHandInProgress() || !seat.isInHand) {
+
+                // The player is not current involved in a hand, so we can add their chips immediately
+                player.chips += command.amount;
+
+                this.queueAction(new AddChipsAction(this.table.id, player.userID, command.amount));
+                this.queueAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
+
+                return;
+
+            }
 
             // we can't add the chips right now, but they will be added before the next hand
             player.chipsToAdd += command.amount;
@@ -409,11 +433,11 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             return;
 
         }
+        else {
 
-        player.chips += command.amount;
+            return this.queueMessage(new Message('Player is not sitting at table', command.userID));
 
-        this.queueAction(new AddChipsAction(this.table.id, player.userID, command.amount));
-        this.queueAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
+        }
 
     }
 
