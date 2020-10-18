@@ -5,7 +5,6 @@ import { CommandHandler } from "../commands/command-handler";
 import { Message } from "../messages/message";
 import { ActionMessage } from "../messages/action-message";
 import { Command } from "../commands/command";
-import { IChipFormatter } from "./chips/chip-formatter";
 import { Table } from "../casino/tables/table";
 import { TableSnapshotAction } from "../actions/table/state/table-snapshot-action";
 import { Action } from "../actions/action";
@@ -15,12 +14,13 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 import { WonPot } from "../casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../actions/table/game/hand-complete-action";
+import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 
 
 const logger: Logger = new Logger();
@@ -157,11 +157,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.moveButton(action);
         }
 
-        if (action instanceof SetHandAction) {
-
-            return this.setHand(action);
-        }
-
         if (action instanceof DealCardAction) {
 
             return this.dealCard(action);
@@ -181,6 +176,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof AnteTurnAction) {
 
             return this.anteTurn(action);
+
+        }
+
+        if (action instanceof IsInHandAction) {
+
+            return this.setIsInHand(action);
 
         }
 
@@ -370,8 +371,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private log(message: string): void {
 
-        // For now, only log from Danny's POV
-        if (this.user.id === 1) {
+        // For now, only log from Sekhar's POV
+        if (this.user.id === 5) {
             console.log(message);
         }
 
@@ -481,14 +482,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // moveButton
 
 
-    private setHand(action: SetHandAction): void {
-
-
-        let seat = this.findSeat(action.seatIndex);
-
-    }
-
-
     private dealCard(action: DealCardAction): void {
 
         let seat = this.findSeat(action.seatIndex);
@@ -526,34 +519,58 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // betTurn
 
 
+    private setIsInHand(action: IsInHandAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+
+        if (seat) {
+
+            this.log(`${seat.getName()} isInHandssssss: ${action.isInHand}`);
+
+        }
+
+    }  // setIsInHand
+
+
     private anteTurn(action: AnteTurnAction): void {
 
         let tracker: BetTracker = this.table.betTracker;
 
         let seat = this.findSeat(tracker.seatIndex);
 
-        this.log(`It is ${seat.getName()}'s turn to ante`);
+        this.log(`In anteTurn, tracker.seatIndex = ${tracker.seatIndex}`);
 
-        if (seat.hand && seat.player) {
+        if (seat) {
 
-            // TODO: Automatically ante if isSittingOut == false, prompt the player if isSittingOut == undefined
+            this.log(`It is ${seat.getName()}'s turn to ante`);
 
-            if (seat.player.userID === this.user.id) {
+            if (seat.isInHand && seat.player) {
 
-                let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
-                let betCommand: AnteCommand = new AnteCommand(this.table.id, seat.player.userID, betAmount);
+                // TODO: Automatically ante if isSittingOut == false, prompt the player if isSittingOut == undefined
 
-                this.broadcastCommand(betCommand);
+                if (seat.player.userID === this.user.id) {
 
+                    let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
+                    let betCommand: AnteCommand = new AnteCommand(this.table.id, seat.player.userID, betAmount);
+
+                    this.broadcastCommand(betCommand);
+
+                    return;
+
+                }  // if it's my turn
+
+            }   // seat has a player
+            else {
+
+                this.log(`${seat.getName()} is MIA`);
                 return;
 
-            }  // if it's my turn
+            }
 
-        }   // seat has a player
+        }
         else {
 
-            this.log(`${seat.getName()} is MIA`);
-            return;
+            this.log(`In anteTurn, could not find seat for index ${tracker.seatIndex}`);
 
         }
 

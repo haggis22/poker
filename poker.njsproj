@@ -54,7 +54,7 @@
     </Content>
     <Content Include="README.md" />
     <Content Include="src\actions\table\game\flip-cards-action.ts" />
-    <Content Include="src\client\chips\money-formatter.ts">
+    <Content Include="src\casino\tables\chips\money-formatter.ts">
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
@@ -89,6 +89,7 @@
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\actions\table\antes\" />
+    <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\client\ui\" />
     <Folder Include="src\client\ui\components\" />
     <Folder Include="src\client\ui\components\card\" />
@@ -104,7 +105,6 @@
     <Folder Include="src\actions\table\players\" />
     <Folder Include="src\actions\table\" />
     <Folder Include="src\cards\" />
-    <Folder Include="src\client\chips\" />
     <Folder Include="src\casino\tables\" />
     <Folder Include="src\casino\tables\boards\" />
     <Folder Include="src\casino\tables\betting\" />
@@ -121,6 +121,7 @@
     <Folder Include="src\logging\" />
     <Folder Include="src\communication\" />
     <Folder Include="src\client\" />
+    <Folder Include="src\ai\" />
     <Folder Include="src\server\" />
     <Folder Include="src\players\" />
     <Folder Include="src\casino\tables\states\" />
@@ -133,7 +134,8 @@
     <TypeScriptCompile Include="src\actions\table\game\hand-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
-    <TypeScriptCompile Include="src\actions\table\players\player-active-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\players\is-in-hand-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\players\sitting-out-action.ts" />
     <TypeScriptCompile Include="src\actions\table\state\table-state-action.ts" />
     <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
@@ -142,7 +144,7 @@
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
     <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
     <TypeScriptCompile Include="src\commands\table\sit-in-command.ts" />
-    <TypeScriptCompile Include="src\server\robo-table-ui.ts" />
+    <TypeScriptCompile Include="src\ai\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -189,9 +191,6 @@
     <TypeScriptCompile Include="src\actions\table\game\deal-card-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\actions\table\game\set-hand-action.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\betting\bet-returned-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\win-pot-action.ts">
       <SubType>Code</SubType>
@@ -223,13 +222,13 @@
     <TypeScriptCompile Include="src\cards\deck.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\chips\chip-formatter.ts">
+    <TypeScriptCompile Include="src\casino\tables\chips\chip-formatter.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\table-ui.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\table-watcher.ts">
+    <TypeScriptCompile Include="src\casino\tables\table-watcher.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\betting\fold.ts" />

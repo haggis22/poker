@@ -15,12 +15,12 @@ import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { SitInCommand } from "../commands/table/sit-in-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, SetHandAction, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker, AnteTurnAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker, AnteTurnAction, IsInHandAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
-import { IChipFormatter } from "../client/chips/chip-formatter";
 import { WonPot } from "../casino/tables/betting/won-pot";
+import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 
 
 const MILLISECONDS_TO_THINK = 1500;
@@ -48,6 +48,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         this.commandHandlers = new Array<CommandHandler>();
 
         this.table = null;
+
+        this.log(`Created Robo UI for user ${user.name}`);
 
     }
 
@@ -123,6 +125,12 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof IsInHandAction) {
+
+            return this.setIsInHand(action);
+
+        }
+
         if (action instanceof AnteAction) {
 
             return this.ante(action);
@@ -138,11 +146,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof MoveButtonAction) {
 
             return this.moveButton(action);
-        }
-
-        if (action instanceof SetHandAction) {
-
-            return;
         }
 
         if (action instanceof DealCardAction) {
@@ -362,7 +365,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     private log(message: string): void {
 
         // For now, only log from Danny's POV
-        if (this.user.id === 1) {
+        if (this.user.id === 2) {
             console.log(`UI: ${message}`);
         }
 
@@ -380,6 +383,19 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }  // changeTableState
+
+
+    private setIsInHand(action: IsInHandAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+
+        if (seat) {
+
+            this.log(`${seat.getName()} isInHand: ${action.isInHand}, seat.isInHand: ${seat.isInHand}`);
+
+        }
+
+    }  // setIsInHand
 
 
 
@@ -477,7 +493,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`It is ${seat.getName()}'s turn to act`);
 
-        if (seat.hand && seat.player) {
+        if (seat.isInHand && seat.player) {
 
             if (seat.player.userID === this.user.id) {
 
@@ -562,9 +578,9 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(tracker.seatIndex);
 
-        this.log(`It is ${seat.getName()}'s turn to ante`);
+        this.log(`It is ${seat.getName()}'s turn to ante, tracker.seatIndex: ${tracker.seatIndex}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
 
-        if (seat.hand && seat.player) {
+        if (seat.isInHand && seat.player) {
 
             if (seat.player.userID === this.user.id) {
 

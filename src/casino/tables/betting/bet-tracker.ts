@@ -71,7 +71,7 @@ export class BetTracker {
 
         }
 
-        if (!seat.hand) {
+        if (!seat.isInHand) {
 
             return new Fold(false, "You do not have a hand");
 
@@ -113,7 +113,7 @@ export class BetTracker {
 
         }
 
-        if (!seat.hand) {
+        if (!seat.isInHand) {
 
             return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "You are not in the hand");
 

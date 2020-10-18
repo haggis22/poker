@@ -1,4 +1,8 @@
-﻿import { Deck } from "./cards/deck";
+﻿// ****************************************************************
+// This file is used for testing, not for actually running a server
+// ****************************************************************
+
+import { Deck } from "./cards/deck";
 import { Player } from "./players/player";
 import { Table } from "./casino/tables/table";
 import { PokerGameFiveCardDraw } from "./games/poker/five-card-draw/poker-game-five-card-draw";
@@ -12,9 +16,9 @@ import { Serializer } from "./communication/serializer";
 import { Seat } from "./casino/tables/seat";
 import { GameFactory } from "./games/game-factory";
 import { BetTracker, Bet, Hand } from "./communication/serializable";
-import { TableWatcher } from "./client/table-watcher";
+import { TableWatcher } from "./casino/tables/table-watcher";
 import { TableUI } from "./client/table-ui";
-import { MoneyFormatter } from "./client/chips/money-formatter";
+import { MoneyFormatter } from "./casino/tables/chips/money-formatter";
 import { LocalGameClient } from "./communication/client-side/local-game-client";
 import { LocalServerClient } from "./communication/server-side/local-server-client";
 
@@ -94,6 +98,7 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
 function setupSeat(seatIndex: number, userID: number, name: string, chips: number): Seat {
 
     let seat: Seat = new Seat(seatIndex);
+    seat.isInHand = true;
     seat.hand = new Hand();
     seat.player = new Player(userID, name);
     seat.player.chips = chips;

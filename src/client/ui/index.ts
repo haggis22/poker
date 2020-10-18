@@ -4,8 +4,8 @@ import './style-seats-6.scss';
 import Vue from 'vue';
 
 import { TableUI } from '../table-ui';
-import { MoneyFormatter } from '../chips/money-formatter';
-import { TableWatcher } from '../table-watcher';
+import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
+import { TableWatcher } from '../../casino/tables/table-watcher';
 import { GameClient } from '../../communication/client-side/game-client';
 import { User } from '../../players/user';
 import { Player } from '../../players/player';

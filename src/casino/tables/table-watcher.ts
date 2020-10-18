@@ -1,36 +1,35 @@
-﻿import { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
-import { PlayerActiveAction } from "../actions/table/players/player-active-action";
-import { MoveButtonAction } from "../actions/table/game/move-button-action";
-import { Player } from "../players/player";
-import { Table } from "../casino/tables/table";
-import { TableSnapshotAction } from "../actions/table/state/table-snapshot-action";
-import { Hand } from "../hands/hand";
-import { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
-import { WinPotAction } from "../actions/table/game/win-pot-action";
-import { StackUpdateAction } from "../actions/table/players/stack-update-action";
-import { CommandHandler } from "../commands/command-handler";
-import { Logger } from "../logging/logger";
-import { MessageHandler } from "../messages/message-handler";
-import { Message } from "../messages/message";
-import { ActionMessage } from "../messages/action-message";
-import { TableAction } from "../actions/table/table-action";
-import { SetHandAction } from "../actions/table/game/set-hand-action";
-import { AddChipsAction } from "../actions/table/players/add-chips-action";
-import { DealCardAction } from "../actions/table/game/deal-card-action";
-import { BetTurnAction } from "../actions/table/betting/bet-turn-action";
-import { FlipCardsAction } from "../actions/table/game/flip-cards-action";
-import { AnteAction } from "../actions/table/antes/ante-action";
-import { BetAction } from "../actions/table/betting/bet-action";
-import { FoldAction } from "../actions/table/betting/fold-action";
-import { BetReturnedAction } from "../actions/table/betting/bet-returned-action";
-import { CommandBroadcaster } from "../commands/command-broadcaster";
-import { Command } from "../commands/command";
-import { TableStateAction, OpenState, Seat } from "../communication/serializable";
-import { SetGameAction } from "../actions/table/game/set-game-action";
-import { Game } from "../games/game";
-import { GameFactory } from "../games/game-factory";
+﻿import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
+import { SittingOutAction } from "../../actions/table/players/sitting-out-action";
+import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
+import { MoveButtonAction } from "../../actions/table/game/move-button-action";
+import { Player } from "../../players/player";
+import { Table } from "./table";
+import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
+import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
+import { WinPotAction } from "../../actions/table/game/win-pot-action";
+import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
+import { CommandHandler } from "../../commands/command-handler";
+import { Logger } from "../../logging/logger";
+import { MessageHandler } from "../../messages/message-handler";
+import { Message } from "../../messages/message";
+import { ActionMessage } from "../../messages/action-message";
+import { TableAction } from "../../actions/table/table-action";
+import { AddChipsAction } from "../../actions/table/players/add-chips-action";
+import { DealCardAction } from "../../actions/table/game/deal-card-action";
+import { BetTurnAction } from "../../actions/table/betting/bet-turn-action";
+import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
+import { AnteAction } from "../../actions/table/antes/ante-action";
+import { BetAction } from "../../actions/table/betting/bet-action";
+import { FoldAction } from "../../actions/table/betting/fold-action";
+import { BetReturnedAction } from "../../actions/table/betting/bet-returned-action";
+import { CommandBroadcaster } from "../../commands/command-broadcaster";
+import { Command } from "../../commands/command";
+import { TableStateAction, OpenState, Seat, AnteTurnAction } from "../../communication/serializable";
+import { SetGameAction } from "../../actions/table/game/set-game-action";
+import { Game } from "../../games/game";
+import { GameFactory } from "../../games/game-factory";
 
-const logger: Logger = new Logger();
+// const logger: Logger = new Logger();
 
 export class TableWatcher implements CommandHandler, MessageHandler, CommandBroadcaster {
 
@@ -54,7 +53,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         this.messageHandlers = new Array<MessageHandler>();
 
         this.messageQueue = new Array<Message>();
-
 
     }
 
@@ -191,9 +189,15 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-        if (action instanceof PlayerActiveAction) {
+        if (action instanceof SittingOutAction) {
 
-            return this.setPlayerActive(action);
+            return this.setSittingOut(action);
+
+        }
+
+        if (action instanceof IsInHandAction) {
+
+            return this.setIsInHand(action);
 
         }
 
@@ -235,11 +239,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-        if (action instanceof SetHandAction) {
-
-            return this.setHand(action);
-        }
-
         if (action instanceof DealCardAction) {
 
             return this.dealCard(action);
@@ -248,6 +247,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         if (action instanceof BetTurnAction) {
 
             return this.betTurn(action);
+
+        }
+
+        if (action instanceof AnteTurnAction) {
+
+            return this.anteTurn(action);
 
         }
 
@@ -321,17 +326,38 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     }
 
-    private setPlayerActive(action: PlayerActiveAction): void {
+    private setSittingOut(action: SittingOutAction): void {
 
         let player: Player = this.findPlayer(action.userID);
 
         if (player) {
 
-            player.isSittingOut = !action.isActive;
+            player.isSittingOut = action.isSittingOut;
 
         }
 
+    }  // setSittingOut
+
+
+    private setIsInHand(action: IsInHandAction): void {
+
+        this.log(`Seat ${action.seatIndex} isInHand = ${action.isInHand}`);
+        let seat: Seat = this.findSeat(action.seatIndex);
+
+        if (seat) {
+
+            seat.isInHand = action.isInHand;
+            this.log('Found seat');
+
+        }
+        else {
+            this.log('Could not find seat');
+        }
+
+
+
     }  // setPlayerActive
+
 
 
     private updateStack(action: StackUpdateAction): void {
@@ -341,7 +367,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         if (player) {
 
             player.chips = action.chips;
-            // this.log(`${player.name} has ${this.chipFormatter.format(action.chips)}`);
+            this.log(`${player.name} has ${action.chips}`);
 
         }
 
@@ -391,22 +417,11 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }  // moveButton
 
 
-    private setHand(action: SetHandAction): void {
-
-        let seat = this.findSeat(action.seatIndex);
-
-        // If the seat has a hand, create a blank hand and copy the values over from the action
-        seat.hand = action.hasHand ? new Hand() : null;
-
-    }  // setHand
-
-
-
     private dealCard(action: DealCardAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
-        seat.hand.deal(action.card);
+        seat.deal(action.card);
 
     }   // dealCard
 
@@ -416,6 +431,13 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         this.table.betTracker = action.betTracker;
 
     }  // betTurn
+
+    private anteTurn(action: AnteTurnAction): void {
+
+        this.table.betTracker = action.betTracker;
+
+    }  // anteTurn
+
 
 
     private bet(action: BetAction): void {

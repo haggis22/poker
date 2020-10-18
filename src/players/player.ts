@@ -21,6 +21,13 @@
     }
 
 
+    public getTotalChips(): number {
+
+        return this.chips + this.chipsToAdd;
+
+    }
+
+
     public toString(): string {
 
         return `[ ${this.name}, chips: ${this.chips} ]`;

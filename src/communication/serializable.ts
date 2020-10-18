@@ -1,4 +1,5 @@
-﻿export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
+﻿
+export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
 
 export { DeclareHandAction } from "../actions/table/game/declare-hand-action";
 export { WinPotAction } from "../actions/table/game/win-pot-action";
@@ -20,7 +21,6 @@ export { AnteTurnAction } from "../actions/table/antes/ante-turn-action";
 export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
 export { GatherBetsAction } from "../actions/table/betting/gather-bets-action";
 
-export { SetHandAction } from "../actions/table/game/set-hand-action";
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 
 export { DealCardAction } from "../actions/table/game/deal-card-action";
@@ -88,5 +88,8 @@ export { Message } from "../messages/message";
 export { ActionMessage } from "../messages/action-message";
 
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
-export { PlayerActiveAction } from "../actions/table/players/player-active-action";
+export { SittingOutAction } from "../actions/table/players/sitting-out-action";
+export { IsInHandAction } from "../actions/table/players/is-in-hand-action";
+
+
 

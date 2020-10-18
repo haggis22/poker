@@ -13,13 +13,12 @@ import { User } from '../players/user';
 import { Table } from '../casino/tables/table';
 import { TableRules } from '../casino/tables/table-rules';
 import { Stakes } from '../communication/serializable';
-import { TableUI } from '../client/table-ui';
-import { MoneyFormatter } from '../client/chips/money-formatter';
-import { TableWatcher } from '../client/table-watcher';
+import { MoneyFormatter } from '../casino/tables/chips/money-formatter';
+import { TableWatcher } from '../casino/tables/table-watcher';
 import { ServerClient } from '../communication/server-side/server-client';
 import { LocalGameClient } from '../communication/client-side/local-game-client';
 import { LocalServerClient } from '../communication/server-side/local-server-client';
-import { RoboTableUI } from './robo-table-ui';
+import { RoboTableUI } from '../ai/robo-table-ui';
 
 const app = express();
 
@@ -54,7 +53,6 @@ let danny = new User(1, 'Danny', 1000);
 let mark = new User(2, 'Matt', 1000);
 let paul = new User(3, 'Paul', 1000);
 // let joe = new User(4, 'Joe', 1000);
-// let sekhar = new User(5, 'Sekhar', 0);
 
 clientManager.setTableManager(tableManager);
 
@@ -117,4 +115,4 @@ function createRoboClient(tableID: number, user: User): LocalServerClient {
 
     return serverClient;
 
-}  // createLocalClient
+}  // createRoboClient

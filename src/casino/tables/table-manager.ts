@@ -34,7 +34,6 @@ import { Message } from "../../messages/message";
 import { ActionMessage } from "../../messages/action-message";
 import { AddChipsAction } from "../../actions/table/players/add-chips-action";
 import { BetAction } from "../../actions/table/betting/bet-action";
-import { SetHandAction } from "../../actions/table/game/set-hand-action";
 import { FoldAction } from "../../actions/table/betting/fold-action";
 import { TableState } from "./states/table-state";
 import { AnteAction } from "../../actions/table/antes/ante-action";
@@ -49,10 +48,11 @@ import { DeepCopier } from "../../communication/deep-copier";
 import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
-import { PlayerActiveAction } from "../../actions/table/players/player-active-action";
+import { SittingOutAction } from "../../actions/table/players/sitting-out-action";
 import { BettingCompleteAction } from "../../actions/table/betting/betting-complete-action";
 import { FacedownCard } from "../../cards/face-down-card";
 import { WonPot } from "./betting/won-pot";
+import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
 
 const logger: Logger = new Logger();
 
@@ -361,8 +361,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         if (player) {
 
-            player.isSittingOut = false;
-            this.queueAction(new PlayerActiveAction(this.table.id, command.userID, true));
+            // Only let them mark themselves as back in if they have chips (or are about to add some)
+            if (player.getTotalChips() > 0) {
+
+                player.isSittingOut = false;
+                this.queueAction(new SittingOutAction(this.table.id, command.userID, false));
+
+            }
 
         }
 
@@ -416,7 +421,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private async checkStartHand(): Promise<void> {
 
-        if (!this.table.state.isHandInProgress() && this.isReadyForNextHand()) {
+        if (!this.table.state.isHandInProgress() && this.isReadyForHand()) {
 
             this.log(`Starting new hand`);
             return await this.goToNextState();
@@ -433,6 +438,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         if (this.table.state instanceof AnteState) {
 
             let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
+
+            if (!bettorSeat.isInHand) {
+
+                // TODO: Send action indicating invalid bet so that the UI can reset itself
+                return this.queueMessage(new Message('You are not in this hand', command.userID));
+
+            }
 
             let ante: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.stakes.ante);
 
@@ -527,10 +539,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.logTimers();
 
         // Take away their cards
-        folderSeat.hand = null;
+        folderSeat.fold();
 
         // This will tell watchers that the given seat is no longer in the hand
-        this.queueAction(new SetHandAction(this.table.id, folderSeat.index, false));
         this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
 
         return await this.advanceBetTurn();
@@ -542,7 +553,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         if (this.table.state instanceof BetState) {
 
-            let folderSeat: Seat = this.table.seats.find(seat => seat.hand && seat.player && seat.player.userID == command.userID);
+            let folderSeat: Seat = this.table.seats.find(seat => seat.isInHand && seat.player && seat.player.userID == command.userID);
 
             let fold: Fold = this.table.betTracker.fold(folderSeat);
 
@@ -577,27 +588,48 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }
 
 
+    private isReadyForHand(): boolean {
 
-    private isReadyForNextHand(): boolean {
+        let numPlayers = 0;
 
-        // isSittingOut could either be undefined or false. If undefined then we will give them a chance to pay the ante/blind (if required)
-        return this.table.seats.filter(seat => seat.player && !seat.player.isSittingOut && seat.player.chips > 0).length > 1;
+        for (let seat of this.table.seats) {
 
-    }
+            if (seat.player) {
 
-    private isReadyForThisHand(): boolean {
+                // isSittingOut could either be undefined or false. If undefined then we will give them a chance to pay the ante/blind (if required)
+                if (seat.player.chips === 0) {
 
-        let numPlayers: number = this.table.seats.filter(seat => seat.player && !seat.player.isSittingOut).length;
-        this.log(`In isReadyForThisHand, numPlayers = ${numPlayers}`);
+                    seat.player.isSittingOut = true;
+
+                }
+
+                if (!seat.player.isSittingOut) {
+                    numPlayers++;
+                }
+
+            }
+
+        }
+
+        this.log(`In isReadyForHand, numPlayers = ${numPlayers}`);
         return numPlayers > 1;
 
-    }
+    }  // isReadyForHand
+
+
+    private isHandStillLive(): boolean {
+
+        return this.table.seats.filter(seat => seat.isInHand).length > 1;
+
+    }   // isHandStillLive
+
+
 
 
 
     private countPlayersInHand(): number {
 
-        return this.table.seats.filter(s => s.hand).length;
+        return this.table.seats.filter(s => s.isInHand).length;
 
     }  // countPlayersInHand
 
@@ -605,6 +637,10 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private doBetweenHandsBusiness() {
 
         for (let seat of this.table.seats) {
+
+            // If we're between hands, then none of the seats are in a hand, right?
+            seat.isInHand = false;
+            this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
 
             if (seat.player) {
 
@@ -620,13 +656,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 }   // they have chips waiting to add
 
-                if (seat.player.chips == 0) {
+                if (seat.player.chips === 0) {
 
                     // if they have no chips then they are automatically sitting out
                     seat.player.isSittingOut = true;
 
                     // Tell the world this player is sitting out
-                    this.queueAction(new PlayerActiveAction(this.table.id, seat.player.userID, false));
+                    this.queueAction(new SittingOutAction(this.table.id, seat.player.userID, true));
 
                 }
 
@@ -658,7 +694,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             this.doBetweenHandsBusiness();
 
-            if (this.isReadyForNextHand()) {
+            if (this.isReadyForHand()) {
 
                 // start the next hand
                 return await this.goToNextState();
@@ -715,6 +751,24 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.table.betTracker.reset();
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
+        for (let seat of this.table.seats) {
+
+            if (seat.player) {
+
+                // if they're not explicitly sitting out, then we will treat them as in so that we can check them for antes/blinds/cards to deal/etc
+                seat.isInHand = !seat.player.isSittingOut;
+
+            }
+            else {
+
+                seat.isInHand = false;
+
+            }
+
+            this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
+
+        }
+
         await this.setButton();
 
         return await this.goToNextState();
@@ -724,7 +778,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private async setButton(): Promise<void> {
 
-        if (!this.isReadyForThisHand()) {
+        if (!this.isHandStillLive()) {
 
             // We don't have enough players, so go back to the open state
             return await this.changeTableState(this.game.stateMachine.goToOpenState());
@@ -742,7 +796,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
-            if (this.table.seats[buttonIndex].player && !this.table.seats[buttonIndex].player.isSittingOut) {
+            if (this.table.seats[buttonIndex].isInHand) {
                 foundButton = true;
             }
             else {
@@ -768,7 +822,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             nextPosition = 0;
         }
 
-        while (!this.table.seats[nextPosition].hand) {
+        while (!this.table.seats[nextPosition].isInHand) {
 
             nextPosition++;
 
@@ -796,7 +850,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         }
 
 
-        if (this.table.seats[seatIndex].hand) {
+        if (this.table.seats[seatIndex].isInHand) {
 
             // deal this player a card
             let card = this.deck.deal();
@@ -805,7 +859,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             card.isFaceUp = dealState.isFaceUp;
 
-            this.table.seats[seatIndex].hand.deal(card);
+            this.table.seats[seatIndex].deal(card);
 
             if (card.isFaceUp) {
 
@@ -900,7 +954,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 await this.completeBetting();
 
-                if (!this.isReadyForThisHand()) {
+                if (!this.isReadyForHand()) {
 
                     // We don't have enough players, so go back to the open state
                     return await this.changeTableState(this.game.stateMachine.goToOpenState());
@@ -912,13 +966,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
-            if (this.table.betTracker.seatIndexInitiatingAction === null) {
+            if (this.table.betTracker.seatIndexInitiatingAction == null) {
 
                 this.table.betTracker.seatIndexInitiatingAction = bettorSeatIndex;
 
             }
 
-            if (this.table.seats[bettorSeatIndex].player && !this.table.seats[bettorSeatIndex].player.isSittingOut) {
+            if (this.table.seats[bettorSeatIndex].isInHand && this.table.seats[bettorSeatIndex].player) {
 
                 done = true;
 
@@ -944,11 +998,6 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         // They need to have a blank hand for the table to accept the ante as a bet
         let anteSeat: Seat = this.table.seats[seatIndexToAct];
 
-        anteSeat.hand = new Hand();
-
-        // Tell the world that this player at least has a placeholder hand
-        this.queueAction(new SetHandAction(this.table.id, anteSeat.index, true));
-
         this.table.betTracker.seatIndex = seatIndexToAct;
         this.table.betTracker.timeToAct = this.table.rules.timeToAnte;
 
@@ -961,7 +1010,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             this.numTimersElapsed++;
             this.logTimers();
 
-            return this.rejectAnte(this.table.seats[this.table.betTracker.seatIndex]);
+            return this.rejectAnte(anteSeat);
 
         }, this.table.rules.timeToAnte * 1000);
 
@@ -978,13 +1027,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         this.log(`${anteSeat.getName()} did not ante - marking as sitting out`);
 
-        // they didn't pay the ante, so take away their (blank) cards
-        anteSeat.hand = null;
+        // they didn't pay the ante, so they're OUT
+        anteSeat.isInHand = false;
         anteSeat.player.isSittingOut = true;
 
         // Tell the world this player is sitting out
-        this.queueAction(new SetHandAction(this.table.id, anteSeat.index, false));
-        this.queueAction(new PlayerActiveAction(this.table.id, anteSeat.player.userID, false));
+        this.queueAction(new IsInHandAction(this.table.id, anteSeat.index, anteSeat.isInHand));
+        this.queueAction(new SittingOutAction(this.table.id, anteSeat.player.userID, true));
 
         return await this.advanceAnteTurn();
 
@@ -1160,7 +1209,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         // First count how many players CAN act this round - if only 1 (or 0) then there's nothing to do
         // This is not the same as blowing through rounds because we're down to just one player because everyone else folded.
         // In this case, at least one person must be all-in, so we're going to keep dealing cards, but we don't need to bet.
-        if (this.table.seats.filter(s => s.hand && s.player && s.player.chips).length < 2) {
+        if (this.table.seats.filter(s => s.isInHand && s.player && s.player.chips).length < 2) {
 
             // we don't have 2 players with money, so dump out
             return null;

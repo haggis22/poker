@@ -1,11 +1,14 @@
 ﻿import { Hand } from "../../hands/hand";
 import { Player } from "../../players/player";
+import { Card } from "../../cards/card";
+import { FacedownCard } from "../../cards/face-down-card";
 
 export class Seat {
 
     public index: number;
     public player: Player;
     public hand: Hand;
+    public isInHand: boolean;
 
 
     constructor(index: number) {
@@ -14,6 +17,7 @@ export class Seat {
 
         this.player = null;
         this.hand = null;
+        this.isInHand = false;
 
     }
 
@@ -29,5 +33,22 @@ export class Seat {
 
     }
 
+    public deal(card: Card | FacedownCard): void {
+
+        if (!this.hand) {
+            this.hand = new Hand();
+        }
+
+        this.hand.deal(card);
+
+    }
+
+
+    public fold(): void {
+
+        this.hand = null;
+        this.isInHand = false;
+
+    }
 
 }
