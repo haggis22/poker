@@ -16,7 +16,8 @@
         {
             ANTE: 1,
             BLIND: 2,
-            REGULAR: 3
+            REGULAR: 3,
+            RETURNED: 4
         };
 
     public isValid: boolean;

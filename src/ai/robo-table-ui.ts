@@ -471,9 +471,11 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                         let rnd:number = Math.random();
 
+                        /*
                         // For testing purposes, always fold to a bet
                         let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
                         return this.broadcastCommand(foldCommand);
+                        */
 
                         if (rnd >= 0.8) {
 
@@ -515,7 +517,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                     setTimeout(() => {
 
                         // This represents a bet out (or a check, if the player has no chips)
-                        let desiredBet = (Math.random() > 0.5) ? this.table.stakes.minRaise : 0;
+                        let desiredBet = (Math.random() > 0.1) ? this.table.stakes.minRaise : 0;
 
                         let betAmount: number = Math.min(desiredBet, seat.player.chips);
                         let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);

@@ -277,6 +277,70 @@ export class BetTracker {
     }
 
 
+    public checkBetsToReturn(): Array<Bet> {
+
+        // We are going to determine whether any player has bet more than everyone else - if so, they'll get their bet reduced by the overage
+
+        let returnedBets: Array<Bet> = new Array<Bet>();
+
+        // Put the bets in descending order of size
+        let rankedBets: Array<Bet> = Object.values(this.bets).sort((b1: Bet, b2: Bet) => b2.totalBet - b1.totalBet);
+
+        if (rankedBets.length == 0) {
+
+            // No bets at all, so nothing needs to be given back
+
+        }
+
+        else if (rankedBets[0].totalBet === 0) {
+
+            // The biggest bet was 0, so nothing to give back
+
+        }
+
+        else if (rankedBets.length === 1) {
+
+            // There was only one bet, and we know it wasn't 0, so they get it back
+            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, false, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
+
+            // Take their bet entirely off the table
+            delete this.bets[rankedBets[0].seatIndex];
+
+        }
+
+        else if (rankedBets[1].totalBet === 0) {
+
+            // There was a non-zero bet, and the next largest was 0 (must have been a check), so they get it back
+            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, false, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
+
+            // Take their bet entirely off the table
+            delete this.bets[rankedBets[0].seatIndex];
+
+        }
+
+        else if (rankedBets[0].totalBet === rankedBets[1].totalBet) {
+
+            // the two largest bets match, so nothing to give back
+
+        }
+
+        else {
+
+            // The biggest bet is larger than the second biggest, so they get their bet reduced  (but some of it remains to match the 2nd biggest)
+            let difference: number = rankedBets[0].totalBet - rankedBets[1].totalBet;
+            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, difference, 0, false, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Reduced bet'));
+
+            // This is still pointing at the original actual bet, so just reduce it by the proper amount
+            rankedBets[0].totalBet -= difference;
+
+        }
+
+        return returnedBets;
+
+    } // checkBetsToReturn
+
+
+
     public gatherBets(): void {
 
         this.seatIndex = null;

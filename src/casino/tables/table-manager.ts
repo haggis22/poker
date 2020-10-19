@@ -65,7 +65,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_ANTE = 100;
     private readonly TIME_BET = 100;
-    private readonly TIME_BETTING_COMPLETE: number = 1250;
+    private readonly TIME_LAST_BET_MADE = 500;
+    private readonly TIME_RETURN_BET = 500;
+    private readonly TIME_GATHERING_BETS: number = 1250;
 
     private readonly TIME_SHOWDOWN: number = 1000;
     private readonly TIME_WIN_POT: number = 2000;
@@ -1136,24 +1138,21 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
         this.table.betTracker.seatIndex = null;
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+        await this.wait(this.TIME_LAST_BET_MADE);
 
+        await this.returnBets(this.table.betTracker.checkBetsToReturn());
 
-        console.log('Server: gather bets');
+        this.log('Gather bets');
         this.queueAction(new GatherBetsAction(this.table.id));
         this.table.betTracker.gatherBets();
-        console.log('Server: update bets');
 
         // give it a minute before clearing out all the actions
-        await this.wait(this.TIME_BETTING_COMPLETE);
+        await this.wait(this.TIME_GATHERING_BETS);
 
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
-        this.checkBetsToReturn();
 
-        console.log('Server: betting is complete');
-
-        console.log('Server: sending BettingCompleteAction');
+        this.log('Betting is complete');
         this.queueAction(new BettingCompleteAction(this.table.id));
-        this.log('Betting complete');
 
 //        return await this.wait(this.TIME_BETTING_COMPLETE);
 
@@ -1300,44 +1299,36 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     }
 
 
-    private checkBetsToReturn() {
+    private async returnBets(returnedBets: Bet[]): Promise<void> {
 
-        let potIndexesToKill: Set<number> = new Set<number>();
+        if (!returnedBets || !returnedBets.length) {
 
-        for (let pot of this.table.betTracker.pots) {
+            // Nothing to do here!
+            return;
+        }
 
-            if (pot.getNumPlayers() === 1) {
 
-                // Convert the set (of 1 element) to an array, and take its first element
-                let seat = this.table.seats[pot.getSeatsInPot()[0]];
+        for (let bet of returnedBets) {
 
-                if (seat) {
+            let seat: Seat = this.table.seats[bet.seatIndex];
 
-                    potIndexesToKill.add(pot.index);
+            if (seat.player) {
 
-                    this.queueAction(new BetReturnedAction(this.table.id, seat.index, pot.amount));
+                this.queueAction(new BetReturnedAction(this.table.id, bet.seatIndex, bet.totalBet));
 
-                    if (seat.player) {
+                // Take the chips from the returned bet and put them back on the player's stack
+                seat.player.chips += bet.totalBet;
+                this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
 
-                        seat.player.chips += pot.amount;
-                        this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
-
-                    }  // if player is not null
-
-                }  // if seat
-
-            }   // if pot only has 1 bettor in it
+            }
 
         }
 
-        if (potIndexesToKill.size > 0) {
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
-            this.table.betTracker.killPots(potIndexesToKill);
-            this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
+        await this.wait(this.TIME_RETURN_BET);
 
-        }
-
-    } // checkBetsToReturn
+    } // returnBets
 
 
     private async showdown(showdownState: ShowdownState): Promise<void> {
