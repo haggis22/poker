@@ -974,18 +974,15 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                 // We're back to the beginning
 
-                // TODO: See how many people ante'd - if not at least 2 then don't continue
-                // TODO: Return antes that have already been given if we're not continuing
-
+                // completeBetting will automatically look for bets that need returning if we don't have enough players
                 await this.completeBetting();
 
-                if (!this.isReadyForHand()) {
+                if (!this.table.betTracker.pots.length) {
 
                     // We don't have enough players, so go back to the open state
                     return await this.changeTableState(this.game.stateMachine.goToOpenState());
 
                 }
-
 
                 return await this.goToNextState();
 

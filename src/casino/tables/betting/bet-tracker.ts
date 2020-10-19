@@ -63,6 +63,31 @@ export class BetTracker {
     }   // clearBets
 
 
+    public getNumberOfBettors(): number {
+
+        if (!this.pots || !this.pots.length) {
+
+            return 0;
+
+        }
+
+        // Track the distinct bettor seatIndexes that appear in any of the pots
+        let setBettors: Set<number> = new Set<number>();
+        for (let pot of this.pots) {
+
+            for (let seatIndex of pot.getSeatsInPot()) {
+
+                setBettors.add(seatIndex);
+
+            }
+
+        }
+
+        return setBettors.size;
+
+    }
+
+
     public fold(seat: Seat): Fold {
 
         if (!seat) {
