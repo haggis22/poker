@@ -458,11 +458,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         let seat = this.findSeat(action.seatIndex);
 
-        if (seat.hand) {
-
-            seat.hand = action.hand;
-
-        }
+        seat.hand = action.hand;
 
     }  // flipCards
 

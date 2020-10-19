@@ -661,10 +661,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private doBetweenHandsBusiness() {
 
+        this.log('In doBetweenHandsBusiness');
+
         for (let seat of this.table.seats) {
 
             // If we're between hands, then none of the seats are in a hand, right?
-            seat.isInHand = false;
+            seat.clearHand();
             this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
 
             if (seat.player) {
@@ -778,15 +780,13 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         for (let seat of this.table.seats) {
 
+            // Remove any cards they might have
+            seat.clearHand();
+
             if (seat.player) {
 
                 // if they're not explicitly sitting out, then we will treat them as in so that we can check them for antes/blinds/cards to deal/etc
                 seat.isInHand = !seat.player.isSittingOut;
-
-            }
-            else {
-
-                seat.isInHand = false;
 
             }
 
@@ -1053,7 +1053,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.log(`${anteSeat.getName()} did not ante - marking as sitting out`);
 
         // they didn't pay the ante, so they're OUT
-        anteSeat.isInHand = false;
+        anteSeat.clearHand();
         anteSeat.player.isSittingOut = true;
 
         // Tell the world this player is sitting out
@@ -1358,7 +1358,8 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
                     seat.hand.flipCards();
 
-                    this.queueAction(new FlipCardsAction(this.table.id, seat.index, seat.hand))
+                    this.log(`There are ${seat.hand.cards.length} cards in the hand`);
+                    this.queueAction(new FlipCardsAction(this.table.id, seat.index, seat.hand));
 
                 }
 
