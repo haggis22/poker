@@ -53,6 +53,7 @@ import { BettingCompleteAction } from "../../actions/table/betting/betting-compl
 import { FacedownCard } from "../../cards/face-down-card";
 import { WonPot } from "./betting/won-pot";
 import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
+import { ClearHandAction } from "../../actions/table/game/clear-hand-action";
 
 const logger: Logger = new Logger();
 
@@ -563,7 +564,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.logTimers();
 
         // Take away their cards
-        folderSeat.fold();
+        folderSeat.clearHand();
 
         // This will tell watchers that the given seat is no longer in the hand
         this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
@@ -1499,6 +1500,16 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         this.queueAction(new HandCompleteAction(this.tableID));
         await this.wait(this.TIME_COMPLETE_HAND);
+
+        for (let seat of this.table.seats) {
+
+            if (seat.isInHand) {
+
+                this.queueAction(new ClearHandAction(this.tableID, seat.index));
+
+            }
+
+        }
 
         return await this.goToNextState();
 

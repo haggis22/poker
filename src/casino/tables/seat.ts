@@ -44,11 +44,12 @@ export class Seat {
     }
 
 
-    public fold(): void {
+    public clearHand(): void {
 
         this.hand = null;
         this.isInHand = false;
 
     }
+
 
 }

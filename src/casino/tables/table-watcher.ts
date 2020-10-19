@@ -28,6 +28,7 @@ import { TableStateAction, OpenState, Seat, AnteTurnAction } from "../../communi
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { Game } from "../../games/game";
 import { GameFactory } from "../../games/game-factory";
+import { ClearHandAction } from "../../actions/table/game/clear-hand-action";
 
 // const logger: Logger = new Logger();
 
@@ -268,6 +269,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
+        if (action instanceof ClearHandAction) {
+
+            return this.clearHand(action);
+
+        }
+
         if (action instanceof FlipCardsAction) {
 
             return this.flipCards(action);
@@ -462,9 +469,17 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private fold(action: FoldAction): void {
 
-        // Nothing to do for this - the actual folding comes with the SetHandAction(null) action
+        this.findSeat(action.seatIndex).clearHand();
 
     }  // fold
+
+
+    private clearHand(action: ClearHandAction): void {
+
+        this.findSeat(action.seatIndex).clearHand();
+
+    }  // clearHand
+
 
 
     private winPot(action: WinPotAction): void {

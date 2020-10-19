@@ -1,4 +1,5 @@
-﻿
+﻿export { ClearHandAction } from "../actions/table/game/clear-hand-action";
+
 export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
 
 export { DeclareHandAction } from "../actions/table/game/declare-hand-action";
@@ -89,7 +90,6 @@ export { ActionMessage } from "../messages/action-message";
 
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 export { SittingOutAction } from "../actions/table/players/sitting-out-action";
+
 export { IsInHandAction } from "../actions/table/players/is-in-hand-action";
-
-
 
