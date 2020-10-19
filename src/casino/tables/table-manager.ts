@@ -471,7 +471,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
-            let ante: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.stakes.ante);
+            let ante: Bet = this.table.betTracker.addBet(bettorSeat, Bet.TYPE.ANTE, command.amount, this.table.stakes.ante);
 
             if (ante.isValid) {
 
@@ -517,7 +517,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             let oldActionInitiator = this.table.betTracker.seatIndexInitiatingAction;
 
-            let bet: Bet = this.table.betTracker.addBet(bettorSeat, command.amount, this.table.stakes.minRaise);
+            let bet: Bet = this.table.betTracker.addBet(bettorSeat, Bet.TYPE.REGULAR, command.amount, this.table.stakes.minRaise);
 
             if (bet.isValid) {
 
@@ -529,7 +529,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
                 this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
                 this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
 
-                if (bet.betType == Bet.RAISE) {
+                if (bet.actionType == Bet.ACTION.RAISE) {
 
                     let newActionInitiator = this.table.betTracker.seatIndexInitiatingAction;
 
@@ -1184,7 +1184,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             let checkerSeat = this.table.seats[this.table.betTracker.seatIndex];
 
             // try to check
-            let check: Bet = this.table.betTracker.addBet(checkerSeat, 0, this.table.stakes.minRaise);
+            let check: Bet = this.table.betTracker.addBet(checkerSeat, Bet.TYPE.REGULAR, 0, this.table.stakes.minRaise);
 
             if (check.isValid) {
 

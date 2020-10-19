@@ -1,12 +1,23 @@
 ﻿export class Bet {
 
 
-    public static readonly INVALID: number = -1;
-    public static readonly CHECK: number = 0;
-    public static readonly OPEN: number = 1;
-    public static readonly CALL: number = 2;
-    public static readonly RAISE: number = 3;
-    public static readonly DEAD_RAISE: number = 4;
+    public static readonly ACTION: any =
+        {
+            INVALID: -1,
+            CHECK: 0,
+            OPEN: 1,
+            CALL: 2,
+            RAISE: 3,
+            DEAD_RAISE: 4
+        }
+
+
+    public static readonly TYPE: any =
+        {
+            ANTE: 1,
+            BLIND: 2,
+            REGULAR: 3
+        };
 
     public isValid: boolean;
 
@@ -16,6 +27,7 @@
     public isAllIn: boolean;
 
     public betType: number;
+    public actionType: number;
 
     public message: string;
 
@@ -25,6 +37,7 @@
                 chipsAdded: number,
                 isAllIn: boolean,
                 betType: number,
+                actionType: number,
                 message: string) {
 
         this.isValid = isValid;
@@ -33,6 +46,7 @@
         this.chipsAdded = chipsAdded;
         this.isAllIn = isAllIn;
         this.betType = betType;
+        this.actionType = actionType;
         this.message = message;
 
     }
@@ -45,28 +59,28 @@
     }
 
 
-    public getTypeName(): string {
+    public getActionName(): string {
 
-        switch (this.betType) {
+        switch (this.actionType) {
 
-            case Bet.CHECK:
+            case Bet.ACTION.CHECK:
                 return 'Checks';
 
-            case Bet.OPEN:
+            case Bet.ACTION.OPEN:
                 return 'Bets';
 
-            case Bet.CALL:
+            case Bet.ACTION.CALL:
                 return 'Calls';
 
-            case Bet.RAISE:
-            case Bet.DEAD_RAISE:
+            case Bet.ACTION.RAISE:
+            case Bet.ACTION.DEAD_RAISE:
                 return 'Raises';
 
         }   // switch
 
         return '';
 
-    }
+    }   // getActionName
 
 
 

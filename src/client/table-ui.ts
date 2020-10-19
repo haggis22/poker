@@ -584,29 +584,29 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let message = 'Unknown message';
 
-        switch (action.bet.betType) {
+        switch (action.bet.actionType) {
 
-            case Bet.CHECK:
+            case Bet.ACTION.CHECK:
                 message = `${seat.getName()} checks`;
                 this.seatAction.set(seat.index, 'CHECK');
                 break;
 
-            case Bet.OPEN:
+            case Bet.ACTION.OPEN:
                 message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
                 this.seatAction.set(seat.index, 'BET');
                 break;
 
-            case Bet.CALL:
+            case Bet.ACTION.CALL:
                 message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
                 this.seatAction.set(seat.index, 'CALL');
                 break;
 
-            case Bet.RAISE:
+            case Bet.ACTION.RAISE:
                 message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
                 this.seatAction.set(seat.index, 'RAISE');
                 break;
 
-            case Bet.DEAD_RAISE:
+            case Bet.ACTION.DEAD_RAISE:
                 message = `${seat.getName()} puts in a dead raise to ${this.chipFormatter.format(action.bet.totalBet)}`;
                 this.seatAction.set(seat.index, 'RAISE');
                 break;

@@ -120,12 +120,12 @@ function testBetTracker() {
     let markSeat: Seat = setupSeat(2, 2, 'Mark', 100);
 
     tracker.seatIndex = 1;
-    let bet: Bet = tracker.addBet(dannySeat, 10, minBet);
+    let bet: Bet = tracker.addBet(dannySeat, Bet.TYPE.REGULAR, 10, minBet);
     console.log(bet);
     console.log(tracker.toString());
 
     tracker.seatIndex = 2;
-    bet = tracker.addBet(markSeat, 0, minBet);
+    bet = tracker.addBet(markSeat, Bet.TYPE.REGULAR, 0, minBet);
     console.log(bet);
     console.log(tracker.toString());
 

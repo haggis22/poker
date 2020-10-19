@@ -131,6 +131,7 @@
     <TypeScriptCompile Include="src\actions\table\antes\ante-turn-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\clear-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\hand-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
@@ -323,9 +324,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\games\poker\five-card-stud\poker-game-five-card-stud.ts" />
     <TypeScriptCompile Include="src\games\hand-winner.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\hands\dealt-card.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\hands\hand.ts">

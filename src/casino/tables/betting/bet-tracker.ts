@@ -127,26 +127,26 @@ export class BetTracker {
     }
 
 
-    public addBet(seat: Seat, totalBetAmount: number, minimumBet: number): Bet {
+    public addBet(seat: Seat, betType: number, totalBetAmount: number, minimumBet: number): Bet {
 
         // console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex} for amount ${totalBetAmount}, currentBet = ${this.currentBet}, lastLiveBet = ${this.lastLiveBet}, seatIndexInitiatingAction = ${this.seatIndexInitiatingAction}`);
 
         
         if (!seat || !seat.player) {
 
-            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "There is no player in that seat");
+            return new Bet(false, seat.index, 0, 0, false, betType, Bet.ACTION.INVALID, "There is no player in that seat");
 
         }
 
         if (!seat.isInHand) {
 
-            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "You are not in the hand");
+            return new Bet(false, seat.index, 0, 0, false, betType, Bet.ACTION.INVALID, "You are not in the hand");
 
         }
 
         if (this.seatIndex != seat.index) {
 
-            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "It is not your turn to act");
+            return new Bet(false, seat.index, 0, 0, false, betType, Bet.ACTION.INVALID, "It is not your turn to act");
 
         }
 
@@ -155,7 +155,7 @@ export class BetTracker {
 
         if (totalBetAmount < 0) {
 
-            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, "You cannot be a negative amount");
+            return new Bet(false, seat.index, 0, 0, false, betType, Bet.ACTION.INVALID, "You cannot be a negative amount");
 
         }
 
@@ -163,7 +163,7 @@ export class BetTracker {
 
         if (totalBetAmount < playerCurrentBet) {
 
-            return new Bet(false, seat.index, playerCurrentBet, 0, false, Bet.INVALID, 'You cannot reduce your bet');
+            return new Bet(false, seat.index, playerCurrentBet, 0, false, betType, Bet.ACTION.INVALID, 'You cannot reduce your bet');
 
         }
 
@@ -179,12 +179,12 @@ export class BetTracker {
         // and they're not putting in any chips this round, then don't mark them all-in again
         let isAllIn: boolean = (chipsRemaining === 0) && (chipsRequired > 0);
 
-        let betType: number = null;
+        let actionType: number = null;
 
         if (totalBetAmount == 0 && this.currentBet > 0) {
 
             // They are trying to bet less than the current, but they still have chips left
-            return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
+            return new Bet(false, seat.index, 0, 0, false, betType, Bet.ACTION.INVALID, 'You cannot bet less than the current bet');
 
         }
 
@@ -193,11 +193,11 @@ export class BetTracker {
             if (chipsRemaining > 0) {
 
                 // They are trying to bet less than the current, but they still have chips left
-                return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, 'You cannot bet less than the current bet');
+                return new Bet(false, seat.index, 0, 0, false, betType, Bet.ACTION.INVALID, 'You cannot bet less than the current bet');
 
             }
 
-            betType = Bet.CALL;
+            actionType = Bet.ACTION.CALL;
 
         }
 
@@ -208,7 +208,7 @@ export class BetTracker {
                 if (chipsRemaining > 0) {
 
                     // They are trying to raise less than the minimum amount, but they still have chips left
-                    return new Bet(false, seat.index, 0, 0, false, Bet.INVALID, `You cannot ${(this.currentBet == 0 ? 'bet' : 'raise')} less than the minimum`);
+                    return new Bet(false, seat.index, 0, 0, false, betType, Bet.ACTION.INVALID, `You cannot ${(this.currentBet == 0 ? 'bet' : 'raise')} less than the minimum`);
 
                 }
 
@@ -218,14 +218,14 @@ export class BetTracker {
                     this.seatIndexInitiatingAction = seat.index;
                     this.lastLiveBet = totalBetAmount;
                     this.currentBet = totalBetAmount;
-                    betType = Bet.OPEN;
+                    actionType = Bet.ACTION.OPEN;
 
                 }
                 else {
 
                     // We are raising the current amount, but NOT the lastLiveAmount since it is a dead raise
                     this.currentBet = totalBetAmount;
-                    betType = Bet.DEAD_RAISE;
+                    actionType = Bet.ACTION.DEAD_RAISE;
 
                 }
 
@@ -236,7 +236,7 @@ export class BetTracker {
                 // They have bet/raise at least the mininum, so mark them as the new betting actor
                 this.seatIndexInitiatingAction = seat.index;
 
-                betType = this.currentBet === 0 ? Bet.OPEN : Bet.RAISE;
+                actionType = this.currentBet === 0 ? Bet.ACTION.OPEN : Bet.ACTION.RAISE;
 
                 // This is a live bet/raise, so update both metrics
                 this.currentBet = totalBetAmount;
@@ -248,16 +248,16 @@ export class BetTracker {
 
         else {
 
-            betType = this.currentBet === 0 ? Bet.CHECK : Bet.CALL;
+            actionType = this.currentBet === 0 ? Bet.ACTION.CHECK : Bet.ACTION.CALL;
 
         }
 
         seat.player.chips -= chipsRequired;
 
-        let bet = new Bet(true, seat.index, totalBetAmount, chipsRequired, isAllIn, betType, null);
+        let bet = new Bet(true, seat.index, totalBetAmount, chipsRequired, isAllIn, betType, actionType, null);
         this.bets[seat.index] = bet;
 
-        // console.log(`BetType is ${betType}`);
+        // console.log(`actionType is ${actionType}`);
 
         if (this.seatIndexInitiatingAction == null) {
             this.seatIndexInitiatingAction = seat.index;
