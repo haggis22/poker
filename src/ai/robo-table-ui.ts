@@ -326,23 +326,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             this.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
 
-            if (action.userID === this.user.id) {
-
-                if (action.amount > 0) {
-
-                    // I have chips now, so I would like to play
-                    this.broadcastCommand(new SitInCommand(this.table.id, this.user.id));
-
-                }
-
-
-            }
-
 
         }
-
-
-
 
     }   // addChips
 
@@ -356,8 +341,20 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             player.chips = action.chips;
             this.log(`${player.name} now has ${this.chipFormatter.format(action.chips)}`);
+
+            if (player.userID === this.user.id) {
+
+                if (player.chips > 0 && player.isSittingOut) {
+
+                    // I have chips now, so I would like to play
+                    this.broadcastCommand(new SitInCommand(this.table.id, this.user.id));
+
+                }
+
+            }
     
         }
+
 
     }  // updateStack
 
