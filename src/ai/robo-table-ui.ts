@@ -208,7 +208,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
-    private broadcastCommand(command: Command) {
+    private broadcastCommand(command: Command): void {
 
         this.log(`Sent ${command.constructor.name}`);
 
@@ -235,16 +235,16 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         switch (this.user.name) {
 
             case 'Danny':
-                return 200;
+                return 1000;
 
             case 'Mark':
                 return 2000;
 
             case 'Matt':
-                return 200;
+                return 1000;
 
             case 'Paul':
-                return 200;
+                return 0;
 
             case 'Joe':
                 return 2000;
@@ -471,6 +471,10 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                         let rnd:number = Math.random();
 
+                        // For testing purposes, always fold to a bet
+                        let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
+                        return this.broadcastCommand(foldCommand);
+
                         if (rnd >= 0.8) {
 
                             // This represents a raise 
@@ -480,8 +484,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                             let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
-                            this.broadcastCommand(betCommand);
-                            return;
+                            return this.broadcastCommand(betCommand);
 
                         }
                         else if (rnd >= 0.02) {
@@ -490,8 +493,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                             let betAmount: number = Math.min(tracker.currentBet, tracker.getCurrentBet(seat.index) + seat.player.chips);
                             let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
 
-                            this.broadcastCommand(betCommand);
-                            return;
+                            return this.broadcastCommand(betCommand);
 
                         }
                         else {
@@ -499,14 +501,13 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                             // We're folding!
                             let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
 
-                            this.broadcastCommand(foldCommand);
-                            return;
+                            return this.broadcastCommand(foldCommand);
 
                         }
 
                     }, MILLISECONDS_TO_THINK);
-                    return;
 
+                    return;
 
                 }
                 else {
