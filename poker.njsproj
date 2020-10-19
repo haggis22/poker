@@ -182,9 +182,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\betting\fold-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\bet-action.ts" />
-    <TypeScriptCompile Include="src\actions\table\antes\ante-action.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\betting\update-bets-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

@@ -15,7 +15,7 @@ import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { SitInCommand } from "../commands/table/sit-in-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker, AnteTurnAction, IsInHandAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker, AnteTurnAction, IsInHandAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -128,12 +128,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof IsInHandAction) {
 
             return this.setIsInHand(action);
-
-        }
-
-        if (action instanceof AnteAction) {
-
-            return this.ante(action);
 
         }
 
@@ -409,29 +403,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }   // startHand
-
-    private ante(action: AnteAction): void {
-
-        let seat = this.table.seats[action.seatIndex];
-        
-        if (seat) {
-        
-            let message = `${seat.getName()} antes ${this.chipFormatter.format(action.ante.chipsAdded)}`;
-        
-            if (action.ante.isAllIn) {
-                message += ' and is all-in';
-            }
-        
-            this.log(message);
-        
-        }
-        else {
-        
-            throw new Error(`Ante: Seat index out of range: ${action.seatIndex}`);
-        
-        }
-
-    }  // ante
 
 
     private updateBets(action: UpdateBetsAction): void {

@@ -36,7 +36,6 @@ import { AddChipsAction } from "../../actions/table/players/add-chips-action";
 import { BetAction } from "../../actions/table/betting/bet-action";
 import { FoldAction } from "../../actions/table/betting/fold-action";
 import { TableState } from "./states/table-state";
-import { AnteAction } from "../../actions/table/antes/ante-action";
 import { DealCardAction } from "../../actions/table/game/deal-card-action";
 import { BetTurnAction } from "../../actions/table/betting/bet-turn-action";
 import { BetReturnedAction } from "../../actions/table/betting/bet-returned-action";

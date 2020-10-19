@@ -18,7 +18,6 @@ import { AddChipsAction } from "../../actions/table/players/add-chips-action";
 import { DealCardAction } from "../../actions/table/game/deal-card-action";
 import { BetTurnAction } from "../../actions/table/betting/bet-turn-action";
 import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
-import { AnteAction } from "../../actions/table/antes/ante-action";
 import { BetAction } from "../../actions/table/betting/bet-action";
 import { FoldAction } from "../../actions/table/betting/fold-action";
 import { BetReturnedAction } from "../../actions/table/betting/bet-returned-action";
@@ -218,13 +217,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         if (action instanceof TableStateAction) {
 
             return this.changeTableState(action);
-
-        }
-
-        if (action instanceof AnteAction) {
-
-            // This is just a pass-through notification; only update the bets on an UpdateBetsAction
-            return;
 
         }
 

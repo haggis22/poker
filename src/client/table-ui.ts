@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, AnteAction, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -131,12 +131,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof TableStateAction) {
 
             return this.changeTableState();
-
-        }
-
-        if (action instanceof AnteAction) {
-
-            return this.ante(action);
 
         }
 
@@ -421,31 +415,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }   // startHand
 
-    private ante(action: AnteAction): void {
-
-        let seat: Seat = this.table.seats[action.seatIndex];
-        
-        if (seat) {
-        
-            let message = `${seat.getName()} antes ${this.chipFormatter.format(action.ante.chipsAdded)}`;
-        
-            if (action.ante.isAllIn) {
-                message += ' and is all-in';
-            }
-        
-            this.log(message);
-
-            this.seatAction.set(seat.index, 'ANTE');
-        
-        }
-        else {
-        
-            throw new Error(`Ante: Seat index out of range: ${action.seatIndex}`);
-        
-        }
-
-    }  // ante
-
 
     private updateBets(action: UpdateBetsAction): void {
 
@@ -584,34 +553,50 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let message = 'Unknown message';
 
-        switch (action.bet.actionType) {
+        if (action.bet.betType == Bet.TYPE.ANTE) {
 
-            case Bet.ACTION.CHECK:
-                message = `${seat.getName()} checks`;
-                this.seatAction.set(seat.index, 'CHECK');
-                break;
+            message = `${seat.getName()} antes ${this.chipFormatter.format(action.bet.totalBet)}`;
+            this.seatAction.set(seat.index, 'ANTE');
 
-            case Bet.ACTION.OPEN:
-                message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
-                this.seatAction.set(seat.index, 'BET');
-                break;
+        }
+        else if (action.bet.betType == Bet.TYPE.BLIND) {
 
-            case Bet.ACTION.CALL:
-                message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
-                this.seatAction.set(seat.index, 'CALL');
-                break;
+            message = `${seat.getName()} blinds ${this.chipFormatter.format(action.bet.totalBet)}`;
+            this.seatAction.set(seat.index, 'BLIND');
 
-            case Bet.ACTION.RAISE:
-                message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
-                this.seatAction.set(seat.index, 'RAISE');
-                break;
+        }
+        else if (action.bet.betType == Bet.TYPE.REGULAR) {
 
-            case Bet.ACTION.DEAD_RAISE:
-                message = `${seat.getName()} puts in a dead raise to ${this.chipFormatter.format(action.bet.totalBet)}`;
-                this.seatAction.set(seat.index, 'RAISE');
-                break;
+            switch (action.bet.actionType) {
 
-        }  // switch
+                case Bet.ACTION.CHECK:
+                    message = `${seat.getName()} checks`;
+                    this.seatAction.set(seat.index, 'CHECK');
+                    break;
+
+                case Bet.ACTION.OPEN:
+                    message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    this.seatAction.set(seat.index, 'BET');
+                    break;
+
+                case Bet.ACTION.CALL:
+                    message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    this.seatAction.set(seat.index, 'CALL');
+                    break;
+
+                case Bet.ACTION.RAISE:
+                    message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    this.seatAction.set(seat.index, 'RAISE');
+                    break;
+
+                case Bet.ACTION.DEAD_RAISE:
+                    message = `${seat.getName()} puts in a dead raise to ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    this.seatAction.set(seat.index, 'RAISE');
+                    break;
+
+            }  // switch
+
+        }
 
         if (action.bet.isAllIn) {
             message += ' and is all-in';

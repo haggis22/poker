@@ -16,7 +16,6 @@ export { BetTurnAction } from "../actions/table/betting/bet-turn-action";
 export { BetReturnedAction } from "../actions/table/betting/bet-returned-action";
 
 export { AnteState } from "../casino/tables/states/betting/ante-state";
-export { AnteAction } from "../actions/table/antes/ante-action";
 export { AnteTurnAction } from "../actions/table/antes/ante-turn-action";
 
 export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
