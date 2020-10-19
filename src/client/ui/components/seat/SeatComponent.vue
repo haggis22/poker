@@ -10,10 +10,13 @@
         </div>
         <div class="chips"><span v-if="seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
         <div class="cards">
+            <div v-if="seat.player && seat.player.isSittingOut" class="sitting-out">
+                [ Sitting Out ]
+            </div>
             <div v-if="seat.hand">
-                <card-component v-for="(card, index) in seat.hand.cards" 
-                                    :key="`card-${index}`" 
-                                    :card="card"></card-component>
+                <card-component v-for="(card, index) in seat.hand.cards"
+                                :key="`card-${index}`"
+                                :card="card"></card-component>
             </div>
         </div>
     </div>
