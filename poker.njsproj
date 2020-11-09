@@ -64,6 +64,8 @@
     <Content Include="src\client\ui\components\card\CardComponent.vue" />
     <Content Include="src\client\ui\components\dealer\dealer-box.scss" />
     <Content Include="src\client\ui\components\dealer\DealerBoxComponent.vue" />
+    <Content Include="src\client\ui\components\log\log.scss" />
+    <Content Include="src\client\ui\components\log\LogComponent.vue" />
     <Content Include="src\client\ui\components\pot\pot.scss" />
     <Content Include="src\client\ui\components\pot\PotComponent.vue" />
     <Content Include="src\client\ui\components\pot\WonPotComponent.vue" />
@@ -90,16 +92,19 @@
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\actions\table\antes\" />
     <Folder Include="src\casino\tables\chips\" />
+    <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\ui\" />
     <Folder Include="src\client\ui\components\" />
     <Folder Include="src\client\ui\components\card\" />
     <Folder Include="src\client\ui\components\dealer\" />
     <Folder Include="src\client\ui\components\bet\" />
+    <Folder Include="src\client\ui\components\log\" />
     <Folder Include="src\client\ui\components\pot\" />
     <Folder Include="src\client\ui\components\seat\" />
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
+    <Folder Include="src\games\poker\texas-hold-em\" />
     <Folder Include="src\messages\" />
     <Folder Include="src\actions\table\state\" />
     <Folder Include="src\actions\table\players\" />
@@ -142,7 +147,9 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
+    <TypeScriptCompile Include="src\casino\tables\boards\hold-em-board.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
     <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
     <TypeScriptCompile Include="src\commands\table\sit-in-command.ts" />
     <TypeScriptCompile Include="src\ai\robo-table-ui.ts" />
@@ -166,6 +173,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\server-side\local-server-client.ts" />
+    <TypeScriptCompile Include="src\games\poker\texas-hold-em\poker-game-texas-hold-em.ts" />
     <TypeScriptCompile Include="src\messages\action-message.ts" />
     <TypeScriptCompile Include="src\messages\message-pair.ts" />
     <TypeScriptCompile Include="src\messages\message.ts">
@@ -357,7 +365,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\states\betting\bet-state.ts" />
-    <TypeScriptCompile Include="src\casino\tables\states\deal-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\open-state.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

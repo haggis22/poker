@@ -37,7 +37,8 @@ export { AddChipsAction } from "../actions/table/players/add-chips-action";
 export { AddChipsCommand } from "../commands/table/add-chips-command";
 
 export { StartHandState } from "../casino/tables/states/start-hand-state";
-export { DealState } from "../casino/tables/states/deal-state";
+export { DealState } from "../casino/tables/states/dealing/deal-state";
+export { DealBoardState } from "../casino/tables/states/dealing/deal-board-state";
 export { ShowdownState } from "../casino/tables/states/showdown-state";
 export { HandCompleteState } from "../casino/tables/states/hand-complete-state";
 export { OpenState } from "../casino/tables/states/open-state";

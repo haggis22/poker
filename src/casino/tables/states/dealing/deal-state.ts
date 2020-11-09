@@ -1,4 +1,4 @@
-﻿import { TableState } from "./table-state";
+﻿import { TableState } from "../table-state";
 
 
 export class DealState implements TableState {

@@ -2,6 +2,8 @@
 
 export class NoBoard implements Board {
 
+    constructor() {
 
+    }
 
 }

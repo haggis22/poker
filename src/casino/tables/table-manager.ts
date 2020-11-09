@@ -9,7 +9,7 @@ import { StartHandState } from "./states/start-hand-state";
 import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
 import { MoveButtonAction } from "../../actions/table/game/move-button-action";
-import { DealState } from "./states/deal-state";
+import { DealState } from "./states/dealing/deal-state";
 import { Hand } from "../../hands/hand";
 import { BetState } from "./states/betting/bet-state";
 import { AnteState } from "./states/betting/ante-state";
@@ -248,6 +248,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     public setGame(game: Game): void {
 
         this.game = game;
+
+        this.table.board = game.newBoard();
+
         this.queueAction(new SetGameAction(this.table.id, game.id));
 
     }
