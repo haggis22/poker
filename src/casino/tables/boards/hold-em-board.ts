@@ -14,5 +14,17 @@ export class HoldEmBoard implements Board {
     }
 
 
+    public reset(): void {
+
+        this.cards.length = 0;
+
+    }
+
+
+    public deal(card: Card): void {
+
+        this.cards.push(card);
+
+    }
 
 }

@@ -1,6 +1,6 @@
-﻿import { TableAction } from "../table-action";
-import { Card } from "../../../cards/card";
-import { FacedownCard } from "../../../cards/face-down-card";
+﻿import { TableAction } from "../../table-action";
+import { Card } from "../../../../cards/card";
+import { FacedownCard } from "../../../../cards/face-down-card";
 
 export class DealCardAction extends TableAction {
 

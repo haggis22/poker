@@ -36,7 +36,7 @@ import { AddChipsAction } from "../../actions/table/players/add-chips-action";
 import { BetAction } from "../../actions/table/betting/bet-action";
 import { FoldAction } from "../../actions/table/betting/fold-action";
 import { TableState } from "./states/table-state";
-import { DealCardAction } from "../../actions/table/game/deal-card-action";
+import { DealCardAction } from "../../actions/table/game/dealing/deal-card-action";
 import { BetTurnAction } from "../../actions/table/betting/bet-turn-action";
 import { BetReturnedAction } from "../../actions/table/betting/bet-returned-action";
 import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction, DealBoardState } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SittingOutAction } from "../../actions/table/players/sitting-out-action";
@@ -53,6 +53,7 @@ import { FacedownCard } from "../../cards/face-down-card";
 import { WonPot } from "./betting/won-pot";
 import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
 import { ClearHandAction } from "../../actions/table/game/clear-hand-action";
+import { DealBoardAction } from "../../actions/table/game/dealing/deal-board-action";
 
 const logger: Logger = new Logger();
 
@@ -62,6 +63,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
     private readonly TIME_SET_BUTTON: number = 750;
 
     private readonly TIME_DEAL_CARD: number = 300;
+    private readonly TIME_DEAL_BOARD: number = 400;
 
     private readonly TIME_ANTE = 100;
     private readonly TIME_BET = 100;
@@ -750,6 +752,12 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
         }
 
+        if (state instanceof DealBoardState) {
+
+            return await this.dealBoard(state);
+
+        }
+
         if (state instanceof AnteState) {
 
             return await this.collectAntes(state);
@@ -936,6 +944,29 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         await this.checkNeedsCard(dealState, this.table.buttonIndex + 1);
 
     }   // dealRound
+
+
+
+
+    private async dealBoard(dealState: DealBoardState): Promise<void> {
+
+        let cards: Array<Card> = [];
+
+        for (let c: number = 0; c < dealState.numCards; c++) {
+
+            let card: Card = this.deck.deal();
+            card.isFaceUp = true;
+            cards.push(card);
+            this.table.board.deal(card);
+
+        }
+
+        // Board activity is always public
+        this.queueAction(new DealBoardAction(this.table.id, cards));
+        await this.wait(this.TIME_DEAL_BOARD * dealState.numCards);
+
+    }   // dealBoard
+
 
 
     private async wait(milliseconds: number): Promise<void> {

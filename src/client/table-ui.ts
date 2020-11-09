@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -158,6 +158,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof DealCardAction) {
 
             return this.dealCard(action);
+        }
+
+        if (action instanceof DealBoardAction) {
+
+            return this.dealBoard(action);
         }
 
         if (action instanceof HandCompleteAction) {
@@ -468,7 +473,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action.card instanceof Card) {
 
-            message = `${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`;
+            message = `${seat.getName()} is dealt ${this.describeCard(action.card)}`;
 
         }
         else {
@@ -481,6 +486,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.log(message);
 
     }   // dealCard
+
+
+    private describeCard(card: Card) {
+
+        return `${card.value.symbol}${card.suit.symbol}`;
+    }
+
+    private dealBoard(action: DealBoardAction): void {
+
+
+        let message: string = `The board is dealt ${ action.cards.map(card => this.describeCard(card)).join(" ") }`;
+
+        this.messages.push(message);
+        this.log(message);
+
+    }   // dealBoard
 
 
     private completeHand(action: HandCompleteAction): void {

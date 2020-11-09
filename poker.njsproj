@@ -91,6 +91,7 @@
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\actions\table\antes\" />
+    <Folder Include="src\actions\table\game\dealing\" />
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\ui\" />
@@ -137,6 +138,7 @@
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\clear-hand-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\dealing\deal-board-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\hand-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
@@ -173,6 +175,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\server-side\local-server-client.ts" />
+    <TypeScriptCompile Include="src\games\hand-selectors\hold-em-selector.ts" />
     <TypeScriptCompile Include="src\games\poker\texas-hold-em\poker-game-texas-hold-em.ts" />
     <TypeScriptCompile Include="src\messages\action-message.ts" />
     <TypeScriptCompile Include="src\messages\message-pair.ts" />
@@ -194,7 +197,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\betting\bet-turn-action.ts" />
-    <TypeScriptCompile Include="src\actions\table\game\deal-card-action.ts">
+    <TypeScriptCompile Include="src\actions\table\game\dealing\deal-card-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\betting\bet-returned-action.ts" />

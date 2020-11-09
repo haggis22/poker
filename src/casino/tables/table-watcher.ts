@@ -15,7 +15,8 @@ import { Message } from "../../messages/message";
 import { ActionMessage } from "../../messages/action-message";
 import { TableAction } from "../../actions/table/table-action";
 import { AddChipsAction } from "../../actions/table/players/add-chips-action";
-import { DealCardAction } from "../../actions/table/game/deal-card-action";
+import { DealCardAction } from "../../actions/table/game/dealing/deal-card-action";
+import { DealBoardAction } from "../../actions/table/game/dealing/deal-board-action";
 import { BetTurnAction } from "../../actions/table/betting/bet-turn-action";
 import { FlipCardsAction } from "../../actions/table/game/flip-cards-action";
 import { BetAction } from "../../actions/table/betting/bet-action";
@@ -237,6 +238,11 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
             return this.dealCard(action);
         }
 
+        if (action instanceof DealBoardAction) {
+
+            return this.dealBoard(action);
+        }
+
         if (action instanceof BetTurnAction) {
 
             return this.betTurn(action);
@@ -423,6 +429,17 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         seat.deal(action.card);
 
     }   // dealCard
+
+
+    private dealBoard(action: DealBoardAction): void {
+
+        for (let card of action.cards) {
+
+            this.table.board.deal(card);
+
+        }
+
+    }   // dealBoard
 
 
     private betTurn(action: BetTurnAction): void {

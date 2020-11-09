@@ -23,7 +23,8 @@ export { GatherBetsAction } from "../actions/table/betting/gather-bets-action";
 
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 
-export { DealCardAction } from "../actions/table/game/deal-card-action";
+export { DealCardAction } from "../actions/table/game/dealing/deal-card-action";
+export { DealBoardAction } from "../actions/table/game/dealing/deal-board-action";
 export { HandCompleteAction } from "../actions/table/game/hand-complete-action";
 export { Card } from "../cards/card";
 export { CardValue } from "../cards/card-value";
