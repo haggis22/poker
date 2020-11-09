@@ -16,6 +16,7 @@ import DealerBoxComponent from './components/dealer/DealerBoxComponent.vue';
 import BetComponent from './components/bet/BetComponent.vue';
 import PotComponent from './components/pot/PotComponent.vue';
 import WonPotComponent from './components/pot/WonPotComponent.vue';
+import LogComponent from './components/log/LogComponent.vue';
 
 var app = new Vue({
 
@@ -29,7 +30,8 @@ var app = new Vue({
         'dealer-box-component': DealerBoxComponent,
         'bet-component': BetComponent,
         'pot-component': PotComponent,
-        'won-pot-component': WonPotComponent
+        'won-pot-component': WonPotComponent,
+        'log-component': LogComponent
     }
 
 });

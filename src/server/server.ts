@@ -61,10 +61,12 @@ clientManager.addClient(createRoboClient(table.id, mark));
 clientManager.addClient(createRoboClient(table.id, paul));
 // clientManager.addClient(createRoboClient(table.id, joe));
 
+let userID: number = 3;
+
 
 wss.on('connection', (socket: WebSocket) => {
 
-    let user: User = new User(5, 'Sehkar', 0);
+    let user: User = new User(++userID, 'Sehkar', 0);
 
     let serverClient: ServerClient = new ServerClient(socket, user.id);
 

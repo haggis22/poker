@@ -42,6 +42,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isGatheringBets: boolean;
 
+    public messages: string[];
+
 
 
 
@@ -59,6 +61,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.wonPots = [];
 
         this.isGatheringBets = false;
+
+        this.messages = [];
 
     }
 
@@ -299,7 +303,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (seat) {
 
-            this.log(`${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`);
+            let message = `${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`;
+            this.messages.push(message);
+
+            this.log(message);
             this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
             if (seat.player.userID === this.user.id) {
@@ -446,7 +453,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(this.table.buttonIndex);
 
-        this.log(`${seat.getName()} now has the button`);
+        let message: string = `${seat.getName()} now has the button`;
+        this.messages.push(message);
+        this.log(message);
 
     }   // moveButton
 
@@ -455,16 +464,21 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
+        let message: string = null;
+
         if (action.card instanceof Card) {
 
-            this.log(`${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`);
+            message = `${seat.getName()} is dealt ${action.card.value.symbol}${action.card.suit.symbol}`;
 
         }
         else {
 
-            this.log(`${seat.getName()} is dealt a card, face-down`);
+            message = `${seat.getName()} is dealt a card, face-down`;
 
         }
+
+        this.messages.push(message);
+        this.log(message);
 
     }   // dealCard
 
@@ -494,7 +508,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (seat) {
 
-            this.log(`${seat.getName()} isInHandssssss: ${action.isInHand}`);
+            // this.log(`${seat.getName()} isInHandssssss: ${action.isInHand}`);
 
         }
 
@@ -602,6 +616,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             message += ' and is all-in';
         }
 
+        this.messages.push(message);
         this.log(message);
 
     }  // bet
@@ -611,7 +626,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
-        this.log(`${seat.getName()} folds`);
+        let message: string = `${seat.getName()} folds`;
+
+        this.messages.push(message);
+        this.log(message);
+
         this.seatAction.set(seat.index, 'FOLD');
 
     }  // fold
@@ -623,7 +642,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
 
-            this.log(`${seat.getName()} has ${seat.hand.cards.map(card => card.toString()).join(" ")}`);
+            let message: string = `${seat.getName()} has ${seat.hand.cards.map(card => card.toString()).join(" ")}`;
+            this.messages.push(message);
+            this.log(message);
 
         }
 
@@ -634,7 +655,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
-        this.log(`${seat.getName()} has ${this.game.handDescriber.describe(action.handEvaluation)}`);
+        let message: string = `${seat.getName()} has ${this.game.handDescriber.describe(action.handEvaluation)}`;
+
+        this.messages.push(message);
+        this.log(message);
 
     }  // declareHand
 
@@ -650,16 +674,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let potDescription = pot.potIndex > 0 ? `side pot #${pot.potIndex}` : `the main pot`;
 
         let handDescription = pot.handEvaluation ? ` with ${this.game.handDescriber.describe(pot.handEvaluation)}` : '';
-        
+
+        let message:string = null;
+
         if (seat.player) {
         
-            this.log(`${seat.getName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`);
+            message = `${seat.getName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`;
         
         }
         else {
-            this.log(`${seat.getSeatName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`);
+
+            message = `${seat.getSeatName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`;
         
         }
+
+        this.messages.push(message);
+        this.log(message);
         
     }  // winPot
 
@@ -669,8 +699,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let seat = this.findSeat(action.seatIndex);
         
         if (seat.player) {
-        
-            this.log(`${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`);
+
+            let message: string = `${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`;
+            this.messages.push(message);
+            this.log(message);
         
         }
         else {

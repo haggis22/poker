@@ -244,14 +244,17 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                 return 1000;
 
             case 'Paul':
-                return 0;
+                return 1000;
 
             case 'Joe':
                 return 2000;
 
+            case 'Sekhar':
+                return 300;
+
         }
 
-        return 0;
+        return 1000;
 
     }
 
