@@ -128,6 +128,7 @@
     <Folder Include="src\communication\" />
     <Folder Include="src\client\" />
     <Folder Include="src\ai\" />
+    <Folder Include="src\math\" />
     <Folder Include="src\server\" />
     <Folder Include="src\players\" />
     <Folder Include="src\casino\tables\states\" />
@@ -177,6 +178,9 @@
     <TypeScriptCompile Include="src\communication\server-side\local-server-client.ts" />
     <TypeScriptCompile Include="src\games\hand-selectors\hold-em-selector.ts" />
     <TypeScriptCompile Include="src\games\poker\texas-hold-em\poker-game-texas-hold-em.ts" />
+    <TypeScriptCompile Include="src\math\combinator.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\messages\action-message.ts" />
     <TypeScriptCompile Include="src\messages\message-pair.ts" />
     <TypeScriptCompile Include="src\messages\message.ts">
