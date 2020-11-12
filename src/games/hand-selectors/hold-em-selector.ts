@@ -4,6 +4,7 @@ import { Board } from "../../casino/tables/boards/board";
 import { HandEvaluator } from "../hand-evaluator";
 import { HandEvaluation } from "../hand-evaluation";
 import { Card } from "../../cards/card";
+import { Combinator } from "../../math/combinator";
 
 export class HoldEmSelector implements BestHandSelector {
 
@@ -22,18 +23,24 @@ export class HoldEmSelector implements BestHandSelector {
 
         }
 
+        // ...Add in the cards from the board
         cards = cards.concat(...board.cards);
 
-        if (cards.length > 5) {
+        let bestHand: HandEvaluation = null;
 
-            cards = cards.slice(0, 5);
+        for (let possibleHand of Combinator.combine(cards, 5)) {
+
+            let evaluation: HandEvaluation = evaluator.evaluate(possibleHand);
+
+            if (bestHand == null || evaluation.compareTo(bestHand) > 0) {
+
+                bestHand = evaluation;
+
+            }
 
         }
 
-
-
-
-        return evaluator.evaluate(cards);
+        return bestHand;
 
     }
 
