@@ -5,14 +5,11 @@
 import { Deck } from "./cards/deck";
 import { Player } from "./players/player";
 import { Table } from "./casino/tables/table";
-import { PokerGameFiveCardDraw } from "./games/poker/five-card-draw/poker-game-five-card-draw";
-import { PokerGameFiveCardStud } from "./games/poker/five-card-stud/poker-game-five-card-stud";
 import { TableManager } from "./casino/tables/table-manager";
 import { User } from "./players/user";
 import { TableRules } from "./casino/tables/table-rules";
 import { Stakes } from "./casino/tables/betting/stakes";
 import { ClientManager } from "./communication/server-side/client-manager";
-import { Serializer } from "./communication/serializer";
 import { Seat } from "./casino/tables/seat";
 import { GameFactory } from "./games/game-factory";
 import { BetTracker, Bet, Hand } from "./communication/serializable";
@@ -21,6 +18,7 @@ import { TableUI } from "./client/table-ui";
 import { MoneyFormatter } from "./casino/tables/chips/money-formatter";
 import { LocalGameClient } from "./communication/client-side/local-game-client";
 import { LocalServerClient } from "./communication/server-side/local-server-client";
+import { PokerGameFiveCardStud } from "./games/poker/games/poker-game-five-card-stud";
 
 
 function createTable(): Table {

@@ -8,7 +8,7 @@ import { ClientManager } from '../communication/server-side/client-manager';
 import { TableManager } from '../casino/tables/table-manager';
 import { Deck } from '../cards/deck';
 import { GameFactory } from '../games/game-factory';
-import { PokerGameFiveCardStud } from '../games/poker/five-card-stud/poker-game-five-card-stud';
+import { PokerGameFiveCardStud } from '../games/poker/games/poker-game-five-card-stud';
 import { User } from '../players/user';
 import { Table } from '../casino/tables/table';
 import { TableRules } from '../casino/tables/table-rules';
@@ -19,6 +19,7 @@ import { ServerClient } from '../communication/server-side/server-client';
 import { LocalGameClient } from '../communication/client-side/local-game-client';
 import { LocalServerClient } from '../communication/server-side/local-server-client';
 import { RoboTableUI } from '../ai/robo-table-ui';
+import { PokerGameSevenCardStud } from '../games/poker/games/poker-game-seven-card-stud';
 
 const app = express();
 
@@ -47,7 +48,9 @@ let table: Table = createTable();
 
 let clientManager: ClientManager = new ClientManager();
 let tableManager: TableManager = new TableManager(table.id, table, new Deck());
-tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+// tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+tableManager.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
+
 
 let danny = new User(1, 'Danny', 1000);
 let mark = new User(2, 'Matt', 1000);

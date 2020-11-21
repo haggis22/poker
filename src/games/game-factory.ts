@@ -1,6 +1,7 @@
 ﻿import { Game } from "./game";
-import { PokerGameFiveCardDraw } from "./poker/five-card-draw/poker-game-five-card-draw";
-import { PokerGameFiveCardStud } from "./poker/five-card-stud/poker-game-five-card-stud";
+import { PokerGameFiveCardDraw } from "./poker/games/poker-game-five-card-draw";
+import { PokerGameFiveCardStud } from "./poker/games/poker-game-five-card-stud";
+import { PokerGameSevenCardStud } from "./poker/games/poker-game-seven-card-stud";
 
 export class GameFactory {
 
@@ -19,6 +20,9 @@ export class GameFactory {
 
             case PokerGameFiveCardDraw.ID:
                 return new PokerGameFiveCardDraw();
+
+            case PokerGameSevenCardStud.ID:
+                return new PokerGameSevenCardStud();
 
 
         }  // switch
