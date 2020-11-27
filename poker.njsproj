@@ -105,7 +105,7 @@
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
-    <Folder Include="src\games\poker\texas-hold-em\" />
+    <Folder Include="src\games\poker\games\" />
     <Folder Include="src\messages\" />
     <Folder Include="src\actions\table\state\" />
     <Folder Include="src\actions\table\players\" />
@@ -119,8 +119,6 @@
     <Folder Include="src\games\hand-selectors\" />
     <Folder Include="src\games\poker\" />
     <Folder Include="src\casino\" />
-    <Folder Include="src\games\poker\five-card-draw\" />
-    <Folder Include="src\games\poker\five-card-stud\" />
     <Folder Include="src\hands\" />
     <Folder Include="src\commands\" />
     <Folder Include="src\actions\" />
@@ -177,7 +175,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\server-side\local-server-client.ts" />
     <TypeScriptCompile Include="src\games\hand-selectors\hold-em-selector.ts" />
-    <TypeScriptCompile Include="src\games\poker\texas-hold-em\poker-game-texas-hold-em.ts" />
+    <TypeScriptCompile Include="src\games\poker\games\poker-game-seven-card-stud.ts" />
+    <TypeScriptCompile Include="src\games\poker\games\poker-game-texas-hold-em.ts" />
     <TypeScriptCompile Include="src\math\combinator.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -331,10 +330,10 @@
     <TypeScriptCompile Include="src\games\hand-selectors\best-hand-selector.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\five-card-draw\poker-game-five-card-draw.ts">
+    <TypeScriptCompile Include="src\games\poker\games\poker-game-five-card-draw.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\games\poker\five-card-stud\poker-game-five-card-stud.ts" />
+    <TypeScriptCompile Include="src\games\poker\games\poker-game-five-card-stud.ts" />
     <TypeScriptCompile Include="src\games\hand-winner.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

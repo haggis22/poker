@@ -1,0 +1,23 @@
+﻿.board {
+    position: absolute;
+    top: 250px;
+    left: 175px;
+    width: 350px;
+    height: 100px;
+    padding: 3px;
+    box-sizing: border-box;
+
+    border: 4px solid rgba(255, 255, 255, 0.1);
+
+    .cards {
+        text-align: left;
+        height: 100%;
+        width: 100%;
+        white-space: nowrap;
+        padding: 15px;
+
+        .card-small-2 + .card-small-2 {
+            margin-left: 10px;
+        }
+    }
+}

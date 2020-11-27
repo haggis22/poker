@@ -1,4 +1,5 @@
-﻿export { ClearHandAction } from "../actions/table/game/clear-hand-action";
+﻿export { ClearHandAction } from "../actions/table/game/dealing/clear-hand-action";
+export { ClearBoardAction } from "../actions/table/game/dealing/clear-board-action";
 
 export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
 
@@ -54,6 +55,7 @@ export { TableConnectedAction } from "../actions/table/state/table-connected-act
 export { PokerHandEvaluator } from "../games/poker/poker-hand-evaluator";
 export { PokerHandDescriber } from "../games/poker/poker-hand-describer";
 export { NoBoard } from "../casino/tables/boards/no-board";
+export { HoldEmBoard } from "../casino/tables/boards/hold-em-board";
 export { Best5InHandSelector } from "../games/hand-selectors/best-5-in-hand-selector";
 
 export { HandEvaluation } from "../games/hand-evaluation";

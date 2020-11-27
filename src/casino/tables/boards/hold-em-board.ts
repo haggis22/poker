@@ -16,6 +16,7 @@ export class HoldEmBoard implements Board {
 
     public reset(): void {
 
+        console.log('Holdem Board clearing out the cards');
         this.cards.length = 0;
 
     }

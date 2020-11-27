@@ -52,8 +52,9 @@ import { BettingCompleteAction } from "../../actions/table/betting/betting-compl
 import { FacedownCard } from "../../cards/face-down-card";
 import { WonPot } from "./betting/won-pot";
 import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
-import { ClearHandAction } from "../../actions/table/game/clear-hand-action";
+import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-action";
 import { DealBoardAction } from "../../actions/table/game/dealing/deal-board-action";
+import { ClearBoardAction } from "../../actions/table/game/dealing/clear-board-action";
 
 const logger: Logger = new Logger();
 
@@ -965,6 +966,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         this.queueAction(new DealBoardAction(this.table.id, cards));
         await this.wait(this.TIME_DEAL_BOARD * dealState.numCards);
 
+        // we are done with the button's position (card dealt or not)
+        return await this.goToNextState();
+
     }   // dealBoard
 
 
@@ -1532,6 +1536,9 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
             }
 
         }
+
+        this.table.board.reset();
+        this.queueAction(new ClearBoardAction(this.tableID));
 
         return await this.goToNextState();
 

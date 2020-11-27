@@ -1,6 +1,8 @@
 ﻿export class Combinator {
 
-    static combine(arr: any[], numElements: number) : Array<Array<any>> {
+    // Given an array of objects, this returns an array of all the possible combinations of those elements, numElements at a time
+    // For this purpose, order doesn't matter, so [a,b] is the same as [b,a]
+    static combine(arr: any[], numElements: number): Array<Array<any>> {
 
         if (arr.length <= numElements) {
             return [[...arr]];

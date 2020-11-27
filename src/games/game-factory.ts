@@ -2,6 +2,7 @@
 import { PokerGameFiveCardDraw } from "./poker/games/poker-game-five-card-draw";
 import { PokerGameFiveCardStud } from "./poker/games/poker-game-five-card-stud";
 import { PokerGameSevenCardStud } from "./poker/games/poker-game-seven-card-stud";
+import { PokerGameTexasHoldEm } from "./poker/games/poker-game-texas-hold-em";
 
 export class GameFactory {
 
@@ -24,8 +25,13 @@ export class GameFactory {
             case PokerGameSevenCardStud.ID:
                 return new PokerGameSevenCardStud();
 
+            case PokerGameTexasHoldEm.ID:
+                return new PokerGameTexasHoldEm();
+
 
         }  // switch
+
+        throw new Error(`Unknown gameID ${gameID}`);
 
 
     }  // create

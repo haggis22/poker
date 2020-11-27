@@ -24,11 +24,11 @@ import { FoldAction } from "../../actions/table/betting/fold-action";
 import { BetReturnedAction } from "../../actions/table/betting/bet-returned-action";
 import { CommandBroadcaster } from "../../commands/command-broadcaster";
 import { Command } from "../../commands/command";
-import { TableStateAction, OpenState, Seat, AnteTurnAction } from "../../communication/serializable";
+import { TableStateAction, OpenState, Seat, AnteTurnAction, ClearBoardAction } from "../../communication/serializable";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { Game } from "../../games/game";
 import { GameFactory } from "../../games/game-factory";
-import { ClearHandAction } from "../../actions/table/game/clear-hand-action";
+import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-action";
 
 // const logger: Logger = new Logger();
 
@@ -243,6 +243,11 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
             return this.dealBoard(action);
         }
 
+        if (action instanceof ClearBoardAction) {
+
+            return this.clearBoard(action);
+        }
+
         if (action instanceof BetTurnAction) {
 
             return this.betTurn(action);
@@ -440,6 +445,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         }
 
     }   // dealBoard
+
+    private clearBoard(action: ClearBoardAction): void {
+
+        this.table.board.reset();
+
+    }  // clearBoard
 
 
     private betTurn(action: BetTurnAction): void {

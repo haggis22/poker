@@ -3,12 +3,11 @@ import { PokerHandEvaluator } from "../poker-hand-evaluator";
 import { PokerHandDescriber } from "../poker-hand-describer";
 
 import { Board } from "../../../casino/tables/boards/board";
-import { NoBoard } from "../../../casino/tables/boards/no-board";
-import { Best5InHandSelector } from "../../hand-selectors/best-5-in-hand-selector";
 import { TableState, HandCompleteState, ShowdownState, BetState, DealState, StartHandState } from "../../../communication/serializable";
 import { AnteState } from "../../../casino/tables/states/betting/ante-state";
 import { DealBoardState } from "../../../casino/tables/states/dealing/deal-board-state";
 import { HoldEmBoard } from "../../../casino/tables/boards/hold-em-board";
+import { HoldEmSelector } from "../../hand-selectors/hold-em-selector";
 
 export class PokerGameTexasHoldEm extends Game {
 
@@ -17,7 +16,7 @@ export class PokerGameTexasHoldEm extends Game {
 
     constructor() {
 
-        super(PokerGameTexasHoldEm.ID, new Best5InHandSelector(), new PokerHandEvaluator(), new PokerHandDescriber());
+        super(PokerGameTexasHoldEm.ID, new HoldEmSelector(), new PokerHandEvaluator(), new PokerHandDescriber());
 
     }
 

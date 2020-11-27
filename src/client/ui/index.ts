@@ -17,6 +17,7 @@ import BetComponent from './components/bet/BetComponent.vue';
 import PotComponent from './components/pot/PotComponent.vue';
 import WonPotComponent from './components/pot/WonPotComponent.vue';
 import LogComponent from './components/log/LogComponent.vue';
+import BoardComponent from './components/board/BoardComponent.vue';
 
 var app = new Vue({
 
@@ -31,7 +32,8 @@ var app = new Vue({
         'bet-component': BetComponent,
         'pot-component': PotComponent,
         'won-pot-component': WonPotComponent,
-        'log-component': LogComponent
+        'log-component': LogComponent,
+        'board-component': BoardComponent
     }
 
 });

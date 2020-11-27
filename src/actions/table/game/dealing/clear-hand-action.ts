@@ -1,4 +1,4 @@
-﻿import { TableAction } from "../table-action";
+﻿import { TableAction } from "../../table-action";
 
 export class ClearHandAction extends TableAction {
 
