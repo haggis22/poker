@@ -60,6 +60,8 @@
     <Content Include="src\casino\tables\table-rules.ts" />
     <Content Include="src\client\ui\components\bet\bet.scss" />
     <Content Include="src\client\ui\components\bet\BetComponent.vue" />
+    <Content Include="src\client\ui\components\board\board.scss" />
+    <Content Include="src\client\ui\components\board\BoardComponent.vue" />
     <Content Include="src\client\ui\components\card\card.scss" />
     <Content Include="src\client\ui\components\card\CardComponent.vue" />
     <Content Include="src\client\ui\components\dealer\dealer-box.scss" />
@@ -96,6 +98,7 @@
     <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\ui\" />
     <Folder Include="src\client\ui\components\" />
+    <Folder Include="src\client\ui\components\board\" />
     <Folder Include="src\client\ui\components\card\" />
     <Folder Include="src\client\ui\components\dealer\" />
     <Folder Include="src\client\ui\components\bet\" />
@@ -136,7 +139,8 @@
     <TypeScriptCompile Include="src\actions\table\antes\ante-turn-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
-    <TypeScriptCompile Include="src\actions\table\game\clear-hand-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\dealing\clear-board-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\dealing\clear-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\dealing\deal-board-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\hand-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
@@ -147,6 +151,7 @@
     <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\cards\face-down-card.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
     <TypeScriptCompile Include="src\casino\tables\boards\hold-em-board.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />

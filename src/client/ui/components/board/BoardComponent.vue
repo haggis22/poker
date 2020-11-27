@@ -1,6 +1,5 @@
 ﻿<template>
     <div class="board">
-        <div># cards: {{ board.cards.length }}</div>
         <div class="cards">
             <card-component v-for="(card, index) in board.cards"
                             :key="`card-${index}`"
