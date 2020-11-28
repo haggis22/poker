@@ -1,0 +1,61 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;700&display=swap');
+
+// $font: "IBM Plex Serif", serif;
+$font: "Times New Roman", serif;
+$felt: green;
+
+$table-height: 500px;
+$table-width: 800px;
+
+
+.table-colors {
+    background-color: $felt;
+    border-radius: 50%;
+    border: 0.75em solid black;
+    margin: 0 auto;
+}
+
+.table {
+
+    @extend .table-colors;
+    height: $table-height;
+    width: $table-width;
+    position: relative;
+    top: 200px;
+
+    .betting-line {
+        background: transparent;
+        border-radius: 50%;
+        height: 84%;
+        width: 88%;
+        margin: 0 auto;
+        margin-top: 30px;
+        position: relative;
+        border: 0.6em solid rgba(255, 255, 255, 0.1);
+    }
+
+    .button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid black;
+        background: grey;
+        position: absolute;
+        line-height: 40px;
+        transition: top 0.6s, left 0.6s, transform 1s;
+
+        .text {
+            text-align: center;
+            text-transform: uppercase;
+            color: black;
+            margin: 0;
+            font-size: 0.5em;
+            font-weight: bold;
+            line-height: 40px;
+        }
+
+    }
+
+}
+
+

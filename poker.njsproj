@@ -58,29 +58,28 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
-    <Content Include="src\client\ui\components\bet\bet.scss" />
-    <Content Include="src\client\ui\components\bet\BetComponent.vue" />
-    <Content Include="src\client\ui\components\board\board.scss" />
-    <Content Include="src\client\ui\components\board\BoardComponent.vue" />
-    <Content Include="src\client\ui\components\card\card.scss" />
-    <Content Include="src\client\ui\components\card\CardComponent.vue" />
-    <Content Include="src\client\ui\components\dealer\dealer-box.scss" />
-    <Content Include="src\client\ui\components\dealer\DealerBoxComponent.vue" />
-    <Content Include="src\client\ui\components\log\log.scss" />
-    <Content Include="src\client\ui\components\log\LogComponent.vue" />
-    <Content Include="src\client\ui\components\pot\pot.scss" />
-    <Content Include="src\client\ui\components\pot\PotComponent.vue" />
-    <Content Include="src\client\ui\components\pot\WonPotComponent.vue" />
-    <Content Include="src\client\ui\components\seat\SeatComponent.vue" />
-    <Content Include="src\client\ui\components\seat\seat.scss" />
     <Content Include="src\client\ui\style.scss" />
+    <Content Include="src\client\ui\table\bet\bet.scss" />
+    <Content Include="src\client\ui\table\bet\BetComponent.vue" />
+    <Content Include="src\client\ui\table\board\board.scss" />
+    <Content Include="src\client\ui\table\board\BoardComponent.vue" />
+    <Content Include="src\client\ui\table\card\card.scss" />
+    <Content Include="src\client\ui\table\card\CardComponent.vue" />
+    <Content Include="src\client\ui\table\dealer\dealer-box.scss" />
+    <Content Include="src\client\ui\table\dealer\DealerBoxComponent.vue" />
+    <Content Include="src\client\ui\table\log\log.scss" />
+    <Content Include="src\client\ui\table\log\LogComponent.vue" />
+    <Content Include="src\client\ui\table\pot\pot.scss" />
+    <Content Include="src\client\ui\table\pot\PotComponent.vue" />
+    <Content Include="src\client\ui\table\pot\WonPotComponent.vue" />
+    <Content Include="src\client\ui\table\seat\seat.scss" />
+    <Content Include="src\client\ui\table\seat\SeatComponent.vue" />
+    <Content Include="src\client\ui\table\table\table-seats-6.scss" />
+    <Content Include="src\client\ui\table\table\table.scss" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\client\ui\index.html">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Include="src\client\ui\style-seats-6.scss">
       <SubType>Code</SubType>
     </Content>
     <Content Include="tsconfig.json">
@@ -97,14 +96,15 @@
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\ui\" />
-    <Folder Include="src\client\ui\components\" />
-    <Folder Include="src\client\ui\components\board\" />
-    <Folder Include="src\client\ui\components\card\" />
-    <Folder Include="src\client\ui\components\dealer\" />
-    <Folder Include="src\client\ui\components\bet\" />
-    <Folder Include="src\client\ui\components\log\" />
-    <Folder Include="src\client\ui\components\pot\" />
-    <Folder Include="src\client\ui\components\seat\" />
+    <Folder Include="src\client\ui\table\" />
+    <Folder Include="src\client\ui\table\bet\" />
+    <Folder Include="src\client\ui\table\board\" />
+    <Folder Include="src\client\ui\table\card\" />
+    <Folder Include="src\client\ui\table\dealer\" />
+    <Folder Include="src\client\ui\table\log\" />
+    <Folder Include="src\client\ui\table\pot\" />
+    <Folder Include="src\client\ui\table\seat\" />
+    <Folder Include="src\client\ui\table\table\" />
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
@@ -156,6 +156,7 @@
     <TypeScriptCompile Include="src\casino\tables\boards\hold-em-board.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
+    <TypeScriptCompile Include="src\client\ui\table\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
     <TypeScriptCompile Include="src\commands\table\sit-in-command.ts" />
     <TypeScriptCompile Include="src\ai\robo-table-ui.ts" />

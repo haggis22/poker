@@ -1,5 +1,13 @@
-﻿.card {
+﻿$card-font: "Times New Roman", serif;
+$spade-color: black;
+$club-color: black;
+$heart-color: red;
+$diamond-color: red;
+
+.card {
+
     display: inline-block;
+    font-family: $card-font;
 
     .card-inner {
         position: relative;
@@ -27,6 +35,53 @@
         transform: rotateY(180deg);
     }
 }
+
+.spade {
+    color: $spade-color;
+}
+
+.club {
+    color: $club-color;
+}
+
+.heart {
+    color: $heart-color;
+}
+
+.diamond {
+    color: $diamond-color;
+}
+
+.card-small {
+    border: .2em solid black;
+    border-radius: 10%;
+    height: 4em;
+    width: 2.7em;
+    background-color: white;
+    float: left;
+
+    .value {
+        margin: 0;
+        margin-top: 0.12em;
+        text-align: center;
+        font-size: 1.5em;
+        font-weight: bold;
+        padding: 0;
+        line-height: 1em;
+    }
+
+    .suit {
+        text-align: center;
+        margin: 0;
+        font-size: 2em;
+        line-height: 1em;
+    }
+}
+
+.card-small + .card-small {
+    margin-left: 10px;
+}
+
 
 .card-small-2 {
 
@@ -92,4 +147,5 @@
         transition: top 0.3s, left 0.3s;
         transition-timing-function: ease-out;
     }
+
 }
