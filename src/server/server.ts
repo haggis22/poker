@@ -21,6 +21,7 @@ import { LocalServerClient } from '../communication/server-side/local-server-cli
 import { RoboTableUI } from '../ai/robo-table-ui';
 import { PokerGameSevenCardStud } from '../games/poker/games/poker-game-seven-card-stud';
 import { PokerGameTexasHoldEm } from '../games/poker/games/poker-game-texas-hold-em';
+import { PokerGameOmaha } from '../games/poker/games/poker-game-omaha';
 
 const app = express();
 
@@ -51,7 +52,8 @@ let clientManager: ClientManager = new ClientManager();
 let tableManager: TableManager = new TableManager(table.id, table, new Deck());
 // tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
 // tableManager.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
-tableManager.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
+// tableManager.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
+tableManager.setGame((new GameFactory()).create(PokerGameOmaha.ID));
 
 
 let danny = new User(1, 'Danny', 1000);
