@@ -62,7 +62,7 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
     private log(msg: string): void {
 
-        // console.log('\x1b[33m%s\x1b[0m', msg);
+        console.log('\x1b[33m%s\x1b[0m', `ClientManager ${msg}`);
 
     }
 
@@ -85,6 +85,12 @@ export class ClientManager implements MessageHandler, CommandHandler {
     }
 
     public handleMessage(message: Message | MessagePair): void {
+
+        this.log(`ClientManager handling ${message.constructor.name}`);
+        if (message instanceof ActionMessage) {
+            console.log(`  ClientManager sending message ${message.action.constructor.name} to ${message.userID}`);
+        }
+
 
         for (let client of this.clients) {
 

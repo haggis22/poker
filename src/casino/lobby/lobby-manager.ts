@@ -24,7 +24,7 @@ export class LobbyManager {
 
     }
 
-
+    
     addTableClient(tableID: number, client: IServerClient): void {
 
         let clientManager = this.tableManager.getClientManager(tableID);

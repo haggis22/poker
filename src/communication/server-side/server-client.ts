@@ -5,6 +5,7 @@ import { Command } from "../../commands/command";
 import { Message } from "../../messages/message";
 import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
+import { ActionMessage } from '../../messages/action-message';
 
 export class ServerClient implements IServerClient {
 
@@ -75,6 +76,12 @@ export class ServerClient implements IServerClient {
     handleMessage(message: Message): void {
 
         // ServerClient objects only get the message object that is suitable for passing down the link, so ship it!
+
+        console.log(`ServerClient sending ${message.constructor.name}`);
+        if (message instanceof ActionMessage) {
+            console.log(`  ServerClient sending message ${message.action.constructor.name}`);
+        }
+
         this.send(message);
 
     }

@@ -103,7 +103,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
     private log(msg: string): void {
 
-        // console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
+        console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
 
     }
 
