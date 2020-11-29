@@ -79,7 +79,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private readonly TIME_COMPLETE_HAND: number = 1000;
 
 
-    public tableID: number;
     private table: Table;
     private game: Game;
     private deck: Deck;
@@ -97,9 +96,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(tableID: number, table: Table, deck: Deck) {
+    constructor(table: Table, deck: Deck) {
 
-        this.tableID = tableID;
         this.table = table;
         this.deck = deck;
 
@@ -1524,21 +1522,21 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // We're done with this hand - go to the next one
 
-        this.queueAction(new HandCompleteAction(this.tableID));
+        this.queueAction(new HandCompleteAction(this.table.id));
         await this.wait(this.TIME_COMPLETE_HAND);
 
         for (let seat of this.table.seats) {
 
             if (seat.isInHand) {
 
-                this.queueAction(new ClearHandAction(this.tableID, seat.index));
+                this.queueAction(new ClearHandAction(this.table.id, seat.index));
 
             }
 
         }
 
         this.table.board.reset();
-        this.queueAction(new ClearBoardAction(this.tableID));
+        this.queueAction(new ClearBoardAction(this.table.id));
 
         return await this.goToNextState();
 

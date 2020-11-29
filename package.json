@@ -21,6 +21,23 @@
     "type": "git",
     "url": "https://github.com/haggis22/poker"
   },
+  "_moduleAliases": {
+    "@tables/*": [
+      "dist/casino/tables/*"
+    ],
+    "@lobby/*": [
+      "dist/casino/lobby/*"
+    ],
+    "@games/*": [
+      "dist/games/*"
+    ],
+    "@cards/*": [
+      "dist/cards/*"
+    ],
+    "@server/*": [
+      "dist/communication/server-side/*"
+    ]
+  },
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",

@@ -1,12 +1,23 @@
 ﻿{
   "compilerOptions": {
-    "sourceMap":  true,
+    "sourceMap": true,
     "esModuleInterop": true,
     "downlevelIteration": true,
     "moduleResolution": "Node",
     "module": "CommonJS",
     "target": "esnext",
     "watch": false,
-    "allowJs": true
+    "allowJs": true,
+    /*
+    "baseUrl": "src",
+    "paths": {
+      "@/*": [ "/*" ],
+      "@tables/*": [ "casino/tables/*" ],
+      "@lobby/*": [ "casino/lobby/*" ],
+      "@games/*": [ "games/*" ],
+      "@cards/*": [ "cards/*" ],
+      "@server/*": [ "communication/server-side/*" ]
+    }
+*/
   }
-}
+} 

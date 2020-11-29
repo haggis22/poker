@@ -11,27 +11,32 @@ import { IServerClient } from "./i-server-client";
 export class ClientManager implements MessageHandler, CommandHandler {
 
 
+    private tableID: number;
     private tableController: TableController;
 
     private clients: IServerClient[];
 
 
-    constructor()
+    constructor(tableID: number)
     {
+        this.tableID = tableID;
+
         this.clients = new Array<IServerClient>();
     }
+
 
     setTableController(tableController: TableController) {
 
         this.tableController = tableController;
 
-        this.tableController.registerMessageHandler(this);
 
+/*
         for (let client of this.clients) {
 
-            client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableController.tableID)));
+            client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableController.table.id)));
 
         }
+*/
 
     }
 
@@ -44,7 +49,7 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
         this.log(`Connected client for userID ${client.userID}`);
 
-        client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableController.tableID)));
+        client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableID)));
 
     }
 
