@@ -2,7 +2,7 @@
 import { Command } from "../../commands/command";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
-import { TableManager } from "../../casino/tables/table-manager";
+import { TableController } from "../../casino/tables/table-controller";
 import { ActionMessage } from "../../messages/action-message";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 import { MessagePair } from "../../messages/message-pair";
@@ -11,7 +11,7 @@ import { IServerClient } from "./i-server-client";
 export class ClientManager implements MessageHandler, CommandHandler {
 
 
-    private tableManager: TableManager;
+    private tableController: TableController;
 
     private clients: IServerClient[];
 
@@ -21,15 +21,15 @@ export class ClientManager implements MessageHandler, CommandHandler {
         this.clients = new Array<IServerClient>();
     }
 
-    setTableManager(tableManager: TableManager) {
+    setTableController(tableController: TableController) {
 
-        this.tableManager = tableManager;
+        this.tableController = tableController;
 
-        this.tableManager.registerMessageHandler(this);
+        this.tableController.registerMessageHandler(this);
 
         for (let client of this.clients) {
 
-            client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableManager.tableID)));
+            client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableController.tableID)));
 
         }
 
@@ -44,7 +44,7 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
         this.log(`Connected client for userID ${client.userID}`);
 
-        client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableManager.tableID)));
+        client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableController.tableID)));
 
     }
 
@@ -73,8 +73,8 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
     private broadcastCommand(command: Command) {
 
-        if (this.tableManager) {
-            this.tableManager.handleCommand(command);
+        if (this.tableController) {
+            this.tableController.handleCommand(command);
         }
 
     }

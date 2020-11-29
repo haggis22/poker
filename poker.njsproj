@@ -280,7 +280,7 @@
     <TypeScriptCompile Include="src\casino\tables\states\table-state-machine.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\tables\table-manager.ts">
+    <TypeScriptCompile Include="src\casino\tables\table-controller.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\command-broadcaster.ts">
@@ -369,6 +369,7 @@
     <TypeScriptCompile Include="src\players\player.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\players\user-manager.ts" />
     <TypeScriptCompile Include="src\players\user.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

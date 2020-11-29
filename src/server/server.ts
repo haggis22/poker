@@ -5,7 +5,7 @@ import * as WebSocket from 'ws';
 import { AddressInfo } from 'net';
 
 import { ClientManager } from '../communication/server-side/client-manager';
-import { TableManager } from '../casino/tables/table-manager';
+import { TableController } from '../casino/tables/table-controller';
 import { Deck } from '../cards/deck';
 import { GameFactory } from '../games/game-factory';
 import { PokerGameFiveCardStud } from '../games/poker/games/poker-game-five-card-stud';
@@ -22,6 +22,7 @@ import { RoboTableUI } from '../ai/robo-table-ui';
 import { PokerGameSevenCardStud } from '../games/poker/games/poker-game-seven-card-stud';
 import { PokerGameTexasHoldEm } from '../games/poker/games/poker-game-texas-hold-em';
 import { PokerGameOmaha } from '../games/poker/games/poker-game-omaha';
+import { UserManager } from '../players/user-manager';
 
 const app = express();
 
@@ -46,34 +47,29 @@ app.use(express.static(clientPath));
 
 let table: Table = createTable();
 
-// Create the components, working from the UI all the way to the TableManager on the server
+// Create the components, working from the UI all the way to the TableController on the server
 
 let clientManager: ClientManager = new ClientManager();
-let tableManager: TableManager = new TableManager(table.id, table, new Deck());
-// tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
-// tableManager.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
-// tableManager.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
-tableManager.setGame((new GameFactory()).create(PokerGameOmaha.ID));
+let tableController: TableController = new TableController(table.id, table, new Deck());
+// tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+// tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
+// tableController.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
+tableController.setGame((new GameFactory()).create(PokerGameOmaha.ID));
 
 
-let danny = new User(1, 'Danny', 1000);
-let mark = new User(2, 'Matt', 1000);
-let paul = new User(3, 'Paul', 1000);
-// let joe = new User(4, 'Joe', 1000);
+clientManager.setTableController(tableController);
 
-clientManager.setTableManager(tableManager);
+let userManager: UserManager = new UserManager();
 
-clientManager.addClient(createRoboClient(table.id, danny));
-clientManager.addClient(createRoboClient(table.id, mark));
-clientManager.addClient(createRoboClient(table.id, paul));
-// clientManager.addClient(createRoboClient(table.id, joe));
 
-let userID: number = 3;
+clientManager.addClient(createRoboClient(table.id, userManager.getUserByID(1)));
+clientManager.addClient(createRoboClient(table.id, userManager.getUserByID(2)));
+clientManager.addClient(createRoboClient(table.id, userManager.getUserByID(3)));
 
 
 wss.on('connection', (socket: WebSocket) => {
 
-    let user: User = new User(++userID, 'Sehkar', 0);
+    let user: User = userManager.getUserByID(4);
 
     let serverClient: ServerClient = new ServerClient(socket, user.id);
 

@@ -5,7 +5,7 @@
 import { Deck } from "./cards/deck";
 import { Player } from "./players/player";
 import { Table } from "./casino/tables/table";
-import { TableManager } from "./casino/tables/table-manager";
+import { TableController } from "./casino/tables/table-controller";
 import { User } from "./players/user";
 import { TableRules } from "./casino/tables/table-rules";
 import { Stakes } from "./casino/tables/betting/stakes";
@@ -70,11 +70,11 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
 
     let table: Table = createTable();
 
-    // Create the components, working from the UI all the way to the TableManager on the server
+    // Create the components, working from the UI all the way to the TableController on the server
 
     let clientManager: ClientManager = new ClientManager();
-    let tableManager: TableManager = new TableManager(table.id, table, new Deck());
-    tableManager.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+    let tableController: TableController = new TableController(table.id, table, new Deck());
+    tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
 
     let danny = new User(1, 'Danny', 10000);
     let mark = new User(2, 'Mark', 10000);
@@ -82,7 +82,7 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
 
-    clientManager.setTableManager(tableManager);
+    clientManager.setTableController(tableController);
 
     clientManager.addClient(createClient(table.id, danny, clientManager));
     clientManager.addClient(createClient(table.id, mark, clientManager));

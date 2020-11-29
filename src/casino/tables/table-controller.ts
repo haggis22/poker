@@ -59,7 +59,7 @@ import { ClearBoardAction } from "../../actions/table/game/dealing/clear-board-a
 const logger: Logger = new Logger();
 
 
-export class TableManager implements CommandHandler, MessageBroadcaster {
+export class TableController implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_SET_BUTTON: number = 750;
 
@@ -314,7 +314,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
     private log(message: string): void {
 
-        console.log('\x1b[31m%s\x1b[0m', `TableManager ${message}`);
+        console.log('\x1b[31m%s\x1b[0m', `TableController ${message}`);
 
     }
 
@@ -1237,7 +1237,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
 
             }
 
-            throw new Error(`TableManager could not check or fold ${checkerSeat.getSeatName()}` );
+            throw new Error(`TableController could not check or fold ${checkerSeat.getSeatName()}` );
 
         }, this.table.rules.timeToAct * 1000);
 
@@ -1404,7 +1404,7 @@ export class TableManager implements CommandHandler, MessageBroadcaster {
         await this.wait(this.TIME_SHOWDOWN);
 
         for (let winner of winners) {
-            this.log(`TableManager: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
+            this.log(`TableController: ${this.table.seats[winner.seatIndex].getName()} has ${this.game.handDescriber.describe(winner.evaluation)}`);
         }
 
         while (this.table.betTracker.pots.length) {
