@@ -1,4 +1,4 @@
-﻿import { TableCommand } from "./table-command";
+﻿import { TableCommand } from "../table-command";
 
 export class FoldCommand extends TableCommand {
 

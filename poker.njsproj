@@ -298,7 +298,7 @@
     <TypeScriptCompile Include="src\commands\table\create-table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\commands\table\fold-command.ts" />
+    <TypeScriptCompile Include="src\commands\table\betting\fold-command.ts" />
     <TypeScriptCompile Include="src\commands\table\betting\bet-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

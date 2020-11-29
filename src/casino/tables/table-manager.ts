@@ -24,7 +24,7 @@ import { AnteCommand } from "../../commands/table/betting/ante-command";
 import { BetCommand } from "../../commands/table/betting/bet-command";
 import { Seat } from "./seat";
 import { Bet } from "./betting/bet";
-import { FoldCommand } from "../../commands/table/fold-command";
+import { FoldCommand } from "../../commands/table/betting/fold-command";
 import { Fold } from "./betting/fold";
 import { Logger } from "../../logging/logger";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";

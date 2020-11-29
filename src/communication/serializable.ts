@@ -66,7 +66,7 @@ export { Pot } from "../casino/tables/betting/pot";
 export { Bet } from "../casino/tables/betting/bet";
 export { Fold } from "../casino/tables/betting/fold";
 export { FoldAction } from "../actions/table/betting/fold-action";
-export { FoldCommand } from "../commands/table/fold-command";
+export { FoldCommand } from "../commands/table/betting/fold-command";
 export { BetCommand } from "../commands/table/betting/bet-command";
 export { AnteCommand } from "../commands/table/betting/ante-command";
 
