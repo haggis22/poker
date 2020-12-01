@@ -99,7 +99,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof TableConnectedAction) {
 
             // we are connected, so request a snapshot of the table for this user
-            this.broadcastCommand(new TableSnapshotCommand(action.tableID, this.user.id))
+            this.broadcastCommand(new TableSnapshotCommand(action.tableID))
             return;
 
         }
@@ -111,7 +111,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                 this.table = action.table;
 
                 // request a seat at the table - the null parameter means any seat will do
-                this.broadcastCommand(new RequestSeatCommand(this.table.id, this.user, null));
+                this.broadcastCommand(new RequestSeatCommand(this.table.id, null));
 
                 return;
 
@@ -351,7 +351,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 // this.log(`I have a seat, so I am requesting ${this.chipFormatter.format(chips)} in chips`);
 
-                this.broadcastCommand(new AddChipsCommand(this.table.id, this.user.id, chips));
+                this.broadcastCommand(new AddChipsCommand(this.table.id, chips));
 
             }
 
@@ -583,7 +583,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                 if (seat.player.userID === this.user.id) {
 
                     let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
-                    let betCommand: AnteCommand = new AnteCommand(this.table.id, seat.player.userID, betAmount);
+                    let betCommand: AnteCommand = new AnteCommand(this.table.id, betAmount);
 
                     this.broadcastCommand(betCommand);
 

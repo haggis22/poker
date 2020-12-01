@@ -2,14 +2,11 @@
 
 export class SitInCommand extends TableCommand {
 
-    public userID: number;
 
-
-    constructor(tableID: number, userID: number) {
+    constructor(tableID: number) {
 
         super(tableID);
 
-        this.userID = userID;
     }
 
 }

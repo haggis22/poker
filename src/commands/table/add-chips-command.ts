@@ -2,15 +2,13 @@
 
 export class AddChipsCommand extends TableCommand {
 
-    public userID: number;
     public amount: number;
 
 
-    constructor(tableID: number, userID: number, amount: number) {
+    constructor(tableID: number, amount: number) {
 
         super(tableID);
 
-        this.userID = userID;
         this.amount = amount;
     }
 

@@ -2,6 +2,7 @@
 
 export class TableCommand extends Command {
 
+    public userID: number;
     public tableID: number;
 
     constructor(tableID: number) {

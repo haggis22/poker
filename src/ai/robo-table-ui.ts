@@ -74,7 +74,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof TableConnectedAction) {
 
             // we are connected, so request a snapshot of the table for this user
-            this.broadcastCommand(new TableSnapshotCommand(action.tableID, this.user.id))
+            this.broadcastCommand(new TableSnapshotCommand(action.tableID))
             return;
 
         }
@@ -86,7 +86,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                 this.table = action.table;
 
                 // request a seat at the table - the null parameter means any seat will do
-                this.broadcastCommand(new RequestSeatCommand(this.table.id, this.user, null));
+                this.broadcastCommand(new RequestSeatCommand(this.table.id, null));
 
                 return;
 
@@ -288,7 +288,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                 // this.log(`I have a seat, so I am requesting ${this.chipFormatter.format(chips)} in chips`);
 
-                this.broadcastCommand(new AddChipsCommand(this.table.id, this.user.id, chips));
+                this.broadcastCommand(new AddChipsCommand(this.table.id, chips));
 
             }
 
@@ -344,7 +344,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                 if (player.chips > 0 && player.isSittingOut) {
 
                     // I have chips now, so I would like to play
-                    this.broadcastCommand(new SitInCommand(this.table.id, this.user.id));
+                    this.broadcastCommand(new SitInCommand(this.table.id));
 
                 }
 
@@ -487,7 +487,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                             this.log(`tracker.currentBet = ${tracker.currentBet}, stakes.minRaise = ${this.table.stakes.minRaise}, playerChips = ${seat.player.chips}, playerCurrentBet = ${tracker.getCurrentBet(seat.index)}`);
 
-                            let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
+                            let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
                             return this.broadcastCommand(betCommand);
 
@@ -496,7 +496,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                             // This represents a call (possibly all-in)
                             let betAmount: number = Math.min(tracker.currentBet, tracker.getCurrentBet(seat.index) + seat.player.chips);
-                            let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
+                            let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
                             return this.broadcastCommand(betCommand);
 
@@ -504,7 +504,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         else {
 
                             // We're folding!
-                            let foldCommand: FoldCommand = new FoldCommand(this.table.id, seat.player.userID);
+                            let foldCommand: FoldCommand = new FoldCommand(this.table.id);
 
                             return this.broadcastCommand(foldCommand);
 
@@ -523,7 +523,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         let desiredBet = (Math.random() > 0.1) ? this.table.stakes.minRaise : 0;
 
                         let betAmount: number = Math.min(desiredBet, seat.player.chips);
-                        let betCommand: BetCommand = new BetCommand(this.table.id, seat.player.userID, betAmount);
+                        let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
                         this.broadcastCommand(betCommand);
 
@@ -559,7 +559,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
             if (seat.player.userID === this.user.id) {
 
                 let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
-                let betCommand: AnteCommand = new AnteCommand(this.table.id, seat.player.userID, betAmount);
+                let betCommand: AnteCommand = new AnteCommand(this.table.id, betAmount);
 
                 this.broadcastCommand(betCommand);
 

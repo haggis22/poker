@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction, DealBoardState } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction, DealBoardState, User } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SittingOutAction } from "../../actions/table/players/sitting-out-action";
@@ -55,6 +55,7 @@ import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
 import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-action";
 import { DealBoardAction } from "../../actions/table/game/dealing/deal-board-action";
 import { ClearBoardAction } from "../../actions/table/game/dealing/clear-board-action";
+import { LobbyManager } from "../lobby/lobby-manager";
 
 const logger: Logger = new Logger();
 
@@ -78,6 +79,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_COMPLETE_HAND: number = 1000;
 
+    private lobbyManager: LobbyManager;
+
 
     private table: Table;
     private game: Game;
@@ -96,7 +99,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(table: Table, deck: Deck) {
+    constructor(lobbyManager: LobbyManager,  table: Table, deck: Deck) {
+
+        this.lobbyManager = lobbyManager;
 
         this.table = table;
         this.deck = deck;
@@ -334,7 +339,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (seatIndex === null) {
 
-            return this.queueMessage(new Message('No seats available', command.user.id));
+            return this.queueMessage(new Message('No seats available', command.userID));
 
         }
 
@@ -344,19 +349,28 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player == null) {
 
-                seat.player = new Player(command.user.id, command.user.name);
+                let user: User = this.lobbyManager.getUserManager().fetchUserByID(command.userID);
 
-                this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
+                if (user) {
 
-                return await this.checkStartHand();
+                    seat.player = new Player(user.id, user.name);
+
+                    this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
+
+                    return await this.checkStartHand();
+
+                }
+
+                this.log(`Could not find User ${command.userID}`);
+                return this.queueMessage(new Message(`${seat.getName()} is already taken`, command.userID));
 
             }
 
-            return this.queueMessage(new Message(`${seat.getName()} is already taken`, command.user.id));
+            return this.queueMessage(new Message(`${seat.getName()} is already taken`, command.userID));
 
         }
 
-        return this.queueMessage(new Message(`Could not find seat ${seatIndex}`, command.user.id));
+        return this.queueMessage(new Message(`Could not find seat ${seatIndex}`, command.userID));
 
     }
 

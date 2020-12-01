@@ -12,6 +12,7 @@ import { PokerGameSevenCardStud } from '../../games/poker/games/poker-game-seven
 import { PokerGameTexasHoldEm } from '../../games/poker/games/poker-game-texas-hold-em';
 import { PokerGameOmaha } from '../../games/poker/games/poker-game-omaha';
 import { IServerClient } from '../../communication/server-side/i-server-client';
+import { LobbyManager } from './lobby-manager';
 
 
 export class TableManager {
@@ -40,8 +41,7 @@ export class TableManager {
 
 
 
-
-    createTable() {
+    createTable(lobbyManager: LobbyManager) {
 
         let tableID = ++this.nextID;
 
@@ -53,7 +53,7 @@ export class TableManager {
 
         let table: Table = new Table(tableID, stakes, rules);
 
-        let tableController: TableController = new TableController(table, new Deck());
+        let tableController: TableController = new TableController(lobbyManager, table, new Deck());
         let clientManager: ClientManager = new ClientManager(tableID);
 
         this.tableControllerMap.set(table.id, tableController);

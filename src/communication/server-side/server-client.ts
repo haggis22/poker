@@ -12,6 +12,7 @@ import { JoinTableCommand } from '../../commands/lobby/join-table-command';
 import { LoginCommand } from '../../commands/lobby/login-command';
 import { User } from "../../players/user";
 import { LoginAction } from '../../actions/lobby/login-action';
+import { TableCommand } from '../../commands/table/table-command';
 
 
 export class ServerClient implements IServerClient {
@@ -71,6 +72,12 @@ export class ServerClient implements IServerClient {
             }
 
             if (o instanceof Command) {
+
+                // Always mark the User ID as the one belonging to this server - not anything 
+                // that might have been passed in from the message - that could always be spoofed
+                if (o instanceof TableCommand) {
+                    o.userID = this.userID;
+                }
 
                 // Pass the message along
                 for (let handler of this.commandHandlers) {

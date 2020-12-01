@@ -36,10 +36,10 @@ export class LobbyManager {
 
     setup(): void {
 
-        this.tableManager.createTable();
+        this.tableManager.createTable(this);
 
     }
-
+    
     addClient(client: IServerClient): void {
 
         this.clients.add(client);
