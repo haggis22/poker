@@ -89,6 +89,7 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="public\" />
+    <Folder Include="src\actions\lobby\" />
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\actions\table\antes\" />
@@ -138,6 +139,10 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\lobby\login-action.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\actions\lobby\lobby-action.ts" />
     <TypeScriptCompile Include="src\actions\table\antes\ante-turn-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
@@ -163,6 +168,7 @@
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
     <TypeScriptCompile Include="src\client\ui\table\table\TableComponent.vue" />
+    <TypeScriptCompile Include="src\commands\lobby\login-command.ts" />
     <TypeScriptCompile Include="src\commands\lobby\lobby-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

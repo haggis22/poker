@@ -9,6 +9,9 @@ import { ActionMessage } from '../../messages/action-message';
 import { LobbyManager } from '../../casino/lobby/lobby-manager';
 import { LobbyCommand } from '../../commands/lobby/lobby-command';
 import { JoinTableCommand } from '../../commands/lobby/join-table-command';
+import { LoginCommand } from '../../commands/lobby/login-command';
+import { User } from "../../players/user";
+
 
 export class ServerClient implements IServerClient {
 
@@ -21,7 +24,7 @@ export class ServerClient implements IServerClient {
 
     private commandHandlers: CommandHandler[];
 
-    constructor(socket: WebSocket, lobbyManager: LobbyManager, userID: number) {
+    constructor(socket: WebSocket, lobbyManager: LobbyManager) {
 
         this.socket = socket;
         this.lobbyManager = lobbyManager;
@@ -29,8 +32,6 @@ export class ServerClient implements IServerClient {
         this.socket.on('message', (message: string) => {
             this.receive(message);
         });
-
-        this.userID = userID;
 
         this.commandHandlers = new Array<CommandHandler>();
 
@@ -90,6 +91,21 @@ export class ServerClient implements IServerClient {
 
             this.lobbyManager.addTableClient(command.tableID, this);
             return;
+
+        }
+
+        if (command instanceof LoginCommand) {
+
+            let user: User = this.lobbyManager.login(command.username, command.password);
+
+            if (user) {
+
+                this.userID = user.id;
+
+            }
+            else {
+                // TODO: send message back to player about incorrect login
+            }
 
         }
 

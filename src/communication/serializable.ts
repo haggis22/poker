@@ -1,4 +1,10 @@
-﻿export { ClearHandAction } from "../actions/table/game/dealing/clear-hand-action";
+﻿// LobbyActions
+export { LoginCommand } from "../commands/lobby/login-command";
+export { JoinTableCommand } from "../commands/lobby/join-table-command";
+
+export { LoginAction } from "../actions/lobby/login-action";
+
+export { ClearHandAction } from "../actions/table/game/dealing/clear-hand-action";
 export { ClearBoardAction } from "../actions/table/game/dealing/clear-board-action";
 
 export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
@@ -48,7 +54,7 @@ export { OpenState } from "../casino/tables/states/open-state";
 export { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 export { SetGameAction } from "../actions/table/game/set-game-action";
 
-export { JoinTableCommand } from "../commands/lobby/join-table-command";
+
 export { RequestSeatCommand } from "../commands/table/request-seat-command";
 export { SitInCommand } from "../commands/table/sit-in-command";
 export { TableConnectedAction } from "../actions/table/state/table-connected-action";

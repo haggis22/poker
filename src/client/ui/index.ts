@@ -24,12 +24,10 @@ var app = new Vue({
 
 });
 
-let user = new User(1, 'Danny', 1000);
-
 const ws = new WebSocket('ws://localhost:3000');
 
 // Client Side
-let ui: TableUI = new TableUI(user, new MoneyFormatter());
+let ui: TableUI = new TableUI(new MoneyFormatter());
 let tableWatcher: TableWatcher = new TableWatcher(1);
 let gameClient: GameClient = new GameClient(ws);
 
@@ -46,9 +44,6 @@ app.ui = ui;
 ws.onopen = (evt: MessageEvent) => {
 
     console.log('Connection opened');
-
-    // Join table 1 automatically
-    gameClient.handleCommand(new JoinTableCommand(1));
 
 };
 

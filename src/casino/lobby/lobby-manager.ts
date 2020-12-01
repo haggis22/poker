@@ -1,5 +1,6 @@
 ﻿import { TableManager } from './table-manager';
-import { Table } from '../tables/table';
+import { UserManager } from '../../players/user-manager';
+import { User } from '../../players/user';
 
 import { IServerClient } from '../../communication/server-side/i-server-client';
 
@@ -8,12 +9,17 @@ export class LobbyManager {
 
 
     private tableManager: TableManager;
+    private userManager: UserManager;
+
+    // We're maintaining a link to clients so that they don't get garbage-collected
     private clients: Set<IServerClient>;
 
 
-    constructor(tableManager: TableManager) {
+    constructor(userManager: UserManager, tableManager: TableManager) {
 
+        this.userManager = userManager;
         this.tableManager = tableManager;
+
         this.clients = new Set<IServerClient>();
 
     }
@@ -53,6 +59,20 @@ export class LobbyManager {
         }
 
     }
+
+
+    fetchUserByID(id: number): User {
+
+        return this.userManager.fetchUserByID(id);
+
+    }   // fetchUserByID
+
+
+    login(username: string, password: string): User {
+
+        return this.userManager.login(username, password);
+
+    }  // login
 
 
 }

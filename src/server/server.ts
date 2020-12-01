@@ -35,9 +35,9 @@ console.log(`Serving files from client path ${clientPath}`);
 
 app.use(express.static(clientPath));
 
-let tableManager: TableManager = new TableManager();
-let lobbyManager: LobbyManager = new LobbyManager(tableManager);
 let userManager: UserManager = new UserManager();
+let tableManager: TableManager = new TableManager();
+let lobbyManager: LobbyManager = new LobbyManager(userManager, tableManager);
 
 lobbyManager.setup();
 
@@ -46,14 +46,13 @@ let tableID = 1;
 
 // RoboClients will automatically connect themselves to the passed-in lobbyManager
 // createRoboClient(tableID, lobbyManager, userManager.getUserByID(1));
-createRoboClient(tableID, lobbyManager, userManager.getUserByID(2));
-createRoboClient(tableID, lobbyManager, userManager.getUserByID(3));
+createRoboClient(tableID, lobbyManager, 2);
+// createRoboClient(tableID, lobbyManager, 3);
 
 
 wss.on('connection', (socket: WebSocket) => {
 
-    let user: User = userManager.getUserByID(1);
-    let serverClient: ServerClient = new ServerClient(socket, lobbyManager, user.id);
+    let serverClient: ServerClient = new ServerClient(socket, lobbyManager);
 
     // Finally, connect the constructed server client to the lobby manager
     lobbyManager.addClient(serverClient);
@@ -64,7 +63,9 @@ wss.on('connection', (socket: WebSocket) => {
 
 
 
-function createRoboClient(tableID: number, lobbyManager: LobbyManager, user: User): LocalServerClient {
+function createRoboClient(tableID: number, lobbyManager: LobbyManager, userID: number): LocalServerClient {
+
+    let user: User = lobbyManager.fetchUserByID(userID);
 
     // Client Side
     let ui: RoboTableUI = new RoboTableUI(user, new MoneyFormatter());

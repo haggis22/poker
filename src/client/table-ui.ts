@@ -14,13 +14,14 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 import { WonPot } from "../casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../actions/table/game/hand-complete-action";
 import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
+import { LoginAction } from "../actions/lobby/login-action";
 
 
 const logger: Logger = new Logger();
@@ -47,9 +48,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    constructor(user: User, chipFormatter: IChipFormatter) {
-
-        this.user = user;
+    constructor(chipFormatter: IChipFormatter) {
 
         this.chipFormatter = chipFormatter;
 
@@ -83,6 +82,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
         let action: Action = message.action;
+
+        if (action instanceof LoginAction) {
+
+            this.logIn(action);
+
+        }
 
         if (action instanceof TableConnectedAction) {
 
@@ -300,6 +305,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
     }   // setGame
+
+
+    private logIn(action: LoginAction): void {
+
+        // Join table 1 automatically
+        this.broadcastCommand(new JoinTableCommand(1));
+
+    }   // logIn
 
 
     private seatPlayer(action: PlayerSeatedAction): void {

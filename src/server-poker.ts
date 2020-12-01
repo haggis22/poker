@@ -21,6 +21,7 @@ import { LocalServerClient } from "./communication/server-side/local-server-clie
 import { PokerGameFiveCardStud } from "./games/poker/games/poker-game-five-card-stud";
 import { TableManager } from './casino/lobby/table-manager';
 import { LobbyManager } from './casino/lobby/lobby-manager';
+import { UserManager } from "./players/user-manager";
 
 
 function createTable(): Table {
@@ -43,7 +44,7 @@ function createTable(): Table {
 function createClient(tableID: number, lobbyManager: LobbyManager, user: User, clientManager: ClientManager): LocalServerClient {
 
     // Client Side
-    let ui: TableUI = new TableUI(user, new MoneyFormatter());
+    let ui: TableUI = new TableUI(new MoneyFormatter());
     let tableWatcher: TableWatcher = new TableWatcher(tableID);
     let gameClient: LocalGameClient = new LocalGameClient();
 
@@ -78,24 +79,19 @@ function createClient(tableID: number, lobbyManager: LobbyManager, user: User, c
     let tableController: TableController = new TableController(table, new Deck());
     tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
 
-    let danny = new User(1, 'Danny', 10000);
-    let mark = new User(2, 'Mark', 10000);
-    let paul = new User(3, 'Paul', 10000);
-    let joe = new User(4, 'Joe', 10000);
-    let sekhar = new User(5, 'Sekhar', 0);
-
+    let userManager: UserManager = new UserManager();
     let tableManager: TableManager = new TableManager();
-    let lobbyManager: LobbyManager = new LobbyManager(tableManager);
+    let lobbyManager: LobbyManager = new LobbyManager(userManager, tableManager);
 
     clientManager.setTableController(tableController);
 
 
 
-    createClient(table.id, lobbyManager, danny, clientManager);
-    createClient(table.id, lobbyManager, mark, clientManager);
-    createClient(table.id, lobbyManager, paul, clientManager);
-    createClient(table.id, lobbyManager, joe, clientManager);
-    createClient(table.id, lobbyManager, sekhar, clientManager);
+    createClient(table.id, lobbyManager, userManager.login('dshell', null), clientManager);
+    createClient(table.id, lobbyManager, userManager.login('mgillmore', null), clientManager);
+    createClient(table.id, lobbyManager, userManager.login('pgrudowski', null), clientManager);
+    createClient(table.id, lobbyManager, userManager.login('jhoepken', null), clientManager);
+    createClient(table.id, lobbyManager, userManager.login('srao', null), clientManager);
 
 })();
 
