@@ -11,6 +11,7 @@ import { LobbyCommand } from '../../commands/lobby/lobby-command';
 import { JoinTableCommand } from '../../commands/lobby/join-table-command';
 import { LoginCommand } from '../../commands/lobby/login-command';
 import { User } from "../../players/user";
+import { LoginAction } from '../../actions/lobby/login-action';
 
 
 export class ServerClient implements IServerClient {
@@ -97,10 +98,16 @@ export class ServerClient implements IServerClient {
         if (command instanceof LoginCommand) {
 
             let user: User = this.lobbyManager.login(command.username, command.password);
+            this.log(`Login for ${command.username} successful? ${(user != null)}`);
 
             if (user) {
 
                 this.userID = user.id;
+
+                // TODO: Who should be in charge of creating the LoginAction?
+                // Should it be this class? the Lobby Manager?
+                this.handleMessage(new ActionMessage(new LoginAction(user)));
+
 
             }
             else {

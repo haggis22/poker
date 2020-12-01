@@ -24,10 +24,19 @@ export class UserManager {
 
     }
 
+    private log(msg: string): void {
+
+        console.log('\x1b[33m%s\x1b[0m', `UserManager ${msg}`);
+
+    }
+
 
     private addUser(user: User): void {
 
         this.userMapByID.set(user.id, user);
+
+        this.log(`Adding username ${user.username} to the username map`);
+
         this.userMapByUsername.set(user.username, user);
 
     }

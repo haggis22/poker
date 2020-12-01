@@ -14,13 +14,14 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 import { WonPot } from "../casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../actions/table/game/hand-complete-action";
 import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
+import { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";
 import { LoginAction } from "../actions/lobby/login-action";
 
 
@@ -83,9 +84,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let action: Action = message.action;
 
+        if (action instanceof LobbyConnectedAction) {
+
+            return this.connected(action);
+
+        }
+
         if (action instanceof LoginAction) {
 
-            this.logIn(action);
+            return this.logIn(action);
 
         }
 
@@ -307,7 +314,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // setGame
 
 
+    private connected(action: LobbyConnectedAction): void {
+
+        // Once connected, log in automatically
+        this.broadcastCommand(new LoginCommand('dshell', 'password1'));
+
+    }   // connected
+
+
+
     private logIn(action: LoginAction): void {
+
+        this.user = action.user;
 
         // Join table 1 automatically
         this.broadcastCommand(new JoinTableCommand(1));
@@ -390,10 +408,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private log(message: string): void {
 
-        // For now, only log from Sekhar's POV
-        if (this.user.id === 5) {
-            console.log(message);
-        }
+        console.log(message);
 
 /*
         if (message == 'You cannot bet less than the current bet') {

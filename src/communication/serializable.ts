@@ -2,6 +2,7 @@
 export { LoginCommand } from "../commands/lobby/login-command";
 export { JoinTableCommand } from "../commands/lobby/join-table-command";
 
+export { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";
 export { LoginAction } from "../actions/lobby/login-action";
 
 export { ClearHandAction } from "../actions/table/game/dealing/clear-hand-action";

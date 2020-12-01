@@ -3,6 +3,8 @@ import { UserManager } from '../../players/user-manager';
 import { User } from '../../players/user';
 
 import { IServerClient } from '../../communication/server-side/i-server-client';
+import { ActionMessage } from '../../messages/action-message';
+import { LobbyConnectedAction } from '../../actions/lobby/lobby-connected-action';
 
 
 export class LobbyManager {
@@ -41,6 +43,9 @@ export class LobbyManager {
     addClient(client: IServerClient): void {
 
         this.clients.add(client);
+
+        // send this client a message that they are connected to the lobby
+        client.handleMessage(new ActionMessage(new LobbyConnectedAction()));
 
     }
 
