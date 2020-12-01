@@ -90,10 +90,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private betTimer: ReturnType<typeof setTimeout>;
 
-    private numTimers: number;
-    private numTimersElapsed: number;
-    private numTimersKilled: number;
-
 
 
     constructor(table: Table, deck: Deck) {
@@ -106,7 +102,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.messageQueue = new Array<Message | MessagePair>();
         this.messageHandlers = new Array<MessageHandler>();
 
-        this.numTimers = this.numTimersElapsed = this.numTimersKilled = 0;
     }
 
 
@@ -481,8 +476,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             if (ante.isValid) {
 
                 clearTimeout(this.betTimer);
-                this.numTimersKilled++;
-                this.logTimers();
 
                 this.queueAction(new BetAction(this.table.id, bettorSeat.index, ante));
                 this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
@@ -527,8 +520,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             if (bet.isValid) {
 
                 clearTimeout(this.betTimer);
-                this.numTimersKilled++;
-                this.logTimers();
 
                 this.queueAction(new BetAction(this.table.id, bettorSeat.index, bet));
                 this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
@@ -565,8 +556,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private async foldPlayer(folderSeat: Seat, fold: Fold): Promise<void> {
 
         clearTimeout(this.betTimer);
-        this.numTimersKilled++;
-        this.logTimers();
 
         // Take away their cards
         folderSeat.clearHand();
@@ -1060,14 +1049,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table.betTracker.seatIndex = seatIndexToAct;
         this.table.betTracker.timeToAct = this.table.rules.timeToAnte;
 
-        this.numTimers++;
-        this.logTimers();
-
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending an Ante command
         this.betTimer = setTimeout(async () => {
-
-            this.numTimersElapsed++;
-            this.logTimers();
 
             return this.rejectAnte(anteSeat);
 
@@ -1081,8 +1064,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private async rejectAnte(anteSeat: Seat): Promise<void> {
 
         clearTimeout(this.betTimer);
-        this.numTimersKilled++;
-        this.logTimers();
 
         this.log(`${anteSeat.getName()} did not ante - marking as sitting out`);
 
@@ -1195,25 +1176,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }  // completeBetting
 
 
-    private logTimers() {
-
-        // this.log(`numTimers: ${this.numTimers}, numTimersElapsed: ${this.numTimersElapsed}, numTimersKilled: ${this.numTimersKilled}`);
-
-    }
-
     private async setBetTurn(seatIndexToAct: number): Promise<void> {
 
         this.table.betTracker.seatIndex = seatIndexToAct;
         this.table.betTracker.timeToAct = this.table.rules.timeToAct;
 
-        this.numTimers++;
-        this.logTimers();
-
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
         this.betTimer = setTimeout(async () => {
-
-            this.numTimersElapsed++;
-            this.logTimers();
 
             let checkerSeat = this.table.seats[this.table.betTracker.seatIndex];
 
