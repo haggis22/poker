@@ -19,6 +19,8 @@ import { MoneyFormatter } from "./casino/tables/chips/money-formatter";
 import { LocalGameClient } from "./communication/client-side/local-game-client";
 import { LocalServerClient } from "./communication/server-side/local-server-client";
 import { PokerGameFiveCardStud } from "./games/poker/games/poker-game-five-card-stud";
+import { TableManager } from './casino/lobby/table-manager';
+import { LobbyManager } from './casino/lobby/lobby-manager';
 
 
 function createTable(): Table {
@@ -38,7 +40,7 @@ function createTable(): Table {
 }
 
 
-function createClient(tableID: number, user: User, clientManager: ClientManager): LocalServerClient {
+function createClient(tableID: number, lobbyManager: LobbyManager, user: User, clientManager: ClientManager): LocalServerClient {
 
     // Client Side
     let ui: TableUI = new TableUI(user, new MoneyFormatter());
@@ -46,7 +48,7 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
     let gameClient: LocalGameClient = new LocalGameClient();
 
     // Server Side
-    let serverClient: LocalServerClient = new LocalServerClient(user.id);
+    let serverClient: LocalServerClient = new LocalServerClient(tableID, lobbyManager, user.id);
 
     // Now join all the links in the chain
     ui.registerCommandHandler(tableWatcher);
@@ -82,13 +84,18 @@ function createClient(tableID: number, user: User, clientManager: ClientManager)
     let joe = new User(4, 'Joe', 10000);
     let sekhar = new User(5, 'Sekhar', 0);
 
+    let tableManager: TableManager = new TableManager();
+    let lobbyManager: LobbyManager = new LobbyManager(tableManager);
+
     clientManager.setTableController(tableController);
 
-    clientManager.addClient(createClient(table.id, danny, clientManager));
-    clientManager.addClient(createClient(table.id, mark, clientManager));
-    clientManager.addClient(createClient(table.id, paul, clientManager));
-    clientManager.addClient(createClient(table.id, joe, clientManager));
-    clientManager.addClient(createClient(table.id, sekhar, clientManager));
+
+
+    createClient(table.id, lobbyManager, danny, clientManager);
+    createClient(table.id, lobbyManager, mark, clientManager);
+    createClient(table.id, lobbyManager, paul, clientManager);
+    createClient(table.id, lobbyManager, joe, clientManager);
+    createClient(table.id, lobbyManager, sekhar, clientManager);
 
 })();
 

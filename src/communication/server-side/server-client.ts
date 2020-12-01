@@ -6,19 +6,25 @@ import { Message } from "../../messages/message";
 import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
 import { ActionMessage } from '../../messages/action-message';
+import { LobbyManager } from '../../casino/lobby/lobby-manager';
+import { LobbyCommand } from '../../commands/lobby/lobby-command';
+import { JoinTableCommand } from '../../commands/lobby/join-table-command';
 
 export class ServerClient implements IServerClient {
 
     private socket: WebSocket;
     private serializer: Serializer;
 
+    private lobbyManager: LobbyManager;
+
     public userID: number;
 
     private commandHandlers: CommandHandler[];
 
-    constructor(socket: WebSocket, userID: number) {
+    constructor(socket: WebSocket, lobbyManager: LobbyManager, userID: number) {
 
         this.socket = socket;
+        this.lobbyManager = lobbyManager;
 
         this.socket.on('message', (message: string) => {
             this.receive(message);
@@ -30,8 +36,15 @@ export class ServerClient implements IServerClient {
 
         this.serializer = new Serializer();
 
+    }
+
+    private log(msg: string): void {
+
+        console.log('\x1b[33m%s\x1b[0m', `ServerClient ${msg}`);
 
     }
+
+
 
     private send(o: any): void {
 
@@ -45,14 +58,38 @@ export class ServerClient implements IServerClient {
 
         let o: any = this.serializer.deserialize(msg);
 
-        if (o && o instanceof Command) {
+        if (o) {
 
-            // Pass the message along
-            for (let handler of this.commandHandlers) {
+            this.log(`Heard ${o.constructor.name}: ${JSON.stringify(o)}`);
 
-                handler.handleCommand(o);
+            if (o instanceof LobbyCommand) {
+
+                return this.handleLobbyCommand(o);
 
             }
+
+            if (o instanceof Command) {
+
+                // Pass the message along
+                for (let handler of this.commandHandlers) {
+
+                    handler.handleCommand(o);
+
+                }
+
+            }
+
+        }  // o is not null
+
+    }   // receive
+
+
+    private handleLobbyCommand(command: LobbyCommand): void {
+
+        if (command instanceof JoinTableCommand) {
+
+            this.lobbyManager.addTableClient(command.tableID, this);
+            return;
 
         }
 

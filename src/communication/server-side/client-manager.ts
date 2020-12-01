@@ -29,12 +29,9 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
         this.tableController = tableController;
 
-
 /*
         for (let client of this.clients) {
-
             client.handleMessage(new ActionMessage(new TableConnectedAction(this.tableController.table.id)));
-
         }
 */
 

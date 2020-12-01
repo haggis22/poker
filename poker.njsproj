@@ -106,6 +106,7 @@
     <Folder Include="src\client\ui\table\pot\" />
     <Folder Include="src\client\ui\table\seat\" />
     <Folder Include="src\client\ui\table\table\" />
+    <Folder Include="src\commands\lobby\" />
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
@@ -162,6 +163,9 @@
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
     <TypeScriptCompile Include="src\client\ui\table\table\TableComponent.vue" />
+    <TypeScriptCompile Include="src\commands\lobby\lobby-command.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
     <TypeScriptCompile Include="src\commands\table\sit-in-command.ts" />
     <TypeScriptCompile Include="src\ai\robo-table-ui.ts" />
@@ -300,14 +304,11 @@
     <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\commands\table\create-table-command.ts">
+    <TypeScriptCompile Include="src\commands\lobby\join-table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\betting\fold-command.ts" />
     <TypeScriptCompile Include="src\commands\table\betting\bet-command.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\commands\table\start-game-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\request-seat-command.ts">

@@ -4,25 +4,29 @@ import { Message } from "../../messages/message";
 import { FakeSocket } from "../fake-socket";
 import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
+import { LobbyManager } from '../../casino/lobby/lobby-manager';
 
 export class LocalServerClient implements IServerClient
-     {
+    {
 
     private socket: FakeSocket;
     private serializer: Serializer;
 
     public userID: number;
 
+    private lobbyManager: LobbyManager;
+
+
     private commandHandlers: CommandHandler[];
 
-    constructor(userID: number) {
+    constructor(tableID: number, lobbyManager: LobbyManager, userID: number) {
 
+        this.lobbyManager = lobbyManager;
         this.userID = userID;
 
         this.commandHandlers = new Array<CommandHandler>();
 
         this.serializer = new Serializer();
-
 
     }
 

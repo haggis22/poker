@@ -15,5 +15,4 @@ export class RequestSeatCommand extends TableCommand {
         this.seatIndex = seatIndex;
     }
 
-
 }

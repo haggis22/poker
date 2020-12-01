@@ -9,6 +9,7 @@ import { Player } from '../../players/player';
 
 
 import TableComponent from './table/table/TableComponent';
+import { JoinTableCommand } from '../../communication/serializable';
 
 var app = new Vue({
 
@@ -23,12 +24,9 @@ var app = new Vue({
 
 });
 
+let user = new User(1, 'Danny', 1000);
 
 const ws = new WebSocket('ws://localhost:3000');
-
-ws.onopen = (evt: MessageEvent) => { console.log('Connection opened'); };
-
-let user = new User(4, 'Sekhar', 0);
 
 // Client Side
 let ui: TableUI = new TableUI(user, new MoneyFormatter());
@@ -44,6 +42,17 @@ tableWatcher.registerCommandHandler(gameClient);
 gameClient.registerMessageHandler(tableWatcher);
 
 app.ui = ui;
+
+ws.onopen = (evt: MessageEvent) => {
+
+    console.log('Connection opened');
+
+    // Join table 1 automatically
+    gameClient.handleCommand(new JoinTableCommand(1));
+
+};
+
+
 
 
 /*
