@@ -90,14 +90,14 @@ export class ServerClient implements IServerClient {
 
         if (command instanceof JoinTableCommand) {
 
-            this.lobbyManager.addTableClient(command.tableID, this);
+            this.lobbyManager.getTableManager().addTableClient(command.tableID, this);
             return;
 
         }
 
         if (command instanceof LoginCommand) {
 
-            let user: User = this.lobbyManager.login(command.username, command.password);
+            let user: User = this.lobbyManager.getUserManager().login(command.username, command.password);
             this.log(`Login for ${command.username} successful? ${(user != null)}`);
 
             if (user) {

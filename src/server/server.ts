@@ -65,7 +65,7 @@ wss.on('connection', (socket: WebSocket) => {
 
 function createRoboClient(tableID: number, lobbyManager: LobbyManager, userID: number): LocalServerClient {
 
-    let user: User = lobbyManager.fetchUserByID(userID);
+    let user: User = lobbyManager.getUserManager().fetchUserByID(userID);
 
     // Client Side
     let ui: RoboTableUI = new RoboTableUI(user, new MoneyFormatter());
@@ -88,7 +88,7 @@ function createRoboClient(tableID: number, lobbyManager: LobbyManager, userID: n
 
     // Finally, connect the constructed server client to the lobby manager
     lobbyManager.addClient(roboClient);
-    lobbyManager.addTableClient(tableID, roboClient);
+    lobbyManager.getTableManager().addTableClient(tableID, roboClient);
 
     return roboClient;
 

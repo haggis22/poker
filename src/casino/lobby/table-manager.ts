@@ -11,6 +11,7 @@ import { PokerGameFiveCardStud } from '../../games/poker/games/poker-game-five-c
 import { PokerGameSevenCardStud } from '../../games/poker/games/poker-game-seven-card-stud';
 import { PokerGameTexasHoldEm } from '../../games/poker/games/poker-game-texas-hold-em';
 import { PokerGameOmaha } from '../../games/poker/games/poker-game-omaha';
+import { IServerClient } from '../../communication/server-side/i-server-client';
 
 
 export class TableManager {
@@ -30,6 +31,13 @@ export class TableManager {
         this.clientManagerMap = new Map<number, ClientManager>();
 
     }
+
+    private log(msg: string): void {
+
+        console.log('\x1b[33m%s\x1b[0m', `TableManager ${msg}`);
+
+    }
+
 
 
 
@@ -70,12 +78,26 @@ export class TableManager {
 
     }
 
-    getClientManager(tableID: number): ClientManager {
+    private getClientManager(tableID: number): ClientManager {
 
         // will be `undefined` if the ID is unknown
         return this.clientManagerMap.get(tableID);
 
     }
 
+
+    addTableClient(tableID: number, client: IServerClient): void {
+
+        let clientManager = this.getClientManager(tableID);
+
+        this.log(`In addTableClient, found clientManager for ${tableID} ? ${(clientManager != null)}`);
+
+        if (clientManager != null) {
+
+            clientManager.addClient(client);
+
+        }
+
+    }  // addTableClient
 
 }

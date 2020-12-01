@@ -49,35 +49,18 @@ export class LobbyManager {
 
     }
 
-    
-    addTableClient(tableID: number, client: IServerClient): void {
 
-        let clientManager = this.tableManager.getClientManager(tableID);
+    getTableManager(): TableManager {
 
-        this.log(`In addTableClient, found clientManager for ${tableID} ? ${(clientManager != null)}`);
-
-
-        if (clientManager != null) {
-
-            clientManager.addClient(client);
-
-        }
+        return this.tableManager;
 
     }
 
 
-    fetchUserByID(id: number): User {
+    getUserManager(): UserManager {
 
-        return this.userManager.fetchUserByID(id);
+        return this.userManager;
 
-    }   // fetchUserByID
-
-
-    login(username: string, password: string): User {
-
-        return this.userManager.login(username, password);
-
-    }  // login
-
+    }
 
 }
