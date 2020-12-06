@@ -2,18 +2,32 @@
 
     <div class="table-menu">
 
-        <div v-if="ui.isCheckBetTime()">
-            <button type="button" v-on:click.stop="check">Check</button>
-            <button type="button" v-on:click.stop="bet">Bet</button>
-            <button type="button" v-on:click.stop="fold">Fold</button>
+        <div class="bet-actions" v-if="ui.isCheckBetTime()">
+            <button type="button" v-on:click.stop="fold">
+                <div class="action">Fold</div>
+            </button>
+            <button type="button" v-on:click.stop="check">
+                <div class="action">Check</div>
+            </button>
+            <button type="button" v-on:click.stop="bet">
+                <div class="action">Bet</div>
+                <div class="amount">{{ ui.chipFormatter.format(ui.myBetAmount) }}</div>
+            </button>
         </div>
 
-        <div v-if="ui.isCallRaiseTime()">
-            <button type="button" v-on:click.stop="call">Call</button>
-            <button type="button" v-on:click.stop="raise">Raise</button>
-            <button type="button" v-on:click.stop="fold">Fold</button>
+        <div class="bet-actions" v-if="ui.isCallRaiseTime()">
+            <button type="button" v-on:click.stop="fold">
+                <div class="action">Fold</div>
+            </button>
+            <button type="button" v-if="ui.myAmountToCall > 0" v-on:click.stop="call">
+                <div class="action">Call</div>
+                <div class="amount">{{ ui.chipFormatter.format(ui.myAmountToCall) }}</div>
+            </button>
+            <button type="button" v-on:click.stop="raise">
+                <div class="action">Raise</div>
+                <div class="amount">{{ ui.chipFormatter.format(ui.myBetAmount) }}</div>
+            </button>
         </div>
-
 
     </div>
 

@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -37,7 +37,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public table: Table;
     public game: Game;
+
     private mySeatIndex: number;
+    public myBetAmount: number;
+    public myAmountToCall: number;
 
 
     public seatAction: Map<number, string>;
@@ -64,6 +67,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.isGatheringBets = false;
 
         this.messages = [];
+
+        // We need to set these values (even to null) so that they are reactive.
+        // If we leave them `undefined` then Vue does not define a setter for it
+        this.mySeatIndex = this.myBetAmount = this.myAmountToCall = null;
 
     }
 
@@ -334,15 +341,48 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // logIn
 
 
+
+    public isInHand(): boolean {
+
+        console.log(`table: ${(this.table != null)}`);
+        console.log(`seats: ${(this.table.seats != null)}`);
+        console.log(`mySeatIndex: ${this.mySeatIndex}`);
+        if (this.mySeatIndex != null) {
+
+            console.log(`mySeat: ${(this.table.seats[this.mySeatIndex] != null)}`);
+
+            if (this.table.seats[this.mySeatIndex]) {
+
+                console.log(`isInHand: ${this.table.seats[this.mySeatIndex].isInHand}`);
+
+            }
+
+
+        }
+
+        return this.table
+            && this.table.seats
+            && (this.mySeatIndex != null)
+            && this.table.seats[this.mySeatIndex]
+            && this.table.seats[this.mySeatIndex].isInHand;
+
+    }
+
     public isCheckBetTime(): boolean {
 
-        return this.table && this.table.betTracker && this.table.betTracker.isCheckAllowed(this.mySeatIndex);
+        return this.isInHand()
+            && this.table.state instanceof BetState
+            && this.table.betTracker
+            && this.table.betTracker.isCheckAllowed(this.mySeatIndex);
 
     }
 
     public isCallRaiseTime(): boolean {
 
-        return this.table && this.table.betTracker && this.table.betTracker.getAmountToCall(this.mySeatIndex) > 0;
+        return this.isInHand()
+            && this.table.state instanceof BetState
+            && this.table.betTracker
+            && this.table.betTracker.getAmountToCall(this.mySeatIndex) > 0;
 
     }
 
@@ -461,11 +501,26 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let state = this.table.state;
 
+        if (!(state instanceof BetState)) {
+
+            // Clear the local bets
+            this.myBetAmount = 0;
+            this.myAmountToCall = 0;
+
+        }
+
         if (state instanceof StartHandState) {
 
             return this.startHand();
 
         }
+
+        if (state instanceof BetState) {
+
+            return this.betState();
+
+        }
+
 
     }  // changeTableState
 
@@ -484,6 +539,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }   // startHand
+
+    private betState(): void {
+
+        // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
+        this.myBetAmount = this.table.betTracker.getMinimumBet(this.mySeatIndex);
+        this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
+
+    }  // betState
 
 
     private updateBets(action: UpdateBetsAction): void {
@@ -572,11 +635,27 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private betTurn(action: BetTurnAction): void {
 
+        // Remove any previous action for the current "to-act" player
         // Map.delete is safe to use, even if the key does not already exist
         this.seatAction.delete(action.betTracker.seatIndex);
 
         let seat = this.findSeat(action.betTracker.seatIndex);
         this.log(`It is ${seat.getName()}'s turn to act`);
+
+        // Raise the minimum value for the UI player to bet/raise, if necessary
+        // Don't lower it if they have previously set it to be higher
+        if (!this.myBetAmount) {
+
+            this.myBetAmount = this.table.betTracker.getMinimumBet(this.mySeatIndex);
+
+        }
+        else {
+
+            this.myBetAmount = Math.max(this.myBetAmount, this.table.betTracker.getMinimumBet(this.mySeatIndex));
+
+        }
+
+        this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
 
     }  // betTurn
 

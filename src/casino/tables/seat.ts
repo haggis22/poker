@@ -8,6 +8,8 @@ export class Seat {
     public index: number;
     public player: Player;
     public hand: Hand;
+
+    // set to true by the TableController whenever a hand is started and the player is not sitting out
     public isInHand: boolean;
 
 
