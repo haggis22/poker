@@ -2,9 +2,18 @@
 
     <div class="table-menu">
 
-        <button type="button" v-on:click.stop="check">Check</button>
-        <button type="button" v-on:click.stop="bet">Bet</button>
-        <button type="button" v-on:click.stop="fold">Fold</button>
+        <div v-if="ui.isCheckBetTime()">
+            <button type="button" v-on:click.stop="check">Check</button>
+            <button type="button" v-on:click.stop="bet">Bet</button>
+            <button type="button" v-on:click.stop="fold">Fold</button>
+        </div>
+
+        <div v-if="ui.isCallRaiseTime()">
+            <button type="button" v-on:click.stop="call">Call</button>
+            <button type="button" v-on:click.stop="raise">Raise</button>
+            <button type="button" v-on:click.stop="fold">Fold</button>
+        </div>
+
 
     </div>
 
@@ -37,9 +46,21 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
+        call: function (event) {
+
+            this.ui.betCommand(new BetCommand(this.ui.table.id, this.ui.table.betTracker.currentBet));
+
+        },
+
         bet: function (event) {
 
-            this.ui.betCommand(new BetCommand(this.ui.table.id, 100));
+            this.ui.betCommand(new BetCommand(this.ui.table.id, this.ui.table.betTracker.getMinimumBet(this.ui.mySeatIndex)));
+
+        },
+
+        raise: function (event) {
+
+            this.ui.betCommand(new BetCommand(this.ui.table.id, this.ui.table.betTracker.getMinimumBet(this.ui.mySeatIndex)));
 
         },
 

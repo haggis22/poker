@@ -87,6 +87,42 @@ export class BetTracker {
 
     }
 
+    public isCheckAllowed(seatIndex: number): boolean {
+
+        // TODO: what about if the player has already checked?
+        // TODO: what about big blind options?
+        // TODO: what about straddles?
+        return this.currentBet == 0;
+
+    }
+
+    public getAmountToCall(seatIndex: number): number {
+
+        // TODO: calculate less if the player has few chips than necessary
+        return this.currentBet - this.getCurrentBet(seatIndex);
+
+    }
+
+    public getMinimumBet(seatIndex: number): number {
+
+        return this.currentBet + 100;
+
+    }  // getMinimumBet
+
+
+    public getMaximumBet(seatIndex: number): number {
+
+        // TODO: Limit vs No-Limit
+        if (this.currentBet == this.getCurrentBet(seatIndex)) {
+
+            return this.currentBet;
+
+        }
+
+        return this.currentBet + 100;
+
+    }  // getMaximumBet
+
 
     public fold(seat: Seat): Fold {
 

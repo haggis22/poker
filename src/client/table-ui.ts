@@ -37,6 +37,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public table: Table;
     public game: Game;
+    private mySeatIndex: number;
 
 
     public seatAction: Map<number, string>;
@@ -333,6 +334,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // logIn
 
 
+    public isCheckBetTime(): boolean {
+
+        return this.table && this.table.betTracker && this.table.betTracker.isCheckAllowed(this.mySeatIndex);
+
+    }
+
+    public isCallRaiseTime(): boolean {
+
+        return this.table && this.table.betTracker && this.table.betTracker.getAmountToCall(this.mySeatIndex) > 0;
+
+    }
+
+
     public betCommand(bet: BetCommand): void {
 
         this.broadcastCommand(bet);
@@ -360,6 +374,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
             if (seat.player.userID === this.user.id) {
+
+                this.mySeatIndex = action.seatIndex;
 
                 let chips = Math.min(this.user.chips, this.calculateBuyIn());
 
