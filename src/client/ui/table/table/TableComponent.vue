@@ -48,6 +48,7 @@
         </div><!-- table seats-6 -->
 
         <log-component :ui="ui"></log-component>
+        <table-menu-component :ui="ui"></table-menu-component>
 
     </div>
 
@@ -78,6 +79,7 @@ import PotComponent from '../pot/PotComponent.vue';
 import WonPotComponent from '../pot/WonPotComponent.vue';
 import LogComponent from '../log/LogComponent.vue';
 import BoardComponent from '../board/BoardComponent.vue';
+import TableMenuComponent from '../table-menu/TableMenuComponent.vue';
 
 const TableComponent = Vue.extend({
 
@@ -96,7 +98,8 @@ const TableComponent = Vue.extend({
         'pot-component': PotComponent,
         'won-pot-component': WonPotComponent,
         'log-component': LogComponent,
-        'board-component': BoardComponent
+        'board-component': BoardComponent,
+        'table-menu-component': TableMenuComponent
 
     }
 

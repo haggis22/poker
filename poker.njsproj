@@ -74,6 +74,8 @@
     <Content Include="src\client\ui\table\pot\WonPotComponent.vue" />
     <Content Include="src\client\ui\table\seat\seat.scss" />
     <Content Include="src\client\ui\table\seat\SeatComponent.vue" />
+    <Content Include="src\client\ui\table\table-menu\table-menu.scss" />
+    <Content Include="src\client\ui\table\table-menu\TableMenuComponent.vue" />
     <Content Include="src\client\ui\table\table\table-seats-6.scss" />
     <Content Include="src\client\ui\table\table\table.scss" />
     <Content Include="src\games\game-factory.ts">
@@ -104,6 +106,7 @@
     <Folder Include="src\client\ui\table\card\" />
     <Folder Include="src\client\ui\table\dealer\" />
     <Folder Include="src\client\ui\table\log\" />
+    <Folder Include="src\client\ui\table\table-menu\" />
     <Folder Include="src\client\ui\table\pot\" />
     <Folder Include="src\client\ui\table\seat\" />
     <Folder Include="src\client\ui\table\table\" />

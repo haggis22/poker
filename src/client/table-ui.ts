@@ -203,13 +203,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof BetAction) {
 
-            return this.bet(action);
+            return this.betAction(action);
 
         }
 
         if (action instanceof FoldAction) {
 
-            return this.fold(action);
+            return this.foldAction(action);
 
         }
 
@@ -311,7 +311,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
 
-    }   // setGame
+    }   // setGamebe
 
 
     private connected(action: LobbyConnectedAction): void {
@@ -331,6 +331,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.broadcastCommand(new JoinTableCommand(1));
 
     }   // logIn
+
+
+    public betCommand(bet: BetCommand): void {
+
+        this.broadcastCommand(bet);
+
+    }
+
+    public foldCommand(fold: FoldCommand): void {
+
+        this.broadcastCommand(fold);
+
+    }
+
 
 
     private seatPlayer(action: PlayerSeatedAction): void {
@@ -610,7 +624,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private bet(action: BetAction): void {
+    private betAction(action: BetAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -671,7 +685,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // bet
 
 
-    private fold(action: FoldAction): void {
+    private foldAction(action: FoldAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 

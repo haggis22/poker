@@ -13,7 +13,7 @@ export class UserManager {
         this.userMapByID = new Map<number, User>();
         this.userMapByUsername = new Map<string, User>();
 
-        this.addUser(new User(1, 'dshell', 'Danny', 1000));
+        this.addUser(new User(1, 'dshell', 'Danny', 5000));
         this.addUser(new User(2, 'moglesby', 'Matt', 1000));
         this.addUser(new User(3, 'ptunney', 'Paul', 1000));
         this.addUser(new User(4, 'srao', 'Sekhar', 1000));

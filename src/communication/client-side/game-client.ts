@@ -49,7 +49,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
         let msgObj: any = this.serializer.deserialize(msg);
 
-        this.log(`received ${msgObj.constructor.name}: ${msg}`);
+        // this.log(`received ${msgObj.constructor.name}: ${msg}`);
 
         if (msgObj instanceof Message) {
 
@@ -58,7 +58,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
             if (msgObj instanceof ActionMessage) {
 
 
-                this.log(`received action ${msgObj.action.constructor.name}`);
+                // this.log(`received action ${msgObj.action.constructor.name}`);
 
 
             }
@@ -66,7 +66,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
             // Pass the message along
             for (let handler of this.messageHandlers) {
 
-                this.log(`Passed message to ${handler.constructor.name}`);
+                // this.log(`Passed message to ${handler.constructor.name}`);
                 handler.handleMessage(msgObj);
 
             }
