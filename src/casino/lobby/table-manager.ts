@@ -64,8 +64,8 @@ export class TableManager {
 
         // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
         // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
-        // tableController.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
-        tableController.setGame((new GameFactory()).create(PokerGameOmaha.ID));
+        tableController.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameOmaha.ID));
 
         return table;
 

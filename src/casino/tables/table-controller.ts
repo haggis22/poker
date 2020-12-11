@@ -1195,6 +1195,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table.betTracker.seatIndex = seatIndexToAct;
         this.table.betTracker.timeToAct = this.table.rules.timeToAct;
 
+        let millisToAct: number = this.table.rules.timeToAct * 1000;
+
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
         this.betTimer = setTimeout(async () => {
 
@@ -1220,9 +1222,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             throw new Error(`TableController could not check or fold ${checkerSeat.getSeatName()}` );
 
-        }, this.table.rules.timeToAct * 1000);
+        }, millisToAct);
 
-        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker)));
+        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker), millisToAct));
 
     }  // setBetTurn
 

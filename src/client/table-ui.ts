@@ -58,7 +58,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
-
+            
         this.table = null;
 
         this.seatAction = new Map<number, string>();
