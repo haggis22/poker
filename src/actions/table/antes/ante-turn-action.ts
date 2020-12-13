@@ -5,12 +5,14 @@ export class AnteTurnAction extends TableAction {
 
     public tableID: number;
     public betTracker: BetTracker;
+    public timesUp: number;
 
-    constructor(tableID: number, betTracker: BetTracker) {
+    constructor(tableID: number, betTracker: BetTracker, timesUp: number) {
 
         super(tableID);
 
         this.betTracker = betTracker;
+        this.timesUp = timesUp;
 
     }
 

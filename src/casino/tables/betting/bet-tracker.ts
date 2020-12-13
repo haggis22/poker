@@ -12,8 +12,6 @@ export class BetTracker {
     public lastLiveBet: number;
     public currentBet: number;
 
-    public timeToAct: number;
-
     // Tracks how much each seat has bet so far in this round
     // Key = seat index
     // Value = Bet object

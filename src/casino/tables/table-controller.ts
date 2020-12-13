@@ -1061,16 +1061,19 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         let anteSeat: Seat = this.table.seats[seatIndexToAct];
 
         this.table.betTracker.seatIndex = seatIndexToAct;
-        this.table.betTracker.timeToAct = this.table.rules.timeToAnte;
+
+        let millisToAct: number = this.table.rules.timeToAnte * 1000;
+        let timesUp: number = Date.now() + millisToAct;
 
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending an Ante command
         this.betTimer = setTimeout(async () => {
 
             return this.rejectAnte(anteSeat);
 
-        }, this.table.rules.timeToAnte * 1000);
+        }, millisToAct);
 
-        this.queueAction(new AnteTurnAction(this.table.id, this.snapshot(this.table.betTracker)));
+        this.queueAction(new AnteTurnAction(this.table.id, this.snapshot(this.table.betTracker), timesUp));
+
 
     }  // setAnteTurn
 
@@ -1193,12 +1196,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private async setBetTurn(seatIndexToAct: number): Promise<void> {
 
         this.table.betTracker.seatIndex = seatIndexToAct;
-        this.table.betTracker.timeToAct = this.table.rules.timeToAct;
 
         let millisToAct: number = this.table.rules.timeToAct * 1000;
         let timesUp: number = Date.now() + millisToAct;
 
-        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker), millisToAct, timesUp));
+        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker), timesUp));
 
         console.log(`Starting timer at ${Date.now()}`);
 

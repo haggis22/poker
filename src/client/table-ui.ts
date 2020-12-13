@@ -661,12 +661,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
 
-        // Clear any existing seat timer
-        for (let [key, value] of this.seatTimer) {
-            value.stop();
-        }
-
-        this.seatTimer.clear();
+        this.clearSeatTimers();
 
         if (action.timesUp > Date.now()) {
 
@@ -704,6 +699,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             this.log(`It is ${seat.getName()}'s turn to ante`);
+
+            this.clearSeatTimers();
+
+            if (action.timesUp > Date.now()) {
+
+                let timer: Timer = new Timer(action.timesUp);
+                timer.start();
+                this.seatTimer.set(seat.index, timer);
+
+            }
 
             if (seat.isInHand && seat.player) {
 
@@ -815,6 +820,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // killSeatTimer
 
 
+    private clearSeatTimers(): void {
+
+        // Stop any seat timer that is already running
+        for (let [key, value] of this.seatTimer) {
+            value.stop();
+        }
+
+        // Remove all timers from the map
+        this.seatTimer.clear();
+
+    }  // clearSeatTimers
+
+
     private foldAction(action: FoldAction): void {
 
         let seat = this.findSeat(action.seatIndex);
@@ -823,11 +841,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.killSeatTimer(action.seatIndex);
 
-
         let message: string = `${seat.getName()} folds`;
-
-
-
 
         this.messages.push(message);
         this.log(message);
