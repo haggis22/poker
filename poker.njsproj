@@ -78,6 +78,8 @@
     <Content Include="src\client\ui\table\table-menu\TableMenuComponent.vue" />
     <Content Include="src\client\ui\table\table\table-seats-6.scss" />
     <Content Include="src\client\ui\table\table\table.scss" />
+    <Content Include="src\client\ui\table\timer\timer.scss" />
+    <Content Include="src\client\ui\table\timer\TimerComponent.vue" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
@@ -106,6 +108,7 @@
     <Folder Include="src\client\ui\table\card\" />
     <Folder Include="src\client\ui\table\dealer\" />
     <Folder Include="src\client\ui\table\log\" />
+    <Folder Include="src\client\ui\table\timer\" />
     <Folder Include="src\client\ui\table\table-menu\" />
     <Folder Include="src\client\ui\table\pot\" />
     <Folder Include="src\client\ui\table\seat\" />
@@ -136,6 +139,7 @@
     <Folder Include="src\client\" />
     <Folder Include="src\ai\" />
     <Folder Include="src\math\" />
+    <Folder Include="src\timers\" />
     <Folder Include="src\server\" />
     <Folder Include="src\players\" />
     <Folder Include="src\casino\tables\states\" />
@@ -402,6 +406,9 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\states\showdown-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\table-state.ts" />
+    <TypeScriptCompile Include="src\timers\timer.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

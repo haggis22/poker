@@ -25,7 +25,6 @@ import './card.scss';
 
 import Vue from 'vue';
 
-import { TableUI } from '../../../table-ui';
 import { Card } from '../../../../cards/card';
 import { FacedownCard } from '../../../../cards/face-down-card';
 
@@ -118,6 +117,6 @@ const CardComponent = Vue.extend ({
 
 });
 
-    export default CardComponent;
+export default CardComponent;
 
 </script>

@@ -5,6 +5,7 @@
         </div>
         <div class="avatar">
             <div class="action-container">
+                <timer-component v-if="ui.seatTimer.has(seat.index)" :timer="ui.seatTimer.get(seat.index)"></timer-component>
                 <div class="action" v-if="ui.seatAction.has(seat.index)">{{ ui.seatAction.get(seat.index) }}</div>
             </div>
         </div>
@@ -35,6 +36,7 @@ import { BetTracker } from '../../../../casino/tables/betting/bet-tracker';
 import { TableUI } from '../../../table-ui';
 
 import CardComponent from '../card/CardComponent';
+import TimerComponent from '../timer/TimerComponent';
 
 const SeatComponent = Vue.extend ({
 
@@ -53,7 +55,8 @@ const SeatComponent = Vue.extend ({
         }
     },
     components: {
-        'card-component': CardComponent
+        'card-component': CardComponent,
+        'timer-component': TimerComponent
     },
     computed: {
 

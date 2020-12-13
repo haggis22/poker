@@ -23,6 +23,7 @@ import { HandCompleteAction } from "../actions/table/game/hand-complete-action";
 import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 import { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";
 import { LoginAction } from "../actions/lobby/login-action";
+import { Timer } from "../timers/timer";
 
 
 const logger: Logger = new Logger();
@@ -44,6 +45,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
     public seatAction: Map<number, string>;
+    public seatTimer: Map<number, Timer>;
+
     public wonPots: WonPot[];
 
     public isGatheringBets: boolean;
@@ -62,6 +65,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.seatAction = new Map<number, string>();
+        this.seatTimer = new Map<number, Timer>();
         this.wonPots = [];
 
         this.isGatheringBets = false;
@@ -657,6 +661,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
 
+        // Clear any existing seat timer
+        for (let [key, value] of this.seatTimer) {
+            value.stop();
+        }
+
+        this.seatTimer.clear();
+
+        let timer: Timer = new Timer(action.timeToAct);
+        this.seatTimer.set(seat.index, timer);
+        timer.start();
+
     }  // betTurn
 
 
@@ -723,6 +738,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
+        this.killSeatTimer(action.seatIndex);
+
         let message = 'Unknown message';
 
         if (action.bet.betType == Bet.TYPE.ANTE) {
@@ -780,11 +797,30 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // bet
 
 
+    private killSeatTimer(seatIndex: number): void {
+
+        // it's OK to delete something that might not exist
+        let timer: Timer = this.seatTimer.get(seatIndex);
+
+        if (timer) {
+            timer.stop();
+            this.seatTimer.delete(seatIndex);
+        }
+
+    }   // killSeatTimer
+
+
     private foldAction(action: FoldAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
+        this.killSeatTimer(action.seatIndex);
+
+
         let message: string = `${seat.getName()} folds`;
+
+
+
 
         this.messages.push(message);
         this.log(message);

@@ -1197,6 +1197,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         let millisToAct: number = this.table.rules.timeToAct * 1000;
 
+        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker), millisToAct));
+
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
         this.betTimer = setTimeout(async () => {
 
@@ -1224,7 +1226,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }, millisToAct);
 
-        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker), millisToAct));
 
     }  // setBetTurn
 
