@@ -1,7 +1,5 @@
 ﻿<template>
     <div class="timer">
-        <div>{{ localTimer.timeRemaining }}</div>
-
         <div class="mercury" :style="{ width: width }"></div>
     </div>
 </template>
@@ -39,9 +37,9 @@ const TimerComponent = Vue.extend ({
 
         width: function () {
 
-            if (this.localTimer && this.localTimer.totalTime) {
+            if (this.localTimer) {
 
-                return (100 * this.localTimer.timeRemaining / this.localTimer.totalTime) + '%';
+                return this.localTimer.percentRemaining() + '%';
 
             }
 

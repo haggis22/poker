@@ -1196,11 +1196,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table.betTracker.timeToAct = this.table.rules.timeToAct;
 
         let millisToAct: number = this.table.rules.timeToAct * 1000;
+        let timesUp: number = Date.now() + millisToAct;
 
-        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker), millisToAct));
+        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betTracker), millisToAct, timesUp));
+
+        console.log(`Starting timer at ${Date.now()}`);
 
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
         this.betTimer = setTimeout(async () => {
+
+            console.log(`Timer went off at ${Date.now()}`);
 
             let checkerSeat = this.table.seats[this.table.betTracker.seatIndex];
 

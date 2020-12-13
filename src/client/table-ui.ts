@@ -668,9 +668,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.seatTimer.clear();
 
-        let timer: Timer = new Timer(action.timeToAct);
-        this.seatTimer.set(seat.index, timer);
-        timer.start();
+        if (action.timesUp > Date.now()) {
+
+            let timer: Timer = new Timer(action.timesUp);
+            timer.start();
+            this.seatTimer.set(seat.index, timer);
+
+        }
+
 
     }  // betTurn
 
@@ -813,6 +818,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private foldAction(action: FoldAction): void {
 
         let seat = this.findSeat(action.seatIndex);
+
+        this.log(`Got the fold message at ${Date.now()}`);
 
         this.killSeatTimer(action.seatIndex);
 

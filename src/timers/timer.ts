@@ -4,14 +4,20 @@
 
     private timer: ReturnType<typeof setTimeout>;
 
-    public totalTime: number;
+    private startTime: number;
+    private expireTime: number;
+    private totalTime: number;
+
     public timeRemaining: number;
 
 
 
-    constructor(totalTime: number) {
+    constructor(expireTime: number) {
 
-        this.timeRemaining = this.totalTime = totalTime;
+        this.startTime = Date.now();
+        this.expireTime = expireTime;
+
+        this.timeRemaining = this.totalTime = Math.max(this.expireTime - this.startTime, 0);
 
     }
 
@@ -30,7 +36,7 @@
 
         clearTimeout(this.timer);
 
-        this.timeRemaining = Math.max(this.timeRemaining - Timer.STEP_TIME, 0);
+        this.timeRemaining = Math.max(this.expireTime - Date.now(), 0);
 
         if (this.timeRemaining > 0) {
 
