@@ -38,7 +38,10 @@ export class LocalServerClient implements IServerClient
     private send(o: any): void {
 
         if (this.socket) {
-            this.socket.receive(this.serializer.serialize(o));
+
+            // introduce a slight delay so that all the robotic activity isn't just direct method invocations
+            setTimeout(() => { this.socket.receive(this.serializer.serialize(o)); }, 0);
+
         }
 
     }

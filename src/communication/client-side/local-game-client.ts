@@ -34,9 +34,9 @@ export class LocalGameClient implements MessageBroadcaster, CommandHandler, Fake
 
         if (this.socket) {
 
-            this.log(`Sending ${o.constructor.name}`);
+            // introduce a slight delay so that all the robotic activity isn't just direct method invocations
+            setTimeout(() => { this.socket.receive(this.serializer.serialize(o)); }, 0);
 
-            this.socket.receive(this.serializer.serialize(o));
         }
 
     }
