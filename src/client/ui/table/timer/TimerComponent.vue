@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="timer">
+    <div :class="classes">
         <div class="mercury" :style="{ width: width }"></div>
     </div>
 </template>
@@ -47,28 +47,17 @@ const TimerComponent = Vue.extend ({
 
         },
 
+        classes: function () {
 
-        maxValue: function () {
+            let classes = [ 'timer' ];
 
-            if (this.timer && this.timer.totalTime) {
+            if (this.localTimer && this.localTimer.percentRemaining() < 20) {
 
-                return this.timer.totalTime;
-
-            }
-
-            return 0;
-
-        },
-
-        currentValue: function () {
-
-            if (this.timer && this.timer.timeRemaining) {
-
-                return this.timer.timeRemaining;
+                classes.push('danger');
 
             }
 
-            return 0;
+            return classes;
 
         }
 

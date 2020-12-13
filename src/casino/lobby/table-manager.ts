@@ -46,7 +46,7 @@ export class TableManager {
         let tableID = ++this.nextID;
 
         // # seats, # seconds to act
-        let rules = new TableRules(6, 5, 10);
+        let rules = new TableRules(6, 5, 5);
 
         // blinds, ante, minRaise
         let stakes = new Stakes(new Array<number>(), 25, 100);
