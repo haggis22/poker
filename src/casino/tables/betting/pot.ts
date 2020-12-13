@@ -39,9 +39,9 @@
 
     }
 
-    getSeatsInPot(): any[] {
+    getSeatsInPot(): number[] {
 
-        return Object.keys(this.seats);
+        return Object.keys(this.seats).map(seatIndexStr => parseInt(seatIndexStr, 10));
 
     }
 

@@ -142,6 +142,11 @@ export class BetTracker {
 
         }
 
+        // Remove the player from all pots up to this point
+        for (let pot of this.pots) {
+            pot.foldPlayer(seat.index);
+        }
+
         return new Fold(true, null);
 
     }   // fold
@@ -375,7 +380,7 @@ export class BetTracker {
 
 
 
-    public gatherBets(): void {
+    public gatherBets(seatIndexesStillInHand: Set<number>): void {
 
         this.seatIndex = null;
 
@@ -389,62 +394,105 @@ export class BetTracker {
         // Find the most recent pot, or create one, if necessary
         let pot = this.pots.length == 0 ? this.createPot() : this.pots[this.pots.length - 1];
 
-        // Everyone still betting should be active in the most recent pot, but it's not necessarily true
-        // that everyone in the most recent pot should also be in this one
-        let needsNew = false;
+        // If there is only one player left in the pot, then just put them money in there
+        // We have already checked at this point for bets that need to be returned.
+        if (seatIndexesStillInHand.size === 1) {
 
-        for (let previousBettorIndex of pot.getSeatsInPot()) {
+            for (let seatIndex of Object.keys(this.bets)) {
 
-            if ((this.getCurrentBet(previousBettorIndex)) === 0) {
+                // the seatIndex is actually a number, but used as a key it will always be a string, so we need to parse it out
+                pot.addChips(parseInt(seatIndex, 10), this.bets[seatIndex].totalBet);
+                delete this.bets[seatIndex];
 
-                // we have non-zero bets in this pot, but this person didn't put in anything
-                needsNew = true;
-                break;
             }
-        }
 
-        if (needsNew) {
-
-            // Create a new pot because someone in the last pot is not in this round of betting
-            pot = this.createPot();
-
+            return;
         }
 
         let done: boolean = false;
 
         while (!done) {
 
-            let smallestBet = Number.MAX_VALUE;
+            done = true;
+
+            // Remove any bet that is just 0 at this point
+            for (let seatIndex of Object.keys(this.bets)) {
+
+                if (this.bets[seatIndex].totalBet == 0) {
+
+                    delete this.bets[seatIndex];
+
+                }
+
+            }
+
+            // If there is anyone in the current pot that is still active in the hand and has not put in a bet, then we need to create a new, split pot
+            let needsNew: boolean = false;
+
+            for (let seatIndexInPot of pot.getSeatsInPot()) {
+
+                if ((this.getCurrentBet(seatIndexInPot)) === 0 && seatIndexesStillInHand.has(seatIndexInPot)) {
+
+                    // we have non-zero bets in this pot, but this person didn't put in anything, and they are still in the hand (so all-in).
+                    // If they put some into the last pot, but nothing into this one, then they just folded, and we don't need a side pot
+                    needsNew = true;
+                    break;
+                }
+
+            }
+
+            if (needsNew) {
+
+                // Create a new pot because someone in the last pot is not in this round of betting
+                pot = this.createPot();
+
+            }
+
+            let smallestActiveBet: number = Number.MAX_VALUE;
+            let largestActiveBet: number = Number.MIN_VALUE;
 
             for (let bet of Object.values(this.bets)) {
 
-                smallestBet = Math.min(smallestBet, bet.totalBet);
+                if (seatIndexesStillInHand.has(bet.seatIndex)) {
+
+                    if (bet.totalBet < smallestActiveBet) {
+
+                        smallestActiveBet = bet.totalBet;
+
+                    }
+
+                    if (bet.totalBet > largestActiveBet) {
+
+                        largestActiveBet = bet.totalBet;
+
+                    }
+
+                }
 
             }
 
-            done = true;
 
+            // If anyone has a bet that must be larger than 0, but smaller than the largest bet, then slice those out
             for (let seatIndex of Object.keys(this.bets)) {
 
+                // only take the amount of the smallest bet. It might be from this seat (and thus their entire bet), or it might
+                // be someone else that has the smallest, but we don't to put in more for this better than the other all-in person put in
+                let amountToContribute: number = Math.min(this.bets[seatIndex].totalBet, smallestActiveBet);
+
                 // iterating object keys will always give strings, but these are actually numbers
-                pot.addChips(parseInt(seatIndex, 10), smallestBet);
+                pot.addChips(parseInt(seatIndex, 10), amountToContribute);
 
-                this.bets[seatIndex].totalBet = this.bets[seatIndex].totalBet - smallestBet;
 
-                if (this.bets[seatIndex].totalBet > 0) {
-
-                    done = false;
-
-                }
-                else {
-                    delete this.bets[seatIndex];
-                }
+                this.bets[seatIndex].totalBet -= amountToContribute;
 
             }
 
-            if (!done) {
+            // Someone didn't put in the full amount, we're going to have a split pot
+            if (smallestActiveBet < largestActiveBet) {
 
-                // Create a new side pot - it will become the active pot to which bets get added
+                done = false;
+
+                // Create a new side pot - it will become the active pot to which the remaining bets get added
                 pot = this.createPot();
 
             }

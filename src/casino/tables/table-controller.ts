@@ -1167,6 +1167,22 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }  // validateBettorOrMoveOn
 
 
+    private getSeatIndexesStillInHand(): Set<number> {
+
+        // We need to track which seats are still in the hand - if they folded mid-hand then we don't want to necessarily create a side pot
+        let seatsStillInHand: Set<number> = new Set<number>();
+        for (let seat of this.table.seats) {
+
+            if (seat.isInHand) {
+                seatsStillInHand.add(seat.index);
+            }
+
+        }
+
+        return seatsStillInHand;
+    }
+
+
     private async completeBetting(): Promise<void> {
 
         // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
@@ -1178,7 +1194,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.log('Gather bets');
         this.queueAction(new GatherBetsAction(this.table.id));
-        this.table.betTracker.gatherBets();
+
+        this.table.betTracker.gatherBets(this.getSeatIndexesStillInHand());
 
         // give it a minute before clearing out all the actions
         await this.wait(this.TIME_GATHERING_BETS);
