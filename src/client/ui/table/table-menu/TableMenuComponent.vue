@@ -12,7 +12,7 @@
         </div>
 
         <div class="bet-actions" v-if="ui.isAnteTime()">
-            <button type="button" v-on:click.stop="sitOut">
+            <button type="button" v-on:click.stop="fold">
                 <div class="action">Sit Out</div>
             </button>
             <button type="button" v-on:click.stop="ante">
@@ -63,7 +63,6 @@ import { TableUI } from '../../../table-ui';
 import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';
 import { FoldCommand } from '../../../../commands/table/betting/fold-command';
-import { SetStatusCommand } from '../../../../commands/table/set-status-command';
 
 const TableMenuComponent = Vue.extend ({
 
@@ -74,12 +73,6 @@ const TableMenuComponent = Vue.extend ({
         }
     },
     methods: {
-
-        sitOut: function (event) {
-
-            this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, true));
-
-        },
 
         ante: function (event) {
 
