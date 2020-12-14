@@ -1190,6 +1190,15 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         while (!done) {
 
+            if (this.table.seats.filter(seat => seat.isInHand).length === 1) {
+
+                // we're down to only one player, so no more betting required
+                await this.completeBetting();
+
+                return await this.goToNextState();
+
+            }
+
             if (bettorSeatIndex == this.table.betTracker.seatIndexInitiatingAction) {
 
                 await this.completeBetting();
