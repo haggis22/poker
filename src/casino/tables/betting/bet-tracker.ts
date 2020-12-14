@@ -96,7 +96,7 @@ export class BetTracker {
 
     public getAmountToCall(seatIndex: number): number {
 
-        // TODO: calculate less if the player has few chips than necessary
+        // TODO: calculate less if the player has fewer chips than necessary
         return this.currentBet - this.getCurrentBet(seatIndex);
 
     }

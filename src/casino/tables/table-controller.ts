@@ -512,8 +512,15 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 await this.wait(this.TIME_ANTE);
 
-                // this was maybe undefined, so make sure it is false
-                bettorSeat.player.isSittingOut = false;
+                // if the player has not specified in or out, then ante-ing put them firmly in the "not-sitting-out" camp
+                if (bettorSeat.player.isSittingOut === undefined) {
+
+                    bettorSeat.player.isSittingOut = false;
+
+                    // Tell the world this player is not sitting out
+                    this.queueAction(new SetStatusAction(this.table.id, bettorSeat.player.userID, false));
+
+                }
 
                 return await this.advanceAnteTurn();
 

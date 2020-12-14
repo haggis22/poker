@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -270,6 +270,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
+    public sendCommand(command: Command) {
+
+        this.broadcastCommand(command);
+
+    }  // sendCommand
+
+
     private broadcastCommand(command: Command) {
 
         this.log(`Sent ${command.constructor.name}`);
@@ -372,6 +379,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
+
+    public isAnteTime(): boolean {
+
+        return this.isInHand()
+            && this.table.state instanceof AnteState;
+
+    }   // isAnteTime
+
+
     public isCheckBetTime(): boolean {
 
         return this.isInHand()
@@ -389,20 +405,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             && this.table.betTracker.getAmountToCall(this.mySeatIndex) > 0;
 
     }
-
-
-    public betCommand(bet: BetCommand): void {
-
-        this.broadcastCommand(bet);
-
-    }
-
-    public foldCommand(fold: FoldCommand): void {
-
-        this.broadcastCommand(fold);
-
-    }
-
 
 
     private seatPlayer(action: PlayerSeatedAction): void {
@@ -505,13 +507,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let state = this.table.state;
 
-        if (!(state instanceof BetState)) {
-
-            // Clear the local bets
-            this.myBetAmount = 0;
-            this.myAmountToCall = 0;
-
-        }
+        // Clear the local bets
+        this.myBetAmount = 0;
+        this.myAmountToCall = 0;
 
         if (state instanceof StartHandState) {
 
@@ -522,6 +520,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (state instanceof BetState) {
 
             return this.betState();
+
+        }
+
+        if (state instanceof AnteState) {
+
+            return this.anteState();
 
         }
 
@@ -551,6 +555,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
 
     }  // betState
+
+    private anteState(): void {
+
+        // reset the player's default bet to match the ante
+        this.myBetAmount = this.table.betTracker.getAmountToCall(this.mySeatIndex);
+
+    }  // anteState
+
 
 
     private updateBets(action: UpdateBetsAction): void {
@@ -699,6 +711,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             this.log(`It is ${seat.getName()}'s turn to ante`);
+
+            // Set the amount required to call the ante
+            this.myBetAmount = this.table.betTracker.getAmountToCall(this.mySeatIndex);
+            this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
 
             this.clearSeatTimers();
 
