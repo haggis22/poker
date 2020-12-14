@@ -1,5 +1,5 @@
 ﻿import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
-import { SittingOutAction } from "../../actions/table/players/sitting-out-action";
+import { SetStatusAction } from "../../actions/table/players/set-status-action";
 import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
 import { MoveButtonAction } from "../../actions/table/game/move-button-action";
 import { Player } from "../../players/player";
@@ -190,9 +190,9 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-        if (action instanceof SittingOutAction) {
+        if (action instanceof SetStatusAction) {
 
-            return this.setSittingOut(action);
+            return this.setStatus(action);
 
         }
 
@@ -324,7 +324,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private seatPlayer(action: PlayerSeatedAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        const seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
         if (seat) {
 
@@ -336,9 +336,9 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     }
 
-    private setSittingOut(action: SittingOutAction): void {
+    private setStatus(action: SetStatusAction): void {
 
-        let player: Player = this.findPlayer(action.userID);
+        const player: Player = this.findPlayer(action.userID);
 
         if (player) {
 

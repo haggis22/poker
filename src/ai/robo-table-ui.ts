@@ -13,7 +13,7 @@ import { Logger } from "../logging/logger";
 import { TableConnectedAction } from "../actions/table/state/table-connected-action";
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
-import { SitInCommand } from "../commands/table/sit-in-command";
+import { SetStatusCommand } from "../commands/table/set-status-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
 import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker, AnteTurnAction, IsInHandAction } from "../communication/serializable";
 import { Game } from "../games/game";
@@ -343,8 +343,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                 if (player.chips > 0 && player.isSittingOut) {
 
-                    // I have chips now, so I would like to play
-                    this.broadcastCommand(new SitInCommand(this.table.id));
+                    // I have chips now, so I would like to play (no longer sitting out)
+                    this.broadcastCommand(new SetStatusCommand(this.table.id, false));
 
                 }
 
@@ -399,7 +399,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player) {
 
-                this.log(`${seat.getSeatName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isSittingOut ? ' [sitting out]' : ''}`);
+                this.log(`${seat.getSeatName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isSittingOut ? ' [sitting out]' : ''}, sittingOut: ${seat.player.isSittingOut}`);
 
             }
 

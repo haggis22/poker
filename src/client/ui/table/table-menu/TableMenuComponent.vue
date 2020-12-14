@@ -2,6 +2,15 @@
 
     <div class="table-menu">
 
+        <div class="sit-out">
+            <label>
+                <input type="checkbox"
+                       value="true" />
+
+                Sit out next hand
+            </label>
+        </div>
+
         <div class="bet-actions" v-if="ui.isCheckBetTime()">
             <button type="button" v-on:click.stop="fold">
                 <div class="action">Fold</div>

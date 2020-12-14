@@ -57,7 +57,7 @@ export { SetGameAction } from "../actions/table/game/set-game-action";
 
 
 export { RequestSeatCommand } from "../commands/table/request-seat-command";
-export { SitInCommand } from "../commands/table/sit-in-command";
+export { SetStatusCommand } from "../commands/table/set-status-command";
 export { TableConnectedAction } from "../actions/table/state/table-connected-action";
 
 export { PokerHandEvaluator } from "../games/poker/poker-hand-evaluator";
@@ -100,7 +100,7 @@ export { Message } from "../messages/message";
 export { ActionMessage } from "../messages/action-message";
 
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
-export { SittingOutAction } from "../actions/table/players/sitting-out-action";
+export { SetStatusAction } from "../actions/table/players/set-status-action";
 
 export { IsInHandAction } from "../actions/table/players/is-in-hand-action";
 

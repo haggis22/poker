@@ -161,7 +161,7 @@
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\players\is-in-hand-action.ts" />
-    <TypeScriptCompile Include="src\actions\table\players\sitting-out-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\players\set-status-action.ts" />
     <TypeScriptCompile Include="src\actions\table\state\table-state-action.ts" />
     <TypeScriptCompile Include="src\actions\table\state\table-connected-action.ts">
       <SubType>Code</SubType>
@@ -181,7 +181,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
-    <TypeScriptCompile Include="src\commands\table\sit-in-command.ts" />
+    <TypeScriptCompile Include="src\commands\table\set-status-command.ts" />
     <TypeScriptCompile Include="src\ai\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>

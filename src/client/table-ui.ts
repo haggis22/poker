@@ -712,9 +712,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.isInHand && seat.player) {
 
-                // TODO: Automatically ante if isSittingOut == false, prompt the player if isSittingOut == undefined
-
-                if (seat.player.userID === this.user.id) {
+                // Automatically ante if isSittingOut == false, prompt the player if isSittingOut == undefined
+                if (seat.player.userID === this.user.id && seat.player.isSittingOut === false) {
 
                     let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
                     let betCommand: AnteCommand = new AnteCommand(this.table.id, betAmount);
@@ -726,12 +725,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                 }  // if it's my turn
 
             }   // seat has a player
-            else {
 
-                this.log(`${seat.getName()} is MIA`);
-                return;
 
-            }
+            this.log(`${seat.getName()} is MIA`);
+            return;
 
         }
         else {

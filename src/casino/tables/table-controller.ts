@@ -2,7 +2,7 @@
 import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { RequestSeatCommand } from "../../commands/table/request-seat-command";
-import { SitInCommand } from "../../commands/table/sit-in-command";
+import { SetStatusCommand } from "../../commands/table/set-status-command";
 import { Player } from "../../players/player";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
 import { StartHandState } from "./states/start-hand-state";
@@ -47,7 +47,7 @@ import { DeepCopier } from "../../communication/deep-copier";
 import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction, DealBoardState, User } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
-import { SittingOutAction } from "../../actions/table/players/sitting-out-action";
+import { SetStatusAction } from "../../actions/table/players/set-status-action";
 import { BettingCompleteAction } from "../../actions/table/betting/betting-complete-action";
 import { FacedownCard } from "../../cards/face-down-card";
 import { WonPot } from "./betting/won-pot";
@@ -207,9 +207,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        if (command instanceof SitInCommand) {
+        if (command instanceof SetStatusCommand) {
 
-            return await this.sitIn(command);
+            return await this.setStatus(command);
 
         }
 
@@ -370,19 +370,33 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
-    private async sitIn(command: SitInCommand): Promise<void> {
+    private async setStatus(command: SetStatusCommand): Promise<void> {
 
         let player = this.findPlayer(command.userID);
 
         if (player) {
 
-            // Only let them mark themselves as back in if they have chips (or are about to add some)
-            if (player.getTotalChips() > 0) {
+            if (command.isSittingOut) {
 
-                player.isSittingOut = false;
-                this.queueAction(new SittingOutAction(this.table.id, command.userID, false));
+                // They can always mark themselves as sitting out the next hand
+                player.isSittingOut = true;
+                this.queueAction(new SetStatusAction(this.table.id, command.userID, true));
 
             }
+
+            else {
+
+                // Only let them mark themselves as back in if they have chips (or are about to add some)
+                if (player.getTotalChips() > 0) {
+
+                    player.isSittingOut = false;
+                    this.queueAction(new SetStatusAction(this.table.id, command.userID, false));
+
+                }
+
+            }
+
+            return await this.checkStartHand();
 
         }
 
@@ -445,7 +459,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             // TODO: create delayed AddChips action
             this.queueMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`, command.userID));
-            return;
+
+            return await this.checkStartHand();
 
         }
         else {
@@ -697,7 +712,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     seat.player.isSittingOut = true;
 
                     // Tell the world this player is sitting out
-                    this.queueAction(new SittingOutAction(this.table.id, seat.player.userID, true));
+                    this.queueAction(new SetStatusAction(this.table.id, seat.player.userID, true));
 
                 }
 
@@ -1090,7 +1105,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // Tell the world this player is sitting out
         this.queueAction(new IsInHandAction(this.table.id, anteSeat.index, anteSeat.isInHand));
-        this.queueAction(new SittingOutAction(this.table.id, anteSeat.player.userID, true));
+        this.queueAction(new SetStatusAction(this.table.id, anteSeat.player.userID, true));
 
         return await this.advanceAnteTurn();
 

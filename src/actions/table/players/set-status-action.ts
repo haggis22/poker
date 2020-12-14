@@ -1,6 +1,6 @@
 ﻿import { TableAction } from "../table-action";
 
-export class SittingOutAction extends TableAction {
+export class SetStatusAction extends TableAction {
 
     public userID: number;
     public isSittingOut: boolean;
