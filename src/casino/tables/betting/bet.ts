@@ -7,8 +7,7 @@
             CHECK: 0,
             OPEN: 1,
             CALL: 2,
-            RAISE: 3,
-            DEAD_RAISE: 4
+            RAISE: 3
         }
 
 

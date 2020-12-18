@@ -801,11 +801,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                     this.seatAction.set(seat.index, 'RAISE');
                     break;
 
-                case Bet.ACTION.DEAD_RAISE:
-                    message = `${seat.getName()} puts in a dead raise to ${this.chipFormatter.format(action.bet.totalBet)}`;
-                    this.seatAction.set(seat.index, 'RAISE');
-                    break;
-
             }  // switch
 
         }

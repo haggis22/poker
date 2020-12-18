@@ -237,6 +237,11 @@ export class BetTracker {
 
         else if (totalBetAmount > this.currentBet) {
 
+            // Even if this is a dead raise, we need to re-calculate the people left to act so that the player immediately before this bettor 
+            // gets a chance to call
+            raisesAction = true;
+
+
             if (totalBetAmount < this.lastLiveBet + minimumBet) {
 
                 if (chipsRemaining > 0) {
@@ -270,9 +275,6 @@ export class BetTracker {
                 // This is a live bet/raise, so update both metrics
                 this.currentBet = totalBetAmount;
                 this.lastLiveBet = totalBetAmount;
-
-                raisesAction = true;
-
 
             }
 
@@ -387,7 +389,7 @@ export class BetTracker {
         // We have already checked at this point for bets that need to be returned.
         if (seatIndexesStillInHand.size === 1) {
 
-            for (let seatIndex of Object.keys(this.bets)) {
+            for (let seatIndex of Object.keys(this.bets)) {D
 
                 // the seatIndex is actually a number, but used as a key it will always be a string, so we need to parse it out
                 pot.addChips(parseInt(seatIndex, 10), this.bets[seatIndex].totalBet);
@@ -519,6 +521,8 @@ export class BetTracker {
             let done: boolean = false;
             let ix: number = possibleStartingIndex;
 
+            console.log(`BETTRACKER: calculateSeatIndexesRemainToAct possibleStartingIndex: ${possibleStartingIndex}, lastPossibleIndex: ${lastPossibleIndex}, numSeats: ${seats.length}`);
+
             while (!done) {
 
                 if (seats[ix] && seats[ix].isInHand && seats[ix].player && seats[ix].player.chips > 0) {
@@ -541,6 +545,9 @@ export class BetTracker {
                 }   // keep going
 
             }  // !done
+
+            console.log(`BETTRACKER: calculateSeatIndexesRemainToAct seatsToAct: [ ${seatsToAct.join("  ")} ]`);
+
 
         }   // seats.length > 0
 
