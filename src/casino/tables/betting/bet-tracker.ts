@@ -6,8 +6,8 @@ import { Fold } from "./fold";
 export class BetTracker {
 
 
-    public seatIndexInitiatingAction: number;
     public seatIndex: number;
+    public seatIndexesRemainToAct: number[];
 
     public lastLiveBet: number;
     public currentBet: number;
@@ -21,6 +21,8 @@ export class BetTracker {
 
     constructor() {
 
+        this.seatIndexesRemainToAct = [];
+
         this.pots = [];
         this.bets = {};
 
@@ -28,7 +30,7 @@ export class BetTracker {
 
     public toString(): string {
 
-        return `[BetTracker, seatIndex: ${this.seatIndex}, seatIndexInitiatingAction: ${this.seatIndexInitiatingAction}, lastLiveBet: ${this.lastLiveBet}, currentBet: ${this.currentBet} ]`;
+        return `[BetTracker, seatIndex: ${this.seatIndex}, lastLiveBet: ${this.lastLiveBet}, currentBet: ${this.currentBet} ]`;
 
     }
 
@@ -47,9 +49,15 @@ export class BetTracker {
 
     }
 
+    public clearBettorsToAct(): void {
+
+        this.seatIndexesRemainToAct.length = 0;
+
+    }
+
     public clearBets(): void {
 
-        this.seatIndexInitiatingAction = null;
+        this.clearBettorsToAct();
 
         for (const prop of Object.getOwnPropertyNames(this.bets)) {
             delete this.bets[prop];
@@ -61,29 +69,13 @@ export class BetTracker {
     }   // clearBets
 
 
-    public getNumberOfBettors(): number {
+    public getNextBettorIndex(): number {
 
-        if (!this.pots || !this.pots.length) {
+        return this.seatIndexesRemainToAct.shift();
+          
+    }   // getNextBetterIndex
 
-            return 0;
 
-        }
-
-        // Track the distinct bettor seatIndexes that appear in any of the pots
-        let setBettors: Set<number> = new Set<number>();
-        for (let pot of this.pots) {
-
-            for (let seatIndex of pot.getSeatsInPot()) {
-
-                setBettors.add(seatIndex);
-
-            }
-
-        }
-
-        return setBettors.size;
-
-    }
 
     public isCheckAllowed(seatIndex: number): boolean {
 
@@ -166,6 +158,8 @@ export class BetTracker {
     }
 
 
+
+
     public addBet(seat: Seat, betType: number, totalBetAmount: number, minimumBet: number): Bet {
 
         // console.log(`In addBet: bet made by ${seat.getName()} at index ${seat.index}, current bettor is ${this.seatIndex} for amount ${totalBetAmount}, currentBet = ${this.currentBet}, lastLiveBet = ${this.lastLiveBet}, seatIndexInitiatingAction = ${this.seatIndexInitiatingAction}`);
@@ -219,6 +213,7 @@ export class BetTracker {
         let isAllIn: boolean = (chipsRemaining === 0) && (chipsRequired > 0);
 
         let actionType: number = null;
+        let raisesAction = false;
 
         if (totalBetAmount == 0 && this.currentBet > 0) {
 
@@ -253,8 +248,6 @@ export class BetTracker {
 
                 if (this.currentBet === 0) {
 
-                    // If there is no existing bet, then this functions as an opening bet, and resets the first actor and the last "live" bet
-                    this.seatIndexInitiatingAction = seat.index;
                     this.lastLiveBet = totalBetAmount;
                     this.currentBet = totalBetAmount;
                     actionType = Bet.ACTION.OPEN;
@@ -264,7 +257,7 @@ export class BetTracker {
 
                     // We are raising the current amount, but NOT the lastLiveAmount since it is a dead raise
                     this.currentBet = totalBetAmount;
-                    actionType = Bet.ACTION.DEAD_RAISE;
+                    actionType = Bet.ACTION.RAISE;
 
                 }
 
@@ -272,14 +265,14 @@ export class BetTracker {
             }
             else {
 
-                // They have bet/raise at least the mininum, so mark them as the new betting actor
-                this.seatIndexInitiatingAction = seat.index;
-
                 actionType = this.currentBet === 0 ? Bet.ACTION.OPEN : Bet.ACTION.RAISE;
 
                 // This is a live bet/raise, so update both metrics
                 this.currentBet = totalBetAmount;
                 this.lastLiveBet = totalBetAmount;
+
+                raisesAction = true;
+
 
             }
 
@@ -294,13 +287,9 @@ export class BetTracker {
         seat.player.chips -= chipsRequired;
 
         let bet = new Bet(true, seat.index, totalBetAmount, chipsRequired, isAllIn, betType, actionType, null);
+        bet.raisesAction = raisesAction;
+
         this.bets[seat.index] = bet;
-
-        // console.log(`actionType is ${actionType}`);
-
-        if (this.seatIndexInitiatingAction == null) {
-            this.seatIndexInitiatingAction = seat.index;
-        }
 
         return bet;
 
@@ -510,5 +499,55 @@ export class BetTracker {
         this.pots = this.pots.filter(pot => !potIndexesToKill.has(pot.index));
 
     }   // killPots
+
+
+    public calculateSeatIndexesRemainToAct(seats: Seat[], possibleStartingIndex: number, lastPossibleIndex: number): void {
+
+        // Go through the rest of the players at the table and see whether or not they need to take an action
+        let seatsToAct = [];
+
+        if (seats.length) {
+
+            while (possibleStartingIndex >= seats.length) {
+                possibleStartingIndex -= seats.length;
+            }
+
+            while (lastPossibleIndex < 0) {
+                lastPossibleIndex += seats.length;
+            }
+
+            let done: boolean = false;
+            let ix: number = possibleStartingIndex;
+
+            while (!done) {
+
+                if (seats[ix] && seats[ix].isInHand && seats[ix].player && seats[ix].player.chips > 0) {
+
+                    seatsToAct.push(ix);
+
+                }
+
+                if (ix == lastPossibleIndex) {
+                    done = true;
+                }
+                else {
+
+                    ix++;
+
+                    if (ix >= seats.length) {
+                        ix = 0;
+                    }
+
+                }   // keep going
+
+            }  // !done
+
+        }   // seats.length > 0
+
+
+        this.seatIndexesRemainToAct = [...seatsToAct];
+
+    }  // calculateSeatIndexesRemainToAct
+
 
 }

@@ -602,10 +602,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                 message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
                 break;
 
-            case Bet.ACTION.DEAD_RAISE:
-                message = `${seat.getName()} puts in a dead raise to ${this.chipFormatter.format(action.bet.totalBet)}`;
-                break;
-
         }  // switch
 
         if (action.bet.isAllIn) {

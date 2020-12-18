@@ -32,6 +32,8 @@
 
     public message: string;
 
+    public raisesAction: boolean;
+
     constructor(isValid: boolean,
                 seatIndex: number,
                 totalBet: number,
@@ -49,6 +51,8 @@
         this.betType = betType;
         this.actionType = actionType;
         this.message = message;
+
+        this.raisesAction = false;
 
     }
 
@@ -74,7 +78,6 @@
                 return 'Calls';
 
             case Bet.ACTION.RAISE:
-            case Bet.ACTION.DEAD_RAISE:
                 return 'Raises';
 
         }   // switch
