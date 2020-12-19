@@ -83,9 +83,9 @@ export class ClientManager implements MessageHandler, CommandHandler {
 
     public handleMessage(message: Message | MessagePair): void {
 
-        this.log(`ClientManager handling ${message.constructor.name}`);
+        // this.log(`ClientManager handling ${message.constructor.name}`);
         if (message instanceof ActionMessage) {
-            console.log(`  ClientManager sending message ${message.action.constructor.name} to ${message.userID}`);
+            // console.log(`  ClientManager sending message ${message.action.constructor.name} to ${message.userID}`);
         }
 
 

@@ -1173,6 +1173,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (seatIndexToAct === undefined) {
 
             this.log('Finished betting');
+
+            // completeBetting will automatically look for bets that need returning if we don't have enough players
+            await this.completeBetting();
+
             return await this.goToNextState();
 
         }

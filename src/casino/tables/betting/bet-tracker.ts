@@ -35,6 +35,13 @@ export class BetTracker {
     }
 
 
+    private log(message: string): void {
+
+        console.log('\x1b[31m%s\x1b[0m', `BetTracker ${message}`);
+
+    }
+
+
     public getBets(): Bet[] {
 
         return Object.values(this.bets);
@@ -375,7 +382,7 @@ export class BetTracker {
 
         this.seatIndex = null;
 
-        if (!Object.values(this.bets).find(bet => bet.totalBet > 0)) {
+        if (Object.values(this.bets).every(bet => bet.totalBet === 0)) {
 
             // No bets greater than 0 to gather. Dump out or we will create extra pots because people from the last one are not in the "no-bets" round
             return;
@@ -385,11 +392,13 @@ export class BetTracker {
         // Find the most recent pot, or create one, if necessary
         let pot = this.pots.length == 0 ? this.createPot() : this.pots[this.pots.length - 1];
 
+        // this.log(`Bets: [ ${Object.keys(this.bets).map(seatIndex => '(Seat ' + seatIndex + ': ' + this.bets[seatIndex] + ')').join("  ")}`);
+
         // If there is only one player left in the pot, then just put them money in there
         // We have already checked at this point for bets that need to be returned.
         if (seatIndexesStillInHand.size === 1) {
 
-            for (let seatIndex of Object.keys(this.bets)) {D
+            for (let seatIndex of Object.keys(this.bets)) {
 
                 // the seatIndex is actually a number, but used as a key it will always be a string, so we need to parse it out
                 pot.addChips(parseInt(seatIndex, 10), this.bets[seatIndex].totalBet);
