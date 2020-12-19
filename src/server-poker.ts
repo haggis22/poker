@@ -12,7 +12,7 @@ import { Stakes } from "./casino/tables/betting/stakes";
 import { ClientManager } from "./communication/server-side/client-manager";
 import { Seat } from "./casino/tables/seat";
 import { GameFactory } from "./games/game-factory";
-import { BetTracker, Bet, Hand } from "./communication/serializable";
+import { BetStatus, Bet, Hand } from "./communication/serializable";
 import { TableWatcher } from "./casino/tables/table-watcher";
 import { TableUI } from "./client/table-ui";
 import { MoneyFormatter } from "./casino/tables/chips/money-formatter";
@@ -22,6 +22,7 @@ import { PokerGameFiveCardStud } from "./games/poker/games/poker-game-five-card-
 import { TableManager } from './casino/lobby/table-manager';
 import { LobbyManager } from './casino/lobby/lobby-manager';
 import { UserManager } from "./players/user-manager";
+import { BetController } from "./casino/tables/betting/bet-controller";
 
 
 function createTable(): Table {
@@ -115,22 +116,23 @@ function testBetTracker() {
 
     const minBet: number = 20;
 
-    let tracker: BetTracker = new BetTracker();
+    let betStatus: BetStatus = new BetStatus();
+    let betController: BetController = new BetController();
 
-    tracker.reset();
+    betController.reset(betStatus);
 
     let dannySeat: Seat = setupSeat(1, 1, 'Danny', 10);
     let markSeat: Seat = setupSeat(2, 2, 'Mark', 100);
 
-    tracker.seatIndex = 1;
-    let bet: Bet = tracker.addBet(dannySeat, Bet.TYPE.REGULAR, 10, minBet);
+    betStatus.seatIndex = 1;
+    let bet: Bet = betController.addBet(betStatus, dannySeat, Bet.TYPE.REGULAR, 10, minBet);
     console.log(bet);
-    console.log(tracker.toString());
+    console.log(betStatus.toString());
 
-    tracker.seatIndex = 2;
-    bet = tracker.addBet(markSeat, Bet.TYPE.REGULAR, 0, minBet);
+    betStatus.seatIndex = 2;
+    bet = betController.addBet(betStatus, markSeat, Bet.TYPE.REGULAR, 0, minBet);
     console.log(bet);
-    console.log(tracker.toString());
+    console.log(betStatus.toString());
 
 
 }

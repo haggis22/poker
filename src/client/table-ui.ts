@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, BetTracker, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -24,6 +24,7 @@ import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 import { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";
 import { LoginAction } from "../actions/lobby/login-action";
 import { Timer } from "../timers/timer";
+import { BetController } from "../casino/tables/betting/bet-controller";
 
 
 const logger: Logger = new Logger();
@@ -38,6 +39,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public table: Table;
     public game: Game;
+    public betController: BetController;
 
     private mySeatIndex: number;
     public myBetAmount: number;
@@ -52,6 +54,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public isGatheringBets: boolean;
 
     public messages: string[];
+
+
 
 
 
@@ -75,6 +79,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
         this.mySeatIndex = this.myBetAmount = this.myAmountToCall = null;
+
+        this.betController = new BetController();
 
     }
 
@@ -392,8 +398,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         return this.isInHand()
             && this.table.state instanceof BetState
-            && this.table.betTracker
-            && this.table.betTracker.isCheckAllowed(this.mySeatIndex);
+            && this.betController.isCheckAllowed(this.table.betStatus, this.mySeatIndex);
 
     }
 
@@ -401,8 +406,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         return this.isInHand()
             && this.table.state instanceof BetState
-            && this.table.betTracker
-            && this.table.betTracker.getAmountToCall(this.mySeatIndex) > 0;
+            && this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex) > 0;
 
     }
 
@@ -551,15 +555,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private betState(): void {
 
         // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-        this.myBetAmount = this.table.betTracker.getMinimumBet(this.mySeatIndex);
-        this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
+        this.myBetAmount = this.betController.getMinimumBet(this.table.betStatus, this.mySeatIndex);
+        this.myAmountToCall = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
 
     }  // betState
 
     private anteState(): void {
 
         // reset the player's default bet to match the ante
-        this.myBetAmount = this.table.betTracker.getAmountToCall(this.mySeatIndex);
+        this.myBetAmount = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
 
     }  // anteState
 
@@ -567,7 +571,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private updateBets(action: UpdateBetsAction): void {
 
-        for (let pot of this.table.betTracker.pots) {
+        for (let pot of this.table.betStatus.pots) {
         
             let potDesc = `${pot.getName()}: ${this.chipFormatter.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
             potDesc += pot.getSeatsInPot().map(seatIndex => this.table.seats[seatIndex].getName()).join(", ");
@@ -575,7 +579,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         
         }
 
-        let betsString = Object.keys(this.table.betTracker.bets).map(seatIndex => `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betTracker.bets[seatIndex].totalBet)}`).join(", ");
+        let betsString = Object.keys(this.table.betStatus.bets).map(seatIndex => `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betStatus.bets[seatIndex].totalBet)}`).join(", ");
         if (betsString.length) {
             this.log(`  Bets: ${betsString}`);
         }
@@ -653,25 +657,25 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // Remove any previous action for the current "to-act" player
         // Map.delete is safe to use, even if the key does not already exist
-        this.seatAction.delete(action.betTracker.seatIndex);
+        this.seatAction.delete(action.betStatus.seatIndex);
 
-        let seat = this.findSeat(action.betTracker.seatIndex);
+        let seat = this.findSeat(action.betStatus.seatIndex);
         this.log(`It is ${seat.getName()}'s turn to act`);
 
         // Raise the minimum value for the UI player to bet/raise, if necessary
         // Don't lower it if they have previously set it to be higher
         if (!this.myBetAmount) {
 
-            this.myBetAmount = this.table.betTracker.getMinimumBet(this.mySeatIndex);
+            this.myBetAmount = this.betController.getMinimumBet(this.table.betStatus, this.mySeatIndex);
 
         }
         else {
 
-            this.myBetAmount = Math.max(this.myBetAmount, this.table.betTracker.getMinimumBet(this.mySeatIndex));
+            this.myBetAmount = Math.max(this.myBetAmount, this.betController.getMinimumBet(this.table.betStatus, this.mySeatIndex));
 
         }
 
-        this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
+        this.myAmountToCall = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
 
         this.clearSeatTimers();
 
@@ -702,19 +706,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private anteTurn(action: AnteTurnAction): void {
 
-        let tracker: BetTracker = this.table.betTracker;
+        let seat = this.findSeat(this.table.betStatus.seatIndex);
 
-        let seat = this.findSeat(tracker.seatIndex);
-
-        this.log(`In anteTurn, tracker.seatIndex = ${tracker.seatIndex}`);
+        this.log(`In anteTurn, tracker.seatIndex = ${this.table.betStatus.seatIndex}`);
 
         if (seat) {
 
             this.log(`It is ${seat.getName()}'s turn to ante`);
 
             // Set the amount required to call the ante
-            this.myBetAmount = this.table.betTracker.getAmountToCall(this.mySeatIndex);
-            this.myAmountToCall = this.table.betTracker.getAmountToCall(this.mySeatIndex);
+            this.myBetAmount = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
+            this.myAmountToCall = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
 
             this.clearSeatTimers();
 
@@ -749,7 +751,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
         else {
 
-            this.log(`In anteTurn, could not find seat for index ${tracker.seatIndex}`);
+            this.log(`In anteTurn, could not find seat for index ${this.table.betStatus.seatIndex}`);
 
         }
 

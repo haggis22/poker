@@ -396,7 +396,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private updateBets(action: UpdateBetsAction): void {
 
-        this.table.betTracker = action.betTracker;
+        this.table.betStatus = action.betStatus;
 
     }  // updateBets
 
@@ -455,13 +455,13 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private betTurn(action: BetTurnAction): void {
 
-        this.table.betTracker = action.betTracker;
+        this.table.betStatus = action.betStatus;
 
     }  // betTurn
 
     private anteTurn(action: AnteTurnAction): void {
 
-        this.table.betTracker = action.betTracker;
+        this.table.betStatus = action.betStatus;
 
     }  // anteTurn
 

@@ -15,12 +15,14 @@ import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { SetStatusCommand } from "../commands/table/set-status-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, BetTracker, AnteTurnAction, IsInHandAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, AnteTurnAction, IsInHandAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
 import { WonPot } from "../casino/tables/betting/won-pot";
 import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
+import { BetStatus } from "../casino/tables/betting/bet-status";
+import { BetController } from "../casino/tables/betting/bet-controller";
 
 
 const MILLISECONDS_TO_THINK = 1500;
@@ -37,6 +39,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private table: Table;
     private game: Game;
+    private betController: BetController;
 
 
     constructor(user: User, chipFormatter: IChipFormatter) {
@@ -48,6 +51,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         this.commandHandlers = new Array<CommandHandler>();
 
         this.table = null;
+
+        this.betController = new BetController();
 
         this.log(`Created Robo UI for user ${user.name}`);
 
@@ -410,7 +415,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private updateBets(action: UpdateBetsAction): void {
 
-        for (let pot of this.table.betTracker.pots) {
+        for (let pot of this.table.betStatus.pots) {
         
             let potDesc = `${pot.getName()}: ${this.chipFormatter.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
             potDesc += pot.getSeatsInPot().map(seatIndex => this.table.seats[seatIndex].getName()).join(", ");
@@ -418,7 +423,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         
         }
 
-        let betsString = Object.keys(this.table.betTracker.bets).map(seatIndex => `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betTracker.bets[seatIndex].totalBet)}`).join(", ");
+        let betsString = Object.keys(this.table.betStatus.bets).map(seatIndex => `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betStatus.bets[seatIndex].totalBet)}`).join(", ");
         if (betsString.length) {
             this.log(`  Bets: ${betsString}`);
         }
@@ -458,9 +463,9 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private betTurn(action: BetTurnAction): void {
 
-        let tracker: BetTracker = action.betTracker;
+        let betStatus: BetStatus = action.betStatus;
 
-        let seat = this.findSeat(tracker.seatIndex);
+        let seat = this.findSeat(betStatus.seatIndex);
 
         this.log(`It is ${seat.getName()}'s turn to act`);
 
@@ -468,7 +473,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player.userID === this.user.id) {
 
-                if (tracker.currentBet > 0) {
+                if (betStatus.currentBet > 0) {
 
                     setTimeout(() => {
 
@@ -483,9 +488,9 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         if (rnd >= 0.8) {
 
                             // This represents a raise 
-                            let betAmount: number = Math.min(tracker.currentBet + this.table.stakes.minRaise, seat.player.chips + tracker.getCurrentBet(seat.index));
+                            let betAmount: number = Math.min(betStatus.currentBet + this.table.stakes.minRaise, seat.player.chips + this.betController.getCurrentBet(this.table.betStatus, seat.index));
 
-                            this.log(`tracker.currentBet = ${tracker.currentBet}, stakes.minRaise = ${this.table.stakes.minRaise}, playerChips = ${seat.player.chips}, playerCurrentBet = ${tracker.getCurrentBet(seat.index)}`);
+                            this.log(`tracker.currentBet = ${betStatus.currentBet}, stakes.minRaise = ${this.table.stakes.minRaise}, playerChips = ${seat.player.chips}, playerCurrentBet = ${this.betController.getCurrentBet(this.table.betStatus, seat.index)}`);
 
                             let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
@@ -495,7 +500,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         else if (rnd >= 0.02) {
 
                             // This represents a call (possibly all-in)
-                            let betAmount: number = Math.min(tracker.currentBet, tracker.getCurrentBet(seat.index) + seat.player.chips);
+                            let betAmount: number = Math.min(betStatus.currentBet, this.betController.getCurrentBet(this.table.betStatus, seat.index) + seat.player.chips);
                             let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
                             return this.broadcastCommand(betCommand);
@@ -548,11 +553,11 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private anteTurn(action: AnteTurnAction): void {
 
-        let tracker: BetTracker = action.betTracker;
+        let betStatus: BetStatus = action.betStatus;
 
-        let seat = this.findSeat(tracker.seatIndex);
+        let seat = this.findSeat(betStatus.seatIndex);
 
-        this.log(`It is ${seat.getName()}'s turn to ante, tracker.seatIndex: ${tracker.seatIndex}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
+        this.log(`It is ${seat.getName()}'s turn to ante, tracker.seatIndex: ${betStatus.seatIndex}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
 
         if (seat.isInHand && seat.player) {
 

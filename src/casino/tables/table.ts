@@ -4,7 +4,7 @@ import { TableState } from "./states/table-state";
 import { OpenState } from "./states/open-state";
 import { Seat } from "./seat";
 import { TableRules } from "./table-rules";
-import { BetTracker } from "./betting/bet-tracker";
+import { BetStatus } from "./betting/bet-status";
 import { Stakes } from "./betting/stakes";
 import { Game } from "../../games/game";
 
@@ -21,7 +21,7 @@ export class Table {
 
     public board: Board;
 
-    public betTracker: BetTracker;
+    public betStatus: BetStatus;
 
     // tracks which seat has the button so that we know where to deal the next card
     public buttonIndex: number;
@@ -43,7 +43,7 @@ export class Table {
         // Button is not yet assigned
         this.buttonIndex = null;
 
-        this.betTracker = new BetTracker();
+        this.betStatus = new BetStatus();
 
         this.state = new OpenState();
 

@@ -1,15 +1,15 @@
 ﻿import { TableAction } from "../table-action";
-import { BetTracker } from "../../../casino/tables/betting/bet-tracker";
+import { BetStatus } from "../../../casino/tables/betting/bet-status";
 
 export class UpdateBetsAction extends TableAction {
 
-    public betTracker: BetTracker
+    public betStatus: BetStatus
 
-    constructor(tableID: number, betTracker: BetTracker) {
+    constructor(tableID: number, betStatus: BetStatus) {
 
         super(tableID);
 
-        this.betTracker = betTracker;
+        this.betStatus = betStatus;
 
     }
 

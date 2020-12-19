@@ -32,7 +32,7 @@ import './seat.scss';
 import Vue from 'vue';
 
 import { Seat } from '../../../../casino/tables/seat';
-import { BetTracker } from '../../../../casino/tables/betting/bet-tracker';
+import { BetStatus} from '../../../../casino/tables/betting/bet-status';
 import { TableUI } from '../../../table-ui';
 
 import CardComponent from '../card/CardComponent';
@@ -45,8 +45,8 @@ const SeatComponent = Vue.extend ({
             type: Seat,
             required: true
         },
-        betTracker: {
-            type: BetTracker,
+        betStatus: {
+            type: BetStatus,
             required: true
         },
         ui: {
@@ -64,7 +64,7 @@ const SeatComponent = Vue.extend ({
 
             let classes = [`seat-${this.seat.index}`];
 
-            if (this.betTracker && this.betTracker.seatIndex == this.seat.index) {
+            if (this.betStatus && this.betStatus.seatIndex == this.seat.index) {
 
                 classes.push('action-on');
 

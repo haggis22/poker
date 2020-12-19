@@ -10,18 +10,18 @@
                                 :key="'seat-' + seat.index"
                                 :seat="seat"
                                 :ui="ui"
-                                :bet-tracker="ui.table.betTracker">
+                                :bet-status="ui.table.betStatus">
                 </seat-component>
 
                 <dealer-box-component></dealer-box-component>
 
-                <bet-component v-for="bet in ui.table.betTracker.bets"
+                <bet-component v-for="bet in ui.table.betStatus.bets"
                                :key="'bet-' + bet.seatIndex"
                                :bet="bet"
                                :ui="ui">
                 </bet-component>
 
-                <pot-component v-for="pot in ui.table.betTracker.pots"
+                <pot-component v-for="pot in ui.table.betStatus.pots"
                                :key="'pot-' + pot.index"
                                :pot="pot"
                                :ui="ui">

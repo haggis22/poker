@@ -86,7 +86,7 @@ export { Stakes } from "../casino/tables/betting/stakes";
 export { TableRules } from "../casino/tables/table-rules";
 export { Board } from "../casino/tables/boards/board";
 export { Deck } from "../cards/deck";
-export { BetTracker } from "../casino/tables/betting/bet-tracker";
+export { BetStatus } from "../casino/tables/betting/bet-status";
 
 
 export { TableAction } from "../actions/table/table-action";
