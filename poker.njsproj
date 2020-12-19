@@ -171,6 +171,7 @@
     <TypeScriptCompile Include="src\casino\lobby\table-manager.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\betting\bet-status.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
     <TypeScriptCompile Include="src\casino\tables\boards\hold-em-board.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
@@ -278,7 +279,7 @@
     <TypeScriptCompile Include="src\casino\tables\betting\bet.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\casino\tables\betting\bet-tracker.ts">
+    <TypeScriptCompile Include="src\casino\tables\betting\bet-controller.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\boards\board.ts">
