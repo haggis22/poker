@@ -1064,16 +1064,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (seatIndexToAct === undefined) {
 
             // completeBetting will automatically look for bets that need returning if we don't have enough players
-            await this.completeBetting();
-
-            if (!this.table.betTracker.pots.length) {
-
-                // We don't have enough players, so go back to the open state
-                return await this.changeTableState(this.game.stateMachine.goToOpenState());
-
-            }
-
-            return await this.goToNextState();
+            return await this.completeBetting();
 
         }
 
@@ -1168,16 +1159,20 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async validateBettorOrMoveOn(): Promise<void> {
 
+        if (this.getSeatIndexesStillInHand().size < 2) {
+
+            // someone probably folded when first to act - no point in going through the list
+
+            // completeBetting will automatically look for bets that need returning if we don't have enough players
+            return await this.completeBetting();
+
+        }
+
         let seatIndexToAct: number = this.table.betTracker.getNextBettorIndex();
 
         if (seatIndexToAct === undefined) {
 
-            this.log('Finished betting');
-
-            // completeBetting will automatically look for bets that need returning if we don't have enough players
-            await this.completeBetting();
-
-            return await this.goToNextState();
+            return await this.completeBetting();
 
         }
 
@@ -1214,11 +1209,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async completeBetting(): Promise<void> {
 
+        this.log('Finished betting');
+
         // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
         this.table.betTracker.seatIndex = null;
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betTracker)));
         await this.wait(this.TIME_LAST_BET_MADE);
 
+        // look for uncalled bets (or pieces of bets of bets that were not fully called)
         await this.returnBets(this.table.betTracker.checkBetsToReturn());
 
         this.log('Gather bets');
@@ -1234,7 +1232,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.log('Betting is complete');
         this.queueAction(new BettingCompleteAction(this.table.id));
 
-//        return await this.wait(this.TIME_BETTING_COMPLETE);
+        if (!this.table.betTracker.pots.length) {
+
+            // We don't have enough players, so go back to the open state
+            return await this.changeTableState(this.game.stateMachine.goToOpenState());
+
+        }
+
+//      await this.wait(this.TIME_BETTING_COMPLETE);
+        return await this.goToNextState();
+
 
     }  // completeBetting
 
