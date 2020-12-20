@@ -395,22 +395,36 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isAnteTime(): boolean {
 
-        return this.mySeatIndex && this.table.state instanceof AnteState && this.myAmountToCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === undefined);
+        return this.mySeatIndex != null && this.table.state instanceof AnteState && this.myAmountToCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === undefined);
 
     }   // isAnteTime
 
 
     public isCheckBetTime(): boolean {
 
-        return this.table.state instanceof BetState && this.myAmountToCall === 0;
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall === 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
 
     }
+
+    public isPendingCheckBetTime(): boolean {
+
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall === 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
+
+    }
+
 
     public isCallRaiseTime(): boolean {
 
-        return this.table.state instanceof BetState && this.myAmountToCall > 0;
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall > 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
 
     }
+
+    public isPendingCallRaiseTime(): boolean {
+
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall > 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
+
+    }
+
 
 
     public calculateCall(): number {

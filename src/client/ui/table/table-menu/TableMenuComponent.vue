@@ -23,6 +23,18 @@
             </button>
         </div>
 
+        <div class="bet-actions" v-if="ui.isPendingCheckBetTime()">
+            <label>
+                <input type="checkbox" /> Fold
+            </label>
+            <label>
+                <input type="checkbox" /> Check
+            </label>
+            <label>
+                <input type="checkbox" /> Bet {{ ui.chipFormatter.format(ui.myBetAmount) }}
+            </label>
+        </div>
+
         <div class="bet-actions" v-if="ui.isCheckBetTime()">
             <button type="button" v-on:click.stop="fold">
                 <div class="action">Fold</div>
