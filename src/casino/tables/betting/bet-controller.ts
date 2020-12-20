@@ -105,7 +105,7 @@ export class BetController {
     }
 
 
-    private takeBet(status: BetStatus, seat: Seat, betAmount: number, betType: number, actionType: number, raisesAction: boolean): Bet {
+    private takeBet(status: BetStatus, seat: Seat, betAmount: number, betType: number, actionType: number, raisesAction: boolean, raisesLiveAction: boolean): Bet {
 
         betAmount = Math.min(betAmount, seat.player.chips);
 
@@ -122,12 +122,9 @@ export class BetController {
 
         status.bets[seat.index] = bet;
 
-        if (raisesAction) {
-
+        if (raisesLiveAction) {
             status.lastLiveRaise = totalBetAmount - status.lastLiveRaise;
-
         }
-
 
         if (totalBetAmount > status.currentBet) {
             status.currentBet = totalBetAmount;
@@ -189,7 +186,7 @@ export class BetController {
 
             }
 
-            return this.takeBet(table.betStatus, seat, table.stakes.ante, Bet.TYPE.ANTE, Bet.ACTION.CALL, false);
+            return this.takeBet(table.betStatus, seat, table.stakes.ante, Bet.TYPE.ANTE, Bet.ACTION.CALL, false, false);
 
         }
         else {
@@ -242,7 +239,7 @@ export class BetController {
 
             }
 
-            return this.takeBet(table.betStatus, seat, blindAmount, Bet.TYPE.BLIND, Bet.ACTION.CALL, false);
+            return this.takeBet(table.betStatus, seat, blindAmount, Bet.TYPE.BLIND, Bet.ACTION.CALL, false, false);
 
         }
         else {
@@ -405,7 +402,7 @@ export class BetController {
 
                 let betAction: number = amount === 0 ? Bet.ACTION.CHECK : Bet.ACTION.CALL;
 
-                return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, betAction, false);
+                return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, betAction, false, false);
 
             }
 
@@ -441,9 +438,11 @@ export class BetController {
             let actionType: number = table.betStatus.currentBet === 0 ? Bet.ACTION.OPEN : Bet.ACTION.RAISE;
 
             // if they cannot meet the minimum live raise then minimumLiveRaise will be null
-            let raisesAction: boolean = minimumLiveRaise !== null && amount >= minimumLiveRaise;
+            let raisesLiveAction: boolean = minimumLiveRaise !== null && amount >= minimumLiveRaise;
 
-            return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, actionType, raisesAction);
+            // This bet/raise will have raiseAction = true so that others are required to respond
+            // Whether it raises the liveAction or not depends on the size of the bet
+            return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, actionType, true, raisesLiveAction);
 
         }
         else {
