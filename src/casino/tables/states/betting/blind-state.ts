@@ -1,6 +1,6 @@
 ﻿import { TableState } from "../table-state";
 
-export class AnteState implements TableState {
+export class BlindState implements TableState {
 
     constructor() {
     }

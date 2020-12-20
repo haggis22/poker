@@ -3,6 +3,8 @@
 export class BetStatus {
 
 
+    public bettingRound: number;
+
     public seatIndex: number;
     public seatIndexesRemainToAct: number[];
 

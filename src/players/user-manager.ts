@@ -14,8 +14,8 @@ export class UserManager {
         this.userMapByUsername = new Map<string, User>();
 
         this.addUser(new User(1, 'dshell', 'Danny', 5000));
-        this.addUser(new User(2, 'moglesby', 'Matt', 1000));
-        this.addUser(new User(3, 'ptunney', 'Paul', 1000));
+        this.addUser(new User(2, 'moglesby', 'Matt', 2000));
+        this.addUser(new User(3, 'ptunney', 'Paul', 2000));
         this.addUser(new User(4, 'srao', 'Sekhar', 1000));
         this.addUser(new User(5, 'pgrudowski', 'Paul', 1000));
         this.addUser(new User(6, 'jhoepken', 'Joe', 1000));

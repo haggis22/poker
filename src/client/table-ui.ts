@@ -398,7 +398,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         return this.isInHand()
             && this.table.state instanceof BetState
-            && this.betController.isCheckAllowed(this.table.betStatus, this.mySeatIndex);
+            && this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex)) === 0;
 
     }
 
@@ -406,7 +406,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         return this.isInHand()
             && this.table.state instanceof BetState
-            && this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex) > 0;
+            && this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex)) > 0;
 
     }
 
@@ -554,16 +554,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private betState(): void {
 
+        let seat: Seat = this.findSeat(this.mySeatIndex);
+
         // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-        this.myBetAmount = this.betController.getMinimumBet(this.table.betStatus, this.mySeatIndex);
-        this.myAmountToCall = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
+        this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat);
+        this.myAmountToCall = this.betController.calculateCall(this.table, seat);
 
     }  // betState
 
     private anteState(): void {
 
         // reset the player's default bet to match the ante
-        this.myBetAmount = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
+        let seat: Seat = this.findSeat(this.mySeatIndex);
+
+        // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
+        this.myBetAmount = this.betController.calculateCall(this.table, seat);
+        this.myAmountToCall = this.betController.calculateCall(this.table, seat);
 
     }  // anteState
 
@@ -666,16 +672,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // Don't lower it if they have previously set it to be higher
         if (!this.myBetAmount) {
 
-            this.myBetAmount = this.betController.getMinimumBet(this.table.betStatus, this.mySeatIndex);
+            this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat);
 
         }
         else {
 
-            this.myBetAmount = Math.max(this.myBetAmount, this.betController.getMinimumBet(this.table.betStatus, this.mySeatIndex));
+            this.myBetAmount = Math.max(this.myBetAmount, this.betController.calculateMinimumRaise(this.table, seat));
 
         }
 
-        this.myAmountToCall = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
+        this.myAmountToCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
 
         this.clearSeatTimers();
 
@@ -715,8 +721,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(`It is ${seat.getName()}'s turn to ante`);
 
             // Set the amount required to call the ante
-            this.myBetAmount = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
-            this.myAmountToCall = this.betController.getAmountToCall(this.table.betStatus, this.mySeatIndex);
+            this.myBetAmount = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
+            this.myAmountToCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
 
             this.clearSeatTimers();
 
@@ -733,8 +739,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                 // Automatically ante if isSittingOut == false, prompt the player if isSittingOut == undefined
                 if (seat.player.userID === this.user.id && seat.player.isSittingOut === false) {
 
-                    let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
-                    let betCommand: AnteCommand = new AnteCommand(this.table.id, betAmount);
+                    let betCommand: AnteCommand = new AnteCommand(this.table.id);
 
                     this.broadcastCommand(betCommand);
 

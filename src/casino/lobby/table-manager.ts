@@ -49,7 +49,12 @@ export class TableManager {
         let rules = new TableRules(6, 5, 5);
 
         // blinds, ante, minRaise
-        let stakes = new Stakes(new Array<number>(), 25, 100);
+        let ante = 25;
+        let blinds: number[] = [];
+        let bets: number[] = [100, 100, 200, 200];
+
+        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT);
+
 
         let table: Table = new Table(tableID, stakes, rules);
 

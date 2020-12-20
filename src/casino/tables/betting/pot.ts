@@ -33,7 +33,7 @@
 
     }
 
-    isInPot(seatIndex: number): boolean {
+    isSeatInPot(seatIndex: number): boolean {
 
         return this.seats[seatIndex] || false;
 

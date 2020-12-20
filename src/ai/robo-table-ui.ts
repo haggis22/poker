@@ -488,9 +488,9 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         if (rnd >= 0.8) {
 
                             // This represents a raise 
-                            let betAmount: number = Math.min(betStatus.currentBet + this.table.stakes.minRaise, seat.player.chips + this.betController.getCurrentBet(this.table.betStatus, seat.index));
+                            let betAmount: number = this.betController.calculateMinimumRaise(this.table, seat);
 
-                            this.log(`tracker.currentBet = ${betStatus.currentBet}, stakes.minRaise = ${this.table.stakes.minRaise}, playerChips = ${seat.player.chips}, playerCurrentBet = ${this.betController.getCurrentBet(this.table.betStatus, seat.index)}`);
+                            this.log(`Raise => tracker.currentBet = ${betStatus.currentBet}, betAmount = ${betAmount}, playerChips = ${seat.player.chips}, playerCurrentBet = ${this.betController.getCurrentBet(this.table.betStatus, seat.index)}`);
 
                             let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
@@ -500,7 +500,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         else if (rnd >= 0.02) {
 
                             // This represents a call (possibly all-in)
-                            let betAmount: number = Math.min(betStatus.currentBet, this.betController.getCurrentBet(this.table.betStatus, seat.index) + seat.player.chips);
+                            let betAmount: number = this.betController.calculateCall(this.table, seat);
                             let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
                             return this.broadcastCommand(betCommand);
@@ -525,9 +525,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                     setTimeout(() => {
 
                         // This represents a bet out (or a check, if the player has no chips)
-                        let desiredBet = (Math.random() > 0.1) ? this.table.stakes.minRaise : 0;
+                        let betAmount: number = (Math.random() > 0.1) ? this.betController.calculateMinimumRaise(this.table, seat) : 0;
 
-                        let betAmount: number = Math.min(desiredBet, seat.player.chips);
                         let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 
                         this.broadcastCommand(betCommand);
@@ -563,8 +562,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player.userID === this.user.id) {
 
-                let betAmount: number = Math.min(this.table.stakes.ante, seat.player.chips);
-                let betCommand: AnteCommand = new AnteCommand(this.table.id, betAmount);
+                let betCommand: AnteCommand = new AnteCommand(this.table.id);
 
                 this.broadcastCommand(betCommand);
 

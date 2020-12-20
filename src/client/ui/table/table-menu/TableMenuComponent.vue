@@ -42,7 +42,7 @@
                 <div class="action">Call</div>
                 <div class="amount">{{ ui.chipFormatter.format(ui.myAmountToCall) }}</div>
             </button>
-            <button type="button" v-on:click.stop="raise">
+            <button type="button" v-on:click.stop="bet">
                 <div class="action">Raise</div>
                 <div class="amount">{{ ui.chipFormatter.format(ui.myBetAmount) }}</div>
             </button>
@@ -76,7 +76,7 @@ const TableMenuComponent = Vue.extend ({
 
         ante: function (event) {
 
-            this.ui.sendCommand(new AnteCommand(this.ui.table.id, this.ui.myAmountToCall));
+            this.ui.sendCommand(new AnteCommand(this.ui.table.id));
 
         },
 
@@ -93,12 +93,6 @@ const TableMenuComponent = Vue.extend ({
         },
 
         bet: function (event) {
-
-            this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myBetAmount));
-
-        },
-
-        raise: function (event) {
 
             this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myBetAmount));
 

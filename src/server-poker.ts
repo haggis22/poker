@@ -32,8 +32,11 @@ function createTable(): Table {
     // # seats, # seconds to act
     let rules = new TableRules(6, 5, 15);
 
-    // blinds, ante, minRaise
-    let stakes = new Stakes(new Array<number>(), 25, 100);
+    let ante = 25;
+    let blinds: number[] = [];
+    let bets: number[] = [100, 200];
+
+    let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT);
 
     let table: Table = new Table(tableID, stakes, rules);
 
@@ -124,8 +127,10 @@ function testBetTracker() {
     let dannySeat: Seat = setupSeat(1, 1, 'Danny', 10);
     let markSeat: Seat = setupSeat(2, 2, 'Mark', 100);
 
+/*
+
     betStatus.seatIndex = 1;
-    let bet: Bet = betController.addBet(betStatus, dannySeat, Bet.TYPE.REGULAR, 10, minBet);
+    let bet: Bet = betController.validateBet(betStatus, dannySeat, Bet.TYPE.REGULAR, 10, minBet);
     console.log(bet);
     console.log(betStatus.toString());
 
@@ -133,7 +138,7 @@ function testBetTracker() {
     bet = betController.addBet(betStatus, markSeat, Bet.TYPE.REGULAR, 0, minBet);
     console.log(bet);
     console.log(betStatus.toString());
-
+*/
 
 }
 

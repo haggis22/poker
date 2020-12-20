@@ -1,14 +1,19 @@
 ﻿export class Stakes {
 
-    public blinds: number[];
+    public static readonly LIMIT: number = 1;
+    public static readonly NO_LIMIT: number = 2;
+
     public ante: number;
-    public minRaise: number;
+    public blinds: number[];
+    public bets: number[];
+    public limit: number;
 
 
-    constructor(blinds: number[], ante: number, minRaise: number) {
-        this.blinds = blinds;
+    constructor(ante: number, blinds: number[], bets: number[], limit: number) {
         this.ante = ante;
-        this.minRaise = minRaise;
+        this.blinds = [...blinds];
+        this.bets = [...bets];
+        this.limit = limit;
     }
 
 }

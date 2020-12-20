@@ -501,22 +501,22 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
+
+
     private async ante(command: AnteCommand): Promise<void> {
 
         this.log(`Received AnteCommand from ${command.userID}, tableState: ${this.table.state.constructor.name}`);
 
+        let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
+        if (!bettorSeat) {
+
+            return this.queueMessage(new Message('You are not at the table', command.userID));
+
+        }
+
         if (this.table.state instanceof AnteState) {
 
-            let bettorSeat: Seat = this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
-
-            if (!bettorSeat.isInHand) {
-
-                // TODO: Send action indicating invalid bet so that the UI can reset itself
-                return this.queueMessage(new Message('You are not in this hand', command.userID));
-
-            }
-
-            let ante: Bet = this.betController.addBet(this.table.betStatus, bettorSeat, Bet.TYPE.ANTE, command.amount, this.table.stakes.ante);
+            let ante: Bet = this.betController.validateAnte(this.table, bettorSeat);
 
             if (ante.isValid) {
 
@@ -550,8 +550,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        // TODO: Send action indicating invalid bet so that the UI can reset itself
-        return this.queueMessage(new Message('It is not time to ante', command.userID));
 
     }  // ante
 
@@ -565,7 +563,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             let bettorSeat: Seat =  this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
 
-            let bet: Bet = this.betController.addBet(this.table.betStatus, bettorSeat, Bet.TYPE.REGULAR, command.amount, this.table.stakes.minRaise);
+            let bet: Bet = this.betController.validateBet(this.table, bettorSeat, command.amount);
 
             if (bet.isValid) {
 
@@ -1051,8 +1049,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        this.betController.setAnte(this.table.betStatus, this.table.stakes.ante);
-
         // Antes always start with first position
         this.calculateInitialBettingOrder(BetState.FIRST_POSITION);
         return await this.validateAnteerOrMoveOn();
@@ -1151,6 +1147,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.log('In makeYourBets');
 
+        this.betController.increaseBettingRound(this.table.betStatus);
         this.calculateInitialBettingOrder(betState.firstToBet);
 
         return await this.validateBettorOrMoveOn();
@@ -1262,7 +1259,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             let checkerSeat = this.table.seats[this.table.betStatus.seatIndex];
 
             // try to check
-            let check: Bet = this.betController.addBet(this.table.betStatus, checkerSeat, Bet.TYPE.REGULAR, 0, this.table.stakes.minRaise);
+            let check: Bet = this.betController.validateBet(this.table, checkerSeat, 0);
 
             if (check.isValid) {
 
@@ -1466,7 +1463,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             for (let winner of winners) {
 
-                if (pot.isInPot(winner.seatIndex)) {
+                if (pot.isSeatInPot(winner.seatIndex)) {
 
                     if (potWinningHand == null) {
 
