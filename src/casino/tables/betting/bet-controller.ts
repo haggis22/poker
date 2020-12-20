@@ -124,7 +124,7 @@ export class BetController {
 
         if (raisesLiveAction) {
 
-            status.lastLiveRaise = totalBetAmount - status.lastLiveRaise;
+            status.lastLiveRaise = totalBetAmount - status.lastLiveBet;
 
             if (totalBetAmount > status.lastLiveBet) {
                 status.lastLiveBet = totalBetAmount;
@@ -297,7 +297,11 @@ export class BetController {
     public calculateMinimumLiveRaise(table: Table, seat: Seat): number {
 
         // the minimum bump for both limit and no-limit is the size of the bet for the round
-        let minRaiseTotal: number = table.betStatus.lastLiveBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+        // If anyone else has raised live, then our new raise must be at least that same amount
+        let minRaiseAmount: number = Math.max(table.stakes.bets[table.betStatus.bettingRound - 1], table.betStatus.lastLiveRaise);
+
+        // the live raise amount goes against the last LIVE bet amount - not necessarily against some dead raise that has happened in-between
+        let minRaiseTotal: number = table.betStatus.lastLiveBet + minRaiseAmount;
 
         let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
 
