@@ -123,16 +123,19 @@ export class BetController {
         status.bets[seat.index] = bet;
 
         if (raisesLiveAction) {
+
             status.lastLiveRaise = totalBetAmount - status.lastLiveRaise;
+
+            if (totalBetAmount > status.lastLiveBet) {
+                status.lastLiveBet = totalBetAmount;
+            }
+
         }
 
         if (totalBetAmount > status.currentBet) {
             status.currentBet = totalBetAmount;
         }
 
-        if (totalBetAmount > status.lastLiveBet) {
-            status.lastLiveBet = totalBetAmount;
-        }
 
 
         this.log(`Bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, betAmount: ${betAmount}, betType: ${betType}, actionType: ${actionType}, raisesAction: ${raisesAction}`);

@@ -153,6 +153,7 @@
     <TypeScriptCompile Include="src\actions\lobby\lobby-action.ts" />
     <TypeScriptCompile Include="src\actions\table\antes\ante-turn-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\betting\gather-bets-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\dealing\clear-board-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\dealing\clear-hand-action.ts" />
