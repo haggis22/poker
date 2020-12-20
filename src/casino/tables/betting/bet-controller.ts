@@ -252,16 +252,32 @@ export class BetController {
     public calculateMinimumLiveRaise(table: Table, seat: Seat): number {
 
         // the minimum bump for both limit and no-limit is the size of the bet for the round
-        let minRaise: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+        let minRaiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
 
-        return minRaise - this.getCurrentBet(table.betStatus, seat.index);
+        let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
+
+        // If they don't have enough chips to actually meet this minimum live raise then return undefined - this will 
+        // indicate that a live raise is not even possible
+        return chipsToRaise > seat.player.chips ? undefined : chipsToRaise;
 
     }
 
 
     public calculateMinimumRaise(table: Table, seat: Seat): number {
 
-        return Math.min(seat.player.chips, this.calculateMinimumLiveRaise(table, seat));
+        if (seat.player.chips === this.calculateCall(table, seat)) {
+
+            // They only have enough chips to call - none extra to raise
+            return undefined;
+        }
+
+        let raiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+
+        // How many chips would they need to put in to meet that raise total?
+        let chipsToRaise: number = raiseTotal - this.getCurrentBet(table.betStatus, seat.index);
+
+        // At this point we know they have more chips than are necessary for a flat call, if they put in everything then it is a raise
+        return Math.min(seat.player.chips, chipsToRaise);
 
     }
 
@@ -272,7 +288,13 @@ export class BetController {
             return this.calculateMinimumRaise(table, seat);
         }
 
-        return seat.player.chips;
+        let minRaise: number = this.calculateMinimumRaise(table, seat);
+        if (minRaise === undefined) {
+            return undefined;
+        }
+
+        // if they have more chips than the min raise, then that is their max possibility
+        return Math.max(minRaise, seat.player.chips);
 
     }
 
