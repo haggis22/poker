@@ -348,11 +348,20 @@ export class BetController {
 
             }
 
-            let minimumLiveRaise: number = this.calculateMinimumLiveRaise(table, seat);
             let minimumBet: number = this.calculateMinimumRaise(table, seat);
+
+            if (minimumBet === undefined) {
+
+                this.log(`We should not be here - they are raising but the min raise is undefined: seatIndex: ${seat.index}, chips: ${seat.player.chips}, minBet: ${minimumBet}, bet amount: ${amount}`);
+                throw new Error('Error calculating minimum raise');
+
+            }
+
+            let minimumLiveRaise: number = this.calculateMinimumLiveRaise(table, seat);
             let maximumBet: number = this.calculateMaximumRaise(table, seat);
 
             // If we've made it here, then the player must be betting/raising, so first make sure it is not too much
+            // We know maximumBet will not be undefined if the minBet is not undefined
             if (amount > maximumBet) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${maximumBet}, bet amount: ${amount}`);
@@ -369,7 +378,9 @@ export class BetController {
             }
 
             let actionType: number = table.betStatus.currentBet === 0 ? Bet.ACTION.OPEN : Bet.ACTION.RAISE;
-            let raisesAction: boolean = amount >= minimumLiveRaise;
+
+            // if they cannot meet the minimum live raise then minimumLiveRaise will be undefined
+            let raisesAction: boolean = minimumLiveRaise !== undefined && amount >= minimumLiveRaise;
 
             return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, actionType, raisesAction);
 
