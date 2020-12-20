@@ -46,7 +46,7 @@ export class BetController {
             delete status.bets[prop];
         }
 
-        status.currentBet = status.lastLiveBet = 0;
+        status.currentBet = status.lastLiveBet = status.lastLiveRaise = 0;
         status.seatIndex = null;
 
     }   // clearBets
@@ -122,9 +122,21 @@ export class BetController {
 
         status.bets[seat.index] = bet;
 
+        if (raisesAction) {
+
+            status.lastLiveRaise = totalBetAmount - status.lastLiveRaise;
+
+        }
+
+
         if (totalBetAmount > status.currentBet) {
             status.currentBet = totalBetAmount;
         }
+
+        if (totalBetAmount > status.lastLiveBet) {
+            status.lastLiveBet = totalBetAmount;
+        }
+
 
         this.log(`Bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, betAmount: ${betAmount}, betType: ${betType}, actionType: ${actionType}, raisesAction: ${raisesAction}`);
 
@@ -285,7 +297,7 @@ export class BetController {
     public calculateMinimumLiveRaise(table: Table, seat: Seat): number {
 
         // the minimum bump for both limit and no-limit is the size of the bet for the round
-        let minRaiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+        let minRaiseTotal: number = table.betStatus.lastLiveBet + table.stakes.bets[table.betStatus.bettingRound - 1];
 
         let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
 
@@ -313,7 +325,7 @@ export class BetController {
 
             if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
 
-                let raiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+                let raiseTotal: number = table.betStatus.lastLiveBet + table.stakes.bets[table.betStatus.bettingRound - 1];
 
                 // How many chips would they need to put in to meet that raise total?
                 let chipsToRaise: number = raiseTotal - this.getCurrentBet(table.betStatus, seat.index);
