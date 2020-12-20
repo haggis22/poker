@@ -268,7 +268,11 @@ export class BetController {
         }
         else if (table.state instanceof BetState) {
 
-            return Math.min(seat.player.chips, table.betStatus.currentBet - this.getCurrentBet(table.betStatus, seat.index));
+            if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
+
+                return Math.min(seat.player.chips, table.betStatus.currentBet - this.getCurrentBet(table.betStatus, seat.index));
+
+            }
 
         }
 
@@ -294,32 +298,48 @@ export class BetController {
 
     public calculateMinimumRaise(table: Table, seat: Seat): number {
 
-        if (seat.player.chips === this.calculateCall(table, seat)) {
-
-            // They only have enough chips to call - none extra to raise
+        // If they don't have chips then they can't call
+        if (!seat.player || seat.player.chips === 0) {
             return null;
         }
 
-        let raiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+        if (table.state instanceof BetState) {
 
-        // How many chips would they need to put in to meet that raise total?
-        let chipsToRaise: number = raiseTotal - this.getCurrentBet(table.betStatus, seat.index);
+            if (seat.player.chips === this.calculateCall(table, seat)) {
 
-        // At this point we know they have more chips than are necessary for a flat call, if they put in everything then it is a raise
-        return Math.min(seat.player.chips, chipsToRaise);
+                // They only have enough chips to call - none extra to raise
+                return null;
+            }
+
+            if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
+
+                let raiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+
+                // How many chips would they need to put in to meet that raise total?
+                let chipsToRaise: number = raiseTotal - this.getCurrentBet(table.betStatus, seat.index);
+
+                // At this point we know they have more chips than are necessary for a flat call, if they put in everything then it is a raise
+                return Math.min(seat.player.chips, chipsToRaise);
+
+            }  // the player still has a chance to act this round
+
+        }
+
+        return null;
+
 
     }
 
 
     public calculateMaximumRaise(table: Table, seat: Seat): number {
 
-        if (table.stakes.limit === Stakes.LIMIT) {
-            return this.calculateMinimumRaise(table, seat);
-        }
-
         let minRaise: number = this.calculateMinimumRaise(table, seat);
         if (minRaise === null) {
             return null;
+        }
+
+        if (table.stakes.limit === Stakes.LIMIT) {
+            return minRaise;
         }
 
         // if they have more chips than the min raise, then that is their max possibility

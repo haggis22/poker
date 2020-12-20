@@ -17,7 +17,9 @@
             </button>
             <button type="button" v-on:click.stop="ante">
                 <div class="action">Ante</div>
-                <div class="amount">{{ ui.chipFormatter.format(ui.myAmountToCall) }}</div>
+                <div class="amount">
+                    {{ ui.chipFormatter.format(ui.myAmountToCall) }}
+                </div>
             </button>
         </div>
 

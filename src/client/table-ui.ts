@@ -42,6 +42,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public betController: BetController;
 
     private mySeatIndex: number;
+
     public myBetAmount: number;
     public myAmountToCall: number;
 
@@ -388,24 +389,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isAnteTime(): boolean {
 
-        return this.table.state instanceof AnteState && this.myAmountToCall != null;
+        return this.mySeatIndex && this.table.state instanceof AnteState && this.myAmountToCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === undefined);
 
     }   // isAnteTime
 
 
     public isCheckBetTime(): boolean {
 
-        return this.isInHand()
-            && this.table.state instanceof BetState
-            && this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex)) === 0;
+        return this.table.state instanceof BetState && this.myAmountToCall === 0;
 
     }
 
     public isCallRaiseTime(): boolean {
 
-        return this.isInHand()
-            && this.table.state instanceof BetState
-            && this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex)) > 0;
+        return this.table.state instanceof BetState && this.myAmountToCall > 0;
 
     }
 
@@ -517,9 +514,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let state = this.table.state;
 
-        // Clear the local bets
-        this.myBetAmount = 0;
-        this.myAmountToCall = 0;
+        // Clear the local bets - null is different from 0 in that it indicates that the given option is not even available
+        this.myBetAmount = null;
+        this.myAmountToCall = null;
 
         if (state instanceof StartHandState) {
 
@@ -567,6 +564,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myAmountToCall = this.betController.calculateCall(this.table, seat);
 
     }  // betState
+
 
     private anteState(): void {
 

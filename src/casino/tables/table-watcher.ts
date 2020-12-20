@@ -45,8 +45,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private messageQueue: Message[];
 
-    private betController: BetController;
-
 
     constructor(tableID: number) {
 
@@ -57,8 +55,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         this.messageHandlers = new Array<MessageHandler>();
 
         this.messageQueue = new Array<Message>();
-
-        this.betController = new BetController()
 
     }
 
