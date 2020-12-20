@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, Pot, AnteTurnAction, DealBoardState, User } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -1226,6 +1226,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
         this.table.betStatus.seatIndex = null;
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+
+        this.log('Betting is complete');
+        this.queueAction(new BettingCompleteAction(this.table.id));
+
         await this.wait(this.TIME_LAST_BET_MADE);
 
         // look for uncalled bets (or pieces of bets of bets that were not fully called)
@@ -1241,8 +1245,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
 
-        this.log('Betting is complete');
-        this.queueAction(new BettingCompleteAction(this.table.id));
+        this.queueAction(new GatherBetsCompleteAction(this.table.id));
 
         if (!this.table.betStatus.pots.length) {
 

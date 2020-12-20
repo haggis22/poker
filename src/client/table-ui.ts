@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -178,6 +178,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof GatherBetsAction) {
 
             return this.gatherBets(action);
+
+        }
+
+        if (action instanceof GatherBetsCompleteAction) {
+
+            return this.gatherBetsComplete(action);
 
         }
 
@@ -510,13 +516,21 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
+    private clearLocalBets(): void {
+
+        // null is different from 0 in that it indicates that the given option is not even available
+        this.myBetAmount = null;
+        this.myAmountToCall = null;
+
+    }
+
+
     private changeTableState(): void {
 
         let state = this.table.state;
 
-        // Clear the local bets - null is different from 0 in that it indicates that the given option is not even available
-        this.myBetAmount = null;
-        this.myAmountToCall = null;
+        this.clearLocalBets();
+
 
         if (state instanceof StartHandState) {
 
@@ -601,13 +615,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
         
     }  // updateBets
-
-
-    private gatherBets(action: GatherBetsAction): void {
-
-        this.isGatheringBets = true;
-
-    }  // gatherBets
 
 
 
@@ -954,10 +961,23 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private bettingComplete(action: BettingCompleteAction): void {
 
+        this.clearLocalBets();
+
+    }  // bettingComplete
+
+
+    private gatherBets(action: GatherBetsAction): void {
+
+        this.isGatheringBets = true;
+
+    }  // gatherBets
+
+    private gatherBetsComplete(action: GatherBetsCompleteAction): void {
+
         this.isGatheringBets = false;
         this.seatAction.clear();
 
-    }  // returnBet
+    }  // gatherBetsComplete
 
 
 

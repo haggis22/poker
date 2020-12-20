@@ -28,6 +28,7 @@ export { AnteTurnAction } from "../actions/table/antes/ante-turn-action";
 
 export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
 export { GatherBetsAction } from "../actions/table/betting/gather-bets-action";
+export { GatherBetsCompleteAction } from "../actions/table/betting/gather-bets-complete-action";
 
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 
