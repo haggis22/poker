@@ -244,7 +244,36 @@ export class BetController {
 
     public calculateCall(table: Table, seat: Seat): number {
 
-        return Math.min(seat.player.chips, table.betStatus.currentBet - this.getCurrentBet(table.betStatus, seat.index));
+        // If they don't have chips then they can't call
+        if (seat.player.chips === 0) {
+            return null;
+        }
+
+        if (table.state instanceof AnteState) {
+
+            // If we are ante-ing and the player still needs to act, then calculate the amount they need to put in
+            if (table.stakes.ante > 0) {
+
+                if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
+
+                    return Math.min(seat.player.chips, table.stakes.ante);
+
+                }
+
+            }
+
+        }
+        else if (table.state instanceof BlindState) {
+
+        }
+        else if (table.state instanceof BetState) {
+
+            return Math.min(seat.player.chips, table.betStatus.currentBet - this.getCurrentBet(table.betStatus, seat.index));
+
+        }
+
+        return null;
+
 
     }  // calculateCall
 
@@ -256,9 +285,9 @@ export class BetController {
 
         let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
 
-        // If they don't have enough chips to actually meet this minimum live raise then return undefined - this will 
+        // If they don't have enough chips to actually meet this minimum live raise then return null - this will 
         // indicate that a live raise is not even possible
-        return chipsToRaise > seat.player.chips ? undefined : chipsToRaise;
+        return chipsToRaise > seat.player.chips ? null : chipsToRaise;
 
     }
 
@@ -268,7 +297,7 @@ export class BetController {
         if (seat.player.chips === this.calculateCall(table, seat)) {
 
             // They only have enough chips to call - none extra to raise
-            return undefined;
+            return null;
         }
 
         let raiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
@@ -289,8 +318,8 @@ export class BetController {
         }
 
         let minRaise: number = this.calculateMinimumRaise(table, seat);
-        if (minRaise === undefined) {
-            return undefined;
+        if (minRaise === null) {
+            return null;
         }
 
         // if they have more chips than the min raise, then that is their max possibility
@@ -350,9 +379,9 @@ export class BetController {
 
             let minimumBet: number = this.calculateMinimumRaise(table, seat);
 
-            if (minimumBet === undefined) {
+            if (minimumBet === null) {
 
-                this.log(`We should not be here - they are raising but the min raise is undefined: seatIndex: ${seat.index}, chips: ${seat.player.chips}, minBet: ${minimumBet}, bet amount: ${amount}`);
+                this.log(`We should not be here - they are raising but the min raise is null: seatIndex: ${seat.index}, chips: ${seat.player.chips}, minBet: ${minimumBet}, bet amount: ${amount}`);
                 throw new Error('Error calculating minimum raise');
 
             }
@@ -361,7 +390,7 @@ export class BetController {
             let maximumBet: number = this.calculateMaximumRaise(table, seat);
 
             // If we've made it here, then the player must be betting/raising, so first make sure it is not too much
-            // We know maximumBet will not be undefined if the minBet is not undefined
+            // We know maximumBet will not be null if the minBet is not null
             if (amount > maximumBet) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${maximumBet}, bet amount: ${amount}`);
@@ -379,8 +408,8 @@ export class BetController {
 
             let actionType: number = table.betStatus.currentBet === 0 ? Bet.ACTION.OPEN : Bet.ACTION.RAISE;
 
-            // if they cannot meet the minimum live raise then minimumLiveRaise will be undefined
-            let raisesAction: boolean = minimumLiveRaise !== undefined && amount >= minimumLiveRaise;
+            // if they cannot meet the minimum live raise then minimumLiveRaise will be null
+            let raisesAction: boolean = minimumLiveRaise !== null && amount >= minimumLiveRaise;
 
             return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, actionType, raisesAction);
 
@@ -601,29 +630,29 @@ export class BetController {
     }   // killPots
 
 
-    public calculateSeatIndexesRemainToAct(status: BetStatus, seats: Seat[], possibleStartingIndex: number, lastPossibleIndex: number): void {
+    public calculateSeatIndexesRemainToAct(table: Table, possibleStartingIndex: number, lastPossibleIndex: number, seatIsEligibile: (seat: Seat) => boolean): void {
 
         // Go through the rest of the players at the table and see whether or not they need to take an action
         let seatsToAct = [];
 
-        if (seats.length) {
+        if (table.seats.length) {
 
-            while (possibleStartingIndex >= seats.length) {
-                possibleStartingIndex -= seats.length;
+            while (possibleStartingIndex >= table.seats.length) {
+                possibleStartingIndex -= table.seats.length;
             }
 
             while (lastPossibleIndex < 0) {
-                lastPossibleIndex += seats.length;
+                lastPossibleIndex += table.seats.length;
             }
 
             let done: boolean = false;
             let ix: number = possibleStartingIndex;
 
-            console.log(`BETTRACKER: calculateSeatIndexesRemainToAct possibleStartingIndex: ${possibleStartingIndex}, lastPossibleIndex: ${lastPossibleIndex}, numSeats: ${seats.length}`);
+            console.log(`BETTRACKER: calculateSeatIndexesRemainToAct possibleStartingIndex: ${possibleStartingIndex}, lastPossibleIndex: ${lastPossibleIndex}, numSeats: ${table.seats.length}`);
 
             while (!done) {
 
-                if (seats[ix] && seats[ix].isInHand && seats[ix].player && seats[ix].player.chips > 0) {
+                if (seatIsEligibile(table.seats[ix])) {
 
                     seatsToAct.push(ix);
 
@@ -636,7 +665,7 @@ export class BetController {
 
                     ix++;
 
-                    if (ix >= seats.length) {
+                    if (ix >= table.seats.length) {
                         ix = 0;
                     }
 
@@ -650,7 +679,7 @@ export class BetController {
         }   // seats.length > 0
 
 
-        status.seatIndexesRemainToAct = [...seatsToAct];
+        table.betStatus.seatIndexesRemainToAct = [...seatsToAct];
 
     }  // calculateSeatIndexesRemainToAct
 

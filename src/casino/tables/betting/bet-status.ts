@@ -35,4 +35,11 @@ export class BetStatus {
 
     }
 
+
+    public doesSeatRemainToAct(seatIndex: number): boolean {
+
+        return this.seatIndexesRemainToAct.includes(seatIndex);
+
+    }
+
 }

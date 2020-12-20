@@ -388,8 +388,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isAnteTime(): boolean {
 
-        return this.isInHand()
-            && this.table.state instanceof AnteState;
+        return this.table.state instanceof AnteState && this.myAmountToCall != null;
 
     }   // isAnteTime
 
@@ -407,6 +406,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         return this.isInHand()
             && this.table.state instanceof BetState
             && this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex)) > 0;
+
+    }
+
+
+    public calculateCall(): number {
+
+        return this.betController.calculateCall(this.table, this.table.seats[this.mySeatIndex]);
 
     }
 
@@ -568,14 +574,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let seat: Seat = this.findSeat(this.mySeatIndex);
 
         // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-        this.myBetAmount = this.betController.calculateCall(this.table, seat);
         this.myAmountToCall = this.betController.calculateCall(this.table, seat);
+
+        // no betting, only calling, with antes
+        this.myBetAmount = 0;
+
 
     }  // anteState
 
 
 
     private updateBets(action: UpdateBetsAction): void {
+
+        this.log(`Seats To Act: [ ${action.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
+        this.log(`Table Seats To Act: [ ${this.table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
 
         for (let pot of this.table.betStatus.pots) {
         

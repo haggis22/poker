@@ -554,6 +554,18 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }  // ante
 
 
+    private isSeatEligibleToBet(seat: Seat): boolean {
+
+        return seat && seat.isInHand && seat.player && seat.player.chips > 0;
+
+    }
+
+    private isSeatEligibleToAnte(seat: Seat): boolean {
+
+        return seat && seat.player && !seat.player.isSittingOut && seat.player.chips > 0;
+
+    }
+
 
     private async bet(command: BetCommand): Promise<void> {
 
@@ -579,7 +591,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // Start with the player *after* this bettor
                     // Stop with the player *before* this bettor
                     // The bet tracker is smart enough to roll the indexes off either end
-                    this.betController.calculateSeatIndexesRemainToAct(this.table.betStatus, this.table.seats, bettorSeat.index + 1, bettorSeat.index - 1);
+                    this.betController.calculateSeatIndexesRemainToAct(this.table, bettorSeat.index + 1, bettorSeat.index - 1, this.isSeatEligibleToBet);
 
                 }
 
@@ -1049,8 +1061,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        // Antes always start with first position
-        this.calculateInitialBettingOrder(BetState.FIRST_POSITION);
+        this.calculateInitialBettingOrder(BetState.FIRST_POSITION, this.isSeatEligibleToAnte);
+
+        this.log(`ANTE ORDER: [ ${this.table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
         return await this.validateAnteerOrMoveOn();
 
     }   // collectAntes
@@ -1073,7 +1086,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (!seat.isInHand) {
 
             // go to the next seat
-            return await this.validateBettorOrMoveOn();
+            return await this.validateAnteerOrMoveOn();
 
         }
 
@@ -1101,6 +1114,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }, millisToAct));
 
+        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
         this.queueAction(new AnteTurnAction(this.table.id, this.snapshot(this.table.betStatus), timesUp));
 
 
@@ -1148,7 +1162,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.log('In makeYourBets');
 
         this.betController.increaseBettingRound(this.table.betStatus);
-        this.calculateInitialBettingOrder(betState.firstToBet);
+        this.calculateInitialBettingOrder(betState.firstToBet, this.isSeatEligibleToBet);
 
         return await this.validateBettorOrMoveOn();
 
@@ -1300,7 +1314,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }   // advanceBetTurn
 
 
-    private calculateInitialBettingOrder(firstBetRule: number): void {
+
+    private calculateInitialBettingOrder(firstBetRule: number, isSeatEligible: (seat: Seat) => boolean): void {
 
         this.betController.clearBettorsToAct(this.table.betStatus);
 
@@ -1321,7 +1336,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // Start with the player *after* the button
                     // The button will be the last player to act
                     // The bet tracker is smart enough to roll the indexes off either end
-                    return this.betController.calculateSeatIndexesRemainToAct(this.table.betStatus, this.table.seats, this.table.buttonIndex + 1, this.table.buttonIndex);
+                    return this.betController.calculateSeatIndexesRemainToAct(this.table, this.table.buttonIndex + 1, this.table.buttonIndex, isSeatEligible);
                 }
 
             case BetState.BEST_HAND:
@@ -1331,7 +1346,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // Start with the player with the best hand
                     // Stop with the player *before* the current leader
                     // The bet tracker is smart enough to roll the indexes off either end
-                    return this.betController.calculateSeatIndexesRemainToAct(this.table.betStatus, this.table.seats, handWinners[0].seatIndex, handWinners[0].seatIndex - 1);
+                    return this.betController.calculateSeatIndexesRemainToAct(this.table, handWinners[0].seatIndex, handWinners[0].seatIndex - 1, isSeatEligible);
                 }
         
         }
