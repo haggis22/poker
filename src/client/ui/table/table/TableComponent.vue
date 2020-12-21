@@ -5,6 +5,8 @@
         <div class="table seats-6">
 
             <div class="betting-line">
+                <div>isSittingOut = {{ ui.isSittingOut }}</div>
+
                 <seat-component v-for="seat in ui.table.seats"
                                 :key="'seat-' + seat.index"
                                 :seat="seat"
@@ -36,7 +38,7 @@
             </div>
         </div><!-- table seats-6 -->
         <log-component :ui="ui"></log-component>
-        <table-menu-component :ui="ui"></table-menu-component>
+        <table-menu-component :ui="ui"  :is-sitting-out.sync="ui.isSittingOut"></table-menu-component>
     </div>
 </template>
 <script lang="ts">

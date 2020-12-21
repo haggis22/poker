@@ -4,8 +4,7 @@
 
         <div class="sit-out">
             <label>
-                <input type="checkbox"
-                       value="true" />
+                <input type="checkbox" v-model="localIsSittingOut" @change.stop="setStatus(localIsSittingOut)" />
 
                 Sit out next hand
             </label>
@@ -77,6 +76,7 @@ import { TableUI } from '../../../table-ui';
 import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';
 import { FoldCommand } from '../../../../commands/table/betting/fold-command';
+import { SetStatusCommand } from '../../../../communication/serializable';
 
 const TableMenuComponent = Vue.extend ({
 
@@ -84,7 +84,21 @@ const TableMenuComponent = Vue.extend ({
         ui: {
             type: TableUI,
             required: true
+        },
+        isSittingOut: {
+            type: Boolean,
+            required: true
         }
+    },
+    data() {
+
+        let values =
+        {
+            localIsSittingOut: this.isSittingOut
+        }
+
+        return values;
+
     },
     methods: {
 
@@ -118,6 +132,11 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
+        setStatus: function (event) {
+
+            this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, this.localIsSittingOut));
+
+        }
 
     }
 
