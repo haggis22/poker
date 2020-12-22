@@ -399,7 +399,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isAnteTime(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof AnteState && this.myAmountToCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === undefined);
+        return this.mySeatIndex != null && this.table.state instanceof AnteState && this.myAmountToCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
 
     }   // isAnteTime
 

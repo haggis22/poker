@@ -1,7 +1,9 @@
 ﻿<template>
     <div v-if="seat != null" class="seat" :class="seatClasses">
         <div class="name">
-            <span v-if="seat.player != null">{{ seat.player.name }}</span>
+            <span v-if="seat.player != null">
+                {{ seat.player.name }}
+            </span>
         </div>
         <div class="avatar">
             <div class="action-container">

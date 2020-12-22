@@ -16,7 +16,7 @@
 
         this.chips = this.chipsToAdd = 0;
 
-        this.isSittingOut = undefined;
+        this.isSittingOut = null;
 
     }
 
