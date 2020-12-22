@@ -97,6 +97,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private betController: BetController;
 
+    private setStatusRequests: Map<number, SetStatusCommand>;
+
+
 
 
     constructor(lobbyManager: LobbyManager,  table: Table, deck: Deck) {
@@ -114,6 +117,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.betTimerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
         this.betController = new BetController();
+
+        this.setStatusRequests = new Map<number, SetStatusCommand>();
 
     }
 
@@ -380,27 +385,42 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async setStatus(command: SetStatusCommand): Promise<void> {
 
-        let player = this.findPlayer(command.userID);
+        let seat: Seat = this.findSeatByPlayer(command.userID);
 
-        if (player) {
+        if (seat) {
 
-            if (command.isSittingOut) {
+            // if the player is not in action, then sitting in/out takes effect immediately
+            if (!this.table.state.isHandInProgress() || !seat.isInHand) {
 
-                // They can always mark themselves as sitting out the next hand
-                player.isSittingOut = true;
-                this.queueAction(new SetStatusAction(this.table.id, command.userID, true));
+                if (seat.player) {
+
+                    if (command.isSittingOut) {
+
+                        // They can always mark themselves as sitting out the next hand
+                        seat.player.isSittingOut = true;
+                        this.queueAction(new SetStatusAction(this.table.id, command.userID, true));
+
+                    }
+
+                    else {
+
+                        // Only let them mark themselves as back in if they have chips (or are about to add some)
+                        if (seat.player.getTotalChips() > 0) {
+
+                            seat.player.isSittingOut = false;
+                            this.queueAction(new SetStatusAction(this.table.id, command.userID, false));
+
+                        }
+
+                    }
+
+                }  // seat has a player
 
             }
-
             else {
 
-                // Only let them mark themselves as back in if they have chips (or are about to add some)
-                if (player.getTotalChips() > 0) {
-
-                    player.isSittingOut = false;
-                    this.queueAction(new SetStatusAction(this.table.id, command.userID, false));
-
-                }
+                // Remember this command for between rounds
+                this.setStatusRequests.set(seat.index, command);
 
             }
 
@@ -748,6 +768,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player) {
 
+                let setStatusCommand: SetStatusCommand = this.setStatusRequests.get(seat.index);
+
+                if (setStatusCommand && setStatusCommand.userID == seat.player.userID) {
+
+                    seat.player.isSittingOut = setStatusCommand.isSittingOut;
+
+                }
+
                 if (seat.player.chipsToAdd) {
 
                     this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
@@ -773,6 +801,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             }
 
         }
+
+        // clear all requests now
+        this.setStatusRequests.clear();
 
     }  // doBetweenHandsBusiness
 
