@@ -1605,6 +1605,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table.board.reset();
         this.queueAction(new ClearBoardAction(this.table.id));
 
+        this.betController.reset(this.table.betStatus);
+        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+
         return await this.goToNextState();
 
     }   // completeHand
