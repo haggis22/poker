@@ -124,7 +124,7 @@ export class BetController {
 
         if (raisesLiveAction) {
 
-            status.lastLiveRaise = totalBetAmount - status.lastLiveBet;
+            status.lastLiveRaise = totalBetAmount - status.currentBet;
 
             if (totalBetAmount > status.lastLiveBet) {
                 status.lastLiveBet = totalBetAmount;
@@ -300,8 +300,9 @@ export class BetController {
         // If anyone else has raised live, then our new raise must be at least that same amount
         let minRaiseAmount: number = Math.max(table.stakes.bets[table.betStatus.bettingRound - 1], table.betStatus.lastLiveRaise);
 
-        // the live raise amount goes against the last LIVE bet amount - not necessarily against some dead raise that has happened in-between
-        let minRaiseTotal: number = table.betStatus.lastLiveBet + minRaiseAmount;
+        // the live raise amount goes against the current betting amount, even if it was a dead raise
+        // Source: http://neilwebber.com/notes/2013/07/25/the-most-misunderstood-poker-rule-nlhe-incomplete-raise-all-in/
+        let minRaiseTotal: number = table.betStatus.currentBet + minRaiseAmount;
 
         let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
 
@@ -329,7 +330,7 @@ export class BetController {
 
             if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
 
-                let raiseTotal: number = table.betStatus.lastLiveBet + table.stakes.bets[table.betStatus.bettingRound - 1];
+                let raiseTotal: number = table.betStatus.currentBet + table.stakes.bets[table.betStatus.bettingRound - 1];
 
                 // How many chips would they need to put in to meet that raise total?
                 let chipsToRaise: number = raiseTotal - this.getCurrentBet(table.betStatus, seat.index);
