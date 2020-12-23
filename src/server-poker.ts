@@ -36,7 +36,7 @@ function createTable(): Table {
     let blinds: number[] = [];
     let bets: number[] = [100, 200];
 
-    let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT);
+    let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, 4);
 
     let table: Table = new Table(tableID, stakes, rules);
 

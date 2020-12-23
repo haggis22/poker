@@ -313,6 +313,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
+    public getMySeat(): Seat {
+
+        if (this.mySeatIndex != null && this.table && this.table.seats) {
+            return this.table.seats[this.mySeatIndex];
+        }
+
+        return null;
+    }
+
+
     private calculateBuyIn(): number {
 
         switch (this.user.name) {

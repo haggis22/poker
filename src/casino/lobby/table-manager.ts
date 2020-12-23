@@ -52,9 +52,9 @@ export class TableManager {
         let ante = 25;
         let blinds: number[] = [];
         let bets: number[] = [100, 100, 200, 200];
+        let maxRaises: number = 4;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT);
-
+        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises);
 
         let table: Table = new Table(tableID, stakes, rules);
 

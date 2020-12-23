@@ -41,9 +41,12 @@
             <button type="button" v-on:click.stop="check">
                 <div class="action">Check</div>
             </button>
-            <button type="button" v-on:click.stop="bet">
+            <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
                 <div class="action">Bet</div>
                 <div class="amount">{{ ui.chipFormatter.format(ui.myBetAmount) }}</div>
+            </button>
+            <button v-if="!isRaiseAllowed" type="button" disabled>
+                <div class="action">Bet</div>
             </button>
         </div>
 
@@ -55,9 +58,12 @@
                 <div class="action">Call</div>
                 <div class="amount">{{ ui.chipFormatter.format(ui.myAmountToCall) }}</div>
             </button>
-            <button type="button" v-on:click.stop="bet">
+            <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
                 <div class="action">Raise</div>
                 <div class="amount">{{ ui.chipFormatter.format(ui.myBetAmount) }}</div>
+            </button>
+            <button v-if="!isRaiseAllowed" type="button" disabled>
+                <div class="action">Raise</div>
             </button>
         </div>
 
@@ -73,6 +79,7 @@ import './table-menu.scss';
 import Vue from 'vue';
 
 import { TableUI } from '../../../table-ui';
+import { Seat } from '../../../../casino/tables/seat';
 import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';
 import { FoldCommand } from '../../../../commands/table/betting/fold-command';
@@ -88,7 +95,8 @@ const TableMenuComponent = Vue.extend ({
         isSittingOut: {
             type: Boolean,
             required: true
-        }
+        },
+
     },
     data() {
 
@@ -98,6 +106,23 @@ const TableMenuComponent = Vue.extend ({
         }
 
         return values;
+
+    },
+    computed: {
+
+        isRaiseAllowed: function () {
+
+            let mySeat: Seat = this.ui.getMySeat();
+
+            if (mySeat) {
+
+                return this.ui.betController.calculateMinimumRaise(this.ui.table, mySeat) != null;
+
+            }
+
+            return false;
+
+        }
 
     },
     methods: {

@@ -12,6 +12,9 @@ export class BetStatus {
     public lastLiveBet: number;
     public lastLiveRaise: number;
 
+    public numRaises: number;
+
+
     // Tracks how much each seat has bet so far in this round
     // Key = seat index
     // Value = Bet object

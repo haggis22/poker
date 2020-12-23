@@ -46,7 +46,7 @@ export class BetController {
             delete status.bets[prop];
         }
 
-        status.currentBet = status.lastLiveBet = status.lastLiveRaise = 0;
+        status.currentBet = status.lastLiveBet = status.lastLiveRaise = status.numRaises = 0;
         status.seatIndex = null;
 
     }   // clearBets
@@ -111,14 +111,16 @@ export class BetController {
 
         seat.player.chips -= betAmount;
 
-        // they have to have put in some chips with this bet to get marked as all-in. If they were previously all-in
-        // and they're not putting in any chips this round, then don't mark them all-in again
-        let isAllIn: boolean = (seat.player.chips === 0) && (betAmount > 0);
-
         let totalBetAmount: number = this.getCurrentBet(status, seat.index) + betAmount;
 
-        let bet = new Bet(true, seat.index, totalBetAmount, betAmount, isAllIn, betType, actionType, null);
+        let bet = new Bet(true, seat.index, totalBetAmount, betAmount, betType, actionType, null);
         bet.raisesAction = raisesAction;
+
+        if (raisesAction) {
+
+            status.numRaises++;
+
+        }
 
         status.bets[seat.index] = bet;
 
@@ -166,26 +168,26 @@ export class BetController {
 
             if (!seat.isInHand) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You are not in the hand');
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You are not in the hand');
 
             }
 
             if (table.betStatus.seatIndex != seat.index) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.ANTE, Bet.ACTION.INVALID, "It is not your turn to act");
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.ACTION.INVALID, "It is not your turn to act");
 
             }
 
             if (table.stakes.ante == 0) {
 
                 // If there is no ante, then just force a check
-                return new Bet(true, seat.index, 0, 0, false, Bet.TYPE.ANTE, Bet.ACTION.CHECK, null);
+                return new Bet(true, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.ACTION.CHECK, null);
 
             }
 
             if (seat.player.chips === 0) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You do not have any chips to ante');
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You do not have any chips to ante');
 
             }
 
@@ -194,7 +196,7 @@ export class BetController {
         }
         else {
 
-            return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'It is not time to ante');
+            return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'It is not time to ante');
 
         }
 
@@ -207,20 +209,20 @@ export class BetController {
 
             if (!seat.isInHand) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.BLIND, Bet.TYPE.INVALID, 'You are not in the hand');
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.TYPE.INVALID, 'You are not in the hand');
 
             }
 
             if (table.betStatus.seatIndex != seat.index) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.BLIND, Bet.ACTION.INVALID, "It is not your turn to act");
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.ACTION.INVALID, "It is not your turn to act");
 
             }
 
             if (table.stakes.blinds.length == 0) {
 
                 // If there is no blind, then just force a check
-                return new Bet(true, seat.index, 0, 0, false, Bet.TYPE.BLIND, Bet.ACTION.CHECK, null);
+                return new Bet(true, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.ACTION.CHECK, null);
 
             }
 
@@ -232,13 +234,13 @@ export class BetController {
             if (blindAmount == 0) {
 
                 // If there is no blind, then just force a check
-                return new Bet(true, seat.index, 0, 0, false, Bet.TYPE.BLIND, Bet.ACTION.CHECK, null);
+                return new Bet(true, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.ACTION.CHECK, null);
 
             }
 
             if (seat.player.chips === 0 && !this.doesPlayerHaveChipsInPotAlready(table.betStatus, seat.index)) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You do not have any chips to pay the blind');
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You do not have any chips to pay the blind');
 
             }
 
@@ -247,7 +249,7 @@ export class BetController {
         }
         else {
 
-            return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'It is not time to pay blinds');
+            return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'It is not time to pay blinds');
 
         }
 
@@ -296,6 +298,16 @@ export class BetController {
 
     public calculateMinimumLiveRaise(table: Table, seat: Seat): number {
 
+        // If they don't have chips then they can't call, much less raise
+        if (!seat.player || seat.player.chips === 0) {
+            return null;
+        }
+
+        // Next, check to see if we already have our maximum number of bets/raises. If there is a limit specified, and we've hit it, then no more raises are possible
+        if (table.stakes.maxRaises != null && table.betStatus.numRaises >= table.stakes.maxRaises) {
+            return null;
+        }
+
         // the minimum bump for both limit and no-limit is the size of the bet for the round
         // If anyone else has raised live, then our new raise must be at least that same amount
         let minRaiseAmount: number = Math.max(table.stakes.bets[table.betStatus.bettingRound - 1], table.betStatus.lastLiveRaise);
@@ -315,8 +327,13 @@ export class BetController {
 
     public calculateMinimumRaise(table: Table, seat: Seat): number {
 
-        // If they don't have chips then they can't call
+        // If they don't have chips then they can't call, much less raise
         if (!seat.player || seat.player.chips === 0) {
+            return null;
+        }
+
+        // Next, check to see if we already have our maximum number of bets/raises. If there is a limit specified, and we've hit it, then no more raises are possible
+        if (table.stakes.maxRaises != null && table.betStatus.numRaises >= table.stakes.maxRaises) {
             return null;
         }
 
@@ -371,13 +388,13 @@ export class BetController {
 
             if (!seat.isInHand) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.REGULAR, Bet.TYPE.INVALID, 'You are not in the hand');
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.TYPE.INVALID, 'You are not in the hand');
 
             }
 
             if (table.betStatus.seatIndex != seat.index) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "It is not your turn to act");
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "It is not your turn to act");
 
             }
 
@@ -386,13 +403,13 @@ export class BetController {
 
             if (amount < 0) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "You cannot be a negative amount");
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "You cannot be a negative amount");
 
             }
 
             if (amount > seat.player.chips) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "You cannot bet more than you have");
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "You cannot bet more than you have");
 
             }
 
@@ -402,7 +419,7 @@ export class BetController {
             // amountToCall will take the fact that the player does not have enough chips into account and will allow a "call for less"
             if (amount < amountToCall) {
 
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, `You must put in at least ${amountToCall}`);
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, `You must put in at least ${amountToCall}`);
 
             }
 
@@ -431,7 +448,7 @@ export class BetController {
             if (amount > maximumBet) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${maximumBet}, bet amount: ${amount}`);
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "Bet is over the maximum");
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "Bet is over the maximum");
 
             }
 
@@ -439,7 +456,7 @@ export class BetController {
             if (amount < minimumBet) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${minimumBet}, bet amount: ${amount}`);
-                return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "Bet is under the maximum");
+                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "Bet is under the maximum");
 
             }
 
@@ -455,7 +472,7 @@ export class BetController {
         }
         else {
 
-            return new Bet(false, seat.index, 0, 0, false, Bet.TYPE.BET, Bet.TYPE.INVALID, 'It is not time to bet');
+            return new Bet(false, seat.index, 0, 0, Bet.TYPE.BET, Bet.TYPE.INVALID, 'It is not time to bet');
 
         }
 
@@ -495,7 +512,7 @@ export class BetController {
         else if (rankedBets.length === 1) {
 
             // There was only one bet, and we know it wasn't 0, so they get it back
-            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, false, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
+            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
 
             // Take their bet entirely off the table
             delete status.bets[rankedBets[0].seatIndex];
@@ -505,7 +522,7 @@ export class BetController {
         else if (rankedBets[1].totalBet === 0) {
 
             // There was a non-zero bet, and the next largest was 0 (must have been a check), so they get it back
-            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, false, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
+            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
 
             // Take their bet entirely off the table
             delete status.bets[rankedBets[0].seatIndex];
@@ -522,7 +539,7 @@ export class BetController {
 
             // The biggest bet is larger than the second biggest, so they get their bet reduced  (but some of it remains to match the 2nd biggest)
             let difference: number = rankedBets[0].totalBet - rankedBets[1].totalBet;
-            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, difference, 0, false, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Reduced bet'));
+            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, difference, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Reduced bet'));
 
             // This is still pointing at the original actual bet, so just reduce it by the proper amount
             rankedBets[0].totalBet -= difference;
