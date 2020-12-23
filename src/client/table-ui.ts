@@ -847,10 +847,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        if (action.bet.isAllIn) {
-            message += ' and is all-in';
-        }
-
         this.messages.push(message);
         this.log(message);
 

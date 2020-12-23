@@ -603,10 +603,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         }  // switch
 
-        if (action.bet.isAllIn) {
-            message += ' and is all-in';
-        }
-
         this.log(message);
 
     }  // bet

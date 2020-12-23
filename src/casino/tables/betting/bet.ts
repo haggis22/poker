@@ -24,7 +24,6 @@
     public seatIndex: number;
     public totalBet: number;
     public chipsAdded: number;
-    public isAllIn: boolean;
 
     public betType: number;
     public actionType: number;
@@ -37,7 +36,6 @@
                 seatIndex: number,
                 totalBet: number,
                 chipsAdded: number,
-                isAllIn: boolean,
                 betType: number,
                 actionType: number,
                 message: string) {
@@ -46,7 +44,6 @@
         this.seatIndex = seatIndex;
         this.totalBet = totalBet;
         this.chipsAdded = chipsAdded;
-        this.isAllIn = isAllIn;
         this.betType = betType;
         this.actionType = actionType;
         this.message = message;
