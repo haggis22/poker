@@ -296,36 +296,7 @@ export class BetController {
     }  // calculateCall
 
 
-    public calculateMinimumLiveRaise(table: Table, seat: Seat): number {
-
-        // If they don't have chips then they can't call, much less raise
-        if (!seat.player || seat.player.chips === 0) {
-            return null;
-        }
-
-        // Next, check to see if we already have our maximum number of bets/raises. If there is a limit specified, and we've hit it, then no more raises are possible
-        if (table.stakes.maxRaises != null && table.betStatus.numRaises >= table.stakes.maxRaises) {
-            return null;
-        }
-
-        // the minimum bump for both limit and no-limit is the size of the bet for the round
-        // If anyone else has raised live, then our new raise must be at least that same amount
-        let minRaiseAmount: number = Math.max(table.stakes.bets[table.betStatus.bettingRound - 1], table.betStatus.lastLiveRaise);
-
-        // the live raise amount goes against the current betting amount, even if it was a dead raise
-        // Source: http://neilwebber.com/notes/2013/07/25/the-most-misunderstood-poker-rule-nlhe-incomplete-raise-all-in/
-        let minRaiseTotal: number = table.betStatus.currentBet + minRaiseAmount;
-
-        let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
-
-        // If they don't have enough chips to actually meet this minimum live raise then return null - this will 
-        // indicate that a live raise is not even possible
-        return chipsToRaise > seat.player.chips ? null : chipsToRaise;
-
-    }
-
-
-    public calculateMinimumRaise(table: Table, seat: Seat): number {
+    public calculateMinimumLiveRaise(table: Table, seat: Seat, amountToCall?: number): number {
 
         // If they don't have chips then they can't call, much less raise
         if (!seat.player || seat.player.chips === 0) {
@@ -339,7 +310,66 @@ export class BetController {
 
         if (table.state instanceof BetState) {
 
-            if (seat.player.chips === this.calculateCall(table, seat)) {
+            if (amountToCall === undefined) {
+                amountToCall = this.calculateCall(table, seat);
+            }
+
+            // If they can't call, then they can't raise
+            if (amountToCall === null) {
+                return null;
+            }
+
+            if (seat.player.chips === amountToCall) {
+
+                // They only have enough chips to call - none extra to raise
+                return null;
+            }
+
+            // the minimum bump for both limit and no-limit is the size of the bet for the round
+            // If anyone else has raised live, then our new raise must be at least that same amount
+            let minRaiseAmount: number = Math.max(table.stakes.bets[table.betStatus.bettingRound - 1], table.betStatus.lastLiveRaise);
+
+            // the live raise amount goes against the current betting amount, even if it was a dead raise
+            // Source: http://neilwebber.com/notes/2013/07/25/the-most-misunderstood-poker-rule-nlhe-incomplete-raise-all-in/
+            let minRaiseTotal: number = table.betStatus.currentBet + minRaiseAmount;
+
+            let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
+
+            // If they don't have enough chips to actually meet this minimum live raise then return null - this will 
+            // indicate that a live raise is not even possible
+            return chipsToRaise > seat.player.chips ? null : chipsToRaise;
+
+        }
+
+        return null;
+
+    }
+
+
+    public calculateMinimumRaise(table: Table, seat: Seat, amountToCall?: number): number {
+
+        // If they don't have chips then they can't call, much less raise
+        if (!seat.player || seat.player.chips === 0) {
+            return null;
+        }
+
+        // Next, check to see if we already have our maximum number of bets/raises. If there is a limit specified, and we've hit it, then no more raises are possible
+        if (table.stakes.maxRaises != null && table.betStatus.numRaises >= table.stakes.maxRaises) {
+            return null;
+        }
+
+        if (table.state instanceof BetState) {
+
+            if (amountToCall === undefined) {
+                amountToCall = this.calculateCall(table, seat);
+            }
+
+            // If they can't call, then they can't raise
+            if (amountToCall === null) {
+                return null;
+            }
+
+            if (seat.player.chips === amountToCall) {
 
                 // They only have enough chips to call - none extra to raise
                 return null;
@@ -365,9 +395,9 @@ export class BetController {
     }
 
 
-    public calculateMaximumRaise(table: Table, seat: Seat): number {
+    public calculateMaximumRaise(table: Table, seat: Seat, amountToCall?: number): number {
 
-        let minRaise: number = this.calculateMinimumRaise(table, seat);
+        let minRaise: number = this.calculateMinimumRaise(table, seat, amountToCall);
         if (minRaise === null) {
             return null;
         }
@@ -431,7 +461,7 @@ export class BetController {
 
             }
 
-            let minimumBet: number = this.calculateMinimumRaise(table, seat);
+            let minimumBet: number = this.calculateMinimumRaise(table, seat, amountToCall);
 
             if (minimumBet === null) {
 
@@ -440,8 +470,8 @@ export class BetController {
 
             }
 
-            let minimumLiveRaise: number = this.calculateMinimumLiveRaise(table, seat);
-            let maximumBet: number = this.calculateMaximumRaise(table, seat);
+            let minimumLiveRaise: number = this.calculateMinimumLiveRaise(table, seat, amountToCall);
+            let maximumBet: number = this.calculateMaximumRaise(table, seat, amountToCall);
 
             // If we've made it here, then the player must be betting/raising, so first make sure it is not too much
             // We know maximumBet will not be null if the minBet is not null

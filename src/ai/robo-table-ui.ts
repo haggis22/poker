@@ -473,8 +473,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player.userID === this.user.id) {
 
-                let minimumRaise: number = this.betController.calculateMinimumRaise(this.table, seat);
                 let callAmount: number = this.betController.calculateCall(this.table, seat);
+                let minimumRaise: number = this.betController.calculateMinimumRaise(this.table, seat, callAmount);
 
                 if (betStatus.currentBet > 0) {
 

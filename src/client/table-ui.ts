@@ -602,8 +602,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let seat: Seat = this.findSeat(this.mySeatIndex);
 
         // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-        this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat);
         this.myAmountToCall = this.betController.calculateCall(this.table, seat);
+        this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall);
 
     }  // betState
 
@@ -713,20 +713,21 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let seat = this.findSeat(action.betStatus.seatIndex);
         this.log(`It is ${seat.getName()}'s turn to act`);
 
+        this.myAmountToCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
+
         // Raise the minimum value for the UI player to bet/raise, if necessary
         // Don't lower it if they have previously set it to be higher
         if (!this.myBetAmount) {
 
-            this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat);
+            this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall);
 
         }
         else {
 
-            this.myBetAmount = Math.max(this.myBetAmount, this.betController.calculateMinimumRaise(this.table, seat));
+            this.myBetAmount = Math.max(this.myBetAmount, this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall));
 
         }
 
-        this.myAmountToCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
 
         this.clearSeatTimers();
 
