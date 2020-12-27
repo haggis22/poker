@@ -99,6 +99,7 @@
     <Folder Include="src\actions\table\antes\" />
     <Folder Include="src\actions\table\game\dealing\" />
     <Folder Include="src\actions\table\game\pots\" />
+    <Folder Include="src\actions\table\game\showdown\" />
     <Folder Include="src\casino\lobby\" />
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
@@ -160,8 +161,10 @@
     <TypeScriptCompile Include="src\actions\table\game\dealing\clear-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\dealing\deal-board-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\hand-complete-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\pots\pot-cards-used-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\set-game-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\declare-hand-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\game\showdown\showdown-action.ts" />
     <TypeScriptCompile Include="src\actions\table\players\is-in-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\players\set-status-action.ts" />
     <TypeScriptCompile Include="src\actions\table\state\table-state-action.ts" />
