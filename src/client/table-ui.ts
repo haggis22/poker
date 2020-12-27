@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -285,6 +285,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.markUsedCards(action);
 
         }
+
+        if (action instanceof ChatAction) {
+
+            return this.chat(action);
+
+        }
+
 
         this.log(`Heard ${action.constructor.name}`);
 
@@ -1048,6 +1055,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }  // gatherBetsComplete
 
+
+
+    private chat(action: ChatAction): void {
+
+        this.messages.push(`${action.username}: ${action.message}`);
+        this.log(`${action.username}: ${action.message}`);
+
+    }  // chat
 
 
 

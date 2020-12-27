@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -182,12 +182,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             this.log(`Queueing ${message.action.constructor.name}`);
 
-            if (message.action instanceof BetTurnAction) {
-
-                // this.log(`Queueing ${message.action.constructor.name} for ${message.action.bets.seatIndex}`);
-
-            }
-
         }
         else if (message instanceof MessagePair) {
 
@@ -257,6 +251,12 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (command instanceof TableSnapshotCommand) {
 
             return await this.tableSnapshot(command);
+
+        }
+
+        if (command instanceof ChatCommand) {
+
+            return await this.chat(command);
 
         }
 
@@ -334,6 +334,15 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     }
 
+
+
+    private async findUser(userID: number): Promise<User> {
+
+        return this.lobbyManager.getUserManager().fetchUserByID(userID);
+
+    }
+
+
     private async seatPlayer(command: RequestSeatCommand): Promise<void> {
 
         let seatIndex = command.seatIndex;
@@ -362,20 +371,18 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player == null) {
 
-                let user: User = this.lobbyManager.getUserManager().fetchUserByID(command.userID);
+                let user: User = await this.findUser(command.userID);
 
                 if (user) {
 
                     seat.player = new Player(user.id, user.name);
-
                     this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
-
                     return await this.checkStartHand();
 
                 }
 
                 this.log(`Could not find User ${command.userID}`);
-                return this.queueMessage(new Message(`${seat.getName()} is already taken`, command.userID));
+                return this.queueMessage(new Message(`User ${command.userID} is unknown`, command.userID));
 
             }
 
@@ -708,7 +715,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }  // fold
 
 
-    private tableSnapshot(command: TableSnapshotCommand): void {
+    private async tableSnapshot(command: TableSnapshotCommand): Promise<void> {
 
         // Create a snapshot of the table situation, from the given player's perspective
         let table: Table = this.createTableSnapshot(command.userID);
@@ -720,6 +727,22 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // Tell the user which game we are playing at this table
         this.queueMessage(new ActionMessage(new SetGameAction(table.id, this.game.id), command.userID));
+
+    }
+
+
+    private async chat(command: ChatCommand): Promise<void> {
+
+        let user: User = await this.findUser(command.userID);
+
+        if (user) {
+
+            return this.queueAction(new ChatAction(this.table.id, user.id, user.username, command.message));
+
+        }
+
+        this.log(`Could not find User ${command.userID}`);
+        return this.queueMessage(new Message(`User ${command.userID} is unknown`, command.userID));
 
     }
 

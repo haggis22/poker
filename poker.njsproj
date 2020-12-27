@@ -65,6 +65,8 @@
     <Content Include="src\client\ui\table\board\BoardComponent.vue" />
     <Content Include="src\client\ui\table\card\card.scss" />
     <Content Include="src\client\ui\table\card\CardComponent.vue" />
+    <Content Include="src\client\ui\table\chat\chat.scss" />
+    <Content Include="src\client\ui\table\chat\ChatComponent.vue" />
     <Content Include="src\client\ui\table\dealer\dealer-box.scss" />
     <Content Include="src\client\ui\table\dealer\DealerBoxComponent.vue" />
     <Content Include="src\client\ui\table\log\log.scss" />
@@ -100,6 +102,7 @@
     <Folder Include="src\actions\table\game\dealing\" />
     <Folder Include="src\actions\table\game\pots\" />
     <Folder Include="src\actions\table\game\showdown\" />
+    <Folder Include="src\actions\table\chat\" />
     <Folder Include="src\casino\lobby\" />
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
@@ -110,6 +113,7 @@
     <Folder Include="src\client\ui\table\card\" />
     <Folder Include="src\client\ui\table\dealer\" />
     <Folder Include="src\client\ui\table\log\" />
+    <Folder Include="src\client\ui\table\chat\" />
     <Folder Include="src\client\ui\table\timer\" />
     <Folder Include="src\client\ui\table\table-menu\" />
     <Folder Include="src\client\ui\table\pot\" />
@@ -117,6 +121,7 @@
     <Folder Include="src\client\ui\table\table\" />
     <Folder Include="src\commands\lobby\" />
     <Folder Include="src\commands\table\betting\" />
+    <Folder Include="src\commands\table\chat\" />
     <Folder Include="src\communication\client-side\" />
     <Folder Include="src\communication\server-side\" />
     <Folder Include="src\games\poker\games\" />
@@ -157,6 +162,7 @@
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\chat\chat-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\dealing\clear-board-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\dealing\clear-hand-action.ts" />
     <TypeScriptCompile Include="src\actions\table\game\dealing\deal-board-action.ts" />
@@ -189,6 +195,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\betting\blind-command.ts" />
     <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
+    <TypeScriptCompile Include="src\commands\table\chat\chat-command.ts" />
     <TypeScriptCompile Include="src\commands\table\set-status-command.ts" />
     <TypeScriptCompile Include="src\ai\robo-table-ui.ts" />
     <TypeScriptCompile Include="src\commands\table\table-command.ts">

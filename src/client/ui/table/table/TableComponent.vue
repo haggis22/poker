@@ -37,6 +37,7 @@
                 </board-component>
             </div>
         </div><!-- table seats-6 -->
+        <chat-component :ui="ui"></chat-component>
         <log-component :ui="ui"></log-component>
         <table-menu-component :ui="ui"  :is-sitting-out.sync="ui.isSittingOut"></table-menu-component>
     </div>
@@ -61,7 +62,9 @@ import PotComponent from '../pot/PotComponent.vue';
 import WonPotComponent from '../pot/WonPotComponent.vue';
 import LogComponent from '../log/LogComponent.vue';
 import BoardComponent from '../board/BoardComponent.vue';
-import TableMenuComponent from '../table-menu/TableMenuComponent.vue';
+    import TableMenuComponent from '../table-menu/TableMenuComponent.vue';
+    import ChatComponent from '../chat/ChatComponent.vue';
+
 const TableComponent = Vue.extend({
     props: {
         ui: {
@@ -77,7 +80,8 @@ const TableComponent = Vue.extend({
         'won-pot-component': WonPotComponent,
         'log-component': LogComponent,
         'board-component': BoardComponent,
-        'table-menu-component': TableMenuComponent
+        'table-menu-component': TableMenuComponent,
+        'chat-component': ChatComponent
     }
 });
 export default TableComponent;

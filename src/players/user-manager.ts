@@ -42,7 +42,7 @@ export class UserManager {
     }
 
 
-    fetchUserByID(id: number): User {
+    public fetchUserByID(id: number): User {
 
         return this.userMapByID.get(id);
 

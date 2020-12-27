@@ -10,10 +10,10 @@ export { ClearBoardAction } from "../actions/table/game/dealing/clear-board-acti
 
 export { BettingCompleteAction } from "../actions/table/betting/betting-complete-action";
 
-export { ShowdownAction } from "../actions/table/game/showdown/showdown-action";
 export { DeclareHandAction } from "../actions/table/game/declare-hand-action";
-export { WinPotAction } from "../actions/table/game/pots/win-pot-action";
 export { WonPot } from "../casino/tables/betting/won-pot";
+export { WinPotAction } from "../actions/table/game/pots/win-pot-action";
+export { ShowdownAction } from "../actions/table/game/showdown/showdown-action";
 export { PotCardsUsedAction } from "../actions/table/game/pots/pot-cards-used-action";
 
 
@@ -81,6 +81,8 @@ export { FoldCommand } from "../commands/table/betting/fold-command";
 export { BetCommand } from "../commands/table/betting/bet-command";
 export { AnteCommand } from "../commands/table/betting/ante-command";
 
+export { ChatCommand } from "../commands/table/chat/chat-command";
+export { ChatAction } from "../actions/table/chat/chat-action";
 
 export { TableState } from "../casino/tables/states/table-state";
 export { TableStateAction } from "../actions/table/state/table-state-action";
