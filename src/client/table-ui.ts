@@ -139,9 +139,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 this.table = action.table;
 
-                // request a seat at the table - the null parameter means any seat will do
-                this.broadcastCommand(new RequestSeatCommand(this.table.id, null));
-
                 return;
 
             }

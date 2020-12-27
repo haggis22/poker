@@ -18,6 +18,11 @@
             </span>
         </div>
         <div class="cards">
+            <div v-if="!seat.player && !ui.getMySeat()">
+                <button type="button" 
+                        class="sit"
+                        v-on:click.stop="sit">Sit</button>
+            </div>
             <div v-if="seat.player && seat.player.isSittingOut" class="sitting-out">
                 [ Sitting Out ]
             </div>
@@ -42,6 +47,7 @@ import Vue from 'vue';
 import { Seat } from '../../../../casino/tables/seat';
 import { BetStatus} from '../../../../casino/tables/betting/bet-status';
 import { TableUI } from '../../../table-ui';
+import { RequestSeatCommand } from '../../../../commands/table/request-seat-command';
 
 import CardComponent from '../card/CardComponent';
 import TimerComponent from '../timer/TimerComponent';
@@ -105,7 +111,21 @@ const SeatComponent = Vue.extend ({
 
         }
 
+    },
+    methods: {
+
+        sit: function (event) {
+
+            if (this.ui && this.ui.table && this.seat) {
+
+                this.ui.sendCommand(new RequestSeatCommand(this.ui.table.id, this.seat.index));
+
+            }
+
+        }
+
     }
+
 
 });
 
