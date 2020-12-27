@@ -82,6 +82,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_COMPLETE_HAND: number = 0;
 
+    private readonly TIME_ALL_IN_FLIP_CARDS: number = 1500;
+
+
     private lobbyManager: LobbyManager;
 
 
@@ -1289,6 +1292,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.queueAction(new GatherBetsCompleteAction(this.table.id));
 
+        // See if we maybe want to do something special once players are all-in
+        await this.checkAllIn();
+
         if (!this.table.betStatus.pots.length) {
 
             // We don't have enough players, so go back to the open state
@@ -1301,6 +1307,50 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
     }  // completeBetting
+
+
+    private async checkAllIn(): Promise<void> {
+
+        let numSeatsInHand: number = 0;
+        let numPlayersWithChips: number = 0;
+
+        for (let seat of this.table.seats) {
+
+            if (seat.isInHand) {
+
+                numSeatsInHand++;
+
+                if (seat.player && seat.player.chips > 0) {
+                    numPlayersWithChips++;
+                }
+
+            }
+
+        }
+
+        // If we have:
+        // 1. Multiple players in the hand, so it's not just a pot won with folding
+        // 2. There is not more than one player with the ability to act (everyone or everyone but one is all-in)
+        // then let's see everyone's cards
+        if (numSeatsInHand >= 2 && numPlayersWithChips <= 1) {
+
+            // Flip all the cards face-up
+            for (let seat of this.table.seats) {
+
+                if (seat.hand) {
+
+                    seat.hand.flipCards();
+                    this.queueAction(new FlipCardsAction(this.table.id, seat.index, seat.hand));
+
+                }
+
+            }
+
+            await this.wait(this.TIME_ALL_IN_FLIP_CARDS);
+
+        }
+
+    }
 
 
     private async setBetTurn(seatIndexToAct: number): Promise<void> {
