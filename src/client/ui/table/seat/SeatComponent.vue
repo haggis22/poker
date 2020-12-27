@@ -11,7 +11,12 @@
                 <div class="action" v-if="ui.seatAction.has(seat.index)">{{ ui.seatAction.get(seat.index) }}</div>
             </div>
         </div>
-        <div class="chips"><span v-if="seat.player != null">{{ ui.chipFormatter.format(seat.player.chips) }}</span></div>
+        <div :class="chipsClasses">
+            <span v-if="seat.player != null">
+                <span v-if="seat.isInHand && seat.player && seat.player.chips === 0">[ ALL IN ]</span>
+                <span v-else>{{ ui.chipFormatter.format(seat.player.chips) }}</span>
+            </span>
+        </div>
         <div class="cards">
             <div v-if="seat.player && seat.player.isSittingOut" class="sitting-out">
                 [ Sitting Out ]
@@ -80,6 +85,19 @@ const SeatComponent = Vue.extend ({
             if (this.ui.isShowdownRequired) {
 
                 classes.push('showdown');
+
+            }
+
+            return classes;
+
+        },
+        chipsClasses: function () {
+
+            let classes = ['chips'];
+
+            if (this.seat && this.seat.isInHand && this.seat.player && this.seat.player.chips === 0) {
+
+                classes.push('all-in');
 
             }
 
