@@ -1,0 +1,19 @@
+﻿.action-log
+{
+    border: 2px solid black;
+    background: white;
+    padding: 5px;
+    overflow-y: scroll;
+
+    position: relative;
+    top: 150px;
+
+    width: 500px;
+    height: 200px;
+
+    .message
+    {
+
+    }
+
+}
