@@ -35,21 +35,35 @@
         &.seat-3 {
             top: -220px;
             left: 600px;
+
+            .dealer-holding {
+                top: 560px;
+                left: -240px;
+            }
         }
 
         &.seat-4 {
             top: 90px;
             left: 740px;
+
+            .dealer-holding {
+                top: 250px;
+                left: -380px;
+            }
         }
 
         &.seat-5 {
             top: 390px;
             left: 580px;
+
+            .dealer-holding {
+                top: -50px;
+                left: -220px;
+            }
         }
     }
 
     .chips-stage.gathering {
-
         top: 200px;
         left: 300px;
     }
@@ -73,18 +87,18 @@
         }
 
         &.seat-3 {
-            top: 20px;
+            top: 40px;
             left: 500px;
         }
 
         &.seat-4 {
-            top: 160px;
-            left: 630px;
+            top: 200px;
+            left: 635px;
         }
 
         &.seat-5 {
-            top: 310px;
-            left: 500px;
+            top: 360px;
+            left: 490px;
         }
     }
 
@@ -94,7 +108,7 @@
         &.seat-0 {
             top: 385px;
             left: 160px;
-            transform: rotate(15deg);
+            transform: rotate(45deg);
         }
 
         &.seat-1 {
@@ -132,6 +146,4 @@
         top: 480px;
         left: 235px;
     }
-
 }
-
