@@ -18,7 +18,7 @@ import { HandCompleteState } from "./states/hand-complete-state";
 import { HandWinner } from "../../games/hand-winner";
 import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
 import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
-import { WinPotAction } from "../../actions/table/game/win-pot-action";
+import { WinPotAction } from "../../actions/table/game/pots/win-pot-action";
 import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
 import { AnteCommand } from "../../commands/table/betting/ante-command";
 import { BetCommand } from "../../commands/table/betting/bet-command";
@@ -57,6 +57,8 @@ import { DealBoardAction } from "../../actions/table/game/dealing/deal-board-act
 import { ClearBoardAction } from "../../actions/table/game/dealing/clear-board-action";
 import { LobbyManager } from "../lobby/lobby-manager";
 import { BetController } from "./betting/bet-controller";
+import { PotCardsUsedAction } from "../../actions/table/game/pots/pot-cards-used-action";
+import { ShowdownAction } from "../../actions/table/game/showdown/showdown-action";
 
 const logger: Logger = new Logger();
 
@@ -1408,7 +1410,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             if (seat.hand) {
 
                 // Put their best hand on the list
-                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index, 0))
+                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index))
 
             }
 
@@ -1476,8 +1478,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async showdown(showdownState: ShowdownState): Promise<void> {
 
-
         let isShowdownRequired = this.countPlayersInHand() > 1;
+
+        this.queueAction(new ShowdownAction(this.table.id, isShowdownRequired));
 
         if (isShowdownRequired) {
 
@@ -1519,6 +1522,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             let potWinningHand = null;
             let potWinnerSeatIndexes = new Set<number>();
 
+            // Track all the cards used in the winning hand(s).  We are using a set
+            // because there might be multiple winners, and each of them could be using the same cards
+            let usedCardsSet: Set<Card> = new Set<Card>();
+
             for (let winner of winners) {
 
                 if (pot.isSeatInPot(winner.seatIndex)) {
@@ -1528,11 +1535,31 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                         potWinningHand = winner.evaluation;
                         potWinnerSeatIndexes.add(winner.seatIndex);
 
+                        if (isShowdownRequired) {
+
+                            // add the cards that the player used to the set so that they will be highlighted on the client
+                            // This will include both cards in the player's hand and cards from the board, as relevant.
+                            for (let card of winner.evaluation.cards) {
+                                usedCardsSet.add(card);
+                            }
+
+                        }
+
                     }
                     else if (winner.evaluation.compareTo(potWinningHand) >= 0) {
 
-                        // Should never be *greater*, since we're going in descending order of hand strength
+                        // Should never be *greater*, since we're going in descending order of hand strength, but whatever
                         potWinnerSeatIndexes.add(winner.seatIndex);
+
+                        if (isShowdownRequired) {
+
+                            // add the cards that the player used to the set so that they will be highlighted on the client
+                            // This will include both cards in the player's hand and cards from the board, as relevant.
+                            for (let card of winner.evaluation.cards) {
+                                usedCardsSet.add(card);
+                            }
+
+                        }
 
                     }
 
@@ -1567,6 +1594,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 }
 
             }
+
+            this.queueAction(new PotCardsUsedAction(this.table.id, [...usedCardsSet.values()]));
 
             // we have popped the pot off, so update that so it effectively gets replaced by the WonPot objects
             this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));

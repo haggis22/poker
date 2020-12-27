@@ -98,6 +98,7 @@
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\actions\table\antes\" />
     <Folder Include="src\actions\table\game\dealing\" />
+    <Folder Include="src\actions\table\game\pots\" />
     <Folder Include="src\casino\lobby\" />
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
@@ -239,7 +240,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\betting\bet-returned-action.ts" />
-    <TypeScriptCompile Include="src\actions\table\game\win-pot-action.ts">
+    <TypeScriptCompile Include="src\actions\table\game\pots\win-pot-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\table\players\stack-update-action.ts">

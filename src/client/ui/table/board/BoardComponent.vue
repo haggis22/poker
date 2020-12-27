@@ -1,9 +1,10 @@
 ﻿<template>
-    <div class="board">
+    <div class="board" :class="boardClasses">
         <div class="cards">
             <card-component v-for="(card, index) in board.cards"
                             :key="`card-${index}`"
-                            :card="card"></card-component>
+                            :card="card"
+                            :used-cards="ui.usedCards"></card-component>
         </div>
     </div>
 </template>
@@ -38,22 +39,16 @@ const BoardComponent = Vue.extend ({
     },
     computed: {
 
-        seatClasses: function () {
+        boardClasses: function () {
 
             let classes = [];
-            /*
-            [`seat-${this.seat.index}`];
 
-            if (this.betTracker && this.betTracker.seatIndex == this.seat.index) {
+            if (this.ui.isShowdownRequired) {
 
-                classes.push('action-on');
+                classes.push('showdown');
 
             }
 
-            if (this.seat.player && this.seat.player.isSittingOut) {
-                classes.push('sitting-out');
-            }
-            */
             return classes;
 
         }

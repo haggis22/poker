@@ -34,6 +34,10 @@ const CardComponent = Vue.extend ({
         card: {
             type: [ Card, FacedownCard],
             required: true
+        },
+        usedCards: {
+            type: Array,
+            required: false
         }
     },
 
@@ -88,6 +92,13 @@ const CardComponent = Vue.extend ({
             if (this.card instanceof Card) {
 
                 classes.push(this.card.suit.text);
+
+                if (this.usedCards && this.usedCards.find(card => card.equals(this.card))) {
+
+                    classes.push('used');
+
+                }
+
 
             }
             else {

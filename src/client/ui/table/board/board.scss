@@ -6,7 +6,6 @@
     height: 100px;
     padding: 3px;
     box-sizing: border-box;
-
     border: 4px solid rgba(255, 255, 255, 0.1);
 
     .cards {
@@ -14,10 +13,39 @@
         height: 100%;
         width: 100%;
         white-space: nowrap;
-        padding: 15px;
+        padding-left: 30px;
+
+        .card {
+            vertical-align: top;
+            margin-top: 10px;
+        }
 
         .card-small-2 + .card-small-2 {
-            margin-left: 10px;
+            margin-left: 13px;
+        }
+    }
+
+    &.showdown {
+
+        .cards {
+
+            .card {
+
+                &.used {
+                    margin-top: -5px;
+                    transition: margin-top 0.5s;
+                }
+
+                &:not(.used) {
+
+                    .card-inner {
+                        background-color: #999;
+                        transition: background-color 0.5s;
+                    }
+
+                }
+            }
+
         }
     }
 }

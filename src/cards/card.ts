@@ -23,4 +23,12 @@ export class Card
 
     }
 
+    public equals(card: Card): boolean {
+
+        return card
+            && card.value && this.value && card.value.value === this.value.value
+            && card.suit && this.suit && card.suit.value === this.suit.value;
+
+    }
+
 }

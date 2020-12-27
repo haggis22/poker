@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -58,6 +58,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isSittingOut: boolean | undefined;
 
+    public isShowdownRequired: boolean;
+    public usedCards: Array<Card>;
+
 
 
 
@@ -86,6 +89,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.betController = new BetController();
 
         this.isSittingOut = false;
+
+        this.isShowdownRequired = false;
+        this.usedCards = new Array<Card>();
 
     }
 
@@ -268,6 +274,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof BettingCompleteAction) {
 
             return this.bettingComplete(action);
+
+        }
+
+        if (action instanceof ShowdownAction) {
+
+            return this.showdown(action);
+
+        }
+
+        if (action instanceof PotCardsUsedAction) {
+
+            return this.markUsedCards(action);
 
         }
 
@@ -701,7 +719,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // If we have pots, then we can't have any WonPots - clear 'em
         this.wonPots.length = 0;
 
-    }  // clearCards
+        // showdown is no longer required - clear the flags that were highlighting cards
+        this.isShowdownRequired = false;
+        this.usedCards.length = 0;
+
+    }  // completeHand
 
 
     private betTurn(action: BetTurnAction): void {
@@ -989,6 +1011,25 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.clearLocalBets();
 
     }  // bettingComplete
+
+
+    private showdown(action: ShowdownAction): void {
+
+        this.isShowdownRequired = action.isShowdownRequired;
+
+    }  // showdown
+
+
+    private markUsedCards(action: PotCardsUsedAction): void {
+
+        this.usedCards.length = 0;
+
+        for (let card of action.cards) {
+            this.usedCards.push(card);
+        }
+
+    }  // markUsedCards
+
 
 
     private gatherBets(action: GatherBetsAction): void {

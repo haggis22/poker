@@ -6,7 +6,7 @@ import { Player } from "../../players/player";
 import { Table } from "./table";
 import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
 import { UpdateBetsAction } from "../../actions/table/betting/update-bets-action";
-import { WinPotAction } from "../../actions/table/game/win-pot-action";
+import { WinPotAction } from "../../actions/table/game/pots/win-pot-action";
 import { StackUpdateAction } from "../../actions/table/players/stack-update-action";
 import { CommandHandler } from "../../commands/command-handler";
 import { Logger } from "../../logging/logger";
