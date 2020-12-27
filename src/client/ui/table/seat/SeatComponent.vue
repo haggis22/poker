@@ -19,7 +19,8 @@
             <div v-if="seat.hand">
                 <card-component v-for="(card, index) in seat.hand.cards"
                                 :key="`card-${index}`"
-                                :card="card"></card-component>
+                                :card="card"
+                                :ui="ui"></card-component>
             </div>
         </div>
     </div>
@@ -74,6 +75,12 @@ const SeatComponent = Vue.extend ({
 
             if (this.seat.player && this.seat.player.isSittingOut) {
                 classes.push('sitting-out');
+            }
+
+            if (this.ui.isShowdownRequired) {
+
+                classes.push('showdown');
+
             }
 
             return classes;

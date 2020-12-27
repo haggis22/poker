@@ -27,19 +27,20 @@ import Vue from 'vue';
 
 import { Card } from '../../../../cards/card';
 import { FacedownCard } from '../../../../cards/face-down-card';
+import { TableUI } from '../../../table-ui';
 
-const CardComponent = Vue.extend ({
+    const CardComponent = Vue.extend({
 
-    props: {
-        card: {
-            type: [ Card, FacedownCard],
-            required: true
+        props: {
+            card: {
+                type: [Card, FacedownCard],
+                required: true
+            },
+            ui: {
+                type: TableUI,
+                required: true
+            }
         },
-        usedCards: {
-            type: Array,
-            required: false
-        }
-    },
 
     data() {
 
@@ -93,16 +94,15 @@ const CardComponent = Vue.extend ({
 
                 classes.push(this.card.suit.text);
 
-                if (this.usedCards && this.usedCards.find(card => card.equals(this.card))) {
-
-                    classes.push('used');
-
-                }
-
-
             }
             else {
                 classes.push('face-down');
+            }
+
+            if (this.ui.isCardUsed(this.card)) {
+
+                classes.push('used');
+
             }
 
             if (this.isDealerHolding) {

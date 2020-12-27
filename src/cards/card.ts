@@ -1,5 +1,6 @@
 ﻿import { CardValue } from "./card-value"
 import { CardSuit } from "./card-suit"
+import { FacedownCard } from "./face-down-card";
 
 export class Card
 {
@@ -23,9 +24,10 @@ export class Card
 
     }
 
-    public equals(card: Card): boolean {
+    public equals(card: Card | FacedownCard): boolean {
 
         return card
+            && card instanceof Card
             && card.value && this.value && card.value.value === this.value.value
             && card.suit && this.suit && card.suit.value === this.suit.value;
 

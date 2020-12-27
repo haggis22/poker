@@ -33,14 +33,17 @@
 
                 &.used {
                     margin-top: -5px;
-                    transition: margin-top 0.5s;
+                    transition: margin-top 0.25s;
                 }
 
                 &:not(.used) {
 
+                    opacity: 0.6;
+                    transition: opacity 0.25s;
+
                     .card-inner {
                         background-color: #999;
-                        transition: background-color 0.5s;
+                        transition: background-color 0.25s;
                     }
 
                 }

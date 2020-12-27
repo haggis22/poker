@@ -4,7 +4,7 @@
             <card-component v-for="(card, index) in board.cards"
                             :key="`card-${index}`"
                             :card="card"
-                            :used-cards="ui.usedCards"></card-component>
+                            :ui="ui"></card-component>
         </div>
     </div>
 </template>

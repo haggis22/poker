@@ -25,7 +25,7 @@ import { BetStatus } from "../casino/tables/betting/bet-status";
 import { BetController } from "../casino/tables/betting/bet-controller";
 
 
-const MILLISECONDS_TO_THINK = 1500;
+const TIME_TO_THINK = 500;
 
 const logger: Logger = new Logger();
 
@@ -511,7 +511,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                         }
 
-                    }, MILLISECONDS_TO_THINK);
+                    }, TIME_TO_THINK);
 
                     return;
 
@@ -527,7 +527,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                         this.broadcastCommand(betCommand);
 
-                    }, MILLISECONDS_TO_THINK);
+                    }, TIME_TO_THINK);
 
                     return;
 

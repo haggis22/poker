@@ -14,7 +14,7 @@ import { TableConnectedAction } from "../actions/table/state/table-connected-act
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -59,7 +59,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public isSittingOut: boolean | undefined;
 
     public isShowdownRequired: boolean;
-    public usedCards: Array<Card>;
+    private usedCards: Array<Card>;
 
 
 
@@ -1030,6 +1030,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }  // markUsedCards
 
+
+    public isCardUsed(card: Card | FacedownCard): boolean {
+
+        return this.usedCards && this.usedCards.find(usedCard => usedCard.equals(card)) != null;
+
+    }  // isCardUsed
 
 
     private gatherBets(action: GatherBetsAction): void {

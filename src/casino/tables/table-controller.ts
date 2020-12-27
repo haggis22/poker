@@ -76,11 +76,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private readonly TIME_RETURN_BET = 500;
     private readonly TIME_GATHERING_BETS: number = 1250;
 
-    private readonly TIME_SHOWDOWN: number = 1000;
-    private readonly TIME_WIN_POT: number = 2000;
-    private readonly TIME_POST_SHOWDOWN: number = 2000;
+    private readonly TIME_SHOWDOWN: number = 500;
+    private readonly TIME_WIN_POT: number = 5000;
+    private readonly TIME_POST_SHOWDOWN: number = 100;
 
-    private readonly TIME_COMPLETE_HAND: number = 1000;
+    private readonly TIME_COMPLETE_HAND: number = 0;
 
     private lobbyManager: LobbyManager;
 
