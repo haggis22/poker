@@ -3,8 +3,13 @@
     <div class="table-menu">
 
         <div class="sit-out">
+
+            <div>isSittingOut: {{ isSittingOut }}</div>
+            <div>ui.isSittingOut: {{ ui.isSittingOut }}</div>
+            <div v-if="ui.getMySeat()">player.isSittingOut: {{ ui.getMySeat().player.isSittingOut }}</div>
+
             <label>
-                <input type="checkbox" v-model="localIsSittingOut" @change.stop="setStatus(localIsSittingOut)" />
+                <input type="checkbox" value="true" :checked="isSittingOut" @change="setStatus" />
 
                 Sit out next hand
             </label>
@@ -93,8 +98,8 @@ const TableMenuComponent = Vue.extend ({
             required: true
         },
         isSittingOut: {
-            type: Boolean,
-            required: true
+            type: Boolean, 
+            required: false
         },
 
     },
@@ -102,7 +107,6 @@ const TableMenuComponent = Vue.extend ({
 
         let values =
         {
-            localIsSittingOut: this.isSittingOut
         }
 
         return values;
@@ -159,7 +163,9 @@ const TableMenuComponent = Vue.extend ({
 
         setStatus: function (event) {
 
-            this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, this.localIsSittingOut));
+            // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
+            this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, event.target.checked));
+            this.$emit('update:isSittingOut', event.target.checked);
 
         }
 

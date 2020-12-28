@@ -258,9 +258,11 @@ export class BetController {
 
     public calculateCall(table: Table, seat: Seat): number {
 
-        // If they don't have chips then they can't call
-        if (seat.player.chips === 0) {
+        // If they don't have a seat, or chips then they can't call
+        if (!seat || !seat.player || seat.player.chips === 0) {
+
             return null;
+
         }
 
         if (table.state instanceof AnteState) {
@@ -299,7 +301,7 @@ export class BetController {
     public calculateMinimumLiveRaise(table: Table, seat: Seat, amountToCall?: number): number {
 
         // If they don't have chips then they can't call, much less raise
-        if (!seat.player || seat.player.chips === 0) {
+        if (!seat || !seat.player || seat.player.chips === 0) {
             return null;
         }
 
@@ -361,7 +363,6 @@ export class BetController {
         }
 
         return null;
-
 
     }
 

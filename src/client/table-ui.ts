@@ -12,9 +12,8 @@ import { PlayerSeatedAction } from "../actions/table/players/player-seated-actio
 import { Logger } from "../logging/logger";
 import { TableConnectedAction } from "../actions/table/state/table-connected-action";
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
-import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, AnteState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -56,7 +55,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public messages: string[];
 
-    public isSittingOut: boolean | undefined;
+    public isSittingOut: boolean;
 
     public isShowdownRequired: boolean;
     private usedCards: Array<Card>;
@@ -88,7 +87,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.betController = new BetController();
 
-        this.isSittingOut = false;
+        this.isSittingOut = null;
 
         this.isShowdownRequired = false;
         this.usedCards = new Array<Card>();
@@ -157,6 +156,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof PlayerSeatedAction) {
 
             return this.seatPlayer(action);
+
+        }
+
+        if (action instanceof SetStatusAction) {
+
+            return this.setStatus(action);
 
         }
 
@@ -499,6 +504,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // seatPlayer
 
 
+
+    private setStatus(action: SetStatusAction): void {
+
+        if (this.user && this.user.id === action.userID) {
+
+            this.isSittingOut = action.isSittingOut;
+
+        }
+
+    }  // setStatus
+
+
+
     private findSeat(seatIndex: number): Seat {
 
         if (seatIndex >= 0 && seatIndex < this.table.seats.length) {
@@ -623,9 +641,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat: Seat = this.findSeat(this.mySeatIndex);
 
-        // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-        this.myAmountToCall = this.betController.calculateCall(this.table, seat);
-        this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall);
+        if (seat) {
+
+            // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
+            this.myAmountToCall = this.betController.calculateCall(this.table, seat);
+            this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall);
+
+        }
+        else {
+
+            this.myAmountToCall = null;
+            this.myBetAmount = null;
+
+        }
 
     }  // betState
 
@@ -635,11 +663,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // reset the player's default bet to match the ante
         let seat: Seat = this.findSeat(this.mySeatIndex);
 
-        // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-        this.myAmountToCall = this.betController.calculateCall(this.table, seat);
+        if (seat) {
 
-        // no betting, only calling, with antes
-        this.myBetAmount = null;
+            // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
+            this.myAmountToCall = this.betController.calculateCall(this.table, seat);
+
+            // no betting, only calling, with antes
+            this.myBetAmount = null;
+
+        }
+        else {
+
+            this.myAmountToCall = null;
+            this.myBetAmount = null;
+
+        }
+
 
 
     }  // anteState

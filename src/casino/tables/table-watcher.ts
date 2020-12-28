@@ -347,7 +347,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
-    }  // setSittingOut
+    }  // setStatus
 
 
     private setIsInHand(action: IsInHandAction): void {
