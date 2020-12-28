@@ -54,4 +54,11 @@ export class Seat {
     }
 
 
+    public isAllIn(): boolean {
+
+        return this.isInHand && this.player && this.player.chips === 0;
+
+    }
+
+
 }

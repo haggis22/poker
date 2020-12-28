@@ -4,15 +4,12 @@
 
         <div class="sit-out">
 
-            <div>isSittingOut: {{ isSittingOut }}</div>
-            <div>ui.isSittingOut: {{ ui.isSittingOut }}</div>
-            <div v-if="ui.getMySeat()">player.isSittingOut: {{ ui.getMySeat().player.isSittingOut }}</div>
-
             <label>
                 <input type="checkbox" value="true" :checked="isSittingOut" @change="setStatus" />
 
                 Sit out next hand
             </label>
+
         </div>
 
         <div class="bet-actions" v-if="ui.isAnteTime()">

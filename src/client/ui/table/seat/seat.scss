@@ -19,6 +19,12 @@
         transition: background-color 0.25s, color 0.25s;
     }
 
+    &.all-in {
+        background: linear-gradient(45deg, #c65c0f, #de9967);
+        color: black;
+        transition: background-color 0.25s, color 0.25s;
+    }
+
     &.sitting-out {
         background: lightgrey;
         color: grey;
@@ -39,12 +45,9 @@
         font-variant: small-caps;
     }
 
-    .chips
-    {
-        &.all-in
-        {
+    .chips {
+        &.all-in {
         }
-
     }
 
     .avatar {
@@ -106,7 +109,6 @@
             .card {
 
                 &:not(.used) {
-
                     margin-top: 8px;
 
                     .card-inner {

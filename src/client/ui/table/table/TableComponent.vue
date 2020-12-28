@@ -39,7 +39,11 @@
         </div><!-- table seats-6 -->
         <chat-component :ui="ui"></chat-component>
         <log-component :ui="ui"></log-component>
-        <table-menu-component :ui="ui"  :is-sitting-out.sync="ui.isSittingOut"></table-menu-component>
+        <table-menu-component 
+                v-if="ui.getMySeat()"
+                :ui="ui"  
+                :is-sitting-out.sync="ui.isSittingOut">
+        </table-menu-component>
     </div>
 </template>
 <script lang="ts">

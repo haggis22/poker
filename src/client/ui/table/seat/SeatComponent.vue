@@ -1,5 +1,5 @@
 ﻿<template>
-    <div v-if="seat != null" class="seat" :class="seatClasses">
+    <div v-if="seat != null" :class="seatClasses">
         <div class="name">
             <span v-if="seat.player != null">
                 {{ seat.player.name }}
@@ -13,7 +13,7 @@
         </div>
         <div :class="chipsClasses">
             <span v-if="seat.player != null">
-                <span v-if="seat.isInHand && seat.player && seat.player.chips === 0">[ ALL IN ]</span>
+                <span v-if="seat.isAllIn()">[ ALL IN ]</span>
                 <span v-else>{{ ui.chipFormatter.format(seat.player.chips) }}</span>
             </span>
         </div>
@@ -76,7 +76,7 @@ const SeatComponent = Vue.extend ({
 
         seatClasses: function () {
 
-            let classes = [`seat-${this.seat.index}`];
+            let classes = [ 'seat', `seat-${this.seat.index}`];
 
             if (this.betStatus && this.betStatus.seatIndex == this.seat.index) {
 
@@ -91,6 +91,12 @@ const SeatComponent = Vue.extend ({
             if (this.ui.isShowdownRequired) {
 
                 classes.push('showdown');
+
+            }
+
+            if (this.seat.isAllIn()) {
+
+                classes.push('all-in');
 
             }
 
