@@ -24,6 +24,7 @@ import { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";
 import { LoginAction } from "../actions/lobby/login-action";
 import { Timer } from "../timers/timer";
 import { BetController } from "../casino/tables/betting/bet-controller";
+import { PendingCommands } from "./ui/state/pending-commands";
 
 
 const logger: Logger = new Logger();
@@ -60,6 +61,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public isShowdownRequired: boolean;
     private usedCards: Array<Card>;
 
+    // fields specific to acting in advance
+    public pendingCommands: PendingCommands;
+
 
 
 
@@ -91,6 +95,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.isShowdownRequired = false;
         this.usedCards = new Array<Card>();
+
+        this.pendingCommands = new PendingCommands();
 
     }
 
@@ -590,6 +596,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myBetAmount = null;
         this.myAmountToCall = null;
 
+        this.pendingCommands.clear();
+
     }
 
 
@@ -778,6 +786,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let seat = this.findSeat(action.betStatus.seatIndex);
         this.log(`It is ${seat.getName()}'s turn to act`);
 
+        this.clearSeatTimers();
+
         this.myAmountToCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
 
         // Raise the minimum value for the UI player to bet/raise, if necessary
@@ -793,10 +803,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-
-        this.clearSeatTimers();
-
         if (action.timesUp > Date.now()) {
+
+            if (this.pendingCommands.fold) {
+
+                // We are taking an action, so clear anything that is pending and try to fold immediately
+                this.pendingCommands.clear();
+                return this.sendCommand(new FoldCommand(this.table.id));
+
+            }
 
             let timer: Timer = new Timer(action.timesUp);
             timer.start();

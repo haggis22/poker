@@ -46,8 +46,12 @@ let tableID = 1;
 
 // RoboClients will automatically connect themselves to the passed-in lobbyManager
 // createRoboClient(tableID, lobbyManager, userManager.getUserByID(1));
-createRoboClient(tableID, lobbyManager, 2);
-createRoboClient(tableID, lobbyManager, 3);
+// createRoboClient(tableID, lobbyManager, 2);
+// createRoboClient(tableID, lobbyManager, 3);
+createRoboClient(tableID, lobbyManager, 5);
+createRoboClient(tableID, lobbyManager, 6);
+createRoboClient(tableID, lobbyManager, 7);
+createRoboClient(tableID, lobbyManager, 8);
 
 
 wss.on('connection', (socket: WebSocket) => {

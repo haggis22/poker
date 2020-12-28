@@ -26,7 +26,7 @@
 
         <div class="bet-actions" v-if="ui.isPendingCheckBetTime()">
             <label>
-                <input type="checkbox" /> Fold
+                <input type="checkbox" value="true" :checked="pendingFold" @change="$emit('update:pendingFold', $event.target.checked)" /> Fold
             </label>
             <label>
                 <input type="checkbox" /> Check
@@ -50,6 +50,18 @@
             <button v-if="!isRaiseAllowed" type="button" disabled>
                 <div class="action">Bet</div>
             </button>
+        </div>
+
+        <div class="bet-actions" v-if="ui.isPendingCallRaiseTime()">
+            <label>
+                <input type="checkbox" value="true" :checked="pendingFold" @change="$emit('update:pendingFold', $event.target.checked)" /> Fold
+            </label>
+            <label>
+                <input type="checkbox" /> Call
+            </label>
+            <label>
+                <input type="checkbox" /> Raise {{ ui.chipFormatter.format(ui.myBetAmount) }}
+            </label>
         </div>
 
         <div class="bet-actions" v-if="ui.isCallRaiseTime()">
@@ -86,6 +98,7 @@ import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';
 import { FoldCommand } from '../../../../commands/table/betting/fold-command';
 import { SetStatusCommand } from '../../../../communication/serializable';
+import { PendingCommands } from '../../state/pending-commands';
 
 const TableMenuComponent = Vue.extend ({
 
@@ -98,6 +111,10 @@ const TableMenuComponent = Vue.extend ({
             type: Boolean, 
             required: false
         },
+        pendingFold: {
+            type: Boolean,
+            required: false
+        }
 
     },
     data() {

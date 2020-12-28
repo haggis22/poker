@@ -1,5 +1,4 @@
-﻿import { User } from "../../players/user";
-import { TableCommand } from "./table-command";
+﻿import { TableCommand } from "./table-command";
 
 export class RequestSeatCommand extends TableCommand {
 

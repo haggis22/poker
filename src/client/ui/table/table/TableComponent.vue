@@ -41,7 +41,8 @@
         <log-component :ui="ui"></log-component>
         <table-menu-component 
                 v-if="ui.getMySeat()"
-                :ui="ui"  
+                :ui="ui"
+                :pending-fold.sync="ui.pendingCommands.fold"
                 :is-sitting-out.sync="ui.isSittingOut">
         </table-menu-component>
     </div>
