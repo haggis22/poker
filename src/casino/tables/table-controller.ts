@@ -345,6 +345,15 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async seatPlayer(command: RequestSeatCommand): Promise<void> {
 
+        let user: User = await this.findUser(command.userID);
+
+        if (!user) {
+
+            this.log(`Could not find User ${command.userID}`);
+            return this.queueMessage(new Message(`User ${command.userID} is unknown`, command.userID));
+
+        }
+
         let seatIndex = command.seatIndex;
         if (seatIndex === null) {
 
@@ -359,6 +368,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }  // no seat specified
 
+        this.log(`User ${command.userID} has requested a null seat, so we are giving them ${seatIndex}`);
+
         if (seatIndex === null) {
 
             return this.queueMessage(new Message('No seats available', command.userID));
@@ -371,18 +382,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player == null) {
 
-                let user: User = await this.findUser(command.userID);
-
-                if (user) {
-
-                    seat.player = new Player(user.id, user.name);
-                    this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
-                    return await this.checkStartHand();
-
-                }
-
-                this.log(`Could not find User ${command.userID}`);
-                return this.queueMessage(new Message(`User ${command.userID} is unknown`, command.userID));
+                seat.player = new Player(user.id, user.name);
+                this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
+                return await this.checkStartHand();
 
             }
 
