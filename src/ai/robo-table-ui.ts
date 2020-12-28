@@ -25,7 +25,7 @@ import { BetStatus } from "../casino/tables/betting/bet-status";
 import { BetController } from "../casino/tables/betting/bet-controller";
 
 
-const TIME_TO_THINK = 500;
+const TIME_TO_THINK = 1200;
 
 const logger: Logger = new Logger();
 
