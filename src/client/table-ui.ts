@@ -639,7 +639,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myAmountToCall = this.betController.calculateCall(this.table, seat);
 
         // no betting, only calling, with antes
-        this.myBetAmount = 0;
+        this.myBetAmount = null;
 
 
     }  // anteState
@@ -842,6 +842,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.killSeatTimer(action.seatIndex);
 
+        if (action.seatIndex == this.mySeatIndex) {
+
+            // I have made a bet, so clear out my betting amounts, or they can be used the next time
+            this.clearLocalBets();
+
+        }
+
+
         let message = 'Unknown message';
 
         if (action.bet.betType == Bet.TYPE.ANTE) {
@@ -887,7 +895,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.messages.push(message);
         this.log(message);
 
-    }  // bet
+    }  // betAction
 
 
     private killSeatTimer(seatIndex: number): void {
