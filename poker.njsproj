@@ -107,6 +107,7 @@
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\ui\" />
+    <Folder Include="src\client\ui\state\" />
     <Folder Include="src\client\ui\table\" />
     <Folder Include="src\client\ui\table\bet\" />
     <Folder Include="src\client\ui\table\board\" />
@@ -188,6 +189,9 @@
     <TypeScriptCompile Include="src\casino\tables\states\betting\blind-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
+    <TypeScriptCompile Include="src\client\ui\state\pending-commands.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\ui\table\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\commands\lobby\login-command.ts" />
     <TypeScriptCompile Include="src\commands\lobby\lobby-command.ts">
