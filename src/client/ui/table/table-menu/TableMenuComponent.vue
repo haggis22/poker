@@ -12,6 +12,8 @@
 
         </div>
 
+        <div>Pending Fold: {{ pendingFold }}</div>
+
         <div class="bet-actions" v-if="ui.isAnteTime()">
             <button type="button" v-on:click.stop="fold">
                 <div class="action">Sit Out</div>
@@ -26,7 +28,7 @@
 
         <div class="bet-actions" v-if="ui.isPendingCheckBetTime()">
             <label>
-                <input type="checkbox" value="true" :checked="pendingFold" @change="$emit('update:pendingFold', $event.target.checked)" /> Fold
+                <input type="checkbox" value="true" :checked="pendingFold" @change="ui.setPendingFold($event.target.checked)" /> Fold
             </label>
             <label>
                 <input type="checkbox" /> Check
@@ -54,7 +56,7 @@
 
         <div class="bet-actions" v-if="ui.isPendingCallRaiseTime()">
             <label>
-                <input type="checkbox" value="true" :checked="pendingFold" @change="$emit('update:pendingFold', $event.target.checked)" /> Fold
+                <input type="checkbox" value="true" :checked="pendingFold" @change="ui.setPendingFold($event.target.checked)" /> Fold
             </label>
             <label>
                 <input type="checkbox" /> Call

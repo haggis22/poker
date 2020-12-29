@@ -31,6 +31,8 @@ const logger: Logger = new Logger();
 
 export class TableUI implements MessageHandler, CommandBroadcaster {
 
+    private readonly TIME_PENDING_ACTION: number = 300;
+
     public user: User;
 
     private commandHandlers: CommandHandler[];
@@ -63,6 +65,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     // fields specific to acting in advance
     public pendingCommands: PendingCommands;
+    private pendingTimer: ReturnType<typeof setTimeout>;
 
 
 
@@ -596,7 +599,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myBetAmount = null;
         this.myAmountToCall = null;
 
+        clearTimeout(this.pendingTimer);
         this.pendingCommands.clear();
+
 
     }
 
@@ -805,11 +810,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action.timesUp > Date.now()) {
 
-            if (this.pendingCommands.fold) {
+            if (action.betStatus.seatIndex == this.mySeatIndex) {
 
-                // We are taking an action, so clear anything that is pending and try to fold immediately
-                this.pendingCommands.clear();
-                return this.sendCommand(new FoldCommand(this.table.id));
+                // it's our turn, so don't allow any of the pending actions to still take hold
+                clearTimeout(this.pendingTimer);
+
+                if (this.pendingCommands.fold) {
+
+                    // We are taking an action, so clear anything that is pending and try to fold immediately
+                    this.pendingCommands.clear();
+                    return this.sendCommand(new FoldCommand(this.table.id));
+
+                }
 
             }
 
@@ -1126,6 +1138,26 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }  // chat
 
+
+    public setPendingFold(foldActivated: boolean): void {
+
+        // kill anything that might already be waiting to execute
+        clearTimeout(this.pendingTimer);
+
+        if (foldActivated) {
+
+            this.pendingTimer = setTimeout(() => { this.pendingCommands.fold = true }, this.TIME_PENDING_ACTION);
+
+        }
+        else {
+
+            // turning off folding can happen immediately
+            this.pendingCommands.fold = false;
+
+        }
+
+
+    }
 
 
 }

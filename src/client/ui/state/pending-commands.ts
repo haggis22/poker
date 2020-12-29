@@ -2,7 +2,8 @@
 
     public fold: boolean;
     public bet: boolean;
-    public betAmount: number
+    public betAmount: number;
+
 
 
     constructor() {
@@ -17,5 +18,7 @@
         this.betAmount = null;
 
     }
+
+
 
 }
