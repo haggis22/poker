@@ -19,7 +19,7 @@ import Vue from 'vue';
 
 import { TableUI } from '../../../table-ui';
 
-import CardComponent from '../card/CardComponent';
+import CardComponent from '../card/CardComponent.vue';
 import { Board } from '../../../../casino/tables/boards/board';
 
 const BoardComponent = Vue.extend ({

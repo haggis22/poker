@@ -100,7 +100,7 @@ import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';
 import { FoldCommand } from '../../../../commands/table/betting/fold-command';
 import { SetStatusCommand } from '../../../../communication/serializable';
-import { PendingCommands } from '../../state/pending-commands';
+
 
 const TableMenuComponent = Vue.extend ({
 

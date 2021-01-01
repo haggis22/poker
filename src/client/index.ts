@@ -1,12 +1,12 @@
 ﻿import Vue from 'vue';
 
-import { TableUI } from '../table-ui';
-import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
-import { TableWatcher } from '../../casino/tables/table-watcher';
-import { GameClient } from '../../communication/client-side/game-client';
+import { TableUI } from './table-ui';
+import { MoneyFormatter } from '../casino/tables/chips/money-formatter';
+import { TableWatcher } from '../casino/tables/table-watcher';
+import { GameClient } from '../communication/client-side/game-client';
 
 
-import TableComponent from './table/table/TableComponent';
+import TableComponent from './components/table/table/TableComponent';
 
 var app = new Vue({
 

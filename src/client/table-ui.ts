@@ -24,7 +24,7 @@ import { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";
 import { LoginAction } from "../actions/lobby/login-action";
 import { Timer } from "../timers/timer";
 import { BetController } from "../casino/tables/betting/bet-controller";
-import { PendingCommands } from "./ui/state/pending-commands";
+import { PendingCommands } from "./pending-commands";
 
 
 const logger: Logger = new Logger();

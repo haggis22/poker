@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
 
-    entry: { index: path.resolve(__dirname, "./src/client/ui", "index.ts") },
+    entry: { index: path.resolve(__dirname, "./src/client", "index.ts") },
     devtool: 'inline-source-map',
     output: {
         filename: 'poker.js',
@@ -63,7 +63,7 @@ module.exports = {
 
     plugins: [
 
-        new HtmlWebpackPlugin({ template: path.resolve(__dirname, "src/client/ui", "index.html") }),
+        new HtmlWebpackPlugin({ template: path.resolve(__dirname, "src/client", "index.html") }),
         new VueLoaderPlugin()
 
     ],

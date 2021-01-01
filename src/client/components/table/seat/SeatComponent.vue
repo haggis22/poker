@@ -49,8 +49,8 @@ import { BetStatus} from '../../../../casino/tables/betting/bet-status';
 import { TableUI } from '../../../table-ui';
 import { RequestSeatCommand } from '../../../../commands/table/request-seat-command';
 
-import CardComponent from '../card/CardComponent';
-import TimerComponent from '../timer/TimerComponent';
+import CardComponent from '../card/CardComponent.vue';
+import TimerComponent from '../timer/TimerComponent.vue';
 
 const SeatComponent = Vue.extend ({
 
