@@ -4,7 +4,7 @@ import { PokerHandDescriber } from "../poker-hand-describer";
 
 import { Board } from "../../../casino/tables/boards/board";
 import { TableState, HandCompleteState, ShowdownState, BetState, DealState, StartHandState } from "../../../communication/serializable";
-import { AnteState } from "../../../casino/tables/states/betting/ante-state";
+import { BlindsAndAntesState } from "../../../casino/tables/states/betting/blinds-and-antes-state";
 import { DealBoardState } from "../../../casino/tables/states/dealing/deal-board-state";
 import { HoldEmBoard } from "../../../casino/tables/boards/hold-em-board";
 import { OmahaSelector } from "../../hand-selectors/omaha-selector";
@@ -34,14 +34,14 @@ export class PokerGameOmaha extends Game {
 
             new StartHandState(),
 
-            new AnteState(),
+            new BlindsAndAntesState(),
 
             new DealState(false),
             new DealState(false),
             new DealState(false),
             new DealState(false),
 
-            new BetState(BetState.FIRST_POSITION),
+            new BetState(BetState.AFTER_BIG_BLIND),
 
             // Flop
             new DealBoardState(3),

@@ -164,6 +164,8 @@
     <TypeScriptCompile Include="src\actions\lobby\lobby-action.ts" />
     <TypeScriptCompile Include="src\actions\table\antes\ante-turn-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\betting-complete-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\betting\gather-antes-action.ts" />
+    <TypeScriptCompile Include="src\actions\table\betting\gather-antes-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-complete-action.ts" />
     <TypeScriptCompile Include="src\actions\table\betting\gather-bets-action.ts" />
     <TypeScriptCompile Include="src\actions\table\chat\chat-action.ts" />
@@ -186,12 +188,14 @@
     <TypeScriptCompile Include="src\casino\lobby\table-manager.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\casino\tables\betting\ante.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\bet-status.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\blind.ts" />
+    <TypeScriptCompile Include="src\casino\tables\betting\invalid-fold.ts" />
+    <TypeScriptCompile Include="src\casino\tables\betting\invalid-bet.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
     <TypeScriptCompile Include="src\casino\tables\boards\hold-em-board.ts" />
-    <TypeScriptCompile Include="src\casino\tables\states\betting\blind-state.ts" />
-    <TypeScriptCompile Include="src\casino\tables\states\betting\ante-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\states\betting\blinds-and-antes-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
     <TypeScriptCompile Include="src\client\pending-commands.ts">
       <SubType>Code</SubType>

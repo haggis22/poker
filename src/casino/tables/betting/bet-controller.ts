@@ -4,10 +4,13 @@ import { Bet } from "./bet";
 import { Fold } from "./fold";
 import { BetStatus } from "./bet-status";
 import { Table } from "../table";
-import { AnteState } from "../states/betting/ante-state";
+import { BlindsAndAntesState } from "../states/betting/blinds-and-antes-state";
 import { BetState } from "../states/betting/bet-state";
-import { BlindState } from "../states/betting/blind-state";
 import { Stakes } from "./stakes";
+import { Blind } from "./blind";
+import { Ante } from "./ante";
+import { InvalidBet } from "./invalid-bet";
+import { InvalidFold } from "./invalid-fold";
 
 export class BetController {
 
@@ -37,6 +40,17 @@ export class BetController {
         status.seatIndexesRemainToAct.length = 0;
 
     }
+
+
+    private clearRequiredBets(status: BetStatus): void {
+
+        for (let seatIndex in status.requiredBets)
+        {
+            delete status.requiredBets[seatIndex];
+        }
+
+    }
+
 
     public clearBets(status: BetStatus): void {
 
@@ -68,23 +82,23 @@ export class BetController {
 
 
 
-    public fold(status: BetStatus, seat: Seat): Fold {
+    public fold(status: BetStatus, seat: Seat): InvalidFold | Fold {
 
         if (!seat) {
 
-            return new Fold(false, "Invalid seat");
+            return new InvalidFold("Invalid seat");
 
         }
 
         if (!seat.isInHand) {
 
-            return new Fold(false, "You do not have a hand");
+            return new InvalidFold("You do not have a hand");
 
         }
 
         if (status.seatIndex != seat.index) {
 
-            return new Fold(false, "It is not your turn to act");
+            return new InvalidFold("It is not your turn to act");
 
         }
 
@@ -93,7 +107,7 @@ export class BetController {
             pot.foldPlayer(seat.index);
         }
 
-        return new Fold(true, null);
+        return new Fold();
 
     }   // fold
 
@@ -113,7 +127,7 @@ export class BetController {
 
         let totalBetAmount: number = this.getCurrentBet(status, seat.index) + betAmount;
 
-        let bet = new Bet(true, seat.index, totalBetAmount, betAmount, betType, actionType, null);
+        let bet = new Bet(seat.index, totalBetAmount, betAmount, betType, actionType);
         bet.raisesAction = raisesAction;
 
         if (raisesAction) {
@@ -138,10 +152,7 @@ export class BetController {
             status.currentBet = totalBetAmount;
         }
 
-
-
         this.log(`Bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, betAmount: ${betAmount}, betType: ${betType}, actionType: ${actionType}, raisesAction: ${raisesAction}`);
-
 
         return bet;
 
@@ -162,98 +173,76 @@ export class BetController {
 
 
 
-    public validateAnte(table: Table, seat: Seat): Bet {
+    public validateBlindsAndAnte(table: Table, seat: Seat): InvalidBet | Bet[] {
 
-        if (table.state instanceof AnteState) {
+        if (table.state instanceof BlindsAndAntesState) {
 
             if (!seat.isInHand) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You are not in the hand');
+                return new InvalidBet(seat.index, 'You are not in the hand');
 
             }
 
             if (table.betStatus.seatIndex != seat.index) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.ACTION.INVALID, "It is not your turn to act");
-
-            }
-
-            if (table.stakes.ante == 0) {
-
-                // If there is no ante, then just force a check
-                return new Bet(true, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.ACTION.CHECK, null);
+                return new InvalidBet(seat.index, "It is not your turn to act");
 
             }
 
             if (seat.player.chips === 0) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You do not have any chips to ante');
+                return new InvalidBet(seat.index, 'You do not have any chips with which to ante or post blinds');
 
             }
 
-            return this.takeBet(table.betStatus, seat, table.stakes.ante, Bet.TYPE.ANTE, Bet.ACTION.CALL, false, false);
+            let betResults: Bet[] = new Array<Bet>();
+
+            let requiredBets: Array<Blind| Ante> = table.betStatus.requiredBets[seat.index] || new Array<Blind | Ante>();
+
+            for (let requiredBet of requiredBets) {
+
+                if (requiredBet instanceof Ante) {
+
+                    if (seat.player && seat.player.chips) {
+
+                        let anteAmount: number = Math.min(requiredBet.amount, seat.player.chips);
+                        seat.player.chips -= anteAmount;
+
+                        let ante = new Bet(seat.index, anteAmount, anteAmount, Bet.TYPE.ANTE, Bet.ACTION.CALL);
+                        table.betStatus.antes[seat.index] = ante;
+
+                        betResults.push(ante);
+
+                    }
+
+                }
+                else if (requiredBet instanceof Blind) {
+
+                    if (seat.player && seat.player.chips) {
+
+                        let blind: Bet = this.takeBet(table.betStatus, seat, requiredBet.amount, Bet.TYPE.BLIND, Bet.ACTION.CALL, false, false);
+
+                        betResults.push(blind);
+
+                    }
+
+                }
+
+            }  // for each requiredBet
+
+            return betResults;
 
         }
         else {
 
-            return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'It is not time to ante');
+            return new InvalidBet(seat.index, 'It is not time to ante');
 
         }
 
-    }  // validateAnte
+    }  // validateBlindsAndAnte
 
 
-    public validateBlind(table: Table, seat: Seat, blindPosition: number): Bet {
 
-        if (table.state instanceof BlindState) {
-
-            if (!seat.isInHand) {
-
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.TYPE.INVALID, 'You are not in the hand');
-
-            }
-
-            if (table.betStatus.seatIndex != seat.index) {
-
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.ACTION.INVALID, "It is not your turn to act");
-
-            }
-
-            if (table.stakes.blinds.length == 0) {
-
-                // If there is no blind, then just force a check
-                return new Bet(true, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.ACTION.CHECK, null);
-
-            }
-
-            // anyone posting a big blind after the big blind just posts the same amount as the largest blind
-            blindPosition = Math.min(table.stakes.blinds.length, blindPosition);
-
-            let blindAmount: number = table.stakes.blinds[blindPosition];
-
-            if (blindAmount == 0) {
-
-                // If there is no blind, then just force a check
-                return new Bet(true, seat.index, 0, 0, Bet.TYPE.BLIND, Bet.ACTION.CHECK, null);
-
-            }
-
-            if (seat.player.chips === 0 && !this.doesPlayerHaveChipsInPotAlready(table.betStatus, seat.index)) {
-
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'You do not have any chips to pay the blind');
-
-            }
-
-            return this.takeBet(table.betStatus, seat, blindAmount, Bet.TYPE.BLIND, Bet.ACTION.CALL, false, false);
-
-        }
-        else {
-
-            return new Bet(false, seat.index, 0, 0, Bet.TYPE.ANTE, Bet.TYPE.INVALID, 'It is not time to pay blinds');
-
-        }
-
-    }  // validateBlind
 
 
     public calculateCall(table: Table, seat: Seat): number {
@@ -265,7 +254,7 @@ export class BetController {
 
         }
 
-        if (table.state instanceof AnteState) {
+        if (table.state instanceof BlindsAndAntesState) {
 
             // If we are ante-ing and the player still needs to act, then calculate the amount they need to put in
             if (table.stakes.ante > 0) {
@@ -277,9 +266,6 @@ export class BetController {
                 }
 
             }
-
-        }
-        else if (table.state instanceof BlindState) {
 
         }
         else if (table.state instanceof BetState) {
@@ -384,19 +370,19 @@ export class BetController {
     }
 
 
-    public validateBet(table: Table, seat: Seat, amount: number): Bet {
+    public validateBet(table: Table, seat: Seat, amount: number): Bet | InvalidBet {
 
         if (table.state instanceof BetState) {
 
             if (!seat.isInHand) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.TYPE.INVALID, 'You are not in the hand');
+                return new InvalidBet(seat.index, 'You are not in the hand');
 
             }
 
             if (table.betStatus.seatIndex != seat.index) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "It is not your turn to act");
+                return new InvalidBet(seat.index, "It is not your turn to act");
 
             }
 
@@ -405,13 +391,13 @@ export class BetController {
 
             if (amount < 0) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "You cannot be a negative amount");
+                return new InvalidBet(seat.index, "You cannot be a negative amount");
 
             }
 
             if (amount > seat.player.chips) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "You cannot bet more than you have");
+                return new InvalidBet(seat.index, "You cannot bet more than you have");
 
             }
 
@@ -421,7 +407,7 @@ export class BetController {
             // amountToCall will take the fact that the player does not have enough chips into account and will allow a "call for less"
             if (amount < amountToCall) {
 
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, `You must put in at least ${amountToCall}`);
+                return new InvalidBet(seat.index, `You must put in at least ${amountToCall}`);
 
             }
 
@@ -450,7 +436,7 @@ export class BetController {
             if (amount > maximumBet) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${maximumBet}, bet amount: ${amount}`);
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "Bet is over the maximum");
+                return new InvalidBet(seat.index, "Bet is over the maximum");
 
             }
 
@@ -458,7 +444,7 @@ export class BetController {
             if (amount < minimumBet) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${minimumBet}, bet amount: ${amount}`);
-                return new Bet(false, seat.index, 0, 0, Bet.TYPE.REGULAR, Bet.ACTION.INVALID, "Bet is under the maximum");
+                return new InvalidBet(seat.index, "Bet is under the maximum");
 
             }
 
@@ -474,7 +460,7 @@ export class BetController {
         }
         else {
 
-            return new Bet(false, seat.index, 0, 0, Bet.TYPE.BET, Bet.TYPE.INVALID, 'It is not time to bet');
+            return new InvalidBet(seat.index, 'It is not time to bet');
 
         }
 
@@ -514,7 +500,7 @@ export class BetController {
         else if (rankedBets.length === 1) {
 
             // There was only one bet, and we know it wasn't 0, so they get it back
-            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
+            returnedBets.push(new Bet(rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR));
 
             // Take their bet entirely off the table
             delete status.bets[rankedBets[0].seatIndex];
@@ -524,7 +510,7 @@ export class BetController {
         else if (rankedBets[1].totalBet === 0) {
 
             // There was a non-zero bet, and the next largest was 0 (must have been a check), so they get it back
-            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Returned bet'));
+            returnedBets.push(new Bet(rankedBets[0].seatIndex, rankedBets[0].totalBet, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR));
 
             // Take their bet entirely off the table
             delete status.bets[rankedBets[0].seatIndex];
@@ -541,7 +527,7 @@ export class BetController {
 
             // The biggest bet is larger than the second biggest, so they get their bet reduced  (but some of it remains to match the 2nd biggest)
             let difference: number = rankedBets[0].totalBet - rankedBets[1].totalBet;
-            returnedBets.push(new Bet(true, rankedBets[0].seatIndex, difference, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR, 'Reduced bet'));
+            returnedBets.push(new Bet(rankedBets[0].seatIndex, difference, 0, Bet.TYPE.RETURNED, Bet.ACTION.REGULAR));
 
             // This is still pointing at the original actual bet, so just reduce it by the proper amount
             rankedBets[0].totalBet -= difference;
@@ -554,11 +540,10 @@ export class BetController {
 
 
 
-    public gatherBets(status: BetStatus, seatIndexesStillInHand: Set<number>): void {
+    // wagers parameter will be an object that is either status.bets or status.antes
+    public gatherChips(status: BetStatus, wagers: object, seatIndexesStillInHand: Set<number>): void {
 
-        status.seatIndex = null;
-
-        if (Object.values(status.bets).every(bet => bet.totalBet === 0)) {
+        if (Object.values(wagers).every(bet => bet.totalBet === 0)) {
 
             // No bets greater than 0 to gather. Dump out or we will create extra pots because people from the last one are not in the "no-bets" round
             return;
@@ -568,17 +553,17 @@ export class BetController {
         // Find the most recent pot, or create one, if necessary
         let pot = status.pots.length == 0 ? this.createPot(status) : status.pots[status.pots.length - 1];
 
-        // this.log(`Bets: [ ${Object.keys(status.bets).map(seatIndex => '(Seat ' + seatIndex + ': ' + status.bets[seatIndex] + ')').join("  ")}`);
+        // this.log(`Bets: [ ${Object.keys(wagers).map(seatIndex => '(Seat ' + seatIndex + ': ' + wagers[seatIndex] + ')').join("  ")}`);
 
         // If there is only one player left in the pot, then just put them money in there
         // We have already checked at this point for bets that need to be returned.
         if (seatIndexesStillInHand.size === 1) {
 
-            for (let seatIndex of Object.keys(status.bets)) {
+            for (let seatIndex of Object.keys(wagers)) {
 
                 // the seatIndex is actually a number, but used as a key it will always be a string, so we need to parse it out
-                pot.addChips(parseInt(seatIndex, 10), status.bets[seatIndex].totalBet);
-                delete status.bets[seatIndex];
+                pot.addChips(parseInt(seatIndex, 10), wagers[seatIndex].totalBet);
+                delete wagers[seatIndex];
 
             }
 
@@ -592,11 +577,11 @@ export class BetController {
             done = true;
 
             // Remove any bet that is just 0 at this point
-            for (let seatIndex of Object.keys(status.bets)) {
+            for (let seatIndex of Object.keys(wagers)) {
 
-                if (status.bets[seatIndex].totalBet == 0) {
+                if (wagers[seatIndex].totalBet == 0) {
 
-                    delete status.bets[seatIndex];
+                    delete wagers[seatIndex];
 
                 }
 
@@ -627,7 +612,7 @@ export class BetController {
             let smallestActiveBet: number = Number.MAX_VALUE;
             let largestActiveBet: number = Number.MIN_VALUE;
 
-            for (let bet of Object.values(status.bets)) {
+            for (let bet of Object.values(wagers)) {
 
                 if (seatIndexesStillInHand.has(bet.seatIndex)) {
 
@@ -649,17 +634,17 @@ export class BetController {
 
 
             // If anyone has a bet that must be larger than 0, but smaller than the largest bet, then slice those out
-            for (let seatIndex of Object.keys(status.bets)) {
+            for (let seatIndex of Object.keys(wagers)) {
 
                 // only take the amount of the smallest bet. It might be from this seat (and thus their entire bet), or it might
                 // be someone else that has the smallest, but we don't to put in more for this better than the other all-in person put in
-                let amountToContribute: number = Math.min(status.bets[seatIndex].totalBet, smallestActiveBet);
+                let amountToContribute: number = Math.min(wagers[seatIndex].totalBet, smallestActiveBet);
 
                 // iterating object keys will always give strings, but these are actually numbers
                 pot.addChips(parseInt(seatIndex, 10), amountToContribute);
 
 
-                status.bets[seatIndex].totalBet -= amountToContribute;
+                wagers[seatIndex].totalBet -= amountToContribute;
 
             }
 
@@ -675,9 +660,24 @@ export class BetController {
 
         }   // while !done
 
+
+    }   // gatherChips
+
+
+    public gatherBets(status: BetStatus, seatIndexesStillInHand: Set<number>): void {
+
+        this.gatherChips(status, status.bets, seatIndexesStillInHand);
         this.clearBets(status);
 
-    }   // gatherBets
+    }
+
+
+    public gatherAntes(status: BetStatus, seatIndexesStillInHand: Set<number>): void {
+
+        this.gatherChips(status, status.antes, seatIndexesStillInHand);
+        // don't clear out all the bets
+
+    }   // gatherAntes
 
 
     // Removes specified pots safely - no deleting while iterating issues
@@ -740,6 +740,123 @@ export class BetController {
         table.betStatus.seatIndexesRemainToAct = [...seatsToAct];
 
     }  // calculateSeatIndexesRemainToAct
+
+
+    public calculateForcedBets(table: Table, isSeatEligible: (seat: Seat) => boolean): void {
+
+        this.clearBettorsToAct(table.betStatus);
+        this.clearRequiredBets(table.betStatus);
+
+        if (table.stakes.ante === 0 && table.stakes.blinds.length === 0) {
+
+            // No blinds or antes, so we're done
+            return;
+
+        }
+
+        // First count how many players CAN act this round - if only 1 (or 0) then there's nothing to do
+        // This is not the same as blowing through rounds because we're down to just one player because everyone else folded.
+        // In this case, at least one person must be all-in, so we're going to keep dealing cards, but we don't need to bet.
+        let numEligibleSeats: number = table.seats.filter(s => isSeatEligible(s)).length;
+        if (numEligibleSeats < table.stakes.blinds.length) {
+
+            // we don't have enough players with money to pay the blinds, so dump out
+            return;
+
+        }
+
+        // Usually start to the left of the button...
+        let possibleStartingIndex: number = table.buttonIndex + 1;
+        let lastPossibleIndex: number = table.buttonIndex;
+
+        if (numEligibleSeats === table.stakes.blinds.length) {
+
+            // When the number of players matches the blinds, then put the button on the small blind so that they act first pre-flop
+            // So button is first to act...
+            possibleStartingIndex = table.buttonIndex;
+
+            // ...and the player before the button is last to act
+            lastPossibleIndex = table.buttonIndex - 1;
+
+        }
+
+
+        // Make sure that our start and finish spots are within the valid range of seat indexes
+        while (possibleStartingIndex >= table.seats.length) {
+            possibleStartingIndex -= table.seats.length;
+        }
+
+        while (lastPossibleIndex < 0) {
+            lastPossibleIndex += table.seats.length;
+        }
+
+
+        // Go through the rest of the players at the table and see whether or not they need to take an action
+        let seatsToAct = [];
+
+        let done: boolean = false;
+        let ix: number = possibleStartingIndex;
+
+        let blindsToHandOut: Blind[] = [...table.stakes.blinds];
+
+        while (!done) {
+
+            if (isSeatEligible(table.seats[ix])) {
+
+                seatsToAct.push(ix);
+
+                if (table.stakes.ante > 0) {
+
+                    if (!table.betStatus.requiredBets.hasOwnProperty(ix)) {
+                        table.betStatus.requiredBets[ix] = new Array<Ante | Blind>();
+                    }
+
+                    table.betStatus.requiredBets[ix].push(new Ante(table.stakes.ante));
+
+                }
+
+                if (blindsToHandOut.length) {
+
+                    if (!table.betStatus.requiredBets.hasOwnProperty(ix)) {
+                        table.betStatus.requiredBets[ix] = new Array<Ante | Blind>();
+                    }
+
+                    // Pop the first blind off the front of the array
+                    let blind: Blind = blindsToHandOut.shift();
+
+                    // the blind is not "owed" - this is just the usual blind order
+                    table.betStatus.requiredBets[ix].push(new Blind(blind.id, blind.name, blind.amount, false));
+
+                }
+
+            }
+
+            if (ix === lastPossibleIndex) {
+                done = true;
+            }
+            else {
+
+                ix++;
+
+                if (ix >= table.seats.length) {
+                    ix = 0;
+                }
+
+            }
+
+        }
+
+        this.log(`End calculateForcedBets, seatsToAct: [ ${seatsToAct.join(" ")} ]`);
+        for (let seatIndex in table.betStatus.requiredBets) {
+
+            this.log(`  ForcedBets, seatIndex ${seatIndex}: [ ${table.betStatus.requiredBets[seatIndex].map(bet => `${bet.constructor.name} ${bet.amount}`).join(",") } ]`)
+
+        }
+
+
+        table.betStatus.seatIndexesRemainToAct = [...seatsToAct];
+
+    }  // calculateForcedBets
 
 
 }

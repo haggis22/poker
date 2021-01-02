@@ -6,7 +6,7 @@ import { Board } from "../../../casino/tables/boards/board";
 import { NoBoard } from "../../../casino/tables/boards/no-board";
 import { Best5InHandSelector } from "../../hand-selectors/best-5-in-hand-selector";
 import { TableState, HandCompleteState, ShowdownState, BetState, DealState, StartHandState } from "../../../communication/serializable";
-import { AnteState } from "../../../casino/tables/states/betting/ante-state";
+import { BlindsAndAntesState } from "../../../casino/tables/states/betting/blinds-and-antes-state";
 
 export class PokerGameSevenCardStud extends Game {
 
@@ -33,7 +33,7 @@ export class PokerGameSevenCardStud extends Game {
 
             new StartHandState(),
 
-            new AnteState(),
+            new BlindsAndAntesState(),
 
             new DealState(false),
             new DealState(false),

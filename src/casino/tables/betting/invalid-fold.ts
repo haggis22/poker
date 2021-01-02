@@ -1,8 +1,10 @@
-﻿export class Fold {
+﻿export class InvalidFold {
 
     public message: string;
 
-    constructor() {
+    constructor(message: string) {
+
+        this.message = message;
 
     }
 

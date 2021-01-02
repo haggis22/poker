@@ -25,12 +25,14 @@ export { BetAction } from "../actions/table/betting/bet-action";
 export { BetTurnAction } from "../actions/table/betting/bet-turn-action";
 export { BetReturnedAction } from "../actions/table/betting/bet-returned-action";
 
-export { AnteState } from "../casino/tables/states/betting/ante-state";
+export { BlindsAndAntesState } from "../casino/tables/states/betting/blinds-and-antes-state";
 export { AnteTurnAction } from "../actions/table/antes/ante-turn-action";
 
 export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";
 export { GatherBetsAction } from "../actions/table/betting/gather-bets-action";
 export { GatherBetsCompleteAction } from "../actions/table/betting/gather-bets-complete-action";
+export { GatherAntesAction } from "../actions/table/betting/gather-antes-action";
+export { GatherAntesCompleteAction } from "../actions/table/betting/gather-antes-complete-action";
 
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 

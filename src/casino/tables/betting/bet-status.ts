@@ -15,6 +15,17 @@ export class BetStatus {
     public numRaises: number;
 
 
+
+    // Tracks how much each seat will be forced to post for a blind
+    // Key = seat index
+    // Value = Array of Blind|Array objects
+    public requiredBets: object
+
+    // Tracks how much each seat has put in for an ante in this round
+    // Key = seat index
+    // Value = Bet object
+    public antes: object;
+
     // Tracks how much each seat has bet so far in this round
     // Key = seat index
     // Value = Bet object
@@ -28,7 +39,11 @@ export class BetStatus {
         this.seatIndexesRemainToAct = [];
 
         this.pots = [];
+
+        this.requiredBets = {};
+
         this.bets = {};
+        this.antes = {};
 
     }
 

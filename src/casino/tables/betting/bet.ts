@@ -19,8 +19,6 @@
             RETURNED: 4
         };
 
-    public isValid: boolean;
-
     public seatIndex: number;
     public totalBet: number;
     public chipsAdded: number;
@@ -28,25 +26,19 @@
     public betType: number;
     public actionType: number;
 
-    public message: string;
-
     public raisesAction: boolean;
 
-    constructor(isValid: boolean,
-                seatIndex: number,
+    constructor(seatIndex: number,
                 totalBet: number,
                 chipsAdded: number,
                 betType: number,
-                actionType: number,
-                message: string) {
+                actionType: number) {
 
-        this.isValid = isValid;
         this.seatIndex = seatIndex;
         this.totalBet = totalBet;
         this.chipsAdded = chipsAdded;
         this.betType = betType;
         this.actionType = actionType;
-        this.message = message;
 
         this.raisesAction = false;
 

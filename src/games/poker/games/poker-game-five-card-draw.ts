@@ -4,7 +4,7 @@ import { PokerHandDescriber } from "../poker-hand-describer";
 import { Board } from "../../../casino/tables/boards/board";
 import { NoBoard } from "../../../casino/tables/boards/no-board";
 import { Best5InHandSelector } from "../../hand-selectors/best-5-in-hand-selector";
-import { StartHandState, DealState, BetState, ShowdownState, HandCompleteState, TableState, AnteState } from "../../../communication/serializable";
+import { StartHandState, DealState, BetState, ShowdownState, HandCompleteState, TableState, BlindsAndAntesState } from "../../../communication/serializable";
 
 export class PokerGameFiveCardDraw extends Game {
 
@@ -33,7 +33,7 @@ export class PokerGameFiveCardDraw extends Game {
 
             new StartHandState(),
 
-            new AnteState(),
+            new BlindsAndAntesState(),
 
             new DealState(false),
             new DealState(false),
