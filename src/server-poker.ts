@@ -12,7 +12,7 @@ import { Stakes } from "./casino/tables/betting/stakes";
 import { ClientManager } from "./communication/server-side/client-manager";
 import { Seat } from "./casino/tables/seat";
 import { GameFactory } from "./games/game-factory";
-import { BetStatus, Bet, Hand } from "./communication/serializable";
+import { BetStatus, Bet, Hand, Blind } from "./communication/serializable";
 import { TableWatcher } from "./casino/tables/table-watcher";
 import { TableUI } from "./client/table-ui";
 import { MoneyFormatter } from "./casino/tables/chips/money-formatter";
@@ -33,8 +33,13 @@ function createTable(): Table {
     let rules = new TableRules(6, 5, 15);
 
     let ante = 25;
-    let blinds: number[] = [];
-    let bets: number[] = [100, 200];
+
+    let blinds: Blind[] = [
+        new Blind(Blind.SMALL, 'the small blind', 100),
+        new Blind(Blind.BIG, 'the big blind', 200)
+    ];
+
+    let bets: number[] = [];
 
     let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, 4);
 

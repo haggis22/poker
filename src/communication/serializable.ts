@@ -75,11 +75,13 @@ export { User } from "../players/user";
 
 export { Pot } from "../casino/tables/betting/pot";
 export { Bet } from "../casino/tables/betting/bet";
+export { Blind } from "../casino/tables/betting/blind";
 export { Fold } from "../casino/tables/betting/fold";
 export { FoldAction } from "../actions/table/betting/fold-action";
 export { FoldCommand } from "../commands/table/betting/fold-command";
 export { BetCommand } from "../commands/table/betting/bet-command";
 export { AnteCommand } from "../commands/table/betting/ante-command";
+export { BlindCommand } from "../commands/table/betting/blind-command";
 
 export { ChatCommand } from "../commands/table/chat/chat-command";
 export { ChatAction } from "../actions/table/chat/chat-action";

@@ -13,6 +13,7 @@ import { PokerGameTexasHoldEm } from '../../games/poker/games/poker-game-texas-h
 import { PokerGameOmaha } from '../../games/poker/games/poker-game-omaha';
 import { IServerClient } from '../../communication/server-side/i-server-client';
 import { LobbyManager } from './lobby-manager';
+import { Blind } from '../tables/betting/blind';
 
 
 export class TableManager {
@@ -48,9 +49,14 @@ export class TableManager {
         // # seats, # seconds to act
         let rules = new TableRules(6, 5, 5);
 
-        // blinds, ante, minRaise
         let ante = 25;
-        let blinds: number[] = [];
+
+        let blinds: Blind[] =
+            [
+                new Blind(Blind.SMALL, 'the small blind', 50),
+                new Blind(Blind.BIG, 'the big blind', 100)
+            ];
+
         let bets: number[] = [100, 100, 200, 200];
         let maxRaises: number = 4;
 
