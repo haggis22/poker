@@ -645,7 +645,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(pot.seatIndex);
 
-        let potDescription = pot.potIndex > 0 ? `side pot #${pot.potIndex}` : `the main pot`;
+        let potDescription = pot.index > 0 ? `side pot #${pot.index}` : `the main pot`;
 
         let handDescription = pot.handEvaluation ? ` with ${this.game.handDescriber.describe(pot.handEvaluation)}` : '';
 

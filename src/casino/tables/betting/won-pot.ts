@@ -2,22 +2,22 @@
 
 export class WonPot {
 
-    public potIndex: number;
+    public index: number;
     public amount: number;
     public seatIndex: number;
     public handEvaluation: HandEvaluation
 
 
-    constructor(potIndex: number, amount: number, seatIndex: number, handEvaluation: HandEvaluation)
+    constructor(index: number, amount: number, seatIndex: number, handEvaluation: HandEvaluation)
     {
-        this.potIndex = potIndex;
+        this.index = index;
         this.amount = amount;
         this.seatIndex = seatIndex;
         this.handEvaluation = handEvaluation;
     }
 
     getName(): string {
-        return (this.potIndex === 0) ? 'the main pot' : `side pot #${this.potIndex}`;
+        return (this.index === 0) ? 'the main pot' : `side pot #${this.index}`;
     }
 
 
