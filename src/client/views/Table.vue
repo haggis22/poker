@@ -1,10 +1,19 @@
 <template>
 
-    <div v-if="ui != null && ui.table != null">
-        <table-component :ui="ui"></table-component>
-    </div>
-    <div v-else>
-        We have no table yet.
+    <div>
+        <div v-if="ui != null && ui.table != null">
+            <table-component :ui="ui"></table-component>
+        </div>
+        <div v-else>
+            We have no table yet.
+        </div>
+        <chat-component :ui="ui"></chat-component>
+        <log-component :ui="ui"></log-component>
+        <table-menu-component v-if="ui.getMySeat()"
+                              :ui="ui"
+                              :pending-fold.sync="ui.pendingCommands.fold"
+                              :is-sitting-out.sync="ui.isSittingOut">
+        </table-menu-component>
     </div>
 
 </template>
@@ -19,12 +28,18 @@
     import { GameClient } from '../../communication/client-side/game-client';
 
     import TableComponent from '../components/table/table/TableComponent.vue';
+    import LogComponent from '../components/table/log/LogComponent.vue';
+    import TableMenuComponent from '../components/table/table-menu/TableMenuComponent.vue';
+    import ChatComponent from '../components/table/chat/ChatComponent.vue';
 
 
     export default {
         name: "Table",
         components: {
-            'table-component': TableComponent
+            'table-component': TableComponent,
+            'log-component': LogComponent,
+            'table-menu-component': TableMenuComponent,
+            'chat-component': ChatComponent
         },
         data() {
 

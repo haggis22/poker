@@ -37,38 +37,22 @@
                 </board-component>
             </div>
         </div><!-- table seats-6 -->
-        <chat-component :ui="ui"></chat-component>
-        <log-component :ui="ui"></log-component>
-        <table-menu-component 
-                v-if="ui.getMySeat()"
-                :ui="ui"
-                :pending-fold.sync="ui.pendingCommands.fold"
-                :is-sitting-out.sync="ui.isSittingOut">
-        </table-menu-component>
     </div>
 </template>
+
 <script lang="ts">
-import './table.scss';
+
+    import './table.scss';
 import './table-seats-6.scss';
 import Vue from 'vue';
 import { TableUI } from '../../../table-ui';
-/*
-    import { TableUI } from '../table-ui';
-    import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
-    import { TableWatcher } from '../../casino/tables/table-watcher';
-    import { GameClient } from '../../communication/client-side/game-client';
-    import { User } from '../../players/user';
-    import { Player } from '../../players/player';
-*/
-import SeatComponent from '../seat/SeatComponent.vue';
+
+    import SeatComponent from '../seat/SeatComponent.vue';
 import DealerBoxComponent from '../dealer/DealerBoxComponent.vue';
 import BetComponent from '../bet/BetComponent.vue';
 import PotComponent from '../pot/PotComponent.vue';
 import WonPotComponent from '../pot/WonPotComponent.vue';
-import LogComponent from '../log/LogComponent.vue';
 import BoardComponent from '../board/BoardComponent.vue';
-    import TableMenuComponent from '../table-menu/TableMenuComponent.vue';
-    import ChatComponent from '../chat/ChatComponent.vue';
 
 const TableComponent = Vue.extend({
     props: {
@@ -83,12 +67,11 @@ const TableComponent = Vue.extend({
         'bet-component': BetComponent,
         'pot-component': PotComponent,
         'won-pot-component': WonPotComponent,
-        'log-component': LogComponent,
         'board-component': BoardComponent,
-        'table-menu-component': TableMenuComponent,
-        'chat-component': ChatComponent
     }
 });
-export default TableComponent;
+
+    export default TableComponent;
+
 </script>
 
