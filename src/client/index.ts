@@ -1,45 +1,11 @@
-﻿import Vue from 'vue';
+﻿import Vue from "vue";
+import App from "./App.vue";
+import router from "./router";
 
-import { TableUI } from './table-ui';
-import { MoneyFormatter } from '../casino/tables/chips/money-formatter';
-import { TableWatcher } from '../casino/tables/table-watcher';
-import { GameClient } from '../communication/client-side/game-client';
+Vue.config.productionTip = false;
 
-
-import TableComponent from './components/table/table/TableComponent';
-
-var app = new Vue({
-
-    el: '#poker',
-    data: {
-        ui: <TableUI> null
-    },
-    components: {
-        'table-component': TableComponent
-    }
-
-});
-
-const ws = new WebSocket('ws://localhost:3000');
-
-// Client Side
-let ui: TableUI = new TableUI(new MoneyFormatter());
-let tableWatcher: TableWatcher = new TableWatcher(1);
-let gameClient: GameClient = new GameClient(ws);
-
-// Now join all the links in the chain
-ui.registerCommandHandler(tableWatcher);
-
-tableWatcher.registerMessageHandler(ui);
-tableWatcher.registerCommandHandler(gameClient);
-
-gameClient.registerMessageHandler(tableWatcher);
-
-app.ui = ui;
-
-ws.onopen = (evt: MessageEvent) => {
-
-    console.log('Connection opened');
-
-};
+new Vue({
+    router,
+    render: h => h(App)
+}).$mount("#app");
 
