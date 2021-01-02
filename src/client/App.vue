@@ -1,6 +1,5 @@
 <template>
     <div id="app">
-        <h2>StanLee is in my way</h2>
 
         <router-view />
 

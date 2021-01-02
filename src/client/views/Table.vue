@@ -29,6 +29,8 @@
         data() {
 
             let values = {
+                tableID: parseInt(this.$route.params.tableID, 10),
+
                 ui: null,
                 ws: null
             };
@@ -42,7 +44,7 @@
 
             // Client Side
             let ui: TableUI = new TableUI(new MoneyFormatter());
-            let tableWatcher: TableWatcher = new TableWatcher(1);
+            let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
             let gameClient: GameClient = new GameClient(ws);
 
             // Now join all the links in the chain

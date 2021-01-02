@@ -6,6 +6,10 @@ Vue.use(VueRouter);
 const routes = [
     {
         path: "/",
+        redirect: '/table',
+    },
+    {
+        path: "/table/:tableID",
         name: "Table",
         component: () =>
             import(/* webpackChunkName: "table" */ '../views/Table.vue')
