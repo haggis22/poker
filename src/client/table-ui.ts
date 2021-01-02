@@ -141,15 +141,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof TableSnapshotAction) {
+
+            return this.processSnapshot(action);
+
+        }
+
         if (this.table == null) {
-
-            if (action instanceof TableSnapshotAction) {
-
-                this.table = action.table;
-
-                return;
-
-            }
 
             // we don't have a table yet, so we can't do anything else
             return;
@@ -380,6 +378,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         return 0;
 
     }
+
+
+    private processSnapshot(action: TableSnapshotAction): void {
+
+        this.table = action.table;
+
+        // See if I'm alreading sitting at the table
+        let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.user.id);
+
+        this.mySeatIndex = mySeat ? mySeat.index : null;
+
+    }  // processSnapshot
 
 
     private setGame(action: SetGameAction): void {
