@@ -1508,10 +1508,20 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             case BetState.AFTER_BIG_BLIND:
                 {
-                    // Start with the player *after* the button
-                    // The button will be the last player to act
+                    if (this.table.betStatus.bigBlindIndex === null) {
+
+                        // There is no Big Blind, so start with the player after the button
+                        // The button will be the last player to act
+                        // The bet tracker is smart enough to roll the indexes off either end
+                        return this.betController.calculateSeatIndexesRemainToAct(this.table, this.table.buttonIndex + 1, this.table.buttonIndex, isSeatEligible);
+
+                    }
+
+                    // Start with the player *after* the big blind
+                    // The big blind will be the last player to act and will get the option to raise
                     // The bet tracker is smart enough to roll the indexes off either end
-                    return this.betController.calculateSeatIndexesRemainToAct(this.table, this.table.buttonIndex + 1, this.table.buttonIndex, isSeatEligible);
+                    return this.betController.calculateSeatIndexesRemainToAct(this.table, this.table.betStatus.bigBlindIndex + 1, this.table.betStatus.bigBlindIndex, isSeatEligible);
+
                 }
 
             case BetState.BEST_HAND:

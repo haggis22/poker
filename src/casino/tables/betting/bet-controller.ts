@@ -30,6 +30,7 @@ export class BetController {
 
         status.bettingRound = 0;
         status.pots.length = 0;
+        status.bigBlindIndex = null;
 
         this.clearBets(status);
 
@@ -824,8 +825,14 @@ export class BetController {
                     // Pop the first blind off the front of the array
                     let blind: Blind = blindsToHandOut.shift();
 
+                    if (blind.type == Blind.TYPE_BIG) {
+
+                        table.betStatus.bigBlindIndex = ix;
+
+                    }
+
                     // the blind is not "owed" - this is just the usual blind order
-                    table.betStatus.requiredBets[ix].push(new Blind(blind.id, blind.name, blind.amount, false));
+                    table.betStatus.requiredBets[ix].push(new Blind(blind.type, blind.name, blind.amount, false));
 
                 }
 

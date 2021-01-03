@@ -53,8 +53,8 @@ export class TableManager {
 
         let blinds: Blind[] =
             [
-                new Blind(Blind.SMALL, 'the small blind', 50),
-                new Blind(Blind.BIG, 'the big blind', 100)
+                new Blind(Blind.TYPE_SMALL, 'the small blind', 50),
+                new Blind(Blind.TYPE_BIG, 'the big blind', 100)
             ];
 
         let bets: number[] = [100, 100, 200, 200];

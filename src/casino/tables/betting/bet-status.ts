@@ -14,7 +14,7 @@ export class BetStatus {
 
     public numRaises: number;
 
-
+    public bigBlindIndex: number;
 
     // Tracks how much each seat will be forced to post for a blind
     // Key = seat index
@@ -44,6 +44,8 @@ export class BetStatus {
 
         this.bets = {};
         this.antes = {};
+
+        this.bigBlindIndex = null;
 
     }
 
