@@ -51,10 +51,11 @@ export class TableManager {
 
         let ante = 25;
 
+        // Both of the regular blinds are live bets (they could towards the current round of betting)
         let blinds: Blind[] =
             [
-                new Blind(Blind.TYPE_SMALL, 'the small blind', 50),
-                new Blind(Blind.TYPE_BIG, 'the big blind', 100)
+                new Blind(Blind.TYPE_SMALL, 'the small blind', 50, true),
+                new Blind(Blind.TYPE_BIG, 'the big blind', 100, true)
             ];
 
         let bets: number[] = [100, 100, 200, 200];

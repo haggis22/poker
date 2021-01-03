@@ -113,6 +113,12 @@ export class BetController {
     }   // fold
 
 
+    public getCurrentAnte(status: BetStatus, seatIndex: number): number {
+
+        return status.antes[seatIndex] ? status.antes[seatIndex].totalBet : 0;
+
+    }
+
     public getCurrentBet(status: BetStatus, seatIndex: number): number {
 
         return status.bets[seatIndex] ? status.bets[seatIndex].totalBet : 0;
@@ -120,37 +126,63 @@ export class BetController {
     }
 
 
-    private takeBet(status: BetStatus, seat: Seat, betAmount: number, betType: number, actionType: number, raisesAction: boolean, raisesLiveAction: boolean): Bet {
+    private takeBet(status: BetStatus,
+                        seat: Seat,
+                        betAmount: number,
+                        betType: number,
+                        actionType: number,
+                        isLiveBet: boolean,
+                        raisesAction: boolean,
+                        raisesLiveAction: boolean): Bet {
 
         betAmount = Math.min(betAmount, seat.player.chips);
 
         seat.player.chips -= betAmount;
 
-        let totalBetAmount: number = this.getCurrentBet(status, seat.index) + betAmount;
+        let bet: Bet = null;
 
-        let bet = new Bet(seat.index, totalBetAmount, betAmount, betType, actionType);
-        bet.raisesAction = raisesAction;
+        if (isLiveBet) {
 
-        if (raisesAction) {
+            let totalBetAmount: number = this.getCurrentBet(status, seat.index) + betAmount;
 
-            status.numRaises++;
+            bet = new Bet(seat.index, totalBetAmount, betAmount, betType, actionType);
+            bet.raisesAction = raisesAction;
 
-        }
+            if (raisesAction) {
 
-        status.bets[seat.index] = bet;
+                status.numRaises++;
 
-        if (raisesLiveAction) {
+            }
 
-            status.lastLiveRaise = totalBetAmount - status.currentBet;
+            status.bets[seat.index] = bet;
 
-            if (totalBetAmount > status.lastLiveBet) {
-                status.lastLiveBet = totalBetAmount;
+            if (raisesLiveAction) {
+
+                status.lastLiveRaise = totalBetAmount - status.currentBet;
+
+                if (totalBetAmount > status.lastLiveBet) {
+                    status.lastLiveBet = totalBetAmount;
+                }
+
+            }
+
+            if (totalBetAmount > status.currentBet) {
+                status.currentBet = totalBetAmount;
             }
 
         }
+        else {
 
-        if (totalBetAmount > status.currentBet) {
-            status.currentBet = totalBetAmount;
+            let totalAnteAmount: number = this.getCurrentAnte(status, seat.index) + betAmount;
+
+            bet = new Bet(seat.index, totalAnteAmount, betAmount, betType, actionType);
+            bet.raisesAction = false;
+
+            // this is just dead money that will go into the pot, so
+            // 1. Don't adjust the bet for the current player so that this doesn't count toward the current round of betting
+            // 2. Don't adjust the amount of the current bet
+            status.antes[seat.index] = bet;
+
         }
 
         this.log(`Bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, betAmount: ${betAmount}, betType: ${betType}, actionType: ${actionType}, raisesAction: ${raisesAction}`);
@@ -206,11 +238,11 @@ export class BetController {
 
                     if (seat.player && seat.player.chips) {
 
-                        let anteAmount: number = Math.min(requiredBet.amount, seat.player.chips);
-                        seat.player.chips -= anteAmount;
+                        // antes are dead money just going into the pot and don't count toward the current round of betting
+                        let isLiveBet: boolean = false;
+                        let raisesAction: boolean = false;
 
-                        let ante = new Bet(seat.index, anteAmount, anteAmount, Bet.TYPE.ANTE, Bet.ACTION.CALL);
-                        table.betStatus.antes[seat.index] = ante;
+                        let ante: Bet = this.takeBet(table.betStatus, seat, requiredBet.amount, Bet.TYPE.ANTE, Bet.ACTION.CALL, isLiveBet, raisesAction, raisesAction);
 
                         betResults.push(ante);
 
@@ -221,7 +253,13 @@ export class BetController {
 
                     if (seat.player && seat.player.chips) {
 
-                        let blind: Bet = this.takeBet(table.betStatus, seat, requiredBet.amount, Bet.TYPE.BLIND, Bet.ACTION.CALL, false, false);
+                        // small bets cannot raise the action
+                        // owed bets will not raise the action more than the regular big blind because they should be the same amount
+                        // If it DOES raise the action, then it is also a live raise
+                        let isLiveBet: boolean = true;
+                        let raisesAction: boolean = requiredBet.type === Blind.TYPE_BIG && requiredBet.amount > table.betStatus.currentBet;
+                                            
+                        let blind: Bet = this.takeBet(table.betStatus, seat, requiredBet.amount, Bet.TYPE.BLIND, Bet.ACTION.CALL, isLiveBet, raisesAction, raisesAction);
 
                         betResults.push(blind);
 
@@ -412,11 +450,14 @@ export class BetController {
 
             }
 
+            let isLiveBet: boolean = true;
+            let raisesAction: boolean = false;
+
             if (amount == amountToCall) {
 
                 let betAction: number = amount === 0 ? Bet.ACTION.CHECK : Bet.ACTION.CALL;
 
-                return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, betAction, false, false);
+                return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, betAction, isLiveBet, raisesAction, raisesAction);
 
             }
 
@@ -449,6 +490,9 @@ export class BetController {
 
             }
 
+            // We are now in Open/Raising territory here
+            raisesAction = true;
+
             let actionType: number = table.betStatus.currentBet === 0 ? Bet.ACTION.OPEN : Bet.ACTION.RAISE;
 
             // if they cannot meet the minimum live raise then minimumLiveRaise will be null
@@ -456,7 +500,7 @@ export class BetController {
 
             // This bet/raise will have raiseAction = true so that others are required to respond
             // Whether it raises the liveAction or not depends on the size of the bet
-            return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, actionType, true, raisesLiveAction);
+            return this.takeBet(table.betStatus, seat, amount, Bet.TYPE.REGULAR, actionType, isLiveBet, raisesAction, raisesLiveAction);
 
         }
         else {
@@ -832,7 +876,7 @@ export class BetController {
                     }
 
                     // the blind is not "owed" - this is just the usual blind order
-                    table.betStatus.requiredBets[ix].push(new Blind(blind.type, blind.name, blind.amount, false));
+                    table.betStatus.requiredBets[ix].push(new Blind(blind.type, blind.name, blind.amount, blind.isLiveBet));
 
                 }
 

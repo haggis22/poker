@@ -35,8 +35,8 @@ function createTable(): Table {
     let ante = 25;
 
     let blinds: Blind[] = [
-        new Blind(Blind.TYPE_SMALL, 'the small blind', 100),
-        new Blind(Blind.TYPE_BIG, 'the big blind', 200)
+        new Blind(Blind.TYPE_SMALL, 'the small blind', 100, true),
+        new Blind(Blind.TYPE_BIG, 'the big blind', 200, true)
     ];
 
     let bets: number[] = [];

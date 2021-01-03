@@ -6,14 +6,14 @@ export class Blind {
     public type: number;
     public name: string;
     public amount: number;
-    public isOwed: boolean;
+    public isLiveBet: boolean;
 
-    constructor(type: number, name: string, amount: number, isOwed?: boolean) {
+    constructor(type: number, name: string, amount: number, isLiveBet: boolean) {
 
         this.type = type;
         this.name = name;
         this.amount = amount;
-        this.isOwed = isOwed || false;
+        this.isLiveBet = isLiveBet;
 
     }
 
