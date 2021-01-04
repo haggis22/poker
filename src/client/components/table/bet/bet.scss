@@ -4,28 +4,29 @@
     font-weight: bold;
     position: absolute;
     text-align: center;
-    border: 2px solid black;
     border-radius: 10%;
-    padding: 0.25em 1.5em;
-    background: tan;
-    
+
+    &.bet {
+        border: 2px solid black;
+        background: tan;
+        padding: 0.25em 1.5em;
+    }
+
+    &.ante {
+        border: 1px solid black;
+        background: white;
+        padding: 0.25em 0.5em;
+    }
     /* hide them at first and fade them in quickly */
     opacity: 0;
-
     z-index: 2;
-
     transition: opacity 0.25s;
 
     &.announced {
-
         opacity: 1;
-
     }
 
     &.gathering {
-
         transition: top 0.5s, left 0.5s;
-
     }
-
 }

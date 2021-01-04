@@ -13,7 +13,7 @@ import { Logger } from "../logging/logger";
 import { TableConnectedAction } from "../actions/table/state/table-connected-action";
 import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -54,6 +54,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public wonPots: WonPot[];
 
+    public isGatheringAntes: boolean;
     public isGatheringBets: boolean;
 
     public messages: string[];
@@ -84,7 +85,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.seatTimer = new Map<number, Timer>();
         this.wonPots = [];
 
-        this.isGatheringBets = false;
+        this.isGatheringAntes = this.isGatheringBets = false;
 
         this.messages = [];
 
@@ -203,6 +204,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof GatherBetsCompleteAction) {
 
             return this.gatherBetsComplete(action);
+
+        }
+
+        if (action instanceof GatherAntesAction) {
+
+            return this.gatherAntes(action);
+
+        }
+
+        if (action instanceof GatherAntesCompleteAction) {
+
+            return this.gatherAntesComplete(action);
 
         }
 
@@ -1135,6 +1148,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private gatherBetsComplete(action: GatherBetsCompleteAction): void {
 
         this.isGatheringBets = false;
+        this.seatAction.clear();
+
+    }  // gatherBetsComplete
+
+
+    private gatherAntes(action: GatherAntesAction): void {
+
+        this.isGatheringAntes  = true;
+
+    }  // gatherAntes
+
+    private gatherAntesComplete(action: GatherAntesCompleteAction): void {
+
+        this.isGatheringAntes = false;
         this.seatAction.clear();
 
     }  // gatherBetsComplete

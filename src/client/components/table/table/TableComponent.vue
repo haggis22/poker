@@ -19,6 +19,11 @@
                                :bet="bet"
                                :ui="ui">
                 </bet-component>
+                <bet-component v-for="ante in ui.table.betStatus.antes"
+                               :key="'ante-' + ante.seatIndex"
+                               :bet="ante"
+                               :ui="ui">
+                </bet-component>
                 <pot-component v-for="pot in ui.table.betStatus.pots"
                                :key="'pot-' + pot.index"
                                :pot="pot"

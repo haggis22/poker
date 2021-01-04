@@ -1,5 +1,5 @@
 ﻿<template>
-    <div v-if="bet.totalBet > 0" class="chips-stage" :class="betClasses">
+    <div v-if="bet.totalBet > 0" :class="betClasses">
         {{ ui.chipFormatter.format(bet.totalBet) }}
     </div>
 </template>
@@ -59,23 +59,27 @@ const BetComponent = Vue.extend ({
                 return null;
             }
 
-            let classes: string[] = [];
+            let classes: string[] =
+                [
+                    'chips-stage'
+                ];
+
+            switch (this.bet.betType) {
+                case Bet.TYPE.ANTE:
+                    classes.push('ante');
+                    classes.push(this.ui.isGatheringAntes ? 'gathering' : `seat-${this.bet.seatIndex}`);
+                    break;
+
+                case Bet.TYPE.BLIND:
+                case Bet.TYPE.REGULAR:
+                    classes.push('bet');
+                    classes.push(this.ui.isGatheringBets ? 'gathering' : `seat-${this.bet.seatIndex}`);
+                    break;
+            }
 
             if (this.isAnnounced) {
 
                 classes.push('announced');
-
-            }
-
-            if (this.ui.isGatheringBets) {
-
-                classes.push('gathering');
-
-            }
-            else {
-
-                classes.push(`seat-${this.bet.seatIndex}`);
-
 
             }
 
