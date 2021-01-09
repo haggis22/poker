@@ -240,22 +240,22 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         switch (this.user.name) {
 
             case 'Danny':
-                return 1000;
+                return 4000;
 
             case 'Mark':
-                return 2000;
+                return 4000;
 
             case 'Matt':
-                return 1000;
+                return 4000;
 
             case 'Paul':
-                return 1000;
+                return 4000;
 
             case 'Joe':
-                return 2000;
+                return 4000;
 
             case 'Sekhar':
-                return 300;
+                return 1000;
 
         }
 
