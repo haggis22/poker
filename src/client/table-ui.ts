@@ -45,9 +45,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private mySeatIndex: number;
 
-    public myBetAmount: number;
-    public myAmountToCall: number;
-
+    public myCall: Bet;
+    public myBet: Bet;
 
     public seatAction: Map<number, string>;
     public seatTimer: Map<number, Timer>;
@@ -91,7 +90,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
-        this.mySeatIndex = this.myBetAmount = this.myAmountToCall = null;
+        this.mySeatIndex = null;
+
+        this.clearLocalBets();
 
         this.betController = new BetController();
 
@@ -100,7 +101,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.isShowdownRequired = false;
         this.usedCards = new Array<Card>();
 
-        this.pendingCommands = new PendingCommands();
 
     }
 
@@ -468,39 +468,39 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isAnteTime(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BlindsAndAntesState && this.myAmountToCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
+        return this.mySeatIndex != null && this.table.state instanceof BlindsAndAntesState && this.myCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
 
     }   // isAnteTime
 
 
     public isCheckBetTime(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall === 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded === 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
 
     }
 
     public isPendingCheckBetTime(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall === 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded === 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
 
     }
 
 
     public isCallRaiseTime(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall > 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded > 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
 
     }
 
     public isPendingCallRaiseTime(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myAmountToCall > 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
+        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded > 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
 
     }
 
 
 
-    public calculateCall(): number {
+    public calculateCall(): Bet {
 
         return this.betController.calculateCall(this.table, this.table.seats[this.mySeatIndex]);
 
@@ -619,11 +619,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private clearLocalBets(): void {
 
         // null is different from 0 in that it indicates that the given option is not even available
-        this.myBetAmount = null;
-        this.myAmountToCall = null;
+        this.myCall = null;
+        this.myBet = null;
 
         clearTimeout(this.pendingTimer);
-        this.pendingCommands.clear();
+
+        if (!this.pendingCommands) {
+            this.pendingCommands = new PendingCommands();
+        }
+        else {
+            this.pendingCommands.clear();
+        }
+
 
 
     }
@@ -675,19 +682,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private betState(): void {
 
-        let seat: Seat = this.findSeat(this.mySeatIndex);
+        let seat: Seat = this.getMySeat();
 
         if (seat) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            this.myAmountToCall = this.betController.calculateCall(this.table, seat);
-            this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall);
+            this.myCall = this.betController.calculateCall(this.table, seat);
+            this.myBet = this.betController.calculateMinimumRaise(this.table, seat, this.myCall);
 
         }
         else {
 
-            this.myAmountToCall = null;
-            this.myBetAmount = null;
+            this.myCall = null;
+            this.myBet = null;
 
         }
 
@@ -702,16 +709,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            this.myAmountToCall = this.betController.calculateCall(this.table, seat);
+            this.myCall = this.betController.calculateCall(this.table, seat);
 
             // no betting, only calling, with antes
-            this.myBetAmount = null;
+            this.myBet = null;
 
         }
         else {
 
-            this.myAmountToCall = null;
-            this.myBetAmount = null;
+            this.myCall = null;
+            this.myBet = null;
 
         }
 
@@ -816,18 +823,25 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.clearSeatTimers();
 
-        this.myAmountToCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
+        let mySeat: Seat = this.getMySeat();
+
+        this.myCall = this.betController.calculateCall(this.table, mySeat);
 
         // Raise the minimum value for the UI player to bet/raise, if necessary
         // Don't lower it if they have previously set it to be higher
-        if (!this.myBetAmount) {
+        if (!this.myBet) {
 
-            this.myBetAmount = this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall);
+            this.myBet = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
 
         }
         else {
 
-            this.myBetAmount = Math.max(this.myBetAmount, this.betController.calculateMinimumRaise(this.table, seat, this.myAmountToCall));
+            let minBet: Bet = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
+
+            // In order to bet/raise we need to put in more chips than we currently have set up, so up the current setting
+            if (minBet.chipsAdded > this.myBet.chipsAdded) {
+                this.myBet = minBet;
+            }
 
         }
 
@@ -882,8 +896,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(`It is ${seat.getName()}'s turn to ante`);
 
             // Set the amount required to call the ante
-            this.myBetAmount = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
-            this.myAmountToCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
+            let mySeat: Seat = this.getMySeat();
+
+            this.myCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
+            this.myBet = null;
 
             this.clearSeatTimers();
 

@@ -473,8 +473,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player.userID === this.user.id) {
 
-                let callAmount: number = this.betController.calculateCall(this.table, seat);
-                let minimumRaise: number = this.betController.calculateMinimumRaise(this.table, seat, callAmount);
+                let call: Bet = this.betController.calculateCall(this.table, seat);
+                let minimumRaise: Bet = this.betController.calculateMinimumRaise(this.table, seat, call);
 
                 if (betStatus.currentBet > 0) {
 
@@ -482,10 +482,10 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                         let rnd:number = Math.random();
 
-                        if (rnd >= 0.8 && minimumRaise != null && minimumRaise > callAmount) {
+                        if (rnd >= 0.8 && minimumRaise != null && minimumRaise.chipsAdded > call.chipsAdded) {
 
                             // This represents a raise 
-                            let betAmount: number = minimumRaise;
+                            let betAmount: number = minimumRaise.chipsAdded;
 
                             this.log(`Raise => tracker.currentBet = ${betStatus.currentBet}, betAmount = ${betAmount}, playerChips = ${seat.player.chips}, playerCurrentBet = ${this.betController.getCurrentBet(this.table.betStatus, seat.index)}`);
 
@@ -497,7 +497,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         else if (rnd >= 0.02) {
 
                             // This represents a call (possibly all-in)
-                            let betCommand: BetCommand = new BetCommand(this.table.id, callAmount);
+                            let betCommand: BetCommand = new BetCommand(this.table.id, call.chipsAdded);
 
                             return this.broadcastCommand(betCommand);
 
@@ -521,7 +521,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                     setTimeout(() => {
 
                         // This represents a bet out (or a check, if the player has no chips)
-                        let betAmount: number = Math.random() > 0.1 && minimumRaise != null && minimumRaise > 0 ? minimumRaise : 0;
+                        let betAmount: number = Math.random() > 0.1 && minimumRaise != null && minimumRaise.chipsAdded > 0 ? minimumRaise.chipsAdded : 0;
 
                         let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
 

@@ -284,8 +284,7 @@ export class BetController {
 
 
 
-
-    public calculateCall(table: Table, seat: Seat): number {
+    public calculateCall(table: Table, seat: Seat): Bet {
 
         // If they don't have a seat, or chips then they can't call
         if (!seat || !seat.player || seat.player.chips === 0) {
@@ -297,13 +296,16 @@ export class BetController {
         if (table.state instanceof BlindsAndAntesState) {
 
             // If we are ante-ing and the player still needs to act, then calculate the amount they need to put in
-            if (table.stakes.ante > 0) {
+            if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
 
-                if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
-
-                    return Math.min(seat.player.chips, table.stakes.ante);
-
+                if (!table.betStatus.requiredBets[seat.index]) {
+                    return new Bet(seat.index, 0, 0, Bet.TYPE.ANTE, Bet.ACTION.CHECK);
                 }
+
+                let totalRequiredBet: number = table.betStatus.requiredBets[seat.index].reduce((total, bet) => total + bet.amount, 0);
+                let chipsRequired = Math.min(seat.player.chips, totalRequiredBet);
+
+                return new Bet(seat.index, chipsRequired, chipsRequired, Bet.TYPE.ANTE, Bet.ACTION.CALL);
 
             }
 
@@ -312,7 +314,10 @@ export class BetController {
 
             if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
 
-                return Math.min(seat.player.chips, table.betStatus.currentBet - this.getCurrentBet(table.betStatus, seat.index));
+                let myCurrentBet: number = this.getCurrentBet(table.betStatus, seat.index);
+                let chipsRequired: number = Math.min(seat.player.chips, table.betStatus.currentBet - myCurrentBet);
+
+                return new Bet(seat.index, myCurrentBet + chipsRequired, chipsRequired, Bet.TYPE.REGULAR, Bet.ACTION.CALL);
 
             }
 
@@ -324,7 +329,7 @@ export class BetController {
     }  // calculateCall
 
 
-    public calculateMinimumLiveRaise(table: Table, seat: Seat, amountToCall?: number): number {
+    public calculateMinimumLiveRaise(table: Table, seat: Seat, call?: Bet): Bet {
 
         // If they don't have chips then they can't call, much less raise
         if (!seat || !seat.player || seat.player.chips === 0) {
@@ -340,16 +345,16 @@ export class BetController {
 
             if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
 
-                if (amountToCall === undefined) {
-                    amountToCall = this.calculateCall(table, seat);
+                if (call === undefined) {
+                    call = this.calculateCall(table, seat);
                 }
 
                 // If they can't call, then they can't raise
-                if (amountToCall === null) {
+                if (call === null) {
                     return null;
                 }
 
-                if (seat.player.chips === amountToCall) {
+                if (seat.player.chips === call.chipsAdded) {
 
                     // They only have enough chips to call - none extra to raise
                     return null;
@@ -363,11 +368,12 @@ export class BetController {
                 // Source: http://neilwebber.com/notes/2013/07/25/the-most-misunderstood-poker-rule-nlhe-incomplete-raise-all-in/
                 let minRaiseTotal: number = table.betStatus.currentBet + minRaiseAmount;
 
-                let chipsToRaise: number = minRaiseTotal - this.getCurrentBet(table.betStatus, seat.index);
+                let myCurrentBet: number = this.getCurrentBet(table.betStatus, seat.index);
+                let chipsRequired: number = minRaiseTotal - myCurrentBet;
 
                 // This is how many chips it would take to make it a live raise. This does NOT necessarily indicate that
                 // the player has enough chips to make that live raise.
-                return chipsToRaise;
+                return new Bet(seat.index, minRaiseTotal, chipsRequired, Bet.TYPE.REGULAR, Bet.ACTION.BET)
 
             }  // it is (or soon will be) the player's turn to act
 
@@ -378,24 +384,34 @@ export class BetController {
     }
 
 
-    public calculateMinimumRaise(table: Table, seat: Seat, amountToCall?: number): number {
+    public calculateMinimumRaise(table: Table, seat: Seat, call: Bet): Bet {
 
-        let minimumLiveRaise: number = this.calculateMinimumLiveRaise(table, seat, amountToCall);
+        let minimumLiveRaise: Bet = this.calculateMinimumLiveRaise(table, seat, call);
 
+        // If the player only has enough chips to call (or less), then minimumLiveRaise will be null
+        // If the player has more chips than are required to call, then minimumLiveRaise will reflect the amount
+        // required for an actual live raise, even if the player does not have quite that much themselves.
         if (minimumLiveRaise !== null) {
 
-            return Math.min(seat.player.chips, minimumLiveRaise);
+            if (seat.player.chips >= minimumLiveRaise.chipsAdded) {
+                return minimumLiveRaise;
+            }
+
+            let myCurrentBet: number = this.getCurrentBet(table.betStatus, seat.index);
+            let myTotalBet = seat.player.chips + myCurrentBet;
+
+            return new Bet(seat.index, myTotalBet, seat.player.chips, Bet.TYPE.REGULAR, Bet.ACTION.BET);
 
         }
 
         return null;
 
-    }
+    }  // calculateMinimumRaise
 
 
-    public calculateMaximumRaise(table: Table, seat: Seat, amountToCall?: number): number {
+    public calculateMaximumRaise(table: Table, seat: Seat, call: Bet): Bet {
 
-        let minRaise: number = this.calculateMinimumRaise(table, seat, amountToCall);
+        let minRaise: Bet = this.calculateMinimumRaise(table, seat, call);
         if (minRaise === null) {
             return null;
         }
@@ -405,9 +421,12 @@ export class BetController {
         }
 
         // if they have more chips than the min raise, then that is their max possibility
-        return Math.max(minRaise, seat.player.chips);
+        let myCurrentBet: number = this.getCurrentBet(table.betStatus, seat.index);
+        let myTotalBet = seat.player.chips + myCurrentBet;
 
-    }
+        return new Bet(seat.index, myTotalBet, seat.player.chips, Bet.TYPE.REGULAR, Bet.ACTION.BET);
+
+    }  // calculateMaximumRaise
 
 
     public validateBet(table: Table, seat: Seat, amount: number): Bet | InvalidBet {
@@ -441,20 +460,20 @@ export class BetController {
 
             }
 
-            let amountToCall: number = this.calculateCall(table, seat);
-            this.log(`   amountToCall: ${amountToCall}`);
+            let call: Bet = this.calculateCall(table, seat);
+            this.log(`   amountToCall: ${call}`);
 
             // amountToCall will take the fact that the player does not have enough chips into account and will allow a "call for less"
-            if (amount < amountToCall) {
+            if (amount < call.chipsAdded) {
 
-                return new InvalidBet(seat.index, `You must put in at least ${amountToCall}`);
+                return new InvalidBet(seat.index, `You must put in at least ${call.chipsAdded}`);
 
             }
 
             let isLiveBet: boolean = true;
             let raisesAction: boolean = false;
 
-            if (amount == amountToCall) {
+            if (amount === call.chipsAdded) {
 
                 let betAction: number = amount === 0 ? Bet.ACTION.CHECK : Bet.ACTION.CALL;
 
@@ -462,7 +481,7 @@ export class BetController {
 
             }
 
-            let minimumBet: number = this.calculateMinimumRaise(table, seat, amountToCall);
+            let minimumBet: Bet = this.calculateMinimumRaise(table, seat, call);
 
             if (minimumBet === null) {
 
@@ -471,12 +490,12 @@ export class BetController {
 
             }
 
-            let minimumLiveRaise: number = this.calculateMinimumLiveRaise(table, seat, amountToCall);
-            let maximumBet: number = this.calculateMaximumRaise(table, seat, amountToCall);
+            let minimumLiveRaise: Bet = this.calculateMinimumLiveRaise(table, seat, call);
+            let maximumBet: Bet = this.calculateMaximumRaise(table, seat, call);
 
             // If we've made it here, then the player must be betting/raising, so first make sure it is not too much
             // We know maximumBet will not be null if the minBet is not null
-            if (amount > maximumBet) {
+            if (amount > maximumBet.chipsAdded) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${maximumBet}, bet amount: ${amount}`);
                 return new InvalidBet(seat.index, "Bet is over the maximum");
@@ -484,7 +503,7 @@ export class BetController {
             }
 
             // If we've made it here, then the player must be betting/raising, so first make sure it is not too much
-            if (amount < minimumBet) {
+            if (amount < minimumBet.chipsAdded) {
 
                 this.log(`Invalid bet: seatIndex: ${seat.index}, chips: ${seat.player.chips}, maxBet: ${minimumBet}, bet amount: ${amount}`);
                 return new InvalidBet(seat.index, "Bet is under the maximum");
@@ -497,7 +516,7 @@ export class BetController {
             let actionType: number = table.betStatus.currentBet === 0 ? Bet.ACTION.OPEN : Bet.ACTION.RAISE;
 
             // if they cannot meet the minimum live raise then minimumLiveRaise will be null
-            let raisesLiveAction: boolean = minimumLiveRaise !== null && amount >= minimumLiveRaise;
+            let raisesLiveAction: boolean = minimumLiveRaise !== null && amount >= minimumLiveRaise.chipsAdded;
 
             // This bet/raise will have raiseAction = true so that others are required to respond
             // Whether it raises the liveAction or not depends on the size of the bet

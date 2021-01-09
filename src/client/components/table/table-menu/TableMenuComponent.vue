@@ -12,8 +12,6 @@
 
         </div>
 
-        <div>Pending Fold: {{ pendingFold }}</div>
-
         <div class="bet-actions" v-if="ui.isAnteTime()">
             <button type="button" v-on:click.stop="fold">
                 <div class="action">Sit Out</div>
@@ -21,7 +19,7 @@
             <button type="button" v-on:click.stop="ante">
                 <div class="action">Ante</div>
                 <div class="amount">
-                    {{ ui.chipFormatter.format(ui.myAmountToCall) }}
+                    {{ ui.chipFormatter.format(ui.myCall.chipsAdded) }}
                 </div>
             </button>
         </div>
@@ -34,7 +32,7 @@
                 <input type="checkbox" /> Check
             </label>
             <label>
-                <input type="checkbox" /> Bet {{ ui.chipFormatter.format(ui.myBetAmount) }}
+                <input type="checkbox" /> Bet {{ ui.chipFormatter.format(ui.myBet.totalBet) }}
             </label>
         </div>
 
@@ -47,7 +45,7 @@
             </button>
             <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
                 <div class="action">Bet</div>
-                <div class="amount">{{ ui.chipFormatter.format(ui.myBetAmount) }}</div>
+                <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
             </button>
             <button v-if="!isRaiseAllowed" type="button" disabled>
                 <div class="action">Bet</div>
@@ -62,7 +60,7 @@
                 <input type="checkbox" /> Call
             </label>
             <label>
-                <input type="checkbox" /> Raise {{ ui.chipFormatter.format(ui.myBetAmount) }}
+                <input type="checkbox" /> Raise to {{ ui.chipFormatter.format(ui.myBet.totalBet) }}
             </label>
         </div>
 
@@ -72,11 +70,11 @@
             </button>
             <button type="button" v-on:click.stop="call">
                 <div class="action">Call</div>
-                <div class="amount">{{ ui.chipFormatter.format(ui.myAmountToCall) }}</div>
+                <div class="amount">{{ ui.chipFormatter.format(ui.myCall.chipsAdded) }}</div>
             </button>
             <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
                 <div class="action">Raise</div>
-                <div class="amount">{{ ui.chipFormatter.format(ui.myBetAmount) }}</div>
+                <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
             </button>
             <button v-if="!isRaiseAllowed" type="button" disabled>
                 <div class="action">Raise</div>
@@ -142,6 +140,19 @@ const TableMenuComponent = Vue.extend ({
 
             return false;
 
+        },
+        minimumRaise: function () {
+
+            let mySeat: Seat = this.ui.getMySeat();
+
+            if (mySeat) {
+
+                return this.ui.betController.calculateMinimumRaise(this.ui.table, mySeat);
+
+            }
+
+            return 0;
+
         }
 
     },
@@ -161,13 +172,13 @@ const TableMenuComponent = Vue.extend ({
 
         call: function (event) {
 
-            this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myAmountToCall));
+            this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myCall.chipsAdded));
 
         },
 
         bet: function (event) {
 
-            this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myBetAmount));
+            this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myBet.chipsAdded));
 
         },
 
