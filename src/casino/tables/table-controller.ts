@@ -408,7 +408,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             // if the player is not in action, then sitting in/out takes effect immediately
             if (!this.table.state.isHandInProgress() || !seat.isInHand) {
 
-                this.processSetStatusCommand(command, seat.player);
+                this.processSetStatusCommand(command, seat);
 
             }
             else {
@@ -425,9 +425,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }   // setStatus
 
 
-    private processSetStatusCommand(command: SetStatusCommand, player: Player): void {
+    private processSetStatusCommand(command: SetStatusCommand, seat: Seat): void {
 
-        if (!command || !player) {
+        if (!command || !seat || !seat.player || seat.player.userID != command.userID) {
 
             return;
 
@@ -436,18 +436,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (command.isSittingOut) {
 
             // They can always mark themselves as sitting out the next hand
-            player.isSittingOut = true;
-            this.queueAction(new SetStatusAction(this.table.id, command.userID, true));
+            this.markSittingOut(seat, true);
 
         }
 
         else {
 
             // Only let them mark themselves as back in if they have chips (or are about to add some)
-            if (player.chips > 0) {
+            if (seat.player.chips > 0) {
 
-                player.isSittingOut = false;
-                this.queueAction(new SetStatusAction(this.table.id, command.userID, false));
+                this.markSittingOut(seat, false);
 
             }
 
@@ -502,8 +500,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 this.queueAction(new AddChipsAction(this.table.id, player.userID, command.amount));
                 this.queueAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
-
-                return;
+                return await this.checkStartHand();
 
             }
 
@@ -585,10 +582,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             // if the player has not specified in or out, then ante-ing put them firmly in the "not-sitting-out" camp
             if (bettorSeat.player.isSittingOut === null) {
 
-                bettorSeat.player.isSittingOut = false;
-
-                // Tell the world this player is not sitting out
-                this.queueAction(new SetStatusAction(this.table.id, bettorSeat.player.userID, false));
+                this.markSittingOut(bettorSeat, false);
 
             }
 
@@ -760,14 +754,17 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player) {
 
+                this.log(`Checking ${seat.player.name}: chips: ${seat.player.chips}, isSttingOut: ${seat.player.isSittingOut}`);
+
                 // isSittingOut could either be undefined or false. If undefined then we will give them a chance to pay the ante/blind (if required)
                 if (seat.player.chips === 0) {
 
-                    seat.player.isSittingOut = true;
+                    this.markSittingOut(seat, true);
 
                 }
 
                 if (!seat.player.isSittingOut) {
+                    this.log(`In isReadyForHand, ${seat.player.name} is ready`);
                     numPlayers++;
                 }
 
@@ -805,8 +802,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         for (let seat of this.table.seats) {
 
             // If we're between hands, then none of the seats are in a hand, right?
-            seat.clearHand();
-            this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
+            this.clearHand(seat);
 
             if (seat.player) {
 
@@ -826,17 +822,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 if (setStatusCommand) {
 
-                    this.processSetStatusCommand(setStatusCommand, seat.player);
+                    this.processSetStatusCommand(setStatusCommand, seat);
 
                 }
 
                 if (seat.player.chips === 0) {
 
                     // if they have no chips then they are automatically sitting out
-                    seat.player.isSittingOut = true;
-
-                    // Tell the world this player is sitting out
-                    this.queueAction(new SetStatusAction(this.table.id, seat.player.userID, true));
+                    this.markSittingOut(seat, true);
 
                 }
 
@@ -1200,16 +1193,33 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.log(`${anteSeat.getName()} did not ante - marking as sitting out`);
 
         // they didn't pay the ante, so they're OUT
-        anteSeat.clearHand();
-        anteSeat.player.isSittingOut = true;
-
-        // Tell the world this player is sitting out
-        this.queueAction(new IsInHandAction(this.table.id, anteSeat.index, anteSeat.isInHand));
-        this.queueAction(new SetStatusAction(this.table.id, anteSeat.player.userID, true));
+        this.clearHand(anteSeat);
+        this.markSittingOut(anteSeat, true);
 
         return await this.advanceAnteTurn();
 
     }   // rejectAnte
+
+
+    private clearHand(seat: Seat): void {
+
+        seat.clearHand();
+        this.queueAction(new IsInHandAction(this.table.id, seat.index, false));
+
+    }  // clearHand
+
+
+    private markSittingOut(seat: Seat, isSittingOut: boolean): void {
+
+        if (seat.player) {
+
+            // Tell the world whether this player is sitting out
+            seat.player.isSittingOut = isSittingOut;
+            this.queueAction(new SetStatusAction(this.table.id, seat.player.userID, isSittingOut));
+
+        }
+
+    }  // markSittingOut
 
 
     private async advanceAnteTurn(): Promise<void> {
