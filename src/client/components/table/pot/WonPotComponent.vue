@@ -60,7 +60,7 @@ const WonPotComponent = Vue.extend ({
                 return null;
             }
 
-            let classes: string[] = [`pot-${this.pot.potIndex}`];
+            let classes: string[] = [`pot-${this.pot.index}`];
 
             if (this.isPushed) {
 
