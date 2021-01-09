@@ -44,7 +44,10 @@
                 <div class="action">Check</div>
             </button>
             <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
-                <div class="action">Bet</div>
+                <div class="action">
+                    <span v-if="alreadyHasBets">Raise</span>
+                    <span v-else>Bet</span>
+                </div>
                 <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
             </button>
             <button v-if="!isRaiseAllowed" type="button" disabled>
@@ -156,6 +159,11 @@ const TableMenuComponent = Vue.extend ({
             }
 
             return 0;
+
+        },
+        alreadyHasBets: function () {
+
+            return this.ui.table.betStatus.numRaises > 0;
 
         }
 
