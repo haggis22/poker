@@ -29,7 +29,7 @@
                 <input type="checkbox" value="true" :checked="pendingFold" @change="ui.setPendingFold($event.target.checked)" /> Fold
             </label>
             <label>
-                <input type="checkbox" /> Check
+                <input type="checkbox" value="true" :checked="pendingCheck" @change="ui.setPendingCheck($event.target.checked)" /> Check
             </label>
             <label>
                 <input type="checkbox" /> Bet {{ ui.chipFormatter.format(ui.myBet.totalBet) }}
@@ -112,6 +112,10 @@ const TableMenuComponent = Vue.extend ({
             required: false
         },
         pendingFold: {
+            type: Boolean,
+            required: false
+        },
+        pendingCheck: {
             type: Boolean,
             required: false
         }

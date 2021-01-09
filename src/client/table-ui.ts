@@ -860,6 +860,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 }
 
+                if (this.pendingCommands.check) {
+
+                    // We are taking an action, so clear anything that is pending and try to fold immediately
+                    this.pendingCommands.clear();
+                    return this.sendCommand(new BetCommand(this.table.id, 0));
+
+                }
+
             }
 
             let timer: Timer = new Timer(action.timesUp);
@@ -1197,6 +1205,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // kill anything that might already be waiting to execute
         clearTimeout(this.pendingTimer);
 
+        this.pendingCommands.check = this.pendingCommands.bet = false;
+
         if (foldActivated) {
 
             this.pendingTimer = setTimeout(() => { this.pendingCommands.fold = true }, this.TIME_PENDING_ACTION);
@@ -1209,8 +1219,29 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+    }  // setPendingFold
 
-    }
+
+    public setPendingCheck(checkActivated: boolean): void {
+
+        // kill anything that might already be waiting to execute
+        clearTimeout(this.pendingTimer);
+
+        this.pendingCommands.fold = this.pendingCommands.bet = false;
+
+        if (checkActivated) {
+
+            this.pendingTimer = setTimeout(() => { this.pendingCommands.check = true }, this.TIME_PENDING_ACTION);
+
+        }
+        else {
+
+            // turning off checking can happen immediately
+            this.pendingCommands.check = false;
+
+        }
+
+    }  // setPendingCheck
 
 
 }

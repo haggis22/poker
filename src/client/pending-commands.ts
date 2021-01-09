@@ -1,6 +1,7 @@
 ﻿export class PendingCommands {
 
     public fold: boolean;
+    public check: boolean;
     public bet: boolean;
     public betAmount: number;
 
@@ -14,7 +15,7 @@
 
     public clear(): void {
 
-        this.fold = this.bet = false;
+        this.fold = this.check = this.bet = false;
         this.betAmount = null;
 
     }
