@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <div :class="chipClasses" :style="{ 'background-color': chip.color }"></div>
+    <div :class="chipClasses" :style="{ 'background-color': chip.color, 'border-color': chip.accentColor }"></div>
 
 </template>
 

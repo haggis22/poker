@@ -5,13 +5,13 @@ export class ChipStacker {
 
     private readonly DENOMINATIONS: Array<Chip> =
         [
-            new Chip(50000, 'pink'),
-            new Chip(10000, 'black'),
-            new Chip(2500, 'green'),
-            new Chip(500, 'yellow'),
-            new Chip(100, 'blue'),
-            new Chip(50, 'red'),
-            new Chip(25, 'white')
+            new Chip(50000, 'pink', 'white'),
+            new Chip(10000, 'black', 'white'),
+            new Chip(2500, 'green', 'white'),
+            new Chip(500, 'yellow', 'white'),
+            new Chip(100, 'blue', 'white'),
+            new Chip(50, 'darkred', 'white'),
+            new Chip(25, 'white', 'black')
         ];
 
 
