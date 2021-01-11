@@ -25,6 +25,7 @@ import { LoginAction } from "../actions/lobby/login-action";
 import { Timer } from "../timers/timer";
 import { BetController } from "../casino/tables/betting/bet-controller";
 import { PendingCommands } from "./pending-commands";
+import { ChipStacker } from "../casino/tables/chips/chip-stacker";
 
 
 const logger: Logger = new Logger();
@@ -42,6 +43,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public table: Table;
     public game: Game;
     public betController: BetController;
+    public chipStacker: ChipStacker;
+
 
     private mySeatIndex: number;
 
@@ -95,6 +98,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.clearLocalBets();
 
         this.betController = new BetController();
+        this.chipStacker = new ChipStacker();
 
         this.isSittingOut = null;
 
