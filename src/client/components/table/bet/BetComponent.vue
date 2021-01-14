@@ -2,7 +2,7 @@
     <div v-if="bet.totalBet > 0" :class="betClasses">
         <chip-box-component :value="bet.totalBet"
                             :chip-stacker="ui.chipStacker"></chip-box-component>
-        {{ ui.chipFormatter.format(bet.totalBet) }}
+        <div class="amount">{{ ui.chipFormatter.format(bet.totalBet) }}</div>
     </div>
 </template>
 

@@ -1,9 +1,11 @@
 ﻿<template>
 
-    <div class="chip-box">
+    <div class="chip-box" :style="{ 'grid-template-rows': `repeat(${chips.length}, 3px)`, 'height': `${(chips.length * 3) + 24}px` }">
         <chip-component v-for="(chip, index) in chips"
                         :key="`chip-${index}`"
-                        :chip="chip"></chip-component>
+                        :chip="chip"
+                        :column="1"
+                        :row="((chips.length - index) + 1)"></chip-component>
     </div>
 
 </template>
