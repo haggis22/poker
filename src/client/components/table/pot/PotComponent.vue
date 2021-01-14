@@ -1,8 +1,10 @@
 ﻿<template>
 
     <div class="pot" :class="potClasses">
+        <chip-box-component :value="pot.amount"
+                            :chip-stacker="ui.chipStacker"></chip-box-component>
+        <div class="amount">{{ ui.chipFormatter.format(pot.amount) }}</div>
         <div class="name">{{ pot.getName() }}</div>
-        <div class="chips">{{ ui.chipFormatter.format(pot.amount) }}</div>
     </div>
 
 </template>
@@ -17,6 +19,7 @@ import Vue from 'vue';
 
 import { Pot } from '../../../../casino/tables/betting/pot';
 import { TableUI } from '../../../table-ui';
+import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
 
 const PotComponent = Vue.extend ({
 
@@ -29,6 +32,9 @@ const PotComponent = Vue.extend ({
             type: TableUI,
             required: true
         }
+    },
+    components: {
+        'chip-box-component': ChipBoxComponent
     },
     data() {
 
