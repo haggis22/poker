@@ -69,8 +69,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_SET_BUTTON: number = 750;
 
-    private readonly TIME_DEAL_CARD: number = 300;
-    private readonly TIME_DEAL_BOARD: number = 400;
+    private readonly TIME_DEAL_CARD: number = 100;
+    private readonly TIME_DEAL_BOARD: number = 300;
 
     private readonly TIME_ANTE = 100;
     private readonly TIME_BET = 100;

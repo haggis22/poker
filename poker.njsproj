@@ -59,6 +59,8 @@
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
     <Content Include="src\client\App.vue" />
+    <Content Include="src\client\components\lobby\lobby\lobby.scss" />
+    <Content Include="src\client\components\lobby\lobby\LobbyComponent.vue" />
     <Content Include="src\client\components\table\chips\chip-box.scss" />
     <Content Include="src\client\components\table\chips\ChipBoxComponent.vue" />
     <Content Include="src\client\components\table\chips\chip.scss" />
@@ -87,6 +89,7 @@
     <Content Include="src\client\components\table\table\table.scss" />
     <Content Include="src\client\components\table\timer\timer.scss" />
     <Content Include="src\client\components\table\timer\TimerComponent.vue" />
+    <Content Include="src\client\views\Lobby.vue" />
     <Content Include="src\client\views\Table.vue" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
@@ -113,6 +116,8 @@
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\components\" />
+    <Folder Include="src\client\components\lobby\" />
+    <Folder Include="src\client\components\lobby\lobby\" />
     <Folder Include="src\client\components\table\" />
     <Folder Include="src\client\components\table\bet\" />
     <Folder Include="src\client\components\table\board\" />
@@ -205,6 +210,7 @@
     <TypeScriptCompile Include="src\casino\tables\chips\chip.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\blinds-and-antes-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\table-summary.ts" />
     <TypeScriptCompile Include="src\client\pending-commands.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

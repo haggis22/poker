@@ -9,6 +9,12 @@ const routes = [
         redirect: '/table',
     },
     {
+        path: "/lobby",
+        name: "Lobby",
+        component: () =>
+            import(/* webpackChunkName: "lobby" */ '../views/Lobby.vue')
+    },
+    {
         path: "/table/:tableID",
         name: "Table",
         component: () =>
