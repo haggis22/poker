@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <div class="pot gathered" :class="potClasses">
+    <div class="pot" :class="potClasses">
         <chip-box-component :value="pot.amount"
                             :chip-stacker="ui.chipStacker"></chip-box-component>
         <div class="amount">{{ ui.chipFormatter.format(pot.amount) }}</div>
@@ -12,19 +12,20 @@
 
 <script lang="ts">
 
+
 import './pot.scss';
 
 import Vue from 'vue';
 
-import { WonPot } from '../../../../casino/tables/betting/won-pot';
-import { TableUI } from '../../../table-ui';
+import { Pot } from '../../../../casino/tables/betting/pot';
+    import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
 
-const WonPotComponent = Vue.extend ({
+const PotComponent = Vue.extend ({
 
     props: {
         pot: {
-            type: WonPot,
+            type: Pot,
             required: true
         },
         ui: {
@@ -39,7 +40,7 @@ const WonPotComponent = Vue.extend ({
 
         let values =
         {
-            isPushed: false,
+            isGathered: false,
             timer: ''
         };
 
@@ -48,12 +49,12 @@ const WonPotComponent = Vue.extend ({
     },
     created() {
 
-        console.log(`Created WonPotComponent for pot index ${this.pot.potIndex}, amount ${this.pot.amount}`);
+        console.log(`Created PotComponent for index ${this.pot.index}, amount ${this.pot.amount}`);
 
-        // After only the briefest of pauses, we're going to start pushing this pot towards its winner
+        // After only the briefest of pauses, we're going to have this pot appear
         this.timer = setTimeout(() => {
 
-            this.isPushed = true;
+            this.isGathered = true;
 
         }, 10);
 
@@ -68,10 +69,9 @@ const WonPotComponent = Vue.extend ({
 
             let classes: string[] = [`pot-${this.pot.index}`];
 
-            if (this.isPushed) {
+            if (this.isGathered) {
 
-                classes.push('pushed');
-                classes.push(`seat-${this.pot.seatIndex}`);
+                classes.push('gathered');
 
             }
 
@@ -83,6 +83,6 @@ const WonPotComponent = Vue.extend ({
 
 });
 
-export default WonPotComponent;
+export default PotComponent;
 
 </script>

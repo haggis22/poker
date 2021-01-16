@@ -12,7 +12,7 @@
 
     import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
 
-    import LobbyComponent from '../components/lobby/lobby/LobbyComponent.vue';
+    import LobbyComponent from './components/lobby/LobbyComponent.vue';
 
 
     export default {
@@ -32,9 +32,9 @@
         },
         created() {
 
-/*
             const ws = new WebSocket('ws://localhost:3000');
 
+            /*
             // Client Side
             let ui: TableUI = new TableUI(new MoneyFormatter());
             let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
@@ -56,7 +56,7 @@
 
             this.ui = ui;
             this.ws = ws;
-*/
+            */
 
         }
 

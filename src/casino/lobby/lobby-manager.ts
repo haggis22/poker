@@ -46,6 +46,7 @@ export class LobbyManager {
 
         // send this client a message that they are connected to the lobby
         client.handleMessage(new ActionMessage(new LobbyConnectedAction()));
+//         client.handleMessage(new )
 
     }
 

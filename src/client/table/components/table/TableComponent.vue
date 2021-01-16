@@ -50,7 +50,7 @@
     import './table.scss';
 import './table-seats-6.scss';
 import Vue from 'vue';
-import { TableUI } from '../../../table-ui';
+    import { TableUI } from '../../table-ui';
 
     import SeatComponent from '../seat/SeatComponent.vue';
 import DealerBoxComponent from '../dealer/DealerBoxComponent.vue';

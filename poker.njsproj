@@ -38,6 +38,9 @@
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\actions\lobby\tables\list-tables.action.ts">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\actions\table\players\add-chips-action.ts">
       <SubType>Code</SubType>
     </Compile>
@@ -59,38 +62,37 @@
     </Content>
     <Content Include="src\casino\tables\table-rules.ts" />
     <Content Include="src\client\App.vue" />
-    <Content Include="src\client\components\lobby\lobby\lobby.scss" />
-    <Content Include="src\client\components\lobby\lobby\LobbyComponent.vue" />
-    <Content Include="src\client\components\table\chips\chip-box.scss" />
-    <Content Include="src\client\components\table\chips\ChipBoxComponent.vue" />
-    <Content Include="src\client\components\table\chips\chip.scss" />
-    <Content Include="src\client\components\table\chips\ChipComponent.vue" />
-    <Content Include="src\client\style.scss" />
-    <Content Include="src\client\components\table\bet\bet.scss" />
-    <Content Include="src\client\components\table\bet\BetComponent.vue" />
-    <Content Include="src\client\components\table\board\board.scss" />
-    <Content Include="src\client\components\table\board\BoardComponent.vue" />
-    <Content Include="src\client\components\table\card\card.scss" />
-    <Content Include="src\client\components\table\card\CardComponent.vue" />
-    <Content Include="src\client\components\table\chat\chat.scss" />
-    <Content Include="src\client\components\table\chat\ChatComponent.vue" />
-    <Content Include="src\client\components\table\dealer\dealer-box.scss" />
-    <Content Include="src\client\components\table\dealer\DealerBoxComponent.vue" />
-    <Content Include="src\client\components\table\log\log.scss" />
-    <Content Include="src\client\components\table\log\LogComponent.vue" />
-    <Content Include="src\client\components\table\pot\pot.scss" />
-    <Content Include="src\client\components\table\pot\PotComponent.vue" />
-    <Content Include="src\client\components\table\pot\WonPotComponent.vue" />
-    <Content Include="src\client\components\table\seat\seat.scss" />
-    <Content Include="src\client\components\table\seat\SeatComponent.vue" />
-    <Content Include="src\client\components\table\table-menu\table-menu.scss" />
-    <Content Include="src\client\components\table\table-menu\TableMenuComponent.vue" />
-    <Content Include="src\client\components\table\table\table-seats-6.scss" />
-    <Content Include="src\client\components\table\table\table.scss" />
-    <Content Include="src\client\components\table\timer\timer.scss" />
-    <Content Include="src\client\components\table\timer\TimerComponent.vue" />
-    <Content Include="src\client\views\Lobby.vue" />
-    <Content Include="src\client\views\Table.vue" />
+    <Content Include="src\client\lobby\components\lobby\lobby.scss" />
+    <Content Include="src\client\lobby\components\lobby\LobbyComponent.vue" />
+    <Content Include="src\client\table\components\chips\chip-box.scss" />
+    <Content Include="src\client\table\components\chips\ChipBoxComponent.vue" />
+    <Content Include="src\client\table\components\chips\chip.scss" />
+    <Content Include="src\client\table\components\chips\ChipComponent.vue" />
+    <Content Include="src\client\table\components\bet\bet.scss" />
+    <Content Include="src\client\table\components\bet\BetComponent.vue" />
+    <Content Include="src\client\table\components\board\board.scss" />
+    <Content Include="src\client\table\components\board\BoardComponent.vue" />
+    <Content Include="src\client\table\components\card\card.scss" />
+    <Content Include="src\client\table\components\card\CardComponent.vue" />
+    <Content Include="src\client\table\components\chat\chat.scss" />
+    <Content Include="src\client\table\components\chat\ChatComponent.vue" />
+    <Content Include="src\client\table\components\dealer\dealer-box.scss" />
+    <Content Include="src\client\table\components\dealer\DealerBoxComponent.vue" />
+    <Content Include="src\client\table\components\log\log.scss" />
+    <Content Include="src\client\table\components\log\LogComponent.vue" />
+    <Content Include="src\client\table\components\pot\pot.scss" />
+    <Content Include="src\client\table\components\pot\PotComponent.vue" />
+    <Content Include="src\client\table\components\pot\WonPotComponent.vue" />
+    <Content Include="src\client\table\components\seat\seat.scss" />
+    <Content Include="src\client\table\components\seat\SeatComponent.vue" />
+    <Content Include="src\client\table\components\table-menu\table-menu.scss" />
+    <Content Include="src\client\table\components\table-menu\TableMenuComponent.vue" />
+    <Content Include="src\client\table\components\table\table-seats-6.scss" />
+    <Content Include="src\client\table\components\table\table.scss" />
+    <Content Include="src\client\table\components\timer\timer.scss" />
+    <Content Include="src\client\table\components\timer\TimerComponent.vue" />
+    <Content Include="src\client\lobby\Lobby.vue" />
+    <Content Include="src\client\table\Table.vue" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
     </Content>
@@ -105,6 +107,7 @@
     <Folder Include="src\" />
     <Folder Include="public\" />
     <Folder Include="src\actions\lobby\" />
+    <Folder Include="src\actions\lobby\tables\" />
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\actions\table\antes\" />
@@ -115,24 +118,24 @@
     <Folder Include="src\casino\lobby\" />
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
-    <Folder Include="src\client\components\" />
-    <Folder Include="src\client\components\lobby\" />
-    <Folder Include="src\client\components\lobby\lobby\" />
-    <Folder Include="src\client\components\table\" />
-    <Folder Include="src\client\components\table\bet\" />
-    <Folder Include="src\client\components\table\board\" />
-    <Folder Include="src\client\components\table\card\" />
-    <Folder Include="src\client\components\table\dealer\" />
-    <Folder Include="src\client\components\table\log\" />
-    <Folder Include="src\client\components\table\chat\" />
-    <Folder Include="src\client\components\table\chips\" />
-    <Folder Include="src\client\components\table\timer\" />
-    <Folder Include="src\client\components\table\table-menu\" />
-    <Folder Include="src\client\components\table\pot\" />
-    <Folder Include="src\client\components\table\seat\" />
-    <Folder Include="src\client\components\table\table\" />
+    <Folder Include="src\client\lobby\components\lobby\" />
+    <Folder Include="src\client\table\components\bet\" />
+    <Folder Include="src\client\table\components\board\" />
+    <Folder Include="src\client\table\components\card\" />
+    <Folder Include="src\client\table\components\dealer\" />
+    <Folder Include="src\client\table\components\log\" />
+    <Folder Include="src\client\table\components\chat\" />
+    <Folder Include="src\client\table\components\chips\" />
+    <Folder Include="src\client\table\components\timer\" />
+    <Folder Include="src\client\table\components\table-menu\" />
+    <Folder Include="src\client\table\components\pot\" />
+    <Folder Include="src\client\table\components\seat\" />
+    <Folder Include="src\client\table\components\table\" />
+    <Folder Include="src\client\lobby\" />
+    <Folder Include="src\client\lobby\components\" />
+    <Folder Include="src\client\table\" />
     <Folder Include="src\client\router\" />
-    <Folder Include="src\client\views\" />
+    <Folder Include="src\client\table\components\" />
     <Folder Include="src\commands\lobby\" />
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\commands\table\chat\" />
@@ -211,10 +214,10 @@
     <TypeScriptCompile Include="src\casino\tables\states\betting\blinds-and-antes-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\table-summary.ts" />
-    <TypeScriptCompile Include="src\client\pending-commands.ts">
+    <TypeScriptCompile Include="src\client\table\pending-commands.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\components\table\table\TableComponent.vue" />
+    <TypeScriptCompile Include="src\client\table\components\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\client\router\index.ts" />
     <TypeScriptCompile Include="src\commands\lobby\login-command.ts" />
     <TypeScriptCompile Include="src\commands\lobby\lobby-command.ts">
@@ -310,7 +313,7 @@
     <TypeScriptCompile Include="src\casino\tables\chips\chip-formatter.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\table-ui.ts">
+    <TypeScriptCompile Include="src\client\table\table-ui.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\table-watcher.ts">
@@ -433,9 +436,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\players\user-manager.ts" />
     <TypeScriptCompile Include="src\players\user.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\server-poker.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\server\server.ts">

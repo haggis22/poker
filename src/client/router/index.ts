@@ -12,13 +12,13 @@ const routes = [
         path: "/lobby",
         name: "Lobby",
         component: () =>
-            import(/* webpackChunkName: "lobby" */ '../views/Lobby.vue')
+            import(/* webpackChunkName: "lobby" */ '../lobby/Lobby.vue')
     },
     {
         path: "/table/:tableID",
         name: "Table",
         component: () =>
-            import(/* webpackChunkName: "table" */ '../views/Table.vue')
+            import(/* webpackChunkName: "table" */ '../table/Table.vue')
     }
 
 ];

@@ -95,7 +95,7 @@ import './table-menu.scss';
 
 import Vue from 'vue';
 
-import { TableUI } from '../../../table-ui';
+    import { TableUI } from '../../table-ui';
 import { Seat } from '../../../../casino/tables/seat';
 import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';

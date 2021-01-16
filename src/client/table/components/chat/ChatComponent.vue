@@ -20,7 +20,7 @@ import './chat.scss';
 
 import Vue from 'vue';
 
-    import { TableUI } from '../../../table-ui';
+    import { TableUI } from '../../table-ui';
     import { ChatCommand } from '../../../../commands/table/chat/chat-command';
 
 const ChatComponent = Vue.extend ({

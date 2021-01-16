@@ -17,7 +17,7 @@ import './board.scss';
 
 import Vue from 'vue';
 
-import { TableUI } from '../../../table-ui';
+    import { TableUI } from '../../table-ui';
 
 import CardComponent from '../card/CardComponent.vue';
 import { Board } from '../../../../casino/tables/boards/board';

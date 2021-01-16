@@ -15,7 +15,7 @@ import './bet.scss';
 import Vue from 'vue';
 
 import { Bet } from '../../../../casino/tables/betting/bet';
-import { TableUI } from '../../../table-ui';
+import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
 
 const BetComponent = Vue.extend ({

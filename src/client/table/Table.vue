@@ -22,15 +22,15 @@
 
     import Vue from 'vue';
 
-    import { TableUI } from '../table-ui';
+    import { TableUI } from './table-ui';
     import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
     import { TableWatcher } from '../../casino/tables/table-watcher';
     import { GameClient } from '../../communication/client-side/game-client';
 
-    import TableComponent from '../components/table/table/TableComponent.vue';
-    import LogComponent from '../components/table/log/LogComponent.vue';
-    import TableMenuComponent from '../components/table/table-menu/TableMenuComponent.vue';
-    import ChatComponent from '../components/table/chat/ChatComponent.vue';
+    import TableComponent from './components/table/TableComponent.vue';
+    import LogComponent from './components/log/LogComponent.vue';
+    import TableMenuComponent from './components/table-menu/TableMenuComponent.vue';
+    import ChatComponent from './components/chat/ChatComponent.vue';
 
 
     export default {

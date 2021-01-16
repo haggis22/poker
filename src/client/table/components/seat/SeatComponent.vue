@@ -46,7 +46,7 @@ import Vue from 'vue';
 
 import { Seat } from '../../../../casino/tables/seat';
 import { BetStatus} from '../../../../casino/tables/betting/bet-status';
-import { TableUI } from '../../../table-ui';
+    import { TableUI } from '../../table-ui';
 import { RequestSeatCommand } from '../../../../commands/table/request-seat-command';
 
 import CardComponent from '../card/CardComponent.vue';

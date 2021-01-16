@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <div class="pot" :class="potClasses">
+    <div class="pot gathered" :class="potClasses">
         <chip-box-component :value="pot.amount"
                             :chip-stacker="ui.chipStacker"></chip-box-component>
         <div class="amount">{{ ui.chipFormatter.format(pot.amount) }}</div>
@@ -12,20 +12,19 @@
 
 <script lang="ts">
 
-
 import './pot.scss';
 
 import Vue from 'vue';
 
-import { Pot } from '../../../../casino/tables/betting/pot';
-import { TableUI } from '../../../table-ui';
+import { WonPot } from '../../../../casino/tables/betting/won-pot';
+    import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
 
-const PotComponent = Vue.extend ({
+const WonPotComponent = Vue.extend ({
 
     props: {
         pot: {
-            type: Pot,
+            type: WonPot,
             required: true
         },
         ui: {
@@ -40,7 +39,7 @@ const PotComponent = Vue.extend ({
 
         let values =
         {
-            isGathered: false,
+            isPushed: false,
             timer: ''
         };
 
@@ -49,12 +48,12 @@ const PotComponent = Vue.extend ({
     },
     created() {
 
-        console.log(`Created PotComponent for index ${this.pot.index}, amount ${this.pot.amount}`);
+        console.log(`Created WonPotComponent for pot index ${this.pot.potIndex}, amount ${this.pot.amount}`);
 
-        // After only the briefest of pauses, we're going to have this pot appear
+        // After only the briefest of pauses, we're going to start pushing this pot towards its winner
         this.timer = setTimeout(() => {
 
-            this.isGathered = true;
+            this.isPushed = true;
 
         }, 10);
 
@@ -69,9 +68,10 @@ const PotComponent = Vue.extend ({
 
             let classes: string[] = [`pot-${this.pot.index}`];
 
-            if (this.isGathered) {
+            if (this.isPushed) {
 
-                classes.push('gathered');
+                classes.push('pushed');
+                classes.push(`seat-${this.pot.seatIndex}`);
 
             }
 
@@ -83,6 +83,6 @@ const PotComponent = Vue.extend ({
 
 });
 
-export default PotComponent;
+export default WonPotComponent;
 
 </script>

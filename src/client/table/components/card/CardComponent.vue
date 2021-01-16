@@ -27,7 +27,7 @@ import Vue from 'vue';
 
 import { Card } from '../../../../cards/card';
 import { FacedownCard } from '../../../../cards/face-down-card';
-import { TableUI } from '../../../table-ui';
+    import { TableUI } from '../../table-ui';
 
     const CardComponent = Vue.extend({
 
