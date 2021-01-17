@@ -61,6 +61,7 @@ import { PotCardsUsedAction } from "../../actions/table/game/pots/pot-cards-used
 import { ShowdownAction } from "../../actions/table/game/showdown/showdown-action";
 import { InvalidBet } from "./betting/invalid-bet";
 import { InvalidFold } from "./betting/invalid-fold";
+import { UserManager } from "../../players/user-manager";
 
 const logger: Logger = new Logger();
 
@@ -87,7 +88,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private readonly TIME_ALL_IN_FLIP_CARDS: number = 1500;
 
 
-    private lobbyManager: LobbyManager;
+    private userManager: UserManager;
 
 
     private table: Table;
@@ -109,9 +110,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(lobbyManager: LobbyManager,  table: Table, deck: Deck) {
+    constructor(userManager: UserManager,  table: Table, deck: Deck) {
 
-        this.lobbyManager = lobbyManager;
+        this.userManager = userManager;
 
         this.table = table;
         this.deck = deck;
@@ -338,16 +339,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    private async findUser(userID: number): Promise<User> {
-
-        return this.lobbyManager.getUserManager().fetchUserByID(userID);
-
-    }
-
-
     private async seatPlayer(command: RequestSeatCommand): Promise<void> {
 
-        let user: User = await this.findUser(command.userID);
+        let user: User = await this.userManager.fetchUserByID(command.userID);
 
         if (!user) {
 
@@ -732,7 +726,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async chat(command: ChatCommand): Promise<void> {
 
-        let user: User = await this.findUser(command.userID);
+        let user: User = await this.userManager.fetchUserByID(command.userID);
 
         if (user) {
 

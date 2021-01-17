@@ -1,6 +1,6 @@
-﻿import { LobbyCommand } from "./lobby-command";
+﻿import { SecurityCommand } from "./security-command";
 
-export class LoginCommand extends LobbyCommand {
+export class AuthenticateCommand extends SecurityCommand {
 
     username: string;
     password: string;

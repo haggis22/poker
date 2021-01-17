@@ -1,4 +1,7 @@
 ﻿import { User } from "./user";
+import { SecurityCommand } from "../commands/security/security-command";
+import { LoginCommand, Message, ActionMessage, LoginAction } from "../communication/serializable";
+import { IServerClient } from "../communication/server-side/i-server-client";
 
 export class UserManager {
 
@@ -31,6 +34,20 @@ export class UserManager {
     }
 
 
+    public handleCommand(command: SecurityCommand, serverClient: IServerClient): Message {
+
+        if (command instanceof LoginCommand) {
+
+            let user: User = this.login(command.username, command.password);
+            this.log(`Login for ${command.username} successful? ${(user != null)}`);
+
+            return user ? new ActionMessage(new LoginAction(user)) : new Message('Login failed');
+
+        }
+
+    }
+
+
     private addUser(user: User): void {
 
         this.userMapByID.set(user.id, user);
@@ -47,6 +64,23 @@ export class UserManager {
         return this.userMapByID.get(id);
 
     }   // fetchUserByID
+
+
+    authenticate(authToken: string): number {
+
+        if (authToken != null) {
+
+            let user: User = this.userMapByUsername.get(authToken);
+            if (user) {
+                return user.id;
+            }
+
+        }
+
+        // unknown user
+        return null;
+
+    }  // authenticate
 
 
     login(username: string, password: string): User {

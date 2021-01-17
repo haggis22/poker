@@ -1,5 +1,5 @@
-﻿import { LobbyAction } from "../lobby-action";
-import { TableSummary } from "../../../casino/tables/table-summary";
+﻿import { LobbyAction } from "./lobby-action";
+import { TableSummary } from "../../casino/tables/table-summary";
 
 export class ListTablesAction extends LobbyAction {
 

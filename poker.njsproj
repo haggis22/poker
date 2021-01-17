@@ -38,7 +38,7 @@
     <Compile Include="public\chat.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\actions\lobby\tables\list-tables.action.ts">
+    <Compile Include="src\actions\lobby\list-tables.action.ts">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\actions\table\players\add-chips-action.ts">
@@ -107,7 +107,7 @@
     <Folder Include="src\" />
     <Folder Include="public\" />
     <Folder Include="src\actions\lobby\" />
-    <Folder Include="src\actions\lobby\tables\" />
+    <Folder Include="src\actions\security\" />
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
     <Folder Include="src\actions\table\antes\" />
@@ -137,6 +137,7 @@
     <Folder Include="src\client\router\" />
     <Folder Include="src\client\table\components\" />
     <Folder Include="src\commands\lobby\" />
+    <Folder Include="src\commands\security\" />
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\commands\table\chat\" />
     <Folder Include="src\communication\client-side\" />
@@ -170,8 +171,8 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="src\actions\lobby\lobby-connected-action.ts" />
-    <TypeScriptCompile Include="src\actions\lobby\login-action.ts">
+    <TypeScriptCompile Include="src\actions\security\security-action.ts" />
+    <TypeScriptCompile Include="src\actions\security\login-action.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\actions\lobby\lobby-action.ts" />
@@ -198,9 +199,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\cards\face-down-card.ts" />
     <TypeScriptCompile Include="src\casino\lobby\lobby-manager.ts" />
-    <TypeScriptCompile Include="src\casino\lobby\table-manager.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\casino\tables\betting\ante.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\bet-status.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\blind.ts" />
@@ -219,7 +217,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\table\components\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\client\router\index.ts" />
-    <TypeScriptCompile Include="src\commands\lobby\login-command.ts" />
+    <TypeScriptCompile Include="src\commands\security\security-command.ts" />
+    <TypeScriptCompile Include="src\commands\security\login-command.ts" />
     <TypeScriptCompile Include="src\commands\lobby\lobby-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -363,7 +362,7 @@
     <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\commands\table\join-table-command.ts">
+    <TypeScriptCompile Include="src\commands\lobby\join-table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\betting\fold-command.ts" />

@@ -1,28 +1,49 @@
-﻿import { TableManager } from './table-manager';
-import { UserManager } from '../../players/user-manager';
-import { User } from '../../players/user';
-
-import { IServerClient } from '../../communication/server-side/i-server-client';
+﻿import { IServerClient } from '../../communication/server-side/i-server-client';
 import { ActionMessage } from '../../messages/action-message';
-import { LobbyConnectedAction } from '../../actions/lobby/lobby-connected-action';
+import { Command } from '../../commands/command';
+import { TableController } from '../tables/table-controller';
+import { ClientManager } from '../../communication/server-side/client-manager';
+
+import { Table } from '../tables/table';
+import { TableRules } from '../tables/table-rules';
+
+import { Deck } from '../../cards/deck';
+import { Stakes } from '../tables/betting/stakes';
+
+import { GameFactory } from '../../games/game-factory';
+import { PokerGameFiveCardStud } from '../../games/poker/games/poker-game-five-card-stud';
+import { PokerGameSevenCardStud } from '../../games/poker/games/poker-game-seven-card-stud';
+import { PokerGameTexasHoldEm } from '../../games/poker/games/poker-game-texas-hold-em';
+import { PokerGameOmaha } from '../../games/poker/games/poker-game-omaha';
+import { Blind } from '../tables/betting/blind';
+
+import { LobbyCommand } from '../../commands/lobby/lobby-command';
+import { JoinTableCommand } from '../../commands/lobby/join-table-command';
+import { UserManager } from '../../players/user-manager';
+
 
 
 export class LobbyManager {
 
 
-    private tableManager: TableManager;
+    private nextID: number;
+
     private userManager: UserManager;
 
-    // We're maintaining a link to clients so that they don't get garbage-collected
-    private clients: Set<IServerClient>;
+    private tableControllerMap: Map<number, TableController>;
+    private clientManagerMap: Map<number, ClientManager>;
 
 
-    constructor(userManager: UserManager, tableManager: TableManager) {
+    constructor(userManager: UserManager) {
 
         this.userManager = userManager;
-        this.tableManager = tableManager;
 
-        this.clients = new Set<IServerClient>();
+        this.nextID = 0;
+
+        this.tableControllerMap = new Map<number, TableController>();
+        this.clientManagerMap = new Map<number, ClientManager>();
+
+        this.setUp();
 
     }
 
@@ -34,34 +55,146 @@ export class LobbyManager {
     }
 
 
-    setup(): void {
 
-        this.tableManager.setUp(this);
+    public handleCommand(command: Command, serverClient: IServerClient): void {
 
-    }
-    
-    addClient(client: IServerClient): void {
+        if (!(command instanceof LobbyCommand)) {
+            return;
+        }
 
-        this.clients.add(client);
+        if (command instanceof JoinTableCommand) {
 
-        // send this client a message that they are connected to the lobby
-        client.handleMessage(new ActionMessage(new LobbyConnectedAction()));
-//         client.handleMessage(new )
+            return this.addTableClient(command.tableID, serverClient);
 
-    }
+        }
 
-
-    getTableManager(): TableManager {
-
-        return this.tableManager;
 
     }
 
 
-    getUserManager(): UserManager {
+    private setUp(): void {
 
-        return this.userManager;
+        let cornDog: Table = this.createCornDog();
+        this.log(`Created table CornDog with ID ${cornDog.id}`);
+
+        let kershner: Table = this.createKershner();
+        this.log(`Created table Kershner with ID ${kershner.id}`);
+
+    }  // setUp
+
+
+    createCornDog(): Table {
+
+        let tableID = ++this.nextID;
+
+        // # seats, # seconds to act
+        let rules = new TableRules(6, 5, 5);
+
+        let ante = 25;
+
+        // Both of the regular blinds are live bets (they could towards the current round of betting)
+        let blinds: Blind[] =
+            [
+                new Blind(Blind.TYPE_SMALL, 'the small blind', 50, true),
+                new Blind(Blind.TYPE_BIG, 'the big blind', 100, true)
+            ];
+
+        let bets: number[] = [100, 100, 200, 200];
+        let maxRaises: number = 4;
+
+        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises);
+
+        let table: Table = new Table(tableID, stakes, rules);
+
+        let tableController: TableController = new TableController(this.userManager, table, new Deck());
+        let clientManager: ClientManager = new ClientManager(tableID);
+
+        this.tableControllerMap.set(table.id, tableController);
+        this.clientManagerMap.set(table.id, clientManager);
+
+        clientManager.setTableController(tableController);
+        tableController.registerMessageHandler(clientManager);
+
+        // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
+        tableController.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameOmaha.ID));
+
+        return table;
+
+    }  // createCornDog
+
+
+    createKershner(): Table {
+
+        let tableID = ++this.nextID;
+
+        // # seats, # seconds to act
+        let rules = new TableRules(6, 5, 5);
+
+        let ante = 25;
+
+        // Both of the regular blinds are live bets (they could towards the current round of betting)
+        let blinds: Blind[] =
+            [
+                new Blind(Blind.TYPE_SMALL, 'the small blind', 50, true),
+                new Blind(Blind.TYPE_BIG, 'the big blind', 100, true)
+            ];
+
+        let bets: number[] = [100, 100, 200, 200];
+        let maxRaises: number = 4;
+
+        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises);
+
+        let table: Table = new Table(tableID, stakes, rules);
+
+        let tableController: TableController = new TableController(this.userManager, table, new Deck());
+        let clientManager: ClientManager = new ClientManager(tableID);
+
+        this.tableControllerMap.set(table.id, tableController);
+        this.clientManagerMap.set(table.id, clientManager);
+
+        clientManager.setTableController(tableController);
+        tableController.registerMessageHandler(clientManager);
+
+        // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
+        tableController.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameOmaha.ID));
+
+        return table;
+
+    }  // createKershner
+
+
+    getTableController(tableID: number): TableController {
+
+        // will be `undefined` if the ID is unknown
+        return this.tableControllerMap.get(tableID);
 
     }
+
+    private getClientManager(tableID: number): ClientManager {
+
+        // will be `undefined` if the ID is unknown
+        return this.clientManagerMap.get(tableID);
+
+    }
+
+
+    addTableClient(tableID: number, client: IServerClient): void {
+
+        let clientManager = this.getClientManager(tableID);
+
+        this.log(`In addTableClient, found clientManager for ${tableID} ? ${(clientManager != null)}`);
+
+        if (clientManager != null) {
+
+            clientManager.addClient(client);
+
+        }
+
+    }  // addTableClient
+
 
 }

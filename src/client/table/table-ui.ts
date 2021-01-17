@@ -21,7 +21,7 @@ import { WonPot } from "../../casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../../actions/table/game/hand-complete-action";
 import { IChipFormatter } from "../../casino/tables/chips/chip-formatter";
 import { LobbyConnectedAction } from "../../actions/lobby/lobby-connected-action";
-import { LoginAction } from "../../actions/lobby/login-action";
+import { LoginAction } from "../../actions/security/login-action";
 import { Timer } from "../../timers/timer";
 import { BetController } from "../../casino/tables/betting/bet-controller";
 import { PendingCommands } from "./pending-commands";

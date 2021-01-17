@@ -8,11 +8,14 @@ import { IServerClient } from "./i-server-client";
 import { ActionMessage } from '../../messages/action-message';
 import { LobbyManager } from '../../casino/lobby/lobby-manager';
 import { LobbyCommand } from '../../commands/lobby/lobby-command';
-import { JoinTableCommand } from '../../commands/table/join-table-command';
-import { LoginCommand } from '../../commands/lobby/login-command';
+import { JoinTableCommand } from '../../commands/lobby/join-table-command';
+import { LoginCommand } from '../../commands/security/login-command';
 import { User } from "../../players/user";
-import { LoginAction } from '../../actions/lobby/login-action';
+import { LoginAction } from '../../actions/security/login-action';
 import { TableCommand } from '../../commands/table/table-command';
+import { UserManager } from '../../players/user-manager';
+import { TableController } from '../../casino/tables/table-controller';
+import { SecurityCommand } from '../../commands/security/security-command';
 
 
 export class ServerClient implements IServerClient {
@@ -20,15 +23,18 @@ export class ServerClient implements IServerClient {
     private socket: WebSocket;
     private serializer: Serializer;
 
+    private userManager: UserManager;
     private lobbyManager: LobbyManager;
 
     public userID: number;
 
     private commandHandlers: CommandHandler[];
 
-    constructor(socket: WebSocket, lobbyManager: LobbyManager) {
+    constructor(socket: WebSocket, userManager: UserManager, lobbyManager: LobbyManager) {
 
         this.socket = socket;
+
+        this.userManager = userManager;
         this.lobbyManager = lobbyManager;
 
         this.socket.on('message', (message: string) => {
@@ -65,64 +71,43 @@ export class ServerClient implements IServerClient {
 
             this.log(`Heard ${o.constructor.name}: ${JSON.stringify(o)}`);
 
+            if (!(o instanceof Command)) {
+
+                // Can't do anything with messages that aren't Commands
+                return;
+
+            }
+
+            // Authenticate the user on every message so that a logged-out user does not continue to act
+            this.userID = o.userID = this.userManager.authenticate(o.authToken);
+
+            if (o instanceof SecurityCommand) {
+
+                return this.handleMessage(this.userManager.handleCommand(o, this));
+
+            }
+
             if (o instanceof LobbyCommand) {
 
-                return this.handleLobbyCommand(o);
+                return this.lobbyManager.handleCommand(o, this);
 
             }
 
-            if (o instanceof Command) {
 
-                // Always mark the User ID as the one belonging to this server - not anything 
-                // that might have been passed in from the message - that could always be spoofed
-                if (o instanceof TableCommand) {
-                    o.userID = this.userID;
-                }
+            // Pass the message along
+            for (let handler of this.commandHandlers) {
 
-                if (o instanceof JoinTableCommand) {
-
-                    return this.lobbyManager.getTableManager().addTableClient(o.tableID, this);
-
-                }
-
-                // Pass the message along
-                for (let handler of this.commandHandlers) {
-
-                    handler.handleCommand(o);
-
-                }
+                handler.handleCommand(o);
 
             }
+
+
+
+
 
         }  // o is not null
 
     }   // receive
-
-
-    private handleLobbyCommand(command: LobbyCommand): void {
-
-        if (command instanceof LoginCommand) {
-
-            let user: User = this.lobbyManager.getUserManager().login(command.username, command.password);
-            this.log(`Login for ${command.username} successful? ${(user != null)}`);
-
-            if (user) {
-
-                this.userID = user.id;
-
-                // TODO: Who should be in charge of creating the LoginAction?
-                // Should it be this class? the Lobby Manager?
-                this.handleMessage(new ActionMessage(new LoginAction(user)));
-
-
-            }
-            else {
-                // TODO: send message back to player about incorrect login
-            }
-
-        }
-
-    }
 
 
 

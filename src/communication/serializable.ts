@@ -1,12 +1,11 @@
 ﻿
 // LobbyActions
-export { LoginCommand } from "../commands/lobby/login-command";
-export { JoinTableCommand } from "../commands/table/join-table-command";
+export { LoginCommand } from "../commands/security/login-command";
+export { JoinTableCommand } from "../commands/lobby/join-table-command";
 export { TableSummary } from "../casino/tables/table-summary";
 
-export { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";
-export { LoginAction } from "../actions/lobby/login-action";
-export { ListTablesAction } from "../actions/lobby/tables/list-tables.action";
+export { LoginAction } from "../actions/security/login-action";
+export { ListTablesAction } from "../actions/lobby/list-tables.action";
 
 export { ClearHandAction } from "../actions/table/game/dealing/clear-hand-action";
 export { ClearBoardAction } from "../actions/table/game/dealing/clear-board-action";

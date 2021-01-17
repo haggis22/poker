@@ -1,16 +1,17 @@
-﻿import { Command } from "../command";
+﻿import { LobbyCommand } from "./lobby-command";
 
-export class TableCommand extends Command {
+export class JoinTableCommand extends LobbyCommand {
+
 
     public tableID: number;
+
 
     constructor(tableID: number) {
 
         super();
 
         this.tableID = tableID;
+
     }
-
-
 
 }

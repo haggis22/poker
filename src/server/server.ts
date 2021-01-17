@@ -12,8 +12,8 @@ import { LocalGameClient } from '../communication/client-side/local-game-client'
 import { LocalServerClient } from '../communication/server-side/local-server-client';
 import { RoboTableUI } from '../ai/robo-table-ui';
 import { UserManager } from '../players/user-manager';
-import { TableManager } from '../casino/lobby/table-manager';
 import { LobbyManager } from '../casino/lobby/lobby-manager';
+import { IServerClient } from '../communication/server-side/i-server-client';
 
 const app = express();
 
@@ -36,10 +36,10 @@ console.log(`Serving files from client path ${clientPath}`);
 app.use(express.static(clientPath));
 
 let userManager: UserManager = new UserManager();
-let tableManager: TableManager = new TableManager();
-let lobbyManager: LobbyManager = new LobbyManager(userManager, tableManager);
+let lobbyManager: LobbyManager = new LobbyManager(userManager);
 
-lobbyManager.setup();
+let clients: Set<IServerClient> = new Set<IServerClient>();
+
 
 // RoboClients will automatically connect themselves to the passed-in lobbyManager
 
@@ -54,10 +54,7 @@ createRoboClient(1, 8);
 
 wss.on('connection', (socket: WebSocket) => {
 
-    let serverClient: ServerClient = new ServerClient(socket, lobbyManager);
-
-    // Finally, connect the constructed server client to the lobby manager
-    lobbyManager.addClient(serverClient);
+    clients.add(new ServerClient(socket, userManager, lobbyManager));
 
 });
 
@@ -67,7 +64,7 @@ wss.on('connection', (socket: WebSocket) => {
 
 function createRoboClient(tableID: number, userID: number): LocalServerClient {
 
-    let user: User = lobbyManager.getUserManager().fetchUserByID(userID);
+    let user: User = userManager.fetchUserByID(userID);
 
     // Client Side
     let ui: RoboTableUI = new RoboTableUI(user, new MoneyFormatter());
@@ -89,8 +86,7 @@ function createRoboClient(tableID: number, userID: number): LocalServerClient {
     roboClient.connect(gameClient);
 
     // Finally, connect the constructed server client to the lobby manager
-    lobbyManager.addClient(roboClient);
-    lobbyManager.getTableManager().addTableClient(tableID, roboClient);
+    lobbyManager.addTableClient(tableID, roboClient);
 
     return roboClient;
 

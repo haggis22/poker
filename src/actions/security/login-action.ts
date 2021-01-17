@@ -1,7 +1,7 @@
-﻿import { LobbyAction } from "./lobby-action";
+﻿import { SecurityAction } from "./security-action";
 import { User } from "../../players/user";
 
-export class LoginAction extends LobbyAction {
+export class LoginAction extends SecurityAction {
 
     public user: User;
 
