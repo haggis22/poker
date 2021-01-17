@@ -1,15 +1,17 @@
 ﻿import { SecurityAction } from "./security-action";
-import { User } from "../../players/user";
+import { UserSummary } from "../../players/user-summary";
 
 export class LoginAction extends SecurityAction {
 
-    public user: User;
+    public user: UserSummary;
+    public authToken: string;
 
-    constructor(user: User) {
+    constructor(user: UserSummary, authToken: string) {
 
         super();
 
         this.user = user;
+        this.authToken = authToken;
 
     }
 

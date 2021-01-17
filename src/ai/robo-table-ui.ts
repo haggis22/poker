@@ -1,6 +1,6 @@
 ﻿import { MessageHandler } from "../messages/message-handler";
 import { CommandBroadcaster } from "../commands/command-broadcaster";
-import { User } from "../players/user";
+import { UserSummary } from "../players/user-summary";
 import { CommandHandler } from "../commands/command-handler";
 import { Message } from "../messages/message";
 import { ActionMessage } from "../messages/action-message";
@@ -31,7 +31,7 @@ const logger: Logger = new Logger();
 
 export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
-    private user: User;
+    private user: UserSummary;
 
     private commandHandlers: CommandHandler[];
 
@@ -42,7 +42,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     private betController: BetController;
 
 
-    constructor(user: User, chipFormatter: IChipFormatter) {
+    constructor(user: UserSummary, chipFormatter: IChipFormatter) {
 
         this.user = user;
 
@@ -289,7 +289,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player.userID === this.user.id) {
 
-                let chips = Math.min(this.user.chips, this.calculateBuyIn());
+                let chips = this.calculateBuyIn();
 
                 // this.log(`I have a seat, so I am requesting ${this.chipFormatter.format(chips)} in chips`);
 

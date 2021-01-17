@@ -5,7 +5,7 @@ import { FakeSocket } from "../fake-socket";
 import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
 import { LobbyManager } from '../../casino/lobby/lobby-manager';
-import { User } from "../../players/user";
+import { UserSummary } from "../../players/user-summary";
 import { LobbyCommand } from "../../commands/lobby/lobby-command";
 
 export class LocalServerClient implements IServerClient
@@ -15,14 +15,14 @@ export class LocalServerClient implements IServerClient
     private serializer: Serializer;
 
     public userID: number;
-    public user: User;
+    public user: UserSummary;
 
     private lobbyManager: LobbyManager;
 
 
     private commandHandlers: CommandHandler[];
 
-    constructor(lobbyManager: LobbyManager, user: User) {
+    constructor(lobbyManager: LobbyManager, user: UserSummary) {
 
         this.lobbyManager = lobbyManager;
 

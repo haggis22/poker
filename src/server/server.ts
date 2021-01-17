@@ -4,7 +4,7 @@ import * as WebSocket from 'ws';
 
 import { AddressInfo } from 'net';
 
-import { User } from '../players/user';
+import { UserSummary } from '../players/user-summary';
 import { MoneyFormatter } from '../casino/tables/chips/money-formatter';
 import { TableWatcher } from '../casino/tables/table-watcher';
 import { ServerClient } from '../communication/server-side/server-client';
@@ -45,12 +45,12 @@ let clients: Set<IServerClient> = new Set<IServerClient>();
 
 createRoboClient(2, 'moglesby');
 createRoboClient(2, 'ptunney');
-/*
+
 createRoboClient(1, 'pgrudowski');
 createRoboClient(1, 'jhoepken');
 createRoboClient(1, 'mgillmore');
 createRoboClient(1, 'benney');
-*/
+
 
 wss.on('connection', (socket: WebSocket) => {
 
@@ -64,7 +64,7 @@ wss.on('connection', (socket: WebSocket) => {
 
 function createRoboClient(tableID: number, authToken: string): LocalServerClient {
 
-    let user: User = userManager.authenticate(authToken);
+    let user: UserSummary = userManager.authenticate(authToken);
 
     // Server Side
     let roboServerClient: LocalServerClient = new LocalServerClient(lobbyManager, user);

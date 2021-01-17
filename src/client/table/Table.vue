@@ -3,17 +3,17 @@
     <div>
         <div v-if="ui != null && ui.table != null">
             <table-component :ui="ui"></table-component>
+            <chat-component :ui="ui"></chat-component>
+            <log-component :ui="ui"></log-component>
+            <table-menu-component v-if="ui.getMySeat()"
+                                  :ui="ui"
+                                  :pending-fold.sync="ui.pendingCommands.fold"
+                                  :is-sitting-out.sync="ui.isSittingOut">
+            </table-menu-component>
         </div>
         <div v-else>
             We have no table yet.
         </div>
-        <chat-component :ui="ui"></chat-component>
-        <log-component :ui="ui"></log-component>
-        <table-menu-component v-if="ui.getMySeat()"
-                              :ui="ui"
-                              :pending-fold.sync="ui.pendingCommands.fold"
-                              :is-sitting-out.sync="ui.isSittingOut">
-        </table-menu-component>
     </div>
 
 </template>
@@ -62,7 +62,7 @@
                 console.log('Connection opened');
 
                 // Client Side
-                let ui: TableUI = new TableUI(new MoneyFormatter());
+                let ui: TableUI = new TableUI(this.tableID, new MoneyFormatter());
                 let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
                 let gameClient: GameClient = new GameClient(ws, 'dshell');
 
@@ -77,7 +77,7 @@
                 this.ui = ui;
                 this.ws = ws;
 
-                ui.joinTable(this.tableID);
+                ui.authenticate();
 
             };
 

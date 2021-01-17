@@ -8,13 +8,8 @@ import { IServerClient } from "./i-server-client";
 import { ActionMessage } from '../../messages/action-message';
 import { LobbyManager } from '../../casino/lobby/lobby-manager';
 import { LobbyCommand } from '../../commands/lobby/lobby-command';
-import { JoinTableCommand } from '../../commands/lobby/join-table-command';
-import { LoginCommand } from '../../commands/security/login-command';
-import { User } from "../../players/user";
-import { LoginAction } from '../../actions/security/login-action';
-import { TableCommand } from '../../commands/table/table-command';
+import { UserSummary } from "../../players/user-summary";
 import { UserManager } from '../../players/user-manager';
-import { TableController } from '../../casino/tables/table-controller';
 import { SecurityCommand } from '../../commands/security/security-command';
 
 
@@ -79,13 +74,17 @@ export class ServerClient implements IServerClient {
             }
 
             // Authenticate the user on every message so that a logged-out user does not continue to act
-            let user: User = this.userManager.authenticate(o.authToken);
+            let user: UserSummary = this.userManager.authenticate(o.authToken);
 
             if (user) {
 
                 o.user = user;
                 this.userID = o.userID = user.id;
 
+            }
+            else {
+                o.user = null;
+                this.userID = o.userID = null;
             }
 
 

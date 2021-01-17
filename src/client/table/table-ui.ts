@@ -1,6 +1,6 @@
 ﻿import { MessageHandler } from "../../messages/message-handler";
 import { CommandBroadcaster } from "../../commands/command-broadcaster";
-import { User } from "../../players/user";
+import { UserSummary } from "../../players/user-summary";
 import { CommandHandler } from "../../commands/command-handler";
 import { Message } from "../../messages/message";
 import { ActionMessage } from "../../messages/action-message";
@@ -14,14 +14,13 @@ import { TableConnectedAction } from "../../actions/table/state/table-connected-
 import { AuthenticateCommand } from "../../commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction } from "../../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { GameFactory } from "../../games/game-factory";
 import { WonPot } from "../../casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../../actions/table/game/hand-complete-action";
 import { IChipFormatter } from "../../casino/tables/chips/chip-formatter";
-import { LoginAction } from "../../actions/security/login-action";
 import { Timer } from "../../timers/timer";
 import { BetController } from "../../casino/tables/betting/bet-controller";
 import { PendingCommands } from "./pending-commands";
@@ -34,13 +33,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private readonly TIME_PENDING_ACTION: number = 300;
 
-    public user: User;
+    public user: UserSummary;
 
     private commandHandlers: CommandHandler[];
 
     public chipFormatter: IChipFormatter;
 
+    private tableID: number;
     public table: Table;
+
     public game: Game;
     public betController: BetController;
     public chipStacker: ChipStacker;
@@ -75,8 +76,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    constructor(chipFormatter: IChipFormatter) {
+    constructor(tableID: number, chipFormatter: IChipFormatter) {
 
+        this.tableID = tableID;
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
@@ -125,6 +127,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
         let action: Action = message.action;
+
+        if (action instanceof AuthenticatedAction) {
+
+            return this.authenticated(action);
+
+        }
 
         if (action instanceof TableConnectedAction) {
 
@@ -411,12 +419,21 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // setGamebe
 
 
+    public authenticate(): void {
 
-    public joinTable(tableID: number): void {
+        this.broadcastCommand(new AuthenticateCommand());
 
-        this.broadcastCommand(new JoinTableCommand(tableID));
+    }   // authenticate
 
-    }   // joinTable
+
+    public authenticated(action: AuthenticatedAction): void {
+
+        this.log(`Heared AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${this.tableID}`);
+        this.user = action.user;
+
+        this.broadcastCommand(new JoinTableCommand(this.tableID));
+
+    }   // authenticated
 
 
 
@@ -504,7 +521,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 this.mySeatIndex = action.seatIndex;
 
-                let chips = Math.min(this.user.chips, this.calculateBuyIn());
+                // TODO: determine how many chips are available
+                let chips = this.calculateBuyIn();
 
                 // this.log(`I have a seat, so I am requesting ${this.chipFormatter.format(chips)} in chips`);
 

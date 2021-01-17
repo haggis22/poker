@@ -1,10 +1,15 @@
-﻿
-// LobbyActions
+﻿// Security Actions
 export { LoginCommand } from "../commands/security/login-command";
+export { AuthenticateCommand } from "../commands/security/authenticate-command";
+export { LoginAction } from "../actions/security/login-action";
+export { AuthenticatedAction } from "../actions/security/authenticated-action";
+
+
+// LobbyActions
 export { JoinTableCommand } from "../commands/lobby/join-table-command";
+
 export { TableSummary } from "../casino/tables/table-summary";
 
-export { LoginAction } from "../actions/security/login-action";
 export { ListTablesAction } from "../actions/lobby/list-tables.action";
 
 export { ClearHandAction } from "../actions/table/game/dealing/clear-hand-action";

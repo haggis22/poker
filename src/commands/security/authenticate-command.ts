@@ -2,14 +2,10 @@
 
 export class AuthenticateCommand extends SecurityCommand {
 
-    authToken: string;
 
-
-    constructor(authToken: string) {
+    constructor() {
 
         super();
-
-        this.authToken = authToken;
 
     }
 

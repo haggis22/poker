@@ -1,7 +1,9 @@
 ﻿import { User } from "./user";
 import { SecurityCommand } from "../commands/security/security-command";
-import { LoginCommand, Message, ActionMessage, LoginAction } from "../communication/serializable";
+import { LoginCommand, Message, ActionMessage, LoginAction, AuthenticatedAction } from "../communication/serializable";
 import { IServerClient } from "../communication/server-side/i-server-client";
+import { AuthenticateCommand } from "../commands/security/authenticate-command";
+import { UserSummary } from "./user-summary";
 
 export class UserManager {
 
@@ -38,12 +40,23 @@ export class UserManager {
 
         if (command instanceof LoginCommand) {
 
-            let user: User = this.login(command.username, command.password);
+            let user: UserSummary = this.login(command.username, command.password);
             this.log(`Login for ${command.username} successful? ${(user != null)}`);
 
-            return user ? new ActionMessage(new LoginAction(user)) : new Message('Login failed');
+            // For now, just use the username as the auth token
+            return user ? new ActionMessage(new LoginAction(user, user.username)) : new Message('Login failed');
 
         }
+
+        if (command instanceof AuthenticateCommand) {
+
+            let user: UserSummary = this.authenticate(command.authToken);
+            this.log(`Authentication for ${command.authToken} successful? ${(user != null)}`);
+
+            return user ? new ActionMessage(new AuthenticatedAction(user)) : new Message('Login failed');
+
+        }
+
 
     }
 
@@ -66,11 +79,18 @@ export class UserManager {
     }   // fetchUserByID
 
 
-    authenticate(authToken: string): User {
+    private convertUserToSummary(user: User): UserSummary {
+
+        return user ? new UserSummary(user.id, user.username, user.name) : null;
+
+    }  // convertUserToSummary
+
+
+    public authenticate(authToken: string): UserSummary {
 
         if (authToken != null) {
 
-            return this.userMapByUsername.get(authToken);
+            return this.convertUserToSummary(this.userMapByUsername.get(authToken));
 
         }
 
@@ -80,18 +100,19 @@ export class UserManager {
     }  // authenticate
 
 
-    login(username: string, password: string): User {
+    private login(username: string, password: string): UserSummary {
 
         let user: User = this.userMapByUsername.get(username);
+
         if (user) {
 
             // TODO: validate password
-            return user;
+            return this.convertUserToSummary(user);
 
         }
 
         // Unknown user
-        return user;
+        return null;
 
     }  // login
 

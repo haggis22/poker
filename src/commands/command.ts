@@ -1,10 +1,10 @@
-﻿import { User } from "../players/user";
+﻿import { UserSummary } from "../players/user-summary";
 
 export class Command {
 
     public authToken: string;
     public userID: number;
-    public user: User;
+    public user: UserSummary;
 
     constructor() {
 

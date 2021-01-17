@@ -1,11 +1,11 @@
 ﻿import { SecurityAction } from "./security-action";
-import { User } from "../../players/user";
+import { UserSummary } from "../../players/user-summary";
 
-export class LoginAction extends SecurityAction {
+export class AuthenticatedAction extends SecurityAction {
 
-    public user: User;
+    public user: UserSummary;
 
-    constructor(user: User) {
+    constructor(user: UserSummary) {
 
         super();
 
