@@ -79,6 +79,12 @@ export class ServerClient implements IServerClient {
                     o.userID = this.userID;
                 }
 
+                if (o instanceof JoinTableCommand) {
+
+                    return this.lobbyManager.getTableManager().addTableClient(o.tableID, this);
+
+                }
+
                 // Pass the message along
                 for (let handler of this.commandHandlers) {
 
@@ -94,13 +100,6 @@ export class ServerClient implements IServerClient {
 
 
     private handleLobbyCommand(command: LobbyCommand): void {
-
-        if (command instanceof JoinTableCommand) {
-
-            this.lobbyManager.getTableManager().addTableClient(command.tableID, this);
-            return;
-
-        }
 
         if (command instanceof LoginCommand) {
 

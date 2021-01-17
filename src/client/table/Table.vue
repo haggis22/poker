@@ -58,7 +58,7 @@
             const ws = new WebSocket('ws://localhost:3000');
 
             // Client Side
-            let ui: TableUI = new TableUI(new MoneyFormatter());
+            let ui: TableUI = new TableUI(this.tableID, new MoneyFormatter());
             let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
             let gameClient: GameClient = new GameClient(ws);
 

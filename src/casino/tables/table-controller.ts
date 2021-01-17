@@ -332,7 +332,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private log(message: string): void {
 
-        console.log('\x1b[31m%s\x1b[0m', `TableController ${message}`);
+        console.log('\x1b[31m%s\x1b[0m', `TableController Table ${this.table.id}: ${message}`);
 
     }
 

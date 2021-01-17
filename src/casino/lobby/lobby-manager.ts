@@ -36,7 +36,7 @@ export class LobbyManager {
 
     setup(): void {
 
-        this.tableManager.createTable(this);
+        this.tableManager.setUp(this);
 
     }
     

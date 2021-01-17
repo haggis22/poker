@@ -34,6 +34,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private readonly TIME_PENDING_ACTION: number = 300;
 
+    public tableID: number;
+
     public user: User;
 
     private commandHandlers: CommandHandler[];
@@ -75,8 +77,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    constructor(chipFormatter: IChipFormatter) {
+    constructor(tableID: number, chipFormatter: IChipFormatter) {
 
+        this.tableID = tableID;
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
@@ -134,7 +137,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof LoginAction) {
 
-            return this.logIn(action);
+            return this.authenticated(action);
 
         }
 
@@ -432,14 +435,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private logIn(action: LoginAction): void {
+    private authenticated(action: LoginAction): void {
 
         this.user = action.user;
 
-        // Join table 1 automatically
-        this.broadcastCommand(new JoinTableCommand(1));
+        this.broadcastCommand(new JoinTableCommand(this.tableID));
 
-    }   // logIn
+    }   // authenticate
 
 
 
