@@ -61,7 +61,6 @@
 
                 console.log('Connection opened');
 
-                // Client Side
                 let ui: TableUI = new TableUI(this.tableID, new MoneyFormatter());
                 let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
                 let gameClient: GameClient = new GameClient(ws, 'dshell');

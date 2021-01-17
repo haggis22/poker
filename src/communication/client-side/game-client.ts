@@ -5,7 +5,6 @@ import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
 import { Serializer } from "../serializer";
 import { ActionMessage } from "../../messages/action-message";
-import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 
 export class GameClient implements MessageBroadcaster, CommandHandler {
 

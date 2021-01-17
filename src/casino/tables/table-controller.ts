@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -130,6 +130,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         return this.copier.copy(obj);
 
     }
+
+    public getTableSummary(): TableSummary {
+
+        return new TableSummary(this.table.id, this.table.name, this.table.description, this.table.seats.length, this.table.seats.filter(s => s.player != null).length);
+
+    }  // getTableSummary
+
 
     public registerMessageHandler(handler: MessageHandler): void {
 
@@ -274,7 +281,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private createTableSnapshot(userID: number): Table {
 
-        let table: Table = new Table(this.table.id, this.table.stakes, this.table.rules);
+        let table: Table = new Table(this.table.id, this.table.name, this.table.description, this.table.stakes, this.table.rules);
 
         table.betStatus = this.table.betStatus;
         table.buttonIndex = this.table.buttonIndex;

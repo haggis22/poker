@@ -1,7 +1,7 @@
 <template>
 
     <div>
-        <lobby-component></lobby-component>
+        <lobby-component :client="client"></lobby-component>
     </div>
 
 </template>
@@ -10,7 +10,9 @@
 
     import Vue from 'vue';
 
+    import { LobbyClient } from './lobby-client';
     import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
+    import { GameClient } from '../../communication/client-side/game-client';
 
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
 
@@ -23,8 +25,7 @@
         data() {
 
             let values = {
-                ui: null,
-                ws: null
+                client: null
             };
 
             return values;
@@ -34,29 +35,22 @@
 
             const ws = new WebSocket('ws://localhost:3000');
 
-            /*
-            // Client Side
-            let ui: TableUI = new TableUI(new MoneyFormatter());
-            let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
-            let gameClient: GameClient = new GameClient(ws);
-
-            // Now join all the links in the chain
-            ui.registerCommandHandler(tableWatcher);
-
-            tableWatcher.registerMessageHandler(ui);
-            tableWatcher.registerCommandHandler(gameClient);
-
-            gameClient.registerMessageHandler(tableWatcher);
-
             ws.onopen = (evt: MessageEvent) => {
 
                 console.log('Connection opened');
 
-            };
+                let client: LobbyClient = new LobbyClient(new MoneyFormatter());
+                let gameClient: GameClient = new GameClient(ws, 'dshell');
 
-            this.ui = ui;
-            this.ws = ws;
-            */
+                // Now join all the links in the chain
+                client.registerCommandHandler(gameClient);
+                gameClient.registerMessageHandler(client);
+
+                this.client = client;
+
+                client.authenticate();
+
+            };
 
         }
 

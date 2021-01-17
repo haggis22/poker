@@ -20,16 +20,24 @@ import { Blind } from '../tables/betting/blind';
 import { LobbyCommand } from '../../commands/lobby/lobby-command';
 import { JoinTableCommand } from '../../commands/lobby/join-table-command';
 import { UserManager } from '../../players/user-manager';
+import { MessageBroadcaster } from '../../messages/message-broadcaster';
+import { MessageHandler } from '../../messages/message-handler';
+import { Message } from "../../messages/message";
+import { MessagePair } from "../../messages/message-pair";
+import { Action } from '../../actions/action';
+import { SubscribeLobbyCommand, ListTablesAction, TableSummary } from '../../communication/serializable';
 
 
-
-export class LobbyManager {
-
+export class LobbyManager implements MessageBroadcaster {
 
     private nextID: number;
 
     private tableControllerMap: Map<number, TableController>;
     private clientManagerMap: Map<number, ClientManager>;
+
+    private messageQueue: Array<Message | MessagePair>;
+    private lobbySubscribers: MessageHandler[];
+
 
 
     constructor() {
@@ -39,18 +47,18 @@ export class LobbyManager {
         this.tableControllerMap = new Map<number, TableController>();
         this.clientManagerMap = new Map<number, ClientManager>();
 
+        this.messageQueue = new Array<Message | MessagePair>();
+        this.lobbySubscribers = new Array<MessageHandler>();
+
         this.setUp();
 
     }
-
 
     private log(msg: string): void {
 
         console.log('\x1b[33m%s\x1b[0m', `LobbyManager ${msg}`);
 
     }
-
-
 
     public handleCommand(command: Command, serverClient: IServerClient): void {
 
@@ -64,6 +72,77 @@ export class LobbyManager {
 
         }
 
+        if (command instanceof SubscribeLobbyCommand) {
+
+            return this.subscribe(serverClient);
+
+        }
+
+
+    }
+
+
+    public registerMessageHandler(handler: MessageHandler): void {
+
+        this.lobbySubscribers.push(handler);
+
+    }   // registerMessageHandler
+
+
+    public unregisterMessageHandler(handler: MessageHandler): void {
+
+        this.lobbySubscribers = this.lobbySubscribers.filter(o => o != handler);
+
+    }
+
+
+    private pumpQueues(): void {
+
+        while (this.messageQueue.length) {
+
+            this.broadcastMessage(this.messageQueue.shift());
+
+        }
+
+    }  // pumpQueues
+
+
+    private broadcastMessage(message: Message | MessagePair): void {
+
+        for (let handler of this.lobbySubscribers) {
+
+            handler.handleMessage(message);
+
+        }
+
+    }   // broadcastMessage
+
+
+    private queueAction(action: Action, userID?: number) {
+
+        this.queueMessage(new ActionMessage(action, userID));
+
+    }
+
+    private queueMessage(message: Message | MessagePair): void {
+
+        if (message instanceof ActionMessage) {
+
+            this.log(`Queueing ${message.action.constructor.name}`);
+
+        }
+        else if (message instanceof MessagePair) {
+
+            let publicMessage: string = message.publicMessage && message.publicMessage instanceof ActionMessage ? message.publicMessage.action.constructor.name : '[No public message]';
+            let privateMessage: string = message.privateMessage && message.privateMessage instanceof ActionMessage ? message.privateMessage.action.constructor.name : '[No private message]';
+
+            this.log(`Queueing public: ${publicMessage}, private: ${privateMessage} `);
+
+        }
+
+        this.messageQueue.push(message);
+
+        this.pumpQueues();
 
     }
 
@@ -100,7 +179,7 @@ export class LobbyManager {
 
         let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises);
 
-        let table: Table = new Table(tableID, stakes, rules);
+        let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
 
         let tableController: TableController = new TableController(table, new Deck());
         let clientManager: ClientManager = new ClientManager(tableID);
@@ -142,7 +221,7 @@ export class LobbyManager {
 
         let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises);
 
-        let table: Table = new Table(tableID, stakes, rules);
+        let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
 
         let tableController: TableController = new TableController(table, new Deck());
         let clientManager: ClientManager = new ClientManager(tableID);
@@ -191,6 +270,18 @@ export class LobbyManager {
         }
 
     }  // addTableClient
+
+
+    subscribe(client: IServerClient): void {
+
+        this.registerMessageHandler(client);
+
+        let tables: TableSummary[] = [...this.tableControllerMap.values()].map(controller => controller.getTableSummary());
+
+        // only send the summaries to this new client, not EVERYBODY!!!
+        client.handleMessage(new ActionMessage(new ListTablesAction(tables)));
+
+    }  // subscribe
 
 
 }

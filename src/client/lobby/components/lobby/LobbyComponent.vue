@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="table in tables" :key="table.id">
+                <tr v-for="table in client.tables" :key="table.id">
                     <td>{{ table.id }}</td>
                     <td><router-link :to="{ name: 'Table' , params: {tableID: table.id}}" target="_blank">{{ table.name }}</router-link></td>
                     <td>{{ table.description }}</td>
@@ -30,25 +30,17 @@
 import './lobby.scss';
 
 import Vue from 'vue';
-import { TableSummary } from '../../../../casino/tables/table-summary';
+    import { TableSummary } from '../../../../casino/tables/table-summary';
+    import { LobbyClient } from '../../lobby-client';
 
 
 const LobbyComponent = Vue.extend({
+
     props: {
-    },
-    data() {
-
-        let tables: Array<TableSummary> = new Array<TableSummary>();
-
-        tables.push(new TableSummary(1, "Corn Dog Table", "LHE 1/2", 6, 4));
-
-        let values = {
-
-            tables: tables
-
-        };
-
-        return values;
+        client: {
+            type: LobbyClient,
+            required: true
+        }
     },
     components: {
     }

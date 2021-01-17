@@ -12,6 +12,8 @@ import { Game } from "../../games/game";
 export class Table {
 
     public id: number;
+    public name: string;
+    public description: string;
 
     public stakes: Stakes;
     public rules: TableRules;
@@ -27,9 +29,11 @@ export class Table {
     public buttonIndex: number;
 
 
-    constructor(id: number, stakes: Stakes, rules: TableRules) {
+    constructor(id: number, name: string, description: string, stakes: Stakes, rules: TableRules) {
 
         this.id = id;
+        this.name = name;
+        this.description = description;
 
         this.stakes = stakes;
         this.rules = rules;

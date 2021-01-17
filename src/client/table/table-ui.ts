@@ -334,14 +334,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
-    public sendCommand(command: Command) {
 
-        this.broadcastCommand(command);
+    // Used by components to send commands on the UI's behalf
+    // TODO: refactor this so that they send the command to the 
+    public sendCommand(command: Command): void {
 
-    }  // sendCommand
+        return this.broadcastCommand(command);
+
+    }
 
 
-    private broadcastCommand(command: Command) {
+    private broadcastCommand(command: Command): void {
 
         this.log(`Sent ${command.constructor.name}`);
 
@@ -598,20 +601,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         console.log(message);
 
-/*
-        if (message == 'You cannot bet less than the current bet') {
-
-            for (let x: number = 0; x < 20; x++) {
-
-                console.log(`${this.user.name} UI: ${message}`);
-
-            }
-
-        }
-
-        console.log(`${this.user.name} UI: ${message}`);
-*/
-
     }
 
 
@@ -855,7 +844,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                     // We are taking an action, so clear anything that is pending and try to fold immediately
                     this.pendingCommands.clear();
-                    return this.sendCommand(new FoldCommand(this.table.id));
+                    return this.broadcastCommand(new FoldCommand(this.table.id));
 
                 }
 
@@ -863,7 +852,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                     // We are taking an action, so clear anything that is pending and try to fold immediately
                     this.pendingCommands.clear();
-                    return this.sendCommand(new BetCommand(this.table.id, 0));
+                    return this.broadcastCommand(new BetCommand(this.table.id, 0));
 
                 }
 
