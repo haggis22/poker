@@ -64,6 +64,7 @@
     <Content Include="src\client\App.vue" />
     <Content Include="src\client\lobby\components\lobby\lobby.scss" />
     <Content Include="src\client\lobby\components\lobby\LobbyComponent.vue" />
+    <Content Include="src\client\lobby\lobby-client.ts" />
     <Content Include="src\client\table\components\chips\chip-box.scss" />
     <Content Include="src\client\table\components\chips\ChipBoxComponent.vue" />
     <Content Include="src\client\table\components\chips\chip.scss" />
@@ -217,6 +218,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\table\components\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\client\router\index.ts" />
+    <TypeScriptCompile Include="src\commands\lobby\subscribe-lobby-command.ts" />
+    <TypeScriptCompile Include="src\commands\security\authenticate-command.ts" />
     <TypeScriptCompile Include="src\commands\security\security-command.ts" />
     <TypeScriptCompile Include="src\commands\security\login-command.ts" />
     <TypeScriptCompile Include="src\commands\lobby\lobby-command.ts">
