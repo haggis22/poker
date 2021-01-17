@@ -66,14 +66,11 @@ export class UserManager {
     }   // fetchUserByID
 
 
-    authenticate(authToken: string): number {
+    authenticate(authToken: string): User {
 
         if (authToken != null) {
 
-            let user: User = this.userMapByUsername.get(authToken);
-            if (user) {
-                return user.id;
-            }
+            return this.userMapByUsername.get(authToken);
 
         }
 

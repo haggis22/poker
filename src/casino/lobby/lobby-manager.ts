@@ -28,15 +28,11 @@ export class LobbyManager {
 
     private nextID: number;
 
-    private userManager: UserManager;
-
     private tableControllerMap: Map<number, TableController>;
     private clientManagerMap: Map<number, ClientManager>;
 
 
-    constructor(userManager: UserManager) {
-
-        this.userManager = userManager;
+    constructor() {
 
         this.nextID = 0;
 
@@ -106,7 +102,7 @@ export class LobbyManager {
 
         let table: Table = new Table(tableID, stakes, rules);
 
-        let tableController: TableController = new TableController(this.userManager, table, new Deck());
+        let tableController: TableController = new TableController(table, new Deck());
         let clientManager: ClientManager = new ClientManager(tableID);
 
         this.tableControllerMap.set(table.id, tableController);
@@ -148,7 +144,7 @@ export class LobbyManager {
 
         let table: Table = new Table(tableID, stakes, rules);
 
-        let tableController: TableController = new TableController(this.userManager, table, new Deck());
+        let tableController: TableController = new TableController(table, new Deck());
         let clientManager: ClientManager = new ClientManager(tableID);
 
         this.tableControllerMap.set(table.id, tableController);

@@ -10,14 +10,17 @@ import { TableConnectedAction } from "../../actions/table/state/table-connected-
 export class GameClient implements MessageBroadcaster, CommandHandler {
 
     private socket: WebSocket;
+    private authToken: string;
+
     private serializer: Serializer;
 
     private messageHandlers: MessageHandler[];
 
 
-    constructor(socket: WebSocket) {
+    constructor(socket: WebSocket, authToken: string) {
 
         this.socket = socket;
+        this.authToken = authToken;
 
         console.log('Setting up web socket listener');
 
@@ -33,17 +36,6 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
     }
 
-    private send(o: any): void {
-
-        if (this.socket) {
-
-            this.log(`Sending ${o.constructor.name}`);
-
-            this.socket.send(this.serializer.serialize(o));
-
-        }
-
-    }
 
     receive(msg: string): void {
 
@@ -95,11 +87,18 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
     }
 
+
     handleCommand(command: Command): void {
 
-        this.send(command);
+        this.log(`Sending ${command.constructor.name}`);
 
-    }
+        // Stamp every outgoing message with the saved authorization token
+        command.authToken = this.authToken;
+
+        this.socket.send(this.serializer.serialize(command));
+
+    }  // handleCommand
+
 
     private log(msg: string): void {
 

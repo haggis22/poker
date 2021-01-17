@@ -6,17 +6,21 @@ import { Message } from "../../messages/message";
 import { FakeSocket } from "../fake-socket";
 import { Serializer } from "../serializer";
 import { ActionMessage } from "../../messages/action-message";
-import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 
 export class LocalGameClient implements MessageBroadcaster, CommandHandler, FakeSocket {
 
     private socket: FakeSocket;
+    private authToken: string;
+
     private serializer: Serializer;
 
     private messageHandlers: MessageHandler[];
 
 
-    constructor() {
+    constructor(socket: FakeSocket, authToken: string) {
+
+        this.socket = socket;
+        this.authToken = authToken;
 
         this.messageHandlers = new Array<MessageHandler>();
         this.serializer = new Serializer();
@@ -24,28 +28,11 @@ export class LocalGameClient implements MessageBroadcaster, CommandHandler, Fake
     }
 
 
-    public connect(socket: FakeSocket) {
-
-        this.socket = socket;
-
-    }
-
-    private send(o: any): void {
-
-        if (this.socket) {
-
-            // introduce a slight delay so that all the robotic activity isn't just direct method invocations
-            setTimeout(() => { this.socket.receive(this.serializer.serialize(o)); }, 0);
-
-        }
-
-    }
-
     receive(msg: string): void {
 
         let msgObj: any = this.serializer.deserialize(msg);
 
-        this.log(`received ${msgObj.constructor.name}: ${msg}`);
+        this.log(`received ${msgObj.constructor.name}`);
 
         if (msgObj instanceof Message) {
 
@@ -62,7 +49,7 @@ export class LocalGameClient implements MessageBroadcaster, CommandHandler, Fake
             // Pass the message along
             for (let handler of this.messageHandlers) {
 
-                this.log(`Passed message to ${handler.constructor.name}`);
+                // this.log(`Passed message to ${handler.constructor.name}`);
                 handler.handleMessage(msgObj);
 
             }
@@ -93,13 +80,19 @@ export class LocalGameClient implements MessageBroadcaster, CommandHandler, Fake
 
     handleCommand(command: Command): void {
 
-        this.send(command);
+        // Stamp every outgoing message with the saved authorization token
+        command.authToken = this.authToken;
+
+        this.log(`Sending ${command.constructor.name} with authToken ${this.authToken}`);
+
+        // introduce a slight delay so that all the robotic activity isn't just direct method invocations
+        setTimeout(() => { this.socket.receive(this.serializer.serialize(command)); }, 0);
 
     }
 
     private log(msg: string): void {
 
-        // console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
+        console.log('\x1b[36m%s\x1b[0m', `LocalGameClient (${this.authToken}): ${msg}`);
 
     }
 

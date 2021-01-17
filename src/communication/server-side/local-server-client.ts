@@ -1,29 +1,32 @@
 ﻿import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
-import { TableCommand } from "../../commands/table/table-command";
 import { Message } from "../../messages/message";
 import { FakeSocket } from "../fake-socket";
 import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
 import { LobbyManager } from '../../casino/lobby/lobby-manager';
+import { User } from "../../players/user";
+import { LobbyCommand } from "../../commands/lobby/lobby-command";
 
 export class LocalServerClient implements IServerClient
-    {
+{
 
     private socket: FakeSocket;
     private serializer: Serializer;
 
     public userID: number;
+    public user: User;
 
     private lobbyManager: LobbyManager;
 
 
     private commandHandlers: CommandHandler[];
 
-    constructor(tableID: number, lobbyManager: LobbyManager, userID: number) {
+    constructor(lobbyManager: LobbyManager, user: User) {
 
         this.lobbyManager = lobbyManager;
-        this.userID = userID;
+
+        this.user = user;
 
         this.commandHandlers = new Array<CommandHandler>();
 
@@ -50,12 +53,21 @@ export class LocalServerClient implements IServerClient
 
         let o: any = this.serializer.deserialize(msg);
 
-        if (o && o instanceof Command) {
+        if (o) {
 
-            // Always mark the User ID as the one belonging to this server - not anything 
-            // that might have been passed in from the message - that could always be spoofed
-            if (o instanceof TableCommand) {
-                o.userID = this.userID;
+            if (!(o instanceof Command)) {
+
+                // Can't do anything with messages that aren't Commands
+                return;
+            }
+
+            o.user = this.user;
+            this.userID = o.userID = this.user.id;
+
+            if (o instanceof LobbyCommand) {
+
+                return this.lobbyManager.handleCommand(o, this);
+
             }
 
             // Pass the message along

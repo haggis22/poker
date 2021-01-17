@@ -79,7 +79,15 @@ export class ServerClient implements IServerClient {
             }
 
             // Authenticate the user on every message so that a logged-out user does not continue to act
-            this.userID = o.userID = this.userManager.authenticate(o.authToken);
+            let user: User = this.userManager.authenticate(o.authToken);
+
+            if (user) {
+
+                o.user = user;
+                this.userID = o.userID = user.id;
+
+            }
+
 
             if (o instanceof SecurityCommand) {
 
@@ -100,9 +108,6 @@ export class ServerClient implements IServerClient {
                 handler.handleCommand(o);
 
             }
-
-
-
 
 
         }  // o is not null

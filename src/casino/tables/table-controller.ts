@@ -61,7 +61,6 @@ import { PotCardsUsedAction } from "../../actions/table/game/pots/pot-cards-used
 import { ShowdownAction } from "../../actions/table/game/showdown/showdown-action";
 import { InvalidBet } from "./betting/invalid-bet";
 import { InvalidFold } from "./betting/invalid-fold";
-import { UserManager } from "../../players/user-manager";
 
 const logger: Logger = new Logger();
 
@@ -88,9 +87,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private readonly TIME_ALL_IN_FLIP_CARDS: number = 1500;
 
 
-    private userManager: UserManager;
-
-
     private table: Table;
     private game: Game;
     private deck: Deck;
@@ -110,9 +106,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(userManager: UserManager,  table: Table, deck: Deck) {
-
-        this.userManager = userManager;
+    constructor(table: Table, deck: Deck) {
 
         this.table = table;
         this.deck = deck;
@@ -341,12 +335,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async seatPlayer(command: RequestSeatCommand): Promise<void> {
 
-        let user: User = await this.userManager.fetchUserByID(command.userID);
+        if (!command.user) {
 
-        if (!user) {
-
-            this.log(`Could not find User ${command.userID}`);
-            return this.queueMessage(new Message(`User ${command.userID} is unknown`, command.userID));
+            this.log(`Missing user for seatPlayer`);
+            return this.queueMessage(new Message(`Unknown User`, command.userID));
 
         }
 
@@ -378,7 +370,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player == null) {
 
-                seat.player = new Player(user.id, user.name);
+                seat.player = new Player(command.user.id, command.user.name);
                 this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
                 return await this.checkStartHand();
 
@@ -726,16 +718,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async chat(command: ChatCommand): Promise<void> {
 
-        let user: User = await this.userManager.fetchUserByID(command.userID);
+        if (command.user) {
 
-        if (user) {
-
-            return this.queueAction(new ChatAction(this.table.id, user.id, user.username, command.message));
+            return this.queueAction(new ChatAction(this.table.id, command.user.username, command.message));
 
         }
-
-        this.log(`Could not find User ${command.userID}`);
-        return this.queueMessage(new Message(`User ${command.userID} is unknown`, command.userID));
 
     }
 

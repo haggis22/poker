@@ -365,7 +365,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         // For now, only log from Danny's POV
         if (this.user.id === 2) {
-            console.log(`UI: ${message}`);
+            console.log(`RoboUI (${this.user.name}): ${message}`);
         }
 
     }

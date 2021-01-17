@@ -11,6 +11,7 @@ import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
 import { Logger } from "../../logging/logger";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
+import { AuthenticateCommand } from "../../commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
 import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction } from "../../communication/serializable";
@@ -20,7 +21,6 @@ import { GameFactory } from "../../games/game-factory";
 import { WonPot } from "../../casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../../actions/table/game/hand-complete-action";
 import { IChipFormatter } from "../../casino/tables/chips/chip-formatter";
-import { LobbyConnectedAction } from "../../actions/lobby/lobby-connected-action";
 import { LoginAction } from "../../actions/security/login-action";
 import { Timer } from "../../timers/timer";
 import { BetController } from "../../casino/tables/betting/bet-controller";
@@ -33,8 +33,6 @@ const logger: Logger = new Logger();
 export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private readonly TIME_PENDING_ACTION: number = 300;
-
-    public tableID: number;
 
     public user: User;
 
@@ -77,9 +75,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    constructor(tableID: number, chipFormatter: IChipFormatter) {
+    constructor(chipFormatter: IChipFormatter) {
 
-        this.tableID = tableID;
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
@@ -128,18 +125,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
         let action: Action = message.action;
-
-        if (action instanceof LobbyConnectedAction) {
-
-            return this.connected(action);
-
-        }
-
-        if (action instanceof LoginAction) {
-
-            return this.authenticated(action);
-
-        }
 
         if (action instanceof TableConnectedAction) {
 
@@ -426,22 +411,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // setGamebe
 
 
-    private connected(action: LobbyConnectedAction): void {
 
-        // Once connected, log in automatically
-        this.broadcastCommand(new LoginCommand('dshell', 'password1'));
+    public joinTable(tableID: number): void {
 
-    }   // connected
+        this.broadcastCommand(new JoinTableCommand(tableID));
 
-
-
-    private authenticated(action: LoginAction): void {
-
-        this.user = action.user;
-
-        this.broadcastCommand(new JoinTableCommand(this.tableID));
-
-    }   // authenticate
+    }   // joinTable
 
 
 

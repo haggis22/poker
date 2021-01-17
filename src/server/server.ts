@@ -36,21 +36,21 @@ console.log(`Serving files from client path ${clientPath}`);
 app.use(express.static(clientPath));
 
 let userManager: UserManager = new UserManager();
-let lobbyManager: LobbyManager = new LobbyManager(userManager);
+let lobbyManager: LobbyManager = new LobbyManager();
 
 let clients: Set<IServerClient> = new Set<IServerClient>();
 
 
 // RoboClients will automatically connect themselves to the passed-in lobbyManager
 
-createRoboClient(2, 2);
-createRoboClient(2, 3);
-
-createRoboClient(1, 5);
-createRoboClient(1, 6);
-createRoboClient(1, 7);
-createRoboClient(1, 8);
-
+createRoboClient(2, 'moglesby');
+createRoboClient(2, 'ptunney');
+/*
+createRoboClient(1, 'pgrudowski');
+createRoboClient(1, 'jhoepken');
+createRoboClient(1, 'mgillmore');
+createRoboClient(1, 'benney');
+*/
 
 wss.on('connection', (socket: WebSocket) => {
 
@@ -62,17 +62,17 @@ wss.on('connection', (socket: WebSocket) => {
 
 
 
-function createRoboClient(tableID: number, userID: number): LocalServerClient {
+function createRoboClient(tableID: number, authToken: string): LocalServerClient {
 
-    let user: User = userManager.fetchUserByID(userID);
+    let user: User = userManager.authenticate(authToken);
+
+    // Server Side
+    let roboServerClient: LocalServerClient = new LocalServerClient(lobbyManager, user);
 
     // Client Side
     let ui: RoboTableUI = new RoboTableUI(user, new MoneyFormatter());
     let tableWatcher: TableWatcher = new TableWatcher(tableID);
-    let gameClient: LocalGameClient = new LocalGameClient();
-
-    // Server Side
-    let roboClient: LocalServerClient = new LocalServerClient(tableID, lobbyManager, user.id);
+    let gameClient: LocalGameClient = new LocalGameClient(roboServerClient, authToken);
 
     // Now join all the links in the chain
     ui.registerCommandHandler(tableWatcher);
@@ -81,13 +81,12 @@ function createRoboClient(tableID: number, userID: number): LocalServerClient {
     tableWatcher.registerCommandHandler(gameClient);
 
     gameClient.registerMessageHandler(tableWatcher);
-    gameClient.connect(roboClient);
 
-    roboClient.connect(gameClient);
+    roboServerClient.connect(gameClient);
 
     // Finally, connect the constructed server client to the lobby manager
-    lobbyManager.addTableClient(tableID, roboClient);
+    lobbyManager.addTableClient(tableID, roboServerClient);
 
-    return roboClient;
+    return roboServerClient;
 
 }  // createRoboClient
