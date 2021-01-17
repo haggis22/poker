@@ -363,7 +363,7 @@
     <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\commands\lobby\join-table-command.ts">
+    <TypeScriptCompile Include="src\commands\table\join-table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\table\betting\fold-command.ts" />

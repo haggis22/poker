@@ -1,7 +1,7 @@
 ﻿
 // LobbyActions
 export { LoginCommand } from "../commands/lobby/login-command";
-export { JoinTableCommand } from "../commands/lobby/join-table-command";
+export { JoinTableCommand } from "../commands/table/join-table-command";
 export { TableSummary } from "../casino/tables/table-summary";
 
 export { LobbyConnectedAction } from "../actions/lobby/lobby-connected-action";

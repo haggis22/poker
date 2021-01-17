@@ -8,7 +8,7 @@ import { IServerClient } from "./i-server-client";
 import { ActionMessage } from '../../messages/action-message';
 import { LobbyManager } from '../../casino/lobby/lobby-manager';
 import { LobbyCommand } from '../../commands/lobby/lobby-command';
-import { JoinTableCommand } from '../../commands/lobby/join-table-command';
+import { JoinTableCommand } from '../../commands/table/join-table-command';
 import { LoginCommand } from '../../commands/lobby/login-command';
 import { User } from "../../players/user";
 import { LoginAction } from '../../actions/lobby/login-action';
