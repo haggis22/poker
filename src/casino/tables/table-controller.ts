@@ -250,7 +250,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (command instanceof StandUpCommand) {
 
-            return await this.standUp(command);
+            return await this.standUpCommand(command);
 
         }
 
@@ -280,7 +280,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (command instanceof FoldCommand) {
 
-            return await this.fold(command);
+            return await this.foldCommand(command);
         }
 
         if (command instanceof TableSnapshotCommand) {
@@ -427,7 +427,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
-    private async standUp(command: StandUpCommand): Promise<void> {
+    private async standUpCommand(command: StandUpCommand): Promise<void> {
 
         if (!command.user) {
 
@@ -447,14 +447,39 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // if the player is not in action, then standing up takes effect immediately
         if (this.table.state.isHandInProgress() && seat.isInHand) {
 
-            // Remember this command for between rounds
+            // remember that this player is going to stand up - this will be handled by rejectAnte/foldPlayer, or will get used later on
             this.standUpRequests.set(seat.index, command);
+
+            if (this.table.state instanceof BlindsAndAntesState) {
+
+                let fold: Fold | InvalidFold = this.betController.fold(this.table, seat);
+
+                if (fold instanceof Fold) {
+
+                    return await this.rejectAnte(seat);
+
+                }
+
+            }
+
+
+            else if (this.table.state instanceof BetState) {
+
+                let fold: Fold | InvalidFold = this.betController.fold(this.table, seat);
+
+                if (fold instanceof Fold) {
+
+                    return await this.foldPlayer(seat, fold);
+
+                }
+
+            }
 
 
         }
         else {
 
-            this.processStandUpCommand(command, seat);
+            this.processStandUpCommand(command);
 
         }
 
@@ -469,7 +494,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (standUpCommand) {
 
-                this.processStandUpCommand(standUpCommand, seat);
+                this.processStandUpCommand(standUpCommand);
+
+                // remove it so that it is also not processed at the end of the hand
+                this.standUpRequests.delete(seat.index);
 
             }
 
@@ -478,16 +506,22 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }  // checkStandUp
 
 
-    private processStandUpCommand(command: StandUpCommand, seat: Seat): void {
+    private processStandUpCommand(command: StandUpCommand): void {
 
-        // remove the player from the table
-        // TODO: return their stack of chips to them
-        seat.player = null;
+        let seat: Seat = this.findSeatByPlayer(command.userID);
 
-        this.queueAction(new SeatVacatedAction(this.table.id, seat.index));
+        if (seat) {
 
-        // Tell any watchers that the number of players has changed
-        this.notifyObservers();
+            // remove the player from the table
+            // TODO: return their stack of chips to them
+            seat.player = null;
+
+            this.queueAction(new SeatVacatedAction(this.table.id, seat.index));
+
+            // Tell any watchers that the number of players has changed
+            this.notifyObservers();
+
+        }
 
     }  // processStandUpCommand
 
@@ -769,7 +803,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }   // foldPlayer
 
 
-    private async fold(command: FoldCommand): Promise<void> {
+    private async foldCommand(command: FoldCommand): Promise<void> {
 
         if (this.table.state instanceof BlindsAndAntesState) {
 
@@ -806,7 +840,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         return this.queueMessage(new Message('It is not time to bet', command.userID));
 
-    }  // fold
+    }  // foldCommand
 
 
     private async tableSnapshot(command: TableSnapshotCommand): Promise<void> {
