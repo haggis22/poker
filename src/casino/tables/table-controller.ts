@@ -104,6 +104,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private betController: BetController;
 
     private setStatusRequests: Map<number, SetStatusCommand>;
+    private standUpRequests: Map<number, StandUpCommand>;
 
     private tableObservers: Set<TableObserver>;
 
@@ -125,6 +126,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.betController = new BetController();
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();
+        this.standUpRequests = new Map<number, StandUpCommand>();
 
         this.tableObservers = new Set<TableObserver>();
 
@@ -442,6 +444,42 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
+        // if the player is not in action, then standing up takes effect immediately
+        if (this.table.state.isHandInProgress() && seat.isInHand) {
+
+            // Remember this command for between rounds
+            this.standUpRequests.set(seat.index, command);
+
+
+        }
+        else {
+
+            this.processStandUpCommand(command, seat);
+
+        }
+
+    }  // standUp
+
+
+    private checkStandUp(seat: Seat): void {
+
+        if (seat.player) {
+
+            let standUpCommand: StandUpCommand = this.standUpRequests.get(seat.index);
+
+            if (standUpCommand) {
+
+                this.processStandUpCommand(standUpCommand, seat);
+
+            }
+
+        }
+
+    }  // checkStandUp
+
+
+    private processStandUpCommand(command: StandUpCommand, seat: Seat): void {
+
         // remove the player from the table
         // TODO: return their stack of chips to them
         seat.player = null;
@@ -451,7 +489,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // Tell any watchers that the number of players has changed
         this.notifyObservers();
 
-    }  // standUp
+    }  // processStandUpCommand
 
 
     private async setStatus(command: SetStatusCommand): Promise<void> {
@@ -724,6 +762,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // This will tell watchers that the given seat is no longer in the hand
         this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
 
+        this.checkStandUp(folderSeat);
+
         return await this.advanceBetTurn();
 
     }   // foldPlayer
@@ -854,6 +894,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             // If we're between hands, then none of the seats are in a hand, right?
             this.clearHand(seat);
 
+            this.checkStandUp(seat);
+
             if (seat.player) {
 
                 if (seat.player.chipsToAdd) {
@@ -867,6 +909,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
 
                 }   // they have chips waiting to add
+
 
                 let setStatusCommand: SetStatusCommand = this.setStatusRequests.get(seat.index);
 
@@ -889,6 +932,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // clear all requests now
         this.setStatusRequests.clear();
+        this.standUpRequests.clear();
 
     }  // doBetweenHandsBusiness
 
@@ -1244,6 +1288,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // they didn't pay the ante, so they're OUT
         this.clearHand(anteSeat);
+
+        this.checkStandUp(anteSeat);
+
         this.markSittingOut(anteSeat, true);
 
         return await this.advanceAnteTurn();
