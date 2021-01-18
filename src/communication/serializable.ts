@@ -83,6 +83,7 @@ export { Best5InHandSelector } from "../games/hand-selectors/best-5-in-hand-sele
 export { HandEvaluation } from "../games/hand-evaluation";
 
 export { User } from "../players/user";
+export { UserSummary } from "../players/user-summary";
 
 export { Pot } from "../casino/tables/betting/pot";
 export { Bet } from "../casino/tables/betting/bet";
