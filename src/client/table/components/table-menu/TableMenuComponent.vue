@@ -6,11 +6,13 @@
 
             <label>
                 <input type="checkbox" value="true" :checked="isSittingOut" @change="setStatus" />
-
                 Sit out next hand
             </label>
 
+            <button type="button" @click.stop="standUp">Stand Up</button>
+
         </div>
+
 
         <div class="bet-actions" v-if="ui.isAnteTime()">
             <button type="button" v-on:click.stop="fold">
@@ -100,7 +102,7 @@ import { Seat } from '../../../../casino/tables/seat';
 import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';
 import { FoldCommand } from '../../../../commands/table/betting/fold-command';
-import { SetStatusCommand } from '../../../../communication/serializable';
+import { SetStatusCommand, StandUpCommand } from '../../../../communication/serializable';
 
 
 const TableMenuComponent = Vue.extend ({
@@ -205,6 +207,12 @@ const TableMenuComponent = Vue.extend ({
             // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
             this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, event.target.checked));
             this.$emit('update:isSittingOut', event.target.checked);
+
+        },
+
+        standUp: function (event) {
+
+            this.ui.sendCommand(new StandUpCommand(this.ui.table.id));
 
         }
 

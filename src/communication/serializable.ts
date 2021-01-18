@@ -70,6 +70,7 @@ export { SetGameAction } from "../actions/table/game/set-game-action";
 
 
 export { RequestSeatCommand } from "../commands/table/request-seat-command";
+export { StandUpCommand } from "../commands/table/stand-up-command";
 export { SetStatusCommand } from "../commands/table/set-status-command";
 export { TableConnectedAction } from "../actions/table/state/table-connected-action";
 
@@ -117,6 +118,7 @@ export { Message } from "../messages/message";
 export { ActionMessage } from "../messages/action-message";
 
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
+export { SeatVacatedAction } from "../actions/table/players/seat-vacated-action";
 export { SetStatusAction } from "../actions/table/players/set-status-action";
 
 export { IsInHandAction } from "../actions/table/players/is-in-hand-action";

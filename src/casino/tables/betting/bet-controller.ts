@@ -84,7 +84,7 @@ export class BetController {
 
 
 
-    public fold(status: BetStatus, seat: Seat): InvalidFold | Fold {
+    public fold(table:Table, seat: Seat): InvalidFold | Fold {
 
         if (!seat) {
 
@@ -98,20 +98,27 @@ export class BetController {
 
         }
 
-        if (status.seatIndex != seat.index) {
+        if (!(table.state instanceof BlindsAndAntesState) && !(table.state instanceof BetState)) {
+
+            return new InvalidFold("It is not a betting round");
+
+        }
+
+        if (table.betStatus.seatIndex != seat.index) {
 
             return new InvalidFold("It is not your turn to act");
 
         }
 
         // Remove the player from all pots up to this point
-        for (let pot of status.pots) {
+        for (let pot of table.betStatus.pots) {
             pot.foldPlayer(seat.index);
         }
 
         return new Fold();
 
     }   // fold
+
 
 
     public getCurrentAnte(status: BetStatus, seatIndex: number): number {

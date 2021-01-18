@@ -2,6 +2,7 @@
 import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { RequestSeatCommand } from "../../commands/table/request-seat-command";
+import { StandUpCommand } from "../../commands/table/stand-up-command";
 import { SetStatusCommand } from "../../commands/table/set-status-command";
 import { Player } from "../../players/player";
 import { AddChipsCommand } from "../../commands/table/add-chips-command";
@@ -44,7 +45,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -245,6 +246,12 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
+        if (command instanceof StandUpCommand) {
+
+            return await this.standUp(command);
+
+        }
+
         if (command instanceof SetStatusCommand) {
 
             return await this.setStatus(command);
@@ -416,6 +423,35 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         return this.queueMessage(new Message(`Could not find seat ${seatIndex}`, command.userID));
 
     }
+
+
+    private async standUp(command: StandUpCommand): Promise<void> {
+
+        if (!command.user) {
+
+            this.log(`Missing user for standUp`);
+            return this.queueMessage(new Message(`Unknown User`, command.userID));
+
+        }
+
+        let seat: Seat = this.findSeatByPlayer(command.userID);
+
+        if (seat == null) {
+
+            return this.queueMessage(new Message('You are not at the table', command.userID));
+
+        }
+
+        // remove the player from the table
+        // TODO: return their stack of chips to them
+        seat.player = null;
+
+        this.queueAction(new SeatVacatedAction(this.table.id, seat.index));
+
+        // Tell any watchers that the number of players has changed
+        this.notifyObservers();
+
+    }  // standUp
 
 
     private async setStatus(command: SetStatusCommand): Promise<void> {
@@ -699,7 +735,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             let folderSeat: Seat = this.table.seats.find(seat => seat.isInHand && seat.player && seat.player.userID == command.userID);
 
-            let fold: Fold | InvalidFold = this.betController.fold(this.table.betStatus, folderSeat);
+            let fold: Fold | InvalidFold = this.betController.fold(this.table, folderSeat);
 
             if (fold instanceof Fold) {
 
@@ -716,7 +752,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             let folderSeat: Seat = this.table.seats.find(seat => seat.isInHand && seat.player && seat.player.userID == command.userID);
 
-            let fold: Fold | InvalidFold = this.betController.fold(this.table.betStatus, folderSeat);
+            let fold: Fold | InvalidFold = this.betController.fold(this.table, folderSeat);
 
             if (fold instanceof Fold) {
 
@@ -1472,7 +1508,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             }
 
-            let fold: Fold = this.betController.fold(this.table.betStatus, checkerSeat);
+            let fold: Fold = this.betController.fold(this.table, checkerSeat);
 
             if (fold instanceof Fold) {
 

@@ -1,15 +1,15 @@
-﻿import { TableCommand } from "./table-command";
+﻿import { TableAction } from "../table-action";
 
-export class RequestSeatCommand extends TableCommand {
+export class SeatVacatedAction extends TableAction {
 
     public seatIndex: number;
-
 
     constructor(tableID: number, seatIndex: number) {
 
         super(tableID);
 
         this.seatIndex = seatIndex;
+
     }
 
 }

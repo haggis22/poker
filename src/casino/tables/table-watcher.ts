@@ -1,4 +1,5 @@
 ﻿import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
+import { SeatVacatedAction } from "../../actions/table/players/seat-vacated-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
 import { IsInHandAction } from "../../actions/table/players/is-in-hand-action";
 import { MoveButtonAction } from "../../actions/table/game/move-button-action";
@@ -191,6 +192,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
+        if (action instanceof SeatVacatedAction) {
+
+            return this.seatVacated(action);
+
+        }
+
         if (action instanceof SetStatusAction) {
 
             return this.setStatus(action);
@@ -336,6 +343,19 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         }
 
     }
+
+    private seatVacated(action: SeatVacatedAction): void {
+
+        const seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+
+        if (seat) {
+
+            seat.player = null;
+
+        }
+
+    }
+
 
     private setStatus(action: SetStatusAction): void {
 

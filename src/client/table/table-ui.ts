@@ -9,6 +9,7 @@ import { Table } from "../../casino/tables/table";
 import { TableSnapshotAction } from "../../actions/table/state/table-snapshot-action";
 import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
+import { SeatVacatedAction } from "../../actions/table/players/seat-vacated-action";
 import { Logger } from "../../logging/logger";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../commands/security/authenticate-command";
@@ -164,6 +165,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof PlayerSeatedAction) {
 
             return this.seatPlayer(action);
+
+        }
+
+        if (action instanceof SeatVacatedAction) {
+
+            return this.seatVacated(action);
 
         }
 
@@ -536,6 +543,27 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }  // seatPlayer
+
+
+    private seatVacated(action: SeatVacatedAction): void {
+
+        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+
+        if (seat) {
+
+            if (seat.index === this.mySeatIndex) {
+                this.mySeatIndex = null;
+            }
+
+            let message = `${seat.getSeatName()} is now open`;
+            this.messages.push(message);
+
+            this.log(message);
+            this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
+
+        }
+
+    }  // seatVacated
 
 
 
