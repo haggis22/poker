@@ -1,7 +1,8 @@
 <template>
 
     <div>
-        <lobby-component :client="client"></lobby-component>
+        <lobby-component v-if="client" 
+                            :client="client"></lobby-component>
     </div>
 
 </template>

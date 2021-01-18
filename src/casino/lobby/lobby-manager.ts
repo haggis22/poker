@@ -26,9 +26,10 @@ import { Message } from "../../messages/message";
 import { MessagePair } from "../../messages/message-pair";
 import { Action } from '../../actions/action';
 import { SubscribeLobbyCommand, ListTablesAction, TableSummary } from '../../communication/serializable';
+import { TableObserver } from '../tables/table-observer';
 
 
-export class LobbyManager implements MessageBroadcaster {
+export class LobbyManager implements MessageBroadcaster, TableObserver {
 
     private nextID: number;
 
@@ -53,6 +54,7 @@ export class LobbyManager implements MessageBroadcaster {
         this.setUp();
 
     }
+
 
     private log(msg: string): void {
 
@@ -182,6 +184,8 @@ export class LobbyManager implements MessageBroadcaster {
         let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
 
         let tableController: TableController = new TableController(table, new Deck());
+        tableController.addTableObserver(this);
+
         let clientManager: ClientManager = new ClientManager(tableID);
 
         this.tableControllerMap.set(table.id, tableController);
@@ -224,6 +228,8 @@ export class LobbyManager implements MessageBroadcaster {
         let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
 
         let tableController: TableController = new TableController(table, new Deck());
+        tableController.addTableObserver(this);
+
         let clientManager: ClientManager = new ClientManager(tableID);
 
         this.tableControllerMap.set(table.id, tableController);
@@ -276,12 +282,31 @@ export class LobbyManager implements MessageBroadcaster {
 
         this.registerMessageHandler(client);
 
-        let tables: TableSummary[] = [...this.tableControllerMap.values()].map(controller => controller.getTableSummary());
-
         // only send the summaries to this new client, not EVERYBODY!!!
-        client.handleMessage(new ActionMessage(new ListTablesAction(tables)));
+        client.handleMessage(new ActionMessage(new ListTablesAction(this.getTablesStatus())));
 
     }  // subscribe
+
+
+    private getTablesStatus(): TableSummary[] {
+
+        return [...this.tableControllerMap.values()].map(controller => controller.getTableSummary());
+
+    }  // getTablesStatus
+
+
+    private pushTableStatus(): void {
+
+        this.broadcastMessage(new ActionMessage(new ListTablesAction(this.getTablesStatus())));
+
+    }  // pushTableStatus
+
+
+    public notifyTableUpdated(table: Table) {
+
+        this.pushTableStatus();
+
+    }  // notifyTableUpdated
 
 
 }

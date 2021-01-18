@@ -212,6 +212,7 @@
     <TypeScriptCompile Include="src\casino\tables\chips\chip.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\betting\blinds-and-antes-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
+    <TypeScriptCompile Include="src\casino\tables\table-observer.ts" />
     <TypeScriptCompile Include="src\casino\tables\table-summary.ts" />
     <TypeScriptCompile Include="src\client\table\pending-commands.ts">
       <SubType>Code</SubType>

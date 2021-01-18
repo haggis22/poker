@@ -30,8 +30,7 @@
 import './lobby.scss';
 
 import Vue from 'vue';
-    import { TableSummary } from '../../../../casino/tables/table-summary';
-    import { LobbyClient } from '../../lobby-client';
+import { LobbyClient } from '../../lobby-client';
 
 
 const LobbyComponent = Vue.extend({

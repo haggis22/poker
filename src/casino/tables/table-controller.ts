@@ -61,6 +61,7 @@ import { PotCardsUsedAction } from "../../actions/table/game/pots/pot-cards-used
 import { ShowdownAction } from "../../actions/table/game/showdown/showdown-action";
 import { InvalidBet } from "./betting/invalid-bet";
 import { InvalidFold } from "./betting/invalid-fold";
+import { TableObserver } from "./table-observer";
 
 const logger: Logger = new Logger();
 
@@ -103,6 +104,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private setStatusRequests: Map<number, SetStatusCommand>;
 
+    private tableObservers: Set<TableObserver>;
+
 
 
 
@@ -122,7 +125,26 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();
 
+        this.tableObservers = new Set<TableObserver>();
+
     }
+
+
+    public addTableObserver(observer: TableObserver): void {
+
+        this.tableObservers.add(observer);
+
+    }
+
+    private notifyObservers(): void {
+
+        for (let observer of this.tableObservers) {
+
+            observer.notifyTableUpdated(this.table);
+
+        }
+
+    }  // notifyObservers
 
 
     private snapshot(obj: any): any {
@@ -379,6 +401,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 seat.player = new Player(command.user.id, command.user.name);
                 this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
+
+                // Tell any watchers that the number of players has changed
+                this.notifyObservers();
+
                 return await this.checkStartHand();
 
             }
