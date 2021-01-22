@@ -45,7 +45,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -63,6 +63,7 @@ import { ShowdownAction } from "../../actions/table/game/showdown/showdown-actio
 import { InvalidBet } from "./betting/invalid-bet";
 import { InvalidFold } from "./betting/invalid-fold";
 import { TableObserver } from "./table-observer";
+import { IServerClient } from "../../communication/server-side/i-server-client";
 
 const logger: Logger = new Logger();
 
@@ -108,6 +109,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private tableObservers: Set<TableObserver>;
 
+    private clients: IServerClient[];
+
 
 
 
@@ -130,6 +133,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.tableObservers = new Set<TableObserver>();
 
+        this.clients = new Array<IServerClient>();
+
     }
 
 
@@ -148,6 +153,27 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         }
 
     }  // notifyObservers
+
+
+    addClient(client: IServerClient) {
+
+        this.clients.push(client);
+
+        // Set this manager to listen to commands from this new client
+        client.registerCommandHandler(this);
+
+        this.log(`Connected client for userID ${client.userID}`);
+
+        client.handleMessage(new ActionMessage(new TableConnectedAction(this.table.id)));
+
+    }
+
+    removeClient(client: IServerClient) {
+
+        this.clients = this.clients.filter(c => c !== client);
+
+    }
+
 
 
     private snapshot(obj: any): any {
@@ -190,13 +216,46 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private broadcastMessage(message: Message | MessagePair): void {
 
-        for (let handler of this.messageHandlers) {
+        for (let client of this.clients) {
 
-            handler.handleMessage(message);
+            if (message instanceof MessagePair) {
+
+                // There is both a public and private message; only the client
+                // with the right userID gets the private message - everyone
+                // else gets the public one
+
+                if (client.userID === message.privateMessage.userID) {
+
+                    // just send the private message to this client
+                    client.handleMessage(message.privateMessage);
+
+                }
+                else if (message.publicMessage) {
+
+                    // If there is a public message, then send it instead to this client
+                    client.handleMessage(message.publicMessage);
+
+                }
+
+            }
+            else {
+
+                // It's a single message, but it is either designed for everyone (userID == null)
+                // or for a specific user 
+
+                if (message.userID == null || message.userID == client.userID) {
+
+                    // this is either a public message, or it is marked for this client
+                    client.handleMessage(message);
+
+                }
+
+            }
 
         }
 
     }   // broadcastMessage
+
 
 
     private queueAction(action: Action, userID?: number) {

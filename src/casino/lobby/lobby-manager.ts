@@ -2,7 +2,6 @@
 import { ActionMessage } from '../../messages/action-message';
 import { Command } from '../../commands/command';
 import { TableController } from '../tables/table-controller';
-import { ClientManager } from '../../communication/server-side/client-manager';
 
 import { Table } from '../tables/table';
 import { TableRules } from '../tables/table-rules';
@@ -34,7 +33,6 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
     private nextID: number;
 
     private tableControllerMap: Map<number, TableController>;
-    private clientManagerMap: Map<number, ClientManager>;
 
     private messageQueue: Array<Message | MessagePair>;
     private lobbySubscribers: MessageHandler[];
@@ -46,7 +44,6 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         this.nextID = 0;
 
         this.tableControllerMap = new Map<number, TableController>();
-        this.clientManagerMap = new Map<number, ClientManager>();
 
         this.messageQueue = new Array<Message | MessagePair>();
         this.lobbySubscribers = new Array<MessageHandler>();
@@ -186,13 +183,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let tableController: TableController = new TableController(table, new Deck());
         tableController.addTableObserver(this);
 
-        let clientManager: ClientManager = new ClientManager(tableID);
-
         this.tableControllerMap.set(table.id, tableController);
-        this.clientManagerMap.set(table.id, clientManager);
-
-        clientManager.setTableController(tableController);
-        tableController.registerMessageHandler(clientManager);
 
         // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
         // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
@@ -230,14 +221,8 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let tableController: TableController = new TableController(table, new Deck());
         tableController.addTableObserver(this);
 
-        let clientManager: ClientManager = new ClientManager(tableID);
-
         this.tableControllerMap.set(table.id, tableController);
-        this.clientManagerMap.set(table.id, clientManager);
-
-        clientManager.setTableController(tableController);
-        tableController.registerMessageHandler(clientManager);
-
+        
         // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
         // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
         tableController.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
@@ -255,23 +240,16 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
 
     }
 
-    private getClientManager(tableID: number): ClientManager {
-
-        // will be `undefined` if the ID is unknown
-        return this.clientManagerMap.get(tableID);
-
-    }
-
 
     addTableClient(tableID: number, client: IServerClient): void {
 
-        let clientManager = this.getClientManager(tableID);
+        let tableController = this.getTableController(tableID);
 
-        this.log(`In addTableClient, found clientManager for ${tableID} ? ${(clientManager != null)}`);
+        this.log(`In addTableClient, found tableController for ${tableID} ? ${(tableController != null)}`);
 
-        if (clientManager != null) {
+        if (tableController != null) {
 
-            clientManager.addClient(client);
+            tableController.addClient(client);
 
         }
 

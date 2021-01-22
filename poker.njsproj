@@ -384,9 +384,6 @@
     <TypeScriptCompile Include="src\commands\table\table-snapshot-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\server-side\client-manager.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\client-side\game-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
