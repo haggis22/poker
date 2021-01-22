@@ -7,9 +7,12 @@
             <log-component :ui="ui"></log-component>
             <table-menu-component v-if="ui.getMySeat()"
                                   :ui="ui"
-                                  :pending-fold.sync="ui.pendingCommands.fold"
                                   :is-sitting-out.sync="ui.isSittingOut">
             </table-menu-component>
+            <betting-menu-component v-if="ui.getMySeat()"
+                                  :ui="ui"
+                                  :pending-fold.sync="ui.pendingCommands.fold">
+            </betting-menu-component>
         </div>
         <div v-else>
             We have no table yet.
@@ -30,6 +33,7 @@
     import TableComponent from './components/table/TableComponent.vue';
     import LogComponent from './components/log/LogComponent.vue';
     import TableMenuComponent from './components/table-menu/TableMenuComponent.vue';
+    import BettingMenuComponent from './components/betting-menu/BettingMenuComponent.vue';
     import ChatComponent from './components/chat/ChatComponent.vue';
 
 
@@ -39,6 +43,7 @@
             'table-component': TableComponent,
             'log-component': LogComponent,
             'table-menu-component': TableMenuComponent,
+            'betting-menu-component': BettingMenuComponent,
             'chat-component': ChatComponent
         },
         data() {
