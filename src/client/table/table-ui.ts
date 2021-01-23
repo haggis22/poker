@@ -108,7 +108,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.isShowdownRequired = false;
         this.usedCards = new Array<Card>();
 
-
     }
 
 

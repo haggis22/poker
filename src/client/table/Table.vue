@@ -24,11 +24,14 @@
 <script lang="ts">
 
     import Vue from 'vue';
+    import WebSocket from 'ws';
+
 
     import { TableUI } from './table-ui';
     import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
     import { TableWatcher } from '../../casino/tables/table-watcher';
     import { GameClient } from '../../communication/client-side/game-client';
+    import { WebSocketWrapper } from '../../communication/web-socket-wrapper';
 
     import TableComponent from './components/table/TableComponent.vue';
     import LogComponent from './components/log/LogComponent.vue';
@@ -49,6 +52,7 @@
         data() {
 
             let values = {
+
                 tableID: parseInt(this.$route.params.tableID, 10),
 
                 ui: null,
@@ -62,13 +66,13 @@
 
             const ws = new WebSocket('ws://localhost:3000');
 
-            ws.onopen = (evt: MessageEvent) => {
+            ws.on('open', () => {
 
                 console.log('Connection opened');
 
                 let ui: TableUI = new TableUI(this.tableID, new MoneyFormatter());
                 let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
-                let gameClient: GameClient = new GameClient(ws, 'dshell');
+                let gameClient: GameClient = new GameClient(new WebSocketWrapper(ws), 'dshell');
 
                 // Now join all the links in the chain
                 ui.registerCommandHandler(tableWatcher);
@@ -83,7 +87,7 @@
 
                 ui.authenticate();
 
-            };
+            });
 
         }
 

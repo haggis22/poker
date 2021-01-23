@@ -3,42 +3,30 @@ import { Command } from "../../commands/command";
 import { MessageBroadcaster } from "../../messages/message-broadcaster";
 import { MessageHandler } from "../../messages/message-handler";
 import { Message } from "../../messages/message";
-import { Serializer } from "../serializer";
 import { ActionMessage } from "../../messages/action-message";
+import { ISocketWrapper } from "../i-socket-wrapper";
 
 export class GameClient implements MessageBroadcaster, CommandHandler {
 
-    private socket: WebSocket;
+    private socket: ISocketWrapper;
     private authToken: string;
-
-    private serializer: Serializer;
 
     private messageHandlers: MessageHandler[];
 
 
-    constructor(socket: WebSocket, authToken: string) {
+    constructor(socket: ISocketWrapper, authToken: string) {
 
         this.socket = socket;
+        this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
+
         this.authToken = authToken;
 
-        console.log('Setting up web socket listener');
-
-        this.socket.onmessage = (evt: MessageEvent) => {
-
-            this.receive(evt.data);
-
-        };
-
-
         this.messageHandlers = new Array<MessageHandler>();
-        this.serializer = new Serializer();
 
     }
 
 
-    receive(msg: string): void {
-
-        let msgObj: any = this.serializer.deserialize(msg);
+    receive(msgObj: any): void {
 
         // this.log(`received ${msgObj.constructor.name}: ${msg}`);
 
@@ -94,7 +82,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
         // Stamp every outgoing message with the saved authorization token
         command.authToken = this.authToken;
 
-        this.socket.send(this.serializer.serialize(command));
+        this.socket.send(command);
 
     }  // handleCommand
 

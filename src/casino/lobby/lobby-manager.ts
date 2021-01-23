@@ -241,7 +241,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
     }
 
 
-    addTableClient(tableID: number, client: IServerClient): void {
+    private addTableClient(tableID: number, client: IServerClient): void {
 
         let tableController = this.getTableController(tableID);
 

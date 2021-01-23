@@ -145,6 +145,7 @@
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\commands\table\chat\" />
     <Folder Include="src\communication\client-side\" />
+    <Folder Include="src\communication\fake\" />
     <Folder Include="src\communication\server-side\" />
     <Folder Include="src\games\poker\games\" />
     <Folder Include="src\messages\" />
@@ -239,13 +240,14 @@
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\client-side\local-game-client.ts" />
-    <TypeScriptCompile Include="src\communication\fake-socket.ts">
+    <TypeScriptCompile Include="src\communication\client-side\client-web-socket-wrapper.ts" />
+    <TypeScriptCompile Include="src\communication\fake\fake-socket.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\communication\deep-copier.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\communication\i-socket-wrapper.ts" />
     <TypeScriptCompile Include="src\communication\serializable.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -255,7 +257,8 @@
     <TypeScriptCompile Include="src\communication\server-side\i-server-client.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\server-side\local-server-client.ts" />
+    <TypeScriptCompile Include="src\communication\fake\fake-socket-wrapper.ts" />
+    <TypeScriptCompile Include="src\communication\server-side\server-web-socket-wrapper.ts" />
     <TypeScriptCompile Include="src\games\hand-selectors\omaha-selector.ts" />
     <TypeScriptCompile Include="src\games\hand-selectors\hold-em-selector.ts" />
     <TypeScriptCompile Include="src\games\poker\games\poker-game-seven-card-stud.ts" />

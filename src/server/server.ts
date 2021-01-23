@@ -4,16 +4,19 @@ import * as WebSocket from 'ws';
 
 import { AddressInfo } from 'net';
 
-import { UserSummary } from '../players/user-summary';
 import { MoneyFormatter } from '../casino/tables/chips/money-formatter';
 import { TableWatcher } from '../casino/tables/table-watcher';
 import { ServerClient } from '../communication/server-side/server-client';
-import { LocalGameClient } from '../communication/client-side/local-game-client';
-import { LocalServerClient } from '../communication/server-side/local-server-client';
 import { RoboTableUI } from '../ai/robo-table-ui';
 import { UserManager } from '../players/user-manager';
 import { LobbyManager } from '../casino/lobby/lobby-manager';
+
 import { IServerClient } from '../communication/server-side/i-server-client';
+import { GameClient } from '../communication/client-side/game-client';
+
+import { FakeSocket } from '../communication/fake/fake-socket';
+import { FakeSocketWrapper } from '../communication/fake/fake-socket-wrapper';
+import { WebSocketWrapper } from '../communication/web-socket-wrapper';
 
 const app = express();
 
@@ -54,7 +57,7 @@ createRoboClient(1, 'benney');
 
 wss.on('connection', (socket: WebSocket) => {
 
-    clients.add(new ServerClient(socket, userManager, lobbyManager));
+    clients.add(new ServerClient(new WebSocketWrapper(socket), userManager, lobbyManager));
 
 });
 
@@ -62,17 +65,18 @@ wss.on('connection', (socket: WebSocket) => {
 
 
 
-function createRoboClient(tableID: number, authToken: string): LocalServerClient {
+function createRoboClient(tableID: number, authToken: string): void {
 
-    let user: UserSummary = userManager.authenticate(authToken);
+    let clientSocketSide: FakeSocket = new FakeSocket();
+    let serverSocketSide: FakeSocket = new FakeSocket();
 
-    // Server Side
-    let roboServerClient: LocalServerClient = new LocalServerClient(lobbyManager, user);
+    clientSocketSide.connect(serverSocketSide);
+    serverSocketSide.connect(clientSocketSide);
 
     // Client Side
-    let ui: RoboTableUI = new RoboTableUI(user, new MoneyFormatter());
+    let ui: RoboTableUI = new RoboTableUI(tableID, new MoneyFormatter());
     let tableWatcher: TableWatcher = new TableWatcher(tableID);
-    let gameClient: LocalGameClient = new LocalGameClient(roboServerClient, authToken);
+    let gameClient: GameClient = new GameClient(new FakeSocketWrapper(clientSocketSide), authToken);
 
     // Now join all the links in the chain
     ui.registerCommandHandler(tableWatcher);
@@ -82,11 +86,11 @@ function createRoboClient(tableID: number, authToken: string): LocalServerClient
 
     gameClient.registerMessageHandler(tableWatcher);
 
-    roboServerClient.connect(gameClient);
+    // Server Side
+    clients.add(new ServerClient(new FakeSocketWrapper(serverSocketSide), userManager, lobbyManager));
 
-    // Finally, connect the constructed server client to the lobby manager
-    lobbyManager.addTableClient(tableID, roboServerClient);
+    // this will kick off the process of the robot client getting itself authorized, joining the table, etc
+    ui.authenticate();
 
-    return roboServerClient;
 
 }  // createRoboClient

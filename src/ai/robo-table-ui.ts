@@ -15,7 +15,7 @@ import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { SetStatusCommand } from "../commands/table/set-status-command";
 import { AddChipsCommand } from "../commands/table/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, AnteTurnAction, IsInHandAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, AnteTurnAction, IsInHandAction, AuthenticateCommand, AuthenticatedAction, JoinTableCommand } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -37,15 +37,16 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private chipFormatter: IChipFormatter;
 
+    private tableID: number;
     private table: Table;
     private game: Game;
+
     private betController: BetController;
 
 
-    constructor(user: UserSummary, chipFormatter: IChipFormatter) {
+    constructor(tableID: number, chipFormatter: IChipFormatter) {
 
-        this.user = user;
-
+        this.tableID = tableID;
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
@@ -53,8 +54,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.betController = new BetController();
-
-        this.log(`Created Robo UI for user ${user.name}`);
 
     }
 
@@ -76,26 +75,25 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         let action: Action = message.action;
 
+        if (action instanceof AuthenticatedAction) {
+
+            return this.authenticatedAction(action);
+
+        }
+
         if (action instanceof TableConnectedAction) {
 
-            // we are connected, so request a snapshot of the table for this user
-            this.broadcastCommand(new TableSnapshotCommand(action.tableID))
-            return;
+            return this.tableConnectedAction(action);
+
+        }
+
+        if (action instanceof TableSnapshotAction) {
+
+            return this.tableSnapshotAction(action);
 
         }
 
         if (this.table == null) {
-
-            if (action instanceof TableSnapshotAction) {
-
-                this.table = action.table;
-
-                // request a seat at the table - the null parameter means any seat will do
-                this.broadcastCommand(new RequestSeatCommand(this.table.id, null));
-
-                return;
-
-            }
 
             // we don't have a table yet, so we can't do anything else
             return;
@@ -104,102 +102,103 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof SetGameAction) {
 
-            return this.setGame(action);
+            return this.setGameAction(action);
 
         }
 
         if (action instanceof PlayerSeatedAction) {
 
-            return this.seatPlayer(action);
+            return this.playerSeatedAction(action);
 
         }
 
         if (action instanceof AddChipsAction) {
 
-            return this.addChips(action);
+            return this.addChipsAction(action);
         }
 
         if (action instanceof StackUpdateAction) {
 
-            return this.updateStack(action);
+            return this.stackUpdateAction(action);
         }
 
         if (action instanceof TableStateAction) {
 
-            return this.changeTableState();
+            return this.tableStateAction();
 
         }
 
         if (action instanceof IsInHandAction) {
 
-            return this.setIsInHand(action);
+            return this.isInHandAction(action);
 
         }
 
         if (action instanceof UpdateBetsAction) {
 
-            return this.updateBets(action);
+            return this.updateBetsAction(action);
 
         }
 
         if (action instanceof MoveButtonAction) {
 
-            return this.moveButton(action);
+            return this.moveButtonAction(action);
         }
 
         if (action instanceof DealCardAction) {
 
-            return this.dealCard(action);
+            return this.dealCardAction(action);
         }
 
         if (action instanceof BetTurnAction) {
 
-            return this.betTurn(action);
+            return this.betTurnAction(action);
         }
 
         if (action instanceof AnteTurnAction) {
 
-            return this.anteTurn(action);
+            return this.anteTurnAction(action);
         }
 
         if (action instanceof BetAction) {
 
-            return this.bet(action);
+            return this.betAction(action);
 
         }
 
         if (action instanceof FoldAction) {
 
-            return this.fold(action);
+            return this.foldAction(action);
 
         }
 
         if (action instanceof FlipCardsAction) {
 
-            return this.flipCards(action);
+            return this.flipCardsAction(action);
 
         }
 
         if (action instanceof DeclareHandAction) {
 
-            return this.declareHand(action);
+            return this.declareHandAction(action);
 
         }
 
         if (action instanceof WinPotAction) {
 
-            return this.winPot(action);
+            return this.winPotAction(action);
 
         }
 
         if (action instanceof BetReturnedAction) {
 
-            return this.returnBet(action);
+            return this.betReturnedAction(action);
         }
 
         this.log(`Heard ${action.constructor.name}`);
 
     }
+
 
     registerCommandHandler(handler: CommandHandler) {
 
@@ -230,6 +229,39 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }
+
+    public authenticate(): void {
+
+        this.broadcastCommand(new AuthenticateCommand());
+
+    }   // authenticate
+
+
+    private authenticatedAction(action: AuthenticatedAction): void {
+
+        this.log(`Heared AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${this.tableID}`);
+        this.user = action.user;
+
+        this.broadcastCommand(new JoinTableCommand(this.tableID));
+
+    }   // authenticated
+
+
+    private tableConnectedAction(action: TableConnectedAction): void {
+
+        // we are connected, so request a snapshot of the table for this user
+        this.broadcastCommand(new TableSnapshotCommand(action.tableID));
+
+    }
+
+    private tableSnapshotAction(action: TableSnapshotAction): void {
+
+        this.table = action.table;
+
+        // request a seat at the table - the null parameter means any seat will do
+        this.broadcastCommand(new RequestSeatCommand(this.table.id, null));
+
+    }  // tableSnapshotAction
 
 
     private calculateBuyIn(): number {
@@ -264,7 +296,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    private setGame(action: SetGameAction): void {
+    private setGameAction(action: SetGameAction): void {
 
         if (!this.game || this.game.id != action.gameID) {
 
@@ -278,7 +310,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }   // setGame
 
 
-    private seatPlayer(action: PlayerSeatedAction): void {
+    private playerSeatedAction(action: PlayerSeatedAction): void {
 
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
@@ -320,7 +352,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }   // findPlayer
 
 
-    private addChips(action: AddChipsAction): void {
+    private addChipsAction(action: AddChipsAction): void {
 
         let player: Player = this.findPlayer(action.userID);
 
@@ -335,7 +367,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private updateStack(action: StackUpdateAction): void {
+    private stackUpdateAction(action: StackUpdateAction): void {
 
         let player = this.findPlayer(action.playerID);
 
@@ -363,15 +395,18 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private log(message: string): void {
 
-        // For now, only log from Danny's POV
-        if (this.user.id === 2) {
+        if (this.user == null) {
+            console.log(`RoboUI (unauthorized): ${message}`);
+        }
+        // For now, only log from Paul's POV
+        else if (this.user.username == 'ptunney') {
             console.log(`RoboUI (${this.user.name}): ${message}`);
         }
 
     }
 
 
-    private changeTableState(): void {
+    private tableStateAction(): void {
 
         let state = this.table.state;
 
@@ -384,7 +419,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // changeTableState
 
 
-    private setIsInHand(action: IsInHandAction): void {
+    private isInHandAction(action: IsInHandAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -413,7 +448,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }   // startHand
 
 
-    private updateBets(action: UpdateBetsAction): void {
+    private updateBetsAction(action: UpdateBetsAction): void {
 
         for (let pot of this.table.betStatus.pots) {
         
@@ -434,7 +469,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private moveButton(action: MoveButtonAction): void {
+    private moveButtonAction(action: MoveButtonAction): void {
 
         let seat = this.findSeat(this.table.buttonIndex);
 
@@ -443,7 +478,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }   // moveButton
 
 
-    private dealCard(action: DealCardAction): void {
+    private dealCardAction(action: DealCardAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -461,7 +496,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }   // dealCard
 
 
-    private betTurn(action: BetTurnAction): void {
+    private betTurnAction(action: BetTurnAction): void {
 
         let betStatus: BetStatus = action.betStatus;
 
@@ -546,7 +581,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // betTurn
 
 
-    private anteTurn(action: AnteTurnAction): void {
+    private anteTurnAction(action: AnteTurnAction): void {
 
         let betStatus: BetStatus = action.betStatus;
 
@@ -577,7 +612,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // anteTurn
 
 
-    private bet(action: BetAction): void {
+    private betAction(action: BetAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -608,7 +643,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // bet
 
 
-    private fold(action: FoldAction): void {
+    private foldAction(action: FoldAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -617,7 +652,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // fold
 
 
-    private flipCards(action: FlipCardsAction): void {
+    private flipCardsAction(action: FlipCardsAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -630,7 +665,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // flipCards
 
 
-    private declareHand(action: DeclareHandAction): void {
+    private declareHandAction(action: DeclareHandAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -639,7 +674,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // declareHand
 
 
-    private winPot(action: WinPotAction): void {
+    private winPotAction(action: WinPotAction): void {
 
         let pot: WonPot = action.pot;
 
@@ -662,7 +697,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }  // winPot
 
 
-    private returnBet(action: BetReturnedAction): void {
+    private betReturnedAction(action: BetReturnedAction): void {
 
         let seat = this.findSeat(action.seatIndex);
         

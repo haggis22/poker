@@ -18,14 +18,16 @@ export class UserManager {
         this.userMapByID = new Map<number, User>();
         this.userMapByUsername = new Map<string, User>();
 
-        this.addUser(new User(1, 'dshell', 'Danny', 5000));
-        this.addUser(new User(2, 'moglesby', 'Matt', 4000));
-        this.addUser(new User(3, 'ptunney', 'Paul', 4000));
-        this.addUser(new User(4, 'srao', 'Sekhar', 4000));
-        this.addUser(new User(5, 'pgrudowski', 'Paul', 4000));
-        this.addUser(new User(6, 'jhoepken', 'Joe', 4000));
-        this.addUser(new User(7, 'mgillmore', 'Mark', 4000));
-        this.addUser(new User(8, 'benney', 'Billy', 4000));
+        let nextUserID: number = 0;
+
+        this.addUser(new User(++nextUserID, 'dshell', 'Danny', 5000));
+        this.addUser(new User(++nextUserID, 'moglesby', 'Matt', 4000));
+        this.addUser(new User(++nextUserID, 'ptunney', 'Paul', 4000));
+        this.addUser(new User(++nextUserID, 'srao', 'Sekhar', 4000));
+        this.addUser(new User(++nextUserID, 'pgrudowski', 'Paul', 4000));
+        this.addUser(new User(++nextUserID, 'jhoepken', 'Joe', 4000));
+        this.addUser(new User(++nextUserID, 'mgillmore', 'Mark', 4000));
+        this.addUser(new User(++nextUserID, 'benney', 'Billy', 4000));
 
     }
 

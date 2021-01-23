@@ -1,9 +1,6 @@
-﻿import * as WebSocket from 'ws';
-
-import { CommandHandler } from "../../commands/command-handler";
+﻿import { CommandHandler } from "../../commands/command-handler";
 import { Command } from "../../commands/command";
 import { Message } from "../../messages/message";
-import { Serializer } from "../serializer";
 import { IServerClient } from "./i-server-client";
 import { ActionMessage } from '../../messages/action-message';
 import { LobbyManager } from '../../casino/lobby/lobby-manager';
@@ -11,12 +8,12 @@ import { LobbyCommand } from '../../commands/lobby/lobby-command';
 import { UserSummary } from "../../players/user-summary";
 import { UserManager } from '../../players/user-manager';
 import { SecurityCommand } from '../../commands/security/security-command';
+import { ISocketWrapper } from '../i-socket-wrapper';
 
 
 export class ServerClient implements IServerClient {
 
-    private socket: WebSocket;
-    private serializer: Serializer;
+    private socket: ISocketWrapper;
 
     private userManager: UserManager;
     private lobbyManager: LobbyManager;
@@ -25,20 +22,15 @@ export class ServerClient implements IServerClient {
 
     private commandHandlers: CommandHandler[];
 
-    constructor(socket: WebSocket, userManager: UserManager, lobbyManager: LobbyManager) {
+    constructor(socket: ISocketWrapper, userManager: UserManager, lobbyManager: LobbyManager) {
 
         this.socket = socket;
+        this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
 
         this.userManager = userManager;
         this.lobbyManager = lobbyManager;
 
-        this.socket.on('message', (message: string) => {
-            this.receive(message);
-        });
-
         this.commandHandlers = new Array<CommandHandler>();
-
-        this.serializer = new Serializer();
 
     }
 
@@ -49,24 +41,13 @@ export class ServerClient implements IServerClient {
     }
 
 
+    receive(obj: any): void {
 
-    private send(o: any): void {
+        if (obj) {
 
-        if (this.socket) {
-            this.socket.send(this.serializer.serialize(o));
-        }
+            this.log(`Heard ${obj.constructor.name}: ${JSON.stringify(obj)}`);
 
-    }
-
-    receive(msg: string): void {
-
-        let o: any = this.serializer.deserialize(msg);
-
-        if (o) {
-
-            this.log(`Heard ${o.constructor.name}: ${JSON.stringify(o)}`);
-
-            if (!(o instanceof Command)) {
+            if (!(obj instanceof Command)) {
 
                 // Can't do anything with messages that aren't Commands
                 return;
@@ -74,29 +55,29 @@ export class ServerClient implements IServerClient {
             }
 
             // Authenticate the user on every message so that a logged-out user does not continue to act
-            let user: UserSummary = this.userManager.authenticate(o.authToken);
+            let user: UserSummary = this.userManager.authenticate(obj.authToken);
 
             if (user) {
 
-                o.user = user;
-                this.userID = o.userID = user.id;
+                obj.user = user;
+                this.userID = obj.userID = user.id;
 
             }
             else {
-                o.user = null;
-                this.userID = o.userID = null;
+                obj.user = null;
+                this.userID = obj.userID = null;
             }
 
 
-            if (o instanceof SecurityCommand) {
+            if (obj instanceof SecurityCommand) {
 
-                return this.handleMessage(this.userManager.handleCommand(o, this));
+                return this.handleMessage(this.userManager.handleCommand(obj, this));
 
             }
 
-            if (o instanceof LobbyCommand) {
+            if (obj instanceof LobbyCommand) {
 
-                return this.lobbyManager.handleCommand(o, this);
+                return this.lobbyManager.handleCommand(obj, this);
 
             }
 
@@ -104,7 +85,7 @@ export class ServerClient implements IServerClient {
             // Pass the message along
             for (let handler of this.commandHandlers) {
 
-                handler.handleCommand(o);
+                handler.handleCommand(obj);
 
             }
 
@@ -132,12 +113,14 @@ export class ServerClient implements IServerClient {
 
         // ServerClient objects only get the message object that is suitable for passing down the link, so ship it!
 
+        /*
         console.log(`ServerClient sending ${message.constructor.name}`);
         if (message instanceof ActionMessage) {
             console.log(`  ServerClient sending message ${message.action.constructor.name}`);
         }
+        */
 
-        this.send(message);
+        this.socket.send(message);
 
     }
 
