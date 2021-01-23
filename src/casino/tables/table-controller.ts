@@ -107,6 +107,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private setStatusRequests: Map<number, SetStatusCommand>;
     private standUpRequests: Map<number, StandUpCommand>;
 
+    // Key = userID
+    // Value = number of chips to add on, when possible
+    private chipsToAdd: Map<number, number>;
+
     private tableObservers: Set<TableObserver>;
 
     private clients: IServerClient[];
@@ -130,6 +134,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();
         this.standUpRequests = new Map<number, StandUpCommand>();
+        this.chipsToAdd = new Map<number, number>();
 
         this.tableObservers = new Set<TableObserver>();
 
@@ -691,7 +696,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             }
 
             // we can't add the chips right now, but they will be added before the next hand
-            player.chipsToAdd += command.amount;
+            this.chipsToAdd.set(command.userID, command.amount);
 
             // TODO: create delayed AddChips action
             this.queueMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`, command.userID));
@@ -991,15 +996,24 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player) {
 
-                if (seat.player.chipsToAdd) {
 
-                    this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, seat.player.chipsToAdd));
+                if (this.chipsToAdd.has(seat.player.userID)) {
 
-                    // Add their chips "to-be-added" to their currents stack
-                    seat.player.chips += seat.player.chipsToAdd;
-                    seat.player.chipsToAdd = 0;
+                    let numChips: number = this.chipsToAdd.get(seat.player.userID);
 
-                    this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+                    if (numChips > 0) {
+
+                        this.queueAction(new AddChipsAction(this.table.id, seat.player.userID, numChips));
+
+                        // Add their chips "to-be-added" to their currents stack
+                        seat.player.chips += numChips;
+
+
+                        this.queueAction(new StackUpdateAction(this.table.id, seat.player.userID, seat.player.chips));
+
+                    }
+
+                    this.chipsToAdd.delete(seat.player.userID);
 
                 }   // they have chips waiting to add
 

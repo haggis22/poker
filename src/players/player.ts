@@ -4,7 +4,6 @@
     public name: string;
 
     public chips: number;
-    public chipsToAdd: number;
 
     public isSittingOut: boolean;
 
@@ -14,16 +13,9 @@
         this.userID = userID;
         this.name = name;
 
-        this.chips = this.chipsToAdd = 0;
+        this.chips = 0;
 
         this.isSittingOut = null;
-
-    }
-
-
-    public getTotalChips(): number {
-
-        return this.chips + this.chipsToAdd;
 
     }
 
