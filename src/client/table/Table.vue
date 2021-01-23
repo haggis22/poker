@@ -24,14 +24,12 @@
 <script lang="ts">
 
     import Vue from 'vue';
-    import WebSocket from 'ws';
-
 
     import { TableUI } from './table-ui';
     import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
     import { TableWatcher } from '../../casino/tables/table-watcher';
     import { GameClient } from '../../communication/client-side/game-client';
-    import { WebSocketWrapper } from '../../communication/web-socket-wrapper';
+    import { BrowserWebSocketWrapper } from '../../communication/client-side/browser-web-socket-wrapper';
 
     import TableComponent from './components/table/TableComponent.vue';
     import LogComponent from './components/log/LogComponent.vue';
@@ -66,13 +64,13 @@
 
             const ws = new WebSocket('ws://localhost:3000');
 
-            ws.on('open', () => {
+            ws.addEventListener('open', () => {
 
                 console.log('Connection opened');
 
                 let ui: TableUI = new TableUI(this.tableID, new MoneyFormatter());
                 let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
-                let gameClient: GameClient = new GameClient(new WebSocketWrapper(ws), 'dshell');
+                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
 
                 // Now join all the links in the chain
                 ui.registerCommandHandler(tableWatcher);

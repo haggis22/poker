@@ -1,15 +1,14 @@
-import WebSocket from 'ws';
+import { ISocketWrapper } from '../i-socket-wrapper';
+import { Serializer } from '../serializer';
+import { IBrowserWebSocket } from './i-browser-web-socket';
 
-import { ISocketWrapper } from './i-socket-wrapper';
-import { Serializer } from './serializer';
 
+export class BrowserWebSocketWrapper implements ISocketWrapper {
 
-export class WebSocketWrapper implements ISocketWrapper {
-
-    private socket: WebSocket;
+    private socket: IBrowserWebSocket;
     private serializer: Serializer
 
-    constructor(socket: WebSocket) {
+    constructor(socket: IBrowserWebSocket) {
 
         this.socket = socket;
         this.serializer = new Serializer();
@@ -18,7 +17,7 @@ export class WebSocketWrapper implements ISocketWrapper {
 
     public addEventListener(method: 'message', callback: (obj: any) => void) {
 
-        this.socket.addEventListener(method, (event) => {
+        this.socket.onmessage = (event: MessageEvent) => { 
 
             if (typeof event.data === 'string') {
 
@@ -28,7 +27,7 @@ export class WebSocketWrapper implements ISocketWrapper {
                 }
             }
 
-        });
+        };
 
     }
 

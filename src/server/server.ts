@@ -16,7 +16,7 @@ import { GameClient } from '../communication/client-side/game-client';
 
 import { FakeSocket } from '../communication/fake/fake-socket';
 import { FakeSocketWrapper } from '../communication/fake/fake-socket-wrapper';
-import { WebSocketWrapper } from '../communication/web-socket-wrapper';
+import { ServerWebSocketWrapper } from '../communication/server-side/server-web-socket-wrapper';
 
 const app = express();
 
@@ -57,7 +57,7 @@ createRoboClient(1, 'benney');
 
 wss.on('connection', (socket: WebSocket) => {
 
-    clients.add(new ServerClient(new WebSocketWrapper(socket), userManager, lobbyManager));
+    clients.add(new ServerClient(new ServerWebSocketWrapper(socket), userManager, lobbyManager));
 
 });
 

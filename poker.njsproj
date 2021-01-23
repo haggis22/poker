@@ -240,7 +240,8 @@
     <TypeScriptCompile Include="src\commands\table\table-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\communication\client-side\client-web-socket-wrapper.ts" />
+    <TypeScriptCompile Include="src\communication\client-side\browser-web-socket-wrapper.ts" />
+    <TypeScriptCompile Include="src\communication\client-side\i-browser-web-socket.ts" />
     <TypeScriptCompile Include="src\communication\fake\fake-socket.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

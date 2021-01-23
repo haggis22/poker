@@ -14,6 +14,7 @@
     import { LobbyClient } from './lobby-client';
     import { MoneyFormatter } from '../../casino/tables/chips/money-formatter';
     import { GameClient } from '../../communication/client-side/game-client';
+    import { BrowserWebSocketWrapper } from '../../communication/client-side/browser-web-socket-wrapper';
 
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
 
@@ -36,12 +37,12 @@
 
             const ws = new WebSocket('ws://localhost:3000');
 
-            ws.onopen = (evt: MessageEvent) => {
+            ws.addEventListener('open', () => { 
 
                 console.log('Connection opened');
 
                 let client: LobbyClient = new LobbyClient(new MoneyFormatter());
-                let gameClient: GameClient = new GameClient(ws, 'dshell');
+                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
 
                 // Now join all the links in the chain
                 client.registerCommandHandler(gameClient);
@@ -51,7 +52,7 @@
 
                 client.authenticate();
 
-            };
+            });
 
         }
 
