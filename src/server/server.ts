@@ -4,12 +4,15 @@ import * as WebSocket from 'ws';
 
 import { AddressInfo } from 'net';
 
+import { UserManager } from '../players/user-manager';
+import { LobbyManager } from '../casino/lobby/lobby-manager';
+import { CashierManager } from '../casino/cashier/cashier-manager';
+
 import { MoneyFormatter } from '../casino/tables/chips/money-formatter';
 import { TableWatcher } from '../casino/tables/table-watcher';
 import { ServerClient } from '../communication/server-side/server-client';
 import { RoboTableUI } from '../ai/robo-table-ui';
-import { UserManager } from '../players/user-manager';
-import { LobbyManager } from '../casino/lobby/lobby-manager';
+
 
 import { IServerClient } from '../communication/server-side/i-server-client';
 import { GameClient } from '../communication/client-side/game-client';
@@ -40,6 +43,7 @@ app.use(express.static(clientPath));
 
 let userManager: UserManager = new UserManager();
 let lobbyManager: LobbyManager = new LobbyManager();
+let cashierManager: CashierManager = new CashierManager(userManager, lobbyManager);
 
 let clients: Set<IServerClient> = new Set<IServerClient>();
 
@@ -57,7 +61,7 @@ createRoboClient(1, 'benney');
 
 wss.on('connection', (socket: WebSocket) => {
 
-    clients.add(new ServerClient(new ServerWebSocketWrapper(socket), userManager, lobbyManager));
+    clients.add(new ServerClient(new ServerWebSocketWrapper(socket), userManager, lobbyManager, cashierManager));
 
 });
 
@@ -87,7 +91,7 @@ function createRoboClient(tableID: number, authToken: string): void {
     gameClient.registerMessageHandler(tableWatcher);
 
     // Server Side
-    clients.add(new ServerClient(new FakeSocketWrapper(serverSocketSide), userManager, lobbyManager));
+    clients.add(new ServerClient(new FakeSocketWrapper(serverSocketSide), userManager, lobbyManager, cashierManager));
 
     // this will kick off the process of the robot client getting itself authorized, joining the table, etc
     ui.authenticate();

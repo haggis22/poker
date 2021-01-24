@@ -9,6 +9,8 @@ import { UserSummary } from "../../players/user-summary";
 import { UserManager } from '../../players/user-manager';
 import { SecurityCommand } from '../../commands/security/security-command';
 import { ISocketWrapper } from '../i-socket-wrapper';
+import { CashierManager } from "../../casino/cashier/cashier-manager";
+import { CashierCommand } from "../../commands/cashier/cashier-command";
 
 
 export class ServerClient implements IServerClient {
@@ -17,18 +19,20 @@ export class ServerClient implements IServerClient {
 
     private userManager: UserManager;
     private lobbyManager: LobbyManager;
+    private cashierManager: CashierManager;
 
     public userID: number;
 
     private commandHandlers: CommandHandler[];
 
-    constructor(socket: ISocketWrapper, userManager: UserManager, lobbyManager: LobbyManager) {
+    constructor(socket: ISocketWrapper, userManager: UserManager, lobbyManager: LobbyManager, cashierManager: CashierManager) {
 
         this.socket = socket;
         this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
 
         this.userManager = userManager;
         this.lobbyManager = lobbyManager;
+        this.cashierManager = cashierManager;
 
         this.commandHandlers = new Array<CommandHandler>();
 
@@ -72,6 +76,12 @@ export class ServerClient implements IServerClient {
             if (obj instanceof SecurityCommand) {
 
                 return this.handleMessage(this.userManager.handleCommand(obj, this));
+
+            }
+
+            if (obj instanceof CashierCommand) {
+
+                return this.cashierManager.handleCommand(obj);
 
             }
 

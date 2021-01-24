@@ -56,7 +56,7 @@ export { FacedownCard } from "../cards/face-down-card";
 
 export { StackUpdateAction } from "../actions/table/players/stack-update-action";
 export { AddChipsAction } from "../actions/table/players/add-chips-action";
-export { AddChipsCommand } from "../commands/table/add-chips-command";
+export { AddChipsCommand } from "../commands/cashier/add-chips-command";
 
 export { StartHandState } from "../casino/tables/states/start-hand-state";
 export { DealState } from "../casino/tables/states/dealing/deal-state";

@@ -18,7 +18,6 @@ import { Blind } from '../tables/betting/blind';
 
 import { LobbyCommand } from '../../commands/lobby/lobby-command';
 import { JoinTableCommand } from '../../commands/lobby/join-table-command';
-import { UserManager } from '../../players/user-manager';
 import { MessageBroadcaster } from '../../messages/message-broadcaster';
 import { MessageHandler } from '../../messages/message-handler';
 import { Message } from "../../messages/message";
@@ -76,7 +75,6 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
             return this.subscribe(serverClient);
 
         }
-
 
     }
 
@@ -233,7 +231,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
     }  // createKershner
 
 
-    getTableController(tableID: number): TableController {
+    public getTableController(tableID: number): TableController {
 
         // will be `undefined` if the ID is unknown
         return this.tableControllerMap.get(tableID);
@@ -285,6 +283,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         this.pushTableStatus();
 
     }  // notifyTableUpdated
+
 
 
 }

@@ -35,9 +35,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="gulpfile.js" />
-    <Compile Include="public\chat.js">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="src\actions\lobby\list-tables.action.ts">
       <SubType>Code</SubType>
     </Compile>
@@ -52,9 +49,6 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
-    <Content Include="public\index.html">
-      <SubType>Code</SubType>
-    </Content>
     <Content Include="README.md" />
     <Content Include="src\actions\table\game\flip-cards-action.ts" />
     <Content Include="src\casino\tables\chips\money-formatter.ts">
@@ -108,7 +102,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
-    <Folder Include="public\" />
     <Folder Include="src\actions\lobby\" />
     <Folder Include="src\actions\security\" />
     <Folder Include="src\actions\table\game\" />
@@ -119,6 +112,7 @@
     <Folder Include="src\actions\table\game\showdown\" />
     <Folder Include="src\actions\table\chat\" />
     <Folder Include="src\casino\lobby\" />
+    <Folder Include="src\casino\cashier\" />
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\lobby\components\lobby\" />
@@ -141,6 +135,7 @@
     <Folder Include="src\client\router\" />
     <Folder Include="src\client\table\components\" />
     <Folder Include="src\commands\lobby\" />
+    <Folder Include="src\commands\cashier\" />
     <Folder Include="src\commands\security\" />
     <Folder Include="src\commands\table\betting\" />
     <Folder Include="src\commands\table\chat\" />
@@ -204,6 +199,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\cards\face-down-card.ts" />
+    <TypeScriptCompile Include="src\casino\cashier\cashier-manager.ts" />
     <TypeScriptCompile Include="src\casino\lobby\lobby-manager.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\ante.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\bet-status.ts" />
@@ -224,6 +220,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\table\components\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\client\router\index.ts" />
+    <TypeScriptCompile Include="src\commands\cashier\cashier-command.ts" />
     <TypeScriptCompile Include="src\commands\lobby\subscribe-lobby-command.ts" />
     <TypeScriptCompile Include="src\commands\security\authenticate-command.ts" />
     <TypeScriptCompile Include="src\commands\security\security-command.ts" />
@@ -372,7 +369,7 @@
     <TypeScriptCompile Include="src\commands\command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\commands\table\add-chips-command.ts">
+    <TypeScriptCompile Include="src\commands\cashier\add-chips-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\commands\lobby\join-table-command.ts">

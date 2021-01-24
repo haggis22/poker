@@ -5,7 +5,6 @@ import { RequestSeatCommand } from "../../commands/table/request-seat-command";
 import { StandUpCommand } from "../../commands/table/stand-up-command";
 import { SetStatusCommand } from "../../commands/table/set-status-command";
 import { Player } from "../../players/player";
-import { AddChipsCommand } from "../../commands/table/add-chips-command";
 import { StartHandState } from "./states/start-hand-state";
 import { Action } from "../../actions/action";
 import { PlayerSeatedAction } from "../../actions/table/players/player-seated-action";
@@ -321,12 +320,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (command instanceof SetStatusCommand) {
 
             return await this.setStatus(command);
-
-        }
-
-        if (command instanceof AddChipsCommand) {
-
-            return await this.addChips(command);
 
         }
 
@@ -669,16 +662,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    private async addChips(command: AddChipsCommand): Promise<void> {
+    public addChips(userID: number, amount: number): boolean {
 
-        if (command.amount <= 0) {
-
-            // Nothing to do here. Either a waste of time or someone trying to get sneaky
-            return;
-
-        }
-
-        let seat: Seat = this.findSeatByPlayer(command.userID);
+        let seat: Seat = this.findSeatByPlayer(userID);
 
         if (seat) {
 
@@ -687,28 +673,31 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             if (!this.table.state.isHandInProgress() || !seat.isInHand) {
 
                 // The player is not current involved in a hand, so we can add their chips immediately
-                player.chips += command.amount;
+                player.chips += amount;
 
-                this.queueAction(new AddChipsAction(this.table.id, player.userID, command.amount));
+                this.queueAction(new AddChipsAction(this.table.id, player.userID, amount));
                 this.queueAction(new StackUpdateAction(this.table.id, player.userID, player.chips));
-                return await this.checkStartHand();
+                this.checkStartHand();
+
+                // successfully added to a player not in the hand
+                return true;
 
             }
 
             // we can't add the chips right now, but they will be added before the next hand
-            this.chipsToAdd.set(command.userID, command.amount);
+            this.chipsToAdd.set(userID, amount);
 
-            // TODO: create delayed AddChips action
-            this.queueMessage(new Message(`${player.name} has bought in for ${command.amount} on the next hand`, command.userID));
+            // TODO: create delayed AddChips action?
+            this.queueMessage(new Message(`${player.name} has bought in for ${amount} on the next hand`, userID));
 
-            return await this.checkStartHand();
+            this.checkStartHand();
 
-        }
-        else {
-
-            return this.queueMessage(new Message('Player is not sitting at table', command.userID));
+            // succesully marked the chips to be added after this hand is complete
+            return true;
 
         }
+
+        return false;
 
     }
 

@@ -14,7 +14,7 @@ import { Logger } from "../../logging/logger";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";
-import { AddChipsCommand } from "../../commands/table/add-chips-command";
+import { AddChipsCommand } from "../../commands/cashier/add-chips-command";
 import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
