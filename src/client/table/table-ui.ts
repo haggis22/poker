@@ -854,7 +854,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             let minBet: Bet = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
 
             // In order to bet/raise we need to put in more chips than we currently have set up, so up the current setting
-            if (minBet.chipsAdded > this.myBet.chipsAdded) {
+            if (minBet && minBet.chipsAdded > this.myBet.chipsAdded) {
                 this.myBet = minBet;
             }
 
