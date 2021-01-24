@@ -303,7 +303,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         */
 
-        return 1000;
+        return 2000;
 
     }
 

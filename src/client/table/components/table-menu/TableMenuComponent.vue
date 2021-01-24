@@ -9,8 +9,14 @@
                 Sit out next hand
             </label>
 
+        </div>
+        <div>
             <button type="button" @click.stop="standUp">Stand Up</button>
-
+        </div>
+        <div>
+            <input type="text" :value="numAddChips" />
+            <button type="button" @click.stop="addChips">Add Chips</button>
+            {{ ui.chipFormatter.format(numAddChips) }}
         </div>
 
     </div>
@@ -25,7 +31,7 @@ import './table-menu.scss';
 import Vue from 'vue';
 
 import { TableUI } from '../../table-ui';
-import { SetStatusCommand, StandUpCommand } from '../../../../communication/serializable';
+import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '../../../../communication/serializable';
 
 
 const TableMenuComponent = Vue.extend ({
@@ -53,7 +59,8 @@ const TableMenuComponent = Vue.extend ({
 
         let values =
         {
-        }
+            numAddChips: 1000
+        };
 
         return values;
 
@@ -75,7 +82,20 @@ const TableMenuComponent = Vue.extend ({
 
             this.ui.sendCommand(new StandUpCommand(this.ui.table.id));
 
+        },
+
+        addChips: function (event) {
+
+            let numChips = parseInt(this.numAddChips, 10);
+
+            if (!isNaN(numChips)) {
+
+                this.ui.sendCommand(new AddChipsCommand(this.ui.table.id, numChips));
+
+            }
+
         }
+
 
     }
 
