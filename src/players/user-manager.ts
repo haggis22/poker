@@ -20,14 +20,14 @@ export class UserManager {
 
         let nextUserID: number = 0;
 
-        this.addUser(new User(++nextUserID, 'dshell', 'Danny', 5000));
-        this.addUser(new User(++nextUserID, 'moglesby', 'Matt', 4000));
-        this.addUser(new User(++nextUserID, 'ptunney', 'Paul', 4000));
-        this.addUser(new User(++nextUserID, 'srao', 'Sekhar', 4000));
-        this.addUser(new User(++nextUserID, 'pgrudowski', 'Paul', 4000));
-        this.addUser(new User(++nextUserID, 'jhoepken', 'Joe', 4000));
-        this.addUser(new User(++nextUserID, 'mgillmore', 'Mark', 4000));
-        this.addUser(new User(++nextUserID, 'benney', 'Billy', 4000));
+        this.addUser(new User(++nextUserID, 'dshell', 'Danny', 10000));
+        this.addUser(new User(++nextUserID, 'moglesby', 'Matt', 2000));
+        this.addUser(new User(++nextUserID, 'ptunney', 'Paul', 3000));
+        this.addUser(new User(++nextUserID, 'srao', 'Sekhar', 0));
+        this.addUser(new User(++nextUserID, 'pgrudowski', 'Paul', 8000));
+        this.addUser(new User(++nextUserID, 'jhoepken', 'Joe', 10000));
+        this.addUser(new User(++nextUserID, 'mgillmore', 'Mark', 2000));
+        this.addUser(new User(++nextUserID, 'benney', 'Billy', 10000));
 
     }
 

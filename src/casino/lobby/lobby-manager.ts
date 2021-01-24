@@ -58,11 +58,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
 
     }
 
-    public handleCommand(command: Command, serverClient: IServerClient): void {
-
-        if (!(command instanceof LobbyCommand)) {
-            return;
-        }
+    public handleCommand(command: LobbyCommand, serverClient: IServerClient): void {
 
         if (command instanceof JoinTableCommand) {
 

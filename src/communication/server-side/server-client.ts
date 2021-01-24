@@ -11,6 +11,7 @@ import { SecurityCommand } from '../../commands/security/security-command';
 import { ISocketWrapper } from '../i-socket-wrapper';
 import { CashierManager } from "../../casino/cashier/cashier-manager";
 import { CashierCommand } from "../../commands/cashier/cashier-command";
+import { ErrorMessage } from "../../messages/error-message";
 
 
 export class ServerClient implements IServerClient {
@@ -81,7 +82,7 @@ export class ServerClient implements IServerClient {
 
             if (obj instanceof CashierCommand) {
 
-                return this.cashierManager.handleCommand(obj);
+                return this.handleMessage(this.cashierManager.handleCommand(obj));
 
             }
 
@@ -121,15 +122,11 @@ export class ServerClient implements IServerClient {
 
     handleMessage(message: Message): void {
 
-        // ServerClient objects only get the message object that is suitable for passing down the link, so ship it!
-
-        /*
-        console.log(`ServerClient sending ${message.constructor.name}`);
-        if (message instanceof ActionMessage) {
-            console.log(`  ServerClient sending message ${message.action.constructor.name}`);
+        if (!message) {
+            return;
         }
-        */
 
+        // ServerClient objects only get the message object that is suitable for passing down the link, so ship it!
         this.socket.send(message);
 
     }

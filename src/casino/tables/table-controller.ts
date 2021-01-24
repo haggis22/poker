@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -662,7 +662,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    public addChips(userID: number, amount: number): boolean {
+    public addChips(userID: number, amount: number): Message | ErrorMessage {
 
         let seat: Seat = this.findSeatByPlayer(userID);
 
@@ -680,7 +680,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 this.checkStartHand();
 
                 // successfully added to a player not in the hand
-                return true;
+                return new Message('Success', userID);
 
             }
 
@@ -693,11 +693,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             this.checkStartHand();
 
             // succesully marked the chips to be added after this hand is complete
-            return true;
+            return new Message('Success', userID);
 
         }
 
-        return false;
+        return new ErrorMessage('User is not seated at the table', userID);
 
     }
 

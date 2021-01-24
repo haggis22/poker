@@ -15,7 +15,7 @@ import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { SetStatusCommand } from "../commands/table/set-status-command";
 import { AddChipsCommand } from "../commands/cashier/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, AnteTurnAction, IsInHandAction, AuthenticateCommand, AuthenticatedAction, JoinTableCommand } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, AnteTurnAction, IsInHandAction, AuthenticateCommand, AuthenticatedAction, JoinTableCommand, SetStatusAction } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -42,6 +42,9 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     private game: Game;
 
     private betController: BetController;
+
+    private amISittingOut: boolean;
+
 
 
     constructor(tableID: number, chipFormatter: IChipFormatter) {
@@ -126,6 +129,11 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             return this.tableStateAction();
 
+        }
+
+        if (action instanceof SetStatusAction) {
+
+            return this.setStatusAction(action);
         }
 
         if (action instanceof IsInHandAction) {
@@ -269,6 +277,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         console.log(`Calculating buy-in for ${this.user.name}`);
 
+        /*
+
         switch (this.user.name) {
 
             case 'Danny':
@@ -291,6 +301,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        */
+
         return 1000;
 
     }
@@ -310,9 +322,10 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     }   // setGame
 
 
+
     private playerSeatedAction(action: PlayerSeatedAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        let seat = this.findSeat(action.seatIndex);
 
         if (seat) {
 
@@ -331,7 +344,32 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-    }  // seatPlayer
+    }  // playerSeatedAction
+
+
+    private setStatusAction(action: SetStatusAction): void {
+
+        // If the table has marked me (a robot) as sitting out, then try to buy back in again
+        if (this.user && action.userID == this.user.id) {
+
+            // if I wasn't sitting out before, but I am now, then buy in
+            if (action.isSittingOut && this.amISittingOut === false) {
+
+                let player: Player = this.findPlayer(action.userID);
+
+                if (player) {
+
+                    this.broadcastCommand(new AddChipsCommand(this.table.id, this.calculateBuyIn()));
+
+                }
+
+            }
+
+            this.amISittingOut = action.isSittingOut;
+
+        }
+
+    }  // setStatusAction
 
 
     private findSeat(seatIndex: number): Seat {
@@ -359,7 +397,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         if (player) {
 
             this.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
-
 
         }
 

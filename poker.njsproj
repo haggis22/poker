@@ -265,6 +265,7 @@
     <TypeScriptCompile Include="src\math\combinator.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\messages\error-message.ts" />
     <TypeScriptCompile Include="src\messages\action-message.ts" />
     <TypeScriptCompile Include="src\messages\message-pair.ts" />
     <TypeScriptCompile Include="src\messages\message.ts">

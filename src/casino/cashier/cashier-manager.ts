@@ -1,7 +1,7 @@
 import { UserManager } from "../../players/user-manager";
 import { LobbyManager } from "../lobby/lobby-manager";
 import { CashierCommand } from "../../commands/cashier/cashier-command";
-import { AddChipsCommand } from "../../communication/serializable";
+import { AddChipsCommand, User, Message, ErrorMessage } from "../../communication/serializable";
 import { TableController } from "../tables/table-controller";
 
 export class CashierManager {
@@ -17,7 +17,7 @@ export class CashierManager {
     }
 
 
-    public handleCommand(command: CashierCommand): void {
+    public handleCommand(command: CashierCommand): Message | ErrorMessage {
 
         if (command instanceof AddChipsCommand) {
 
@@ -28,12 +28,12 @@ export class CashierManager {
     }
 
 
-    private addChipsCommand(command: AddChipsCommand): void {
+    public addChipsCommand(command: AddChipsCommand): Message | ErrorMessage {
 
         if (command.amount <= 0) {
 
             // Nothing to do here. Either a waste of time or someone trying to get sneaky
-            return;
+            return new ErrorMessage('Invalid buy-in', command.userID);
 
         }
 
@@ -41,12 +41,22 @@ export class CashierManager {
 
         if (tableController) {
 
-            let chipsWithdrawn: number = command.amount;
+            let user: User = this.userManager.fetchUserByID(command.userID);
 
-            let addResult: boolean = tableController.addChips(command.userID, chipsWithdrawn);
+            if (user.balance < command.amount) {
 
+                // not enough money to buy that amount of chips
+                return new ErrorMessage('You do not have enough chips', command.userID);
+
+            }
+
+            user.balance -= command.amount;
+
+            return tableController.addChips(command.userID, command.amount);
 
         }
+
+        return new ErrorMessage('Could not find table', command.userID);
 
     }  // addChipsCommand
 
