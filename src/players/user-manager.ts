@@ -38,7 +38,7 @@ export class UserManager {
     }
 
 
-    public handleCommand(command: SecurityCommand, serverClient: IServerClient): Message {
+    public handleCommand(command: SecurityCommand): Message {
 
         if (command instanceof LoginCommand) {
 

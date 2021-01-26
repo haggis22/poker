@@ -76,7 +76,7 @@ export class ServerClient implements IServerClient {
 
             if (obj instanceof SecurityCommand) {
 
-                return this.handleMessage(this.userManager.handleCommand(obj, this));
+                return this.handleMessage(this.userManager.handleCommand(obj));
 
             }
 
