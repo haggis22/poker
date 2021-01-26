@@ -21,7 +21,6 @@ import { JoinTableCommand } from '../../commands/lobby/join-table-command';
 import { MessageBroadcaster } from '../../messages/message-broadcaster';
 import { MessageHandler } from '../../messages/message-handler';
 import { Message } from "../../messages/message";
-import { MessagePair } from "../../messages/message-pair";
 import { Action } from '../../actions/action';
 import { SubscribeLobbyCommand, ListTablesAction, TableSummary } from '../../communication/serializable';
 import { TableObserver } from '../tables/table-observer';
@@ -33,7 +32,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
 
     private tableControllerMap: Map<number, TableController>;
 
-    private messageQueue: Array<Message | MessagePair>;
+    private messageQueue: Array<Message>;
     private lobbySubscribers: MessageHandler[];
 
 
@@ -44,7 +43,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
 
         this.tableControllerMap = new Map<number, TableController>();
 
-        this.messageQueue = new Array<Message | MessagePair>();
+        this.messageQueue = new Array<Message>();
         this.lobbySubscribers = new Array<MessageHandler>();
 
         this.setUp();
@@ -100,7 +99,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
     }  // pumpQueues
 
 
-    private broadcastMessage(message: Message | MessagePair): void {
+    private broadcastMessage(message: Message): void {
 
         for (let handler of this.lobbySubscribers) {
 
@@ -117,21 +116,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
 
     }
 
-    private queueMessage(message: Message | MessagePair): void {
-
-        if (message instanceof ActionMessage) {
-
-            this.log(`Queueing ${message.action.constructor.name}`);
-
-        }
-        else if (message instanceof MessagePair) {
-
-            let publicMessage: string = message.publicMessage && message.publicMessage instanceof ActionMessage ? message.publicMessage.action.constructor.name : '[No public message]';
-            let privateMessage: string = message.privateMessage && message.privateMessage instanceof ActionMessage ? message.privateMessage.action.constructor.name : '[No private message]';
-
-            this.log(`Queueing public: ${publicMessage}, private: ${privateMessage} `);
-
-        }
+    private queueMessage(message: Message): void {
 
         this.messageQueue.push(message);
 
