@@ -103,6 +103,7 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\actions\lobby\" />
+    <Folder Include="src\actions\cashier\" />
     <Folder Include="src\actions\security\" />
     <Folder Include="src\actions\table\game\" />
     <Folder Include="src\actions\table\betting\" />
@@ -171,6 +172,8 @@
     <Folder Include="src\casino\tables\states\betting\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\cashier\cashier-action.ts" />
+    <TypeScriptCompile Include="src\actions\cashier\current-balance-action.ts" />
     <TypeScriptCompile Include="src\actions\security\security-action.ts" />
     <TypeScriptCompile Include="src\actions\security\login-action.ts">
       <SubType>Code</SubType>
@@ -220,6 +223,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\table\components\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\client\router\index.ts" />
+    <TypeScriptCompile Include="src\commands\cashier\check-balance-command.ts" />
     <TypeScriptCompile Include="src\commands\cashier\cashier-command.ts" />
     <TypeScriptCompile Include="src\commands\lobby\subscribe-lobby-command.ts" />
     <TypeScriptCompile Include="src\commands\security\authenticate-command.ts" />
