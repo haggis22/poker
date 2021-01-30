@@ -525,6 +525,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(message);
             this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
+            if (seat.player.userID === this.user.id) {
+                this.mySeatIndex = action.seatIndex;
+            }
+
         }
 
     }  // seatPlayer
