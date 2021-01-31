@@ -60,6 +60,7 @@
     <Content Include="src\client\lobby\components\lobby\LobbyComponent.vue" />
     <Content Include="src\client\lobby\lobby-client.ts" />
     <Content Include="src\client\styles\_buttons.scss" />
+    <Content Include="src\client\styles\_cards.scss" />
     <Content Include="src\client\table\components\betting-menu\betting-menu.scss" />
     <Content Include="src\client\table\components\betting-menu\BettingMenuComponent.vue" />
     <Content Include="src\client\table\components\chips\chip-box.scss" />

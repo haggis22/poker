@@ -46,10 +46,18 @@ export class Seat {
     }
 
 
-    public clearHand(): void {
+    public clearHand(): Array<Card | FacedownCard> {
+
+        let muckedCards: Array<Card | FacedownCard> = new Array<Card | FacedownCard>();
+
+        if (this.hand && this.hand.cards) {
+            muckedCards.push(...this.hand.cards);
+        }
 
         this.hand = null;
         this.isInHand = false;
+
+        return muckedCards;
 
     }
 

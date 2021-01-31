@@ -677,7 +677,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         }  // switch
 
         this.log(message);
-*/s
+*/
 
     }  // betAction
 

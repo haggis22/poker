@@ -843,11 +843,28 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.clearBetTimeout(folderSeat.index);
 
+        // We want each player to remember their own mucked cards, but we don't want anyone *else* to know what they were (unless they were all face-up)
+
         // Take away their cards
-        folderSeat.clearHand();
+        let muckedCards: Array<Card | FacedownCard> = folderSeat.clearHand();
+        let publicMuckedCards: Array<FacedownCard> = muckedCards.map(card => new FacedownCard());
 
         // This will tell watchers that the given seat is no longer in the hand
-        this.queueAction(new FoldAction(this.table.id, folderSeat.index, fold));
+
+        // It's face-down, so the public action does not include the card info, whereas the private action does
+        let publicFoldMessage = new ActionMessage(new FoldAction(this.table.id, folderSeat.index, fold, publicMuckedCards));
+
+        if (folderSeat.player) {
+
+            let privateFoldMessage = new ActionMessage(new FoldAction(this.table.id, folderSeat.index, fold, muckedCards), folderSeat.player.userID);
+            this.queueMessage(new MessagePair(publicFoldMessage, privateFoldMessage));
+
+        }
+        else {
+
+            this.queueMessage(publicFoldMessage);
+
+        }
 
         this.checkStandUp(folderSeat);
 

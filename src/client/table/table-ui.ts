@@ -67,11 +67,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public isSittingOut: boolean;
 
     public isShowdownRequired: boolean;
+
+    // indicates which cards were used in calculating the winning hand for a given pot
     private usedCards: Array<Card>;
 
     // fields specific to acting in advance
     public pendingCommands: PendingCommands;
     private pendingTimer: ReturnType<typeof setTimeout>;
+
+    // Key = seatIndex
+    // Value = array of cards that have been mucked
+    public muckedCards: Map<number, Array<Card | FacedownCard>>;
 
 
 
@@ -110,6 +116,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.usedCards = new Array<Card>();
 
         this.currentBalance = null;
+
+        this.muckedCards = new Map<number, Array<Card | FacedownCard>>();
 
     }
 
@@ -688,6 +696,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }   // startHand
 
+
     private betState(): void {
 
         let seat: Seat = this.getMySeat();
@@ -817,7 +826,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.isShowdownRequired = false;
         this.usedCards.length = 0;
 
-    }  // completeHand
+        this.muckedCards.clear();
+
+    }  // handComplete
 
 
     private betTurn(action: BetTurnAction): void {
@@ -1049,9 +1060,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
-        this.log(`Got the fold message at ${Date.now()}`);
-
         this.killSeatTimer(action.seatIndex);
+
+        if (!this.muckedCards.get(action.seatIndex)) {
+            this.muckedCards.set(action.seatIndex, new Array<Card | FacedownCard>());
+        }
+
+        this.muckedCards.get(action.seatIndex).push(...action.cards);
 
         let message: string = `${seat.getName()} folds`;
 
@@ -1059,6 +1074,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.log(message);
 
         this.seatAction.set(seat.index, 'FOLD');
+
+
+
 
     }  // fold
 
@@ -1250,6 +1268,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
     }  // setPendingCheck
+
+
+    public getMuckedCards(seatIndex: number): Array<Card | FacedownCard> {
+
+        if (this.muckedCards && this.muckedCards.get(seatIndex)) {
+
+            return [...this.muckedCards.get(seatIndex)];
+
+        }
+
+        return [];
+
+    }  // getMuckedCards
 
 
 }

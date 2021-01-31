@@ -39,6 +39,14 @@ import { FacedownCard } from '../../../../cards/face-down-card';
             ui: {
                 type: TableUI,
                 required: true
+            },
+            startDealing: {
+                type: Boolean,
+                required: false
+            },
+            startMucking: {
+                type: Boolean,
+                required: false
             }
         },
 
@@ -46,8 +54,10 @@ import { FacedownCard } from '../../../../cards/face-down-card';
 
         let values =
         {
-            isDealerHolding: true,
+            isDealerHolding: this.startDealing,
             isDealing: false,
+            isDealt: false,
+            isPlayerHolding: this.startMucking,
             isMucking: false,
             isMucked: false,
             timer: ''
@@ -61,16 +71,34 @@ import { FacedownCard } from '../../../../cards/face-down-card';
         // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
         this.timer = setTimeout(() => {
 
-            console.log(`Moving from isDealerHolding to isDealing from ${this.card}`);
-            // In one stroke, set the card moving and take it out of the dealer's hand
-            this.isDealerHolding = !(this.isDealing = true);
+            if (this.isDealerHolding) {
 
-            this.timer = setTimeout(() => {
+                console.log(`Moving from isDealerHolding to isDealing from ${this.card}`);
+                // In one stroke, set the card moving and take it out of the dealer's hand
+                this.isDealerHolding = !(this.isDealing = true);
 
-                console.log(`Removing isDealing from ${this.card}`);
-                this.isDealing = false;
+                this.timer = setTimeout(() => {
 
-            }, 300);
+                    console.log(`Removing isDealing from ${this.card}`);
+                    this.isDealing = !(this.isDealt = true);
+
+                }, 300);
+
+            }
+
+            if (this.isPlayerHolding) {
+
+                // In one stroke, set the card moving and take it out of the player's hand
+                this.isPlayerHolding = !(this.isMucking = true);
+
+                this.timer = setTimeout(() => {
+
+                    console.log(`Removing isMucking from ${this.card}`);
+                    this.isMucking = !(this.isMucked = true);
+
+                }, 300);
+
+            }
 
         }, 300);
 
@@ -113,6 +141,30 @@ import { FacedownCard } from '../../../../cards/face-down-card';
             }
             else if (this.isDealing) {
                 classes.push('dealing');
+            }
+            else if (this.isDealt) {
+                classes.push('dealt');
+            }
+            else if (this.isPlayerHolding) {
+                classes.push('player-holding');
+            }
+            else if (this.isMucking) {
+                classes.push('mucking');
+                classes.push('face-down');
+            }
+            else if (this.isMucked) {
+
+                if (this.card instanceof Card) {
+
+                    classes.push('muck-fish');
+
+                }
+                else {
+
+                    classes.push('mucked');
+
+                }
+
             }
 
             return classes;

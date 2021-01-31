@@ -92,13 +92,28 @@
         }
 
         .card-small-2 + .card-small-2 {
-            margin-left: -30px;
+
+            &.dealt,
+            &.muck-fish
+            {
+                margin-left: -30px;
+            }
+
         }
 
         .sitting-out {
             height: 4.2em;
             line-height: 4.2em;
             text-transform: uppercase;
+        }
+
+        .card.muck-fish {
+
+            .card-inner {
+                background-color: #999;
+                transition: background-color 0.25s;
+            }
+
         }
     }
 

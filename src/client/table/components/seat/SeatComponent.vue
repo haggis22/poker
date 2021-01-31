@@ -30,6 +30,14 @@
                 <card-component v-for="(card, index) in seat.hand.cards"
                                 :key="`card-${index}`"
                                 :card="card"
+                                :start-dealing="true"
+                                :ui="ui"></card-component>
+            </div>
+            <div v-if="ui.muckedCards.has(seat.index)">
+                <card-component v-for="(card, index) in ui.muckedCards.get(seat.index)"
+                                :key="`mucked-card-${index}`"
+                                :card="card"
+                                :start-mucking="true"
                                 :ui="ui"></card-component>
             </div>
         </div>
@@ -46,8 +54,10 @@ import Vue from 'vue';
 
 import { Seat } from '../../../../casino/tables/seat';
 import { BetStatus} from '../../../../casino/tables/betting/bet-status';
-    import { TableUI } from '../../table-ui';
+import { TableUI } from '../../table-ui';
 import { RequestSeatCommand } from '../../../../commands/table/request-seat-command';
+import { Card } from '../../../../cards/card';
+import { FacedownCard } from '../../../../cards/face-down-card';
 
 import CardComponent from '../card/CardComponent.vue';
 import TimerComponent from '../timer/TimerComponent.vue';
