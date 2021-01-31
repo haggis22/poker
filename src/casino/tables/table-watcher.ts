@@ -166,13 +166,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         }
 
+        if (action instanceof TableSnapshotAction) {
+
+            this.tableSnapshotAction(action);
+
+        }
+
+
         if (this.table == null) {
-
-            if (action instanceof TableSnapshotAction) {
-
-                this.grabTableData(action);
-
-            }
 
             // we don't have a table yet, so we can't do anything else
             return;
@@ -181,32 +182,31 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         if (action instanceof SetGameAction) {
 
-            return this.setGame(action);
+            return this.setGameAction(action);
 
         }
 
         if (action instanceof PlayerSeatedAction) {
 
-            // this.log(` yes - it is a PlayerSeatedAction`);
-            return this.seatPlayer(action);
+            return this.playerSeatedAction(action);
 
         }
 
         if (action instanceof SeatVacatedAction) {
 
-            return this.seatVacated(action);
+            return this.seatVacatedAction(action);
 
         }
 
         if (action instanceof SetStatusAction) {
 
-            return this.setStatus(action);
+            return this.setStatusAction(action);
 
         }
 
         if (action instanceof IsInHandAction) {
 
-            return this.setIsInHand(action);
+            return this.isInHandAction(action);
 
         }
 
@@ -219,88 +219,88 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         if (action instanceof StackUpdateAction) {
 
-            return this.updateStack(action);
+            return this.stackUpdateAction(action);
 
         }
 
         if (action instanceof TableStateAction) {
 
-            return this.changeTableState(action);
+            return this.tableStateAction(action);
 
         }
 
         if (action instanceof UpdateBetsAction) {
 
-            return this.updateBets(action);
+            return this.updateBetsAction(action);
 
         }
 
         if (action instanceof MoveButtonAction) {
 
-            return this.moveButton(action);
+            return this.moveButtonAction(action);
 
         }
 
         if (action instanceof DealCardAction) {
 
-            return this.dealCard(action);
+            return this.dealCardAction(action);
         }
 
         if (action instanceof DealBoardAction) {
 
-            return this.dealBoard(action);
+            return this.dealBoardAction(action);
         }
 
         if (action instanceof ClearBoardAction) {
 
-            return this.clearBoard(action);
+            return this.clearBoardAction(action);
         }
 
         if (action instanceof BetTurnAction) {
 
-            return this.betTurn(action);
+            return this.betTurnAction(action);
 
         }
 
         if (action instanceof AnteTurnAction) {
 
-            return this.anteTurn(action);
+            return this.anteTurnAction(action);
 
         }
 
         if (action instanceof BetAction) {
 
-            return this.bet(action);
+            return this.betAction(action);
 
         }
 
         if (action instanceof FoldAction) {
 
-            return this.fold(action);
+            return this.foldAction(action);
 
         }
 
         if (action instanceof ClearHandAction) {
 
-            return this.clearHand(action);
+            return this.clearHandAction(action);
 
         }
 
         if (action instanceof FlipCardsAction) {
 
-            return this.flipCards(action);
+            return this.flipCardsAction(action);
 
         }
 
         if (action instanceof WinPotAction) {
 
-            return this.winPot(action);
+            return this.winPotAction(action);
 
         }
 
         if (action instanceof BetReturnedAction) {
 
-            return this.returnBet(action);
+            return this.betReturnedAction(action);
         }
 
         this.log(`Heard ${action.constructor.name}`);
@@ -315,14 +315,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }
 
 
-    private grabTableData(action: TableSnapshotAction): void {
+    private tableSnapshotAction(action: TableSnapshotAction): void {
 
         this.table = action.table;
 
     }
 
 
-    private setGame(action: SetGameAction): void {
+    private setGameAction(action: SetGameAction): void {
 
         // Looks up the rules for the game based on ID, rather than passing a game object through the pipes
         this.game = (new GameFactory()).create(action.gameID);
@@ -330,7 +330,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }   // setGame
 
 
-    private seatPlayer(action: PlayerSeatedAction): void {
+    private playerSeatedAction(action: PlayerSeatedAction): void {
 
         const seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
@@ -344,7 +344,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     }
 
-    private seatVacated(action: SeatVacatedAction): void {
+    private seatVacatedAction(action: SeatVacatedAction): void {
 
         const seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
@@ -357,7 +357,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }
 
 
-    private setStatus(action: SetStatusAction): void {
+    private setStatusAction(action: SetStatusAction): void {
 
         const player: Player = this.findPlayer(action.userID);
 
@@ -370,7 +370,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }  // setStatus
 
 
-    private setIsInHand(action: IsInHandAction): void {
+    private isInHandAction(action: IsInHandAction): void {
 
         this.log(`Seat ${action.seatIndex} isInHand = ${action.isInHand}`);
         let seat: Seat = this.findSeat(action.seatIndex);
@@ -391,7 +391,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
 
 
-    private updateStack(action: StackUpdateAction): void {
+    private stackUpdateAction(action: StackUpdateAction): void {
 
         let player: Player = this.findPlayer(action.playerID);
 
@@ -405,7 +405,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }  // updateStack
 
 
-    private changeTableState(action: TableStateAction): void {
+    private tableStateAction(action: TableStateAction): void {
 
         let state = action.state || new OpenState();
 
@@ -415,7 +415,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }   // changeTableState
 
 
-    private updateBets(action: UpdateBetsAction): void {
+    private updateBetsAction(action: UpdateBetsAction): void {
 
         this.table.betStatus = action.betStatus;
 
@@ -441,14 +441,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }   // findPlayer
 
 
-    private moveButton(action: MoveButtonAction): void {
+    private moveButtonAction(action: MoveButtonAction): void {
 
         this.table.buttonIndex = action.seatIndex;
 
     }  // moveButton
 
 
-    private dealCard(action: DealCardAction): void {
+    private dealCardAction(action: DealCardAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -457,7 +457,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }   // dealCard
 
 
-    private dealBoard(action: DealBoardAction): void {
+    private dealBoardAction(action: DealBoardAction): void {
 
         for (let card of action.cards) {
 
@@ -467,20 +467,20 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     }   // dealBoard
 
-    private clearBoard(action: ClearBoardAction): void {
+    private clearBoardAction(action: ClearBoardAction): void {
 
         this.table.board.reset();
 
     }  // clearBoard
 
 
-    private betTurn(action: BetTurnAction): void {
+    private betTurnAction(action: BetTurnAction): void {
 
         this.table.betStatus = action.betStatus;
 
     }  // betTurn
 
-    private anteTurn(action: AnteTurnAction): void {
+    private anteTurnAction(action: AnteTurnAction): void {
 
         this.table.betStatus = action.betStatus;
 
@@ -494,14 +494,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
 
 
-    private bet(action: BetAction): void {
+    private betAction(action: BetAction): void {
 
         // For now, we're not doing anything - we'll wait for the UpdateBetsAction
 
     }  // bet
 
 
-    private flipCards(action: FlipCardsAction): void {
+    private flipCardsAction(action: FlipCardsAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -510,14 +510,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }  // flipCards
 
 
-    private fold(action: FoldAction): void {
+    private foldAction(action: FoldAction): void {
 
         this.findSeat(action.seatIndex).clearHand();
 
     }  // fold
 
 
-    private clearHand(action: ClearHandAction): void {
+    private clearHandAction(action: ClearHandAction): void {
 
         this.findSeat(action.seatIndex).clearHand();
 
@@ -525,14 +525,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
 
 
-    private winPot(action: WinPotAction): void {
+    private winPotAction(action: WinPotAction): void {
 
         // Nothing to do for this - it's mostly descriptive
 
     }  // winPot
 
 
-    private returnBet(action: BetReturnedAction): void {
+    private betReturnedAction(action: BetReturnedAction): void {
 
         // Nothing to do for this - it's mostly descriptive
 
