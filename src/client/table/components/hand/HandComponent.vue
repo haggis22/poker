@@ -58,8 +58,8 @@ const HandComponent = Vue.extend ({
             // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
             setTimeout(() => {
 
-                card.top = 10;
-                card.left = 30 + (card.index * 20);
+                card.top = 5;
+                card.left = 50 + (card.index * 50);
                 card.isFacedown = false;
 
             }, 300);

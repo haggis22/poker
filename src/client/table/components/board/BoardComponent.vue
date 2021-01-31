@@ -40,7 +40,7 @@ const BoardComponent = Vue.extend ({
 
         let values = {
 
-            dealerPosition: new UIPosition(245, 160)
+            dealerPosition: new UIPosition(245, 158)
 
         };
 
