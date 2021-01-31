@@ -18,8 +18,16 @@ export class CashierManager {
         this.lobbyManager = lobbyManager;
     }
 
+    private log(msg: string): void {
+
+        console.log('\x1b[33m%s\x1b[0m', `CashierManager ${msg}`);
+
+    }
+    
 
     public handleCommand(command: CashierCommand): Message {
+
+        this.log(`Heard ${command.constructor.name}: ${JSON.stringify(command)}`);
 
         if (command instanceof CheckBalanceCommand) {
 

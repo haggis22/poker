@@ -1,4 +1,6 @@
-﻿.table-menu {
+﻿@import "../../../styles/buttons";
+
+.table-menu {
 
     border: 2px solid black;
     background-color: lightgrey;
@@ -15,8 +17,7 @@
 
     button {
 
-        width: 80px;
-        height: 60px;
+        width: 100px;
         font-weight: bold;
         vertical-align: top;
         text-align: center;
@@ -24,6 +25,32 @@
         .action + .amount
         {
             margin-top: 4px;
+        }
+
+        &.stand-up
+        {
+            background-color: red;
+            color: white;
+        }
+
+        &.buy-in
+        {
+            @include good-button;
+        }
+
+    }
+
+    .add-chips-dialog
+    {
+        div
+        {
+            text-align: center;
+
+            &.buy-amount
+            {
+                font-weight: bold;
+            }
+
         }
 
     }

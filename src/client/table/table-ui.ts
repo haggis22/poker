@@ -14,7 +14,7 @@ import { Logger } from "../../logging/logger";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction } from "../../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction, CheckBalanceCommand, TableAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { GameFactory } from "../../games/game-factory";
@@ -25,6 +25,7 @@ import { Timer } from "../../timers/timer";
 import { BetController } from "../../casino/tables/betting/bet-controller";
 import { PendingCommands } from "./pending-commands";
 import { ChipStacker } from "../../casino/tables/chips/chip-stacker";
+import { CurrentBalanceAction } from "../../actions/cashier/current-balance-action";
 
 
 const logger: Logger = new Logger();
@@ -51,6 +52,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public myCall: Bet;
     public myBet: Bet;
+    public currentBalance: number;
 
     public seatAction: Map<number, string>;
     public seatTimer: Map<number, Timer>;
@@ -107,6 +109,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.isShowdownRequired = false;
         this.usedCards = new Array<Card>();
 
+        this.currentBalance = null;
+
     }
 
 
@@ -143,11 +147,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof TableSnapshotAction) {
 
-            return this.processSnapshot(action);
+            return this.tableSnapshotAction(action);
 
         }
 
-        if (this.table == null) {
+        if (action instanceof CurrentBalanceAction) {
+
+            return this.currentBalanceAction(action);
+
+        }
+
+
+        if (action instanceof TableAction && this.table == null) {
 
             // we don't have a table yet, so we can't do anything else
             return;
@@ -378,30 +389,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    private calculateBuyIn(): number {
+    private checkBalance(): void {
 
-        switch (this.user.name) {
+        this.currentBalance = null;
+        this.sendCommand(new CheckBalanceCommand());
 
-            case 'Danny':
-                return 70000;
-
-            case 'Mark':
-                return 50000;
-
-            case 'Paul':
-                return 60000;
-
-            case 'Joe':
-                return 40000;
-
-        }
-
-        return 0;
-
-    }
+    }   // checkBalance
 
 
-    private processSnapshot(action: TableSnapshotAction): void {
+    private currentBalanceAction(action: CurrentBalanceAction): void {
+
+        this.currentBalance = action.balance;
+
+    }  // currentBalanceAction
+
+
+    private tableSnapshotAction(action: TableSnapshotAction): void {
 
         this.table = action.table;
 
@@ -410,7 +413,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.mySeatIndex = mySeat ? mySeat.index : null;
 
-    }  // processSnapshot
+    }  // tableSnapshotAction
 
 
     private setGame(action: SetGameAction): void {

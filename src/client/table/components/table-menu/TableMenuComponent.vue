@@ -11,12 +11,22 @@
 
         </div>
         <div>
-            <button type="button" @click.stop="standUp">Stand Up</button>
+            <button type="button" class="stand-up" @click.stop="standUp">Stand Up</button>
         </div>
-        <div>
-            <input type="text" :value="numAddChips" />
-            <button type="button" @click.stop="addChips">Add Chips</button>
-            {{ ui.chipFormatter.format(numAddChips) }}
+        <div v-if="addChipsButtonReady">
+            <button type="button" class="add-chips" @click.stop="checkBalance">Add Chips</button>
+        </div>
+        <div v-if="addChipsDialogReady" class="add-chips-dialog">
+            <div>
+                <span class="min-buy-in">{{ ui.chipFormatter.format(minBuyIn) }}</span>
+                <input type="range" v-model="numAddChips" :min="minBuyIn" :max="maxBuyIn" :step="step" />
+                <span class="max-buy-in">{{ ui.chipFormatter.format(maxBuyIn) }}</span>
+            </div>
+            <div class="buy-amount">{{ ui.chipFormatter.format(numAddChips) }}</div>
+            <div>
+                <button type="button" class="buy-in" @click.stop="buyIn">Buy In</button>
+                <button type="button" class="cancel" @click.stop="cancelBuyIn">Cancel</button>
+            </div>
         </div>
 
     </div>
@@ -37,6 +47,7 @@ import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '../../../../c
 const TableMenuComponent = Vue.extend ({
 
     props: {
+
         ui: {
             type: TableUI,
             required: true
@@ -45,27 +56,46 @@ const TableMenuComponent = Vue.extend ({
             type: Boolean, 
             required: false
         },
-        pendingFold: {
-            type: Boolean,
-            required: false
-        },
-        pendingCheck: {
-            type: Boolean,
-            required: false
-        }
 
     },
     data() {
 
         let values =
         {
-            numAddChips: 1000
+            numAddChips: 1000,
+            step: 100,
+            showAddChips: false
         };
 
         return values;
 
     },
     computed: {
+
+        addChipsButtonReady: function () {
+
+            return !this.showAddChips;
+
+        },
+
+        minBuyIn: function () {
+
+            return this.showAddChips ? 0 : null;
+
+        },
+
+        maxBuyIn: function () {
+
+            return (this.showAddChips && this.ui) ? this.ui.currentBalance : null;
+
+        },
+
+        addChipsDialogReady: function () {
+
+            return this.showAddChips && this.maxBuyIn > 0;
+
+        }
+
 
     },
     methods: {
@@ -84,17 +114,42 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
-        addChips: function (event) {
+        checkBalance: function (event) {
+
+            this.ui.checkBalance();
+            this.showAddChips = true;
+
+        },
+
+        buyIn: function (event) {
 
             let numChips = parseInt(this.numAddChips, 10);
 
             if (!isNaN(numChips)) {
 
-                this.ui.sendCommand(new AddChipsCommand(this.ui.table.id, numChips));
+                if (numChips === 0) {
+
+                    this.showAddChips = false;
+                    return;
+
+                }
+
+                if (numChips <= this.ui.currentBalance) {
+
+                    this.ui.sendCommand(new AddChipsCommand(this.ui.table.id, numChips));
+                    this.showAddChips = false;
+
+                }
 
             }
 
+        },
+        cancelBuyIn: function (event) {
+
+            this.showAddChips = false;
+
         }
+
 
 
     }
