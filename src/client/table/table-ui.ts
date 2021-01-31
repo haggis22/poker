@@ -49,7 +49,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public chipStacker: ChipStacker;
 
 
-    private mySeatIndex: number;
+    public mySeatIndex: number;
 
     public myCall: Bet;
     public myBet: Bet;

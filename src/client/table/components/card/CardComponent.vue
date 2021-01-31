@@ -40,6 +40,10 @@ import { FacedownCard } from '../../../../cards/face-down-card';
                 type: Number,
                 required: true
             },
+            isFolding: {
+                type: Boolean,
+                required: false
+            },
             isGhost: {
                 type: Boolean,
                 required: false
@@ -102,6 +106,10 @@ import { FacedownCard } from '../../../../cards/face-down-card';
 
             if (this.isGhost) {
                 classes.push('ghost');
+            }
+
+            if (this.isFolding) {
+                classes.push('folding');
             }
 
             return classes;

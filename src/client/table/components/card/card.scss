@@ -35,13 +35,33 @@ $card-font: "Times New Roman", serif;
     &.ghost {
         opacity: 0.5;
         transition: opacity 0.25s;
-
         /*
         .card-inner {
             background-color: #999;
             transition: background-color 0.25s;
         }
 */
+    }
+
+    &.folding {
+        animation-name: spin;
+        animation-duration: 200ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in;
+        /* transform: rotate(3deg); */
+        /* transform: rotate(0.3rad);/ */
+        /* transform: rotate(3grad); */
+        /* transform: rotate(.03turn);  */
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     &.face-down .card-inner {

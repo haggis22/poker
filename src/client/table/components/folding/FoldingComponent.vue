@@ -4,6 +4,7 @@
                         :key="`folding-card-${index}`"
                         :card="card"
                         :index="index"
+                        :is-folding="true"
                         @card-created="cardCreated"></card-component>
     </div>
 </template>
