@@ -38,7 +38,7 @@
                                    :cards="ui.muckedCards.get(seat.index)"
                                    :dealer-position="dealerPosition"></folding-component>
 
-                <ghost-hand-component v-if="ui.muckedCards.has(seat.index)"
+                <ghost-hand-component v-if="ui.muckedCards.has(seat.index) && ui.mySeatIndex == seat.index"
                                    :cards="ui.muckedCards.get(seat.index)"
                                    :dealer-position="dealerPosition"></ghost-hand-component>
 
