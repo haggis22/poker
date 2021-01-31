@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="hand">
         <card-component v-for="(card, index) in this.cards"
-                        :key="`hand-card-${index}`"
+                        :key="`folding-card-${index}`"
                         :card="card"
                         :index="index"
                         @card-created="cardCreated"></card-component>
@@ -12,7 +12,7 @@
 <script lang="ts">
 
 
-import './hand.scss';
+import './folding.scss';
 
 import Vue from 'vue';
 
@@ -22,7 +22,7 @@ import { UIPosition } from '../../../ui-position';
 
 
 
-const HandComponent = Vue.extend ({
+const FoldingComponent = Vue.extend ({
 
     props: {
         cards: {
@@ -52,17 +52,24 @@ const HandComponent = Vue.extend ({
 
         cardCreated(card: CardUI) {
 
-            console.log(`Starting dealing animation for ${card.index}`)
-            card.top = this.dealerPosition.top;
-            card.left = this.dealerPosition.left;
-            card.isFacedown = true;
+            console.log(`Starting folding animation for ${card.index}`)
+            card.top = 5;
+            card.left = 50 + (card.index * 50);
+            card.isFacedown = false;
 
-            // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+            // After only the briefest of pauses, we're going to mark this card as "mucked", so it goes flying towards the dealer
             setTimeout(() => {
 
-                card.top = 5;
-                card.left = 50 + (card.index * 50);
-                card.isFacedown = false;
+                card.top = this.dealerPosition.top;
+                card.left = this.dealerPosition.left;
+                card.isFacedown = true;
+
+                // After we have given the card time to reach the dealer, then zap it
+                setTimeout(() => {
+
+                    card.top = card.left = null;
+
+                }, 300)
 
             }, 10);
 
@@ -72,6 +79,6 @@ const HandComponent = Vue.extend ({
 
 });
 
-export default HandComponent;
+export default FoldingComponent;
 
 </script>

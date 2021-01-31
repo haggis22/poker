@@ -28,9 +28,18 @@
             <div v-if="seat.player && seat.player.isSittingOut" class="sitting-out">
                 [ Sitting Out ]
             </div>
-            <hand-component v-if="seat.hand"
-                            :cards="seat.hand.cards"
-                            :dealer-position="ui.dealerPositions.get(seat.index)"></hand-component>
+            <div class="cards">
+
+                <hand-component v-if="seat.hand"
+                                :cards="seat.hand.cards"
+                                :dealer-position="ui.dealerPositions.get(seat.index)"></hand-component>
+
+                <folding-component v-if="ui.muckedCards.has(seat.index)"
+                                :cards="ui.muckedCards.get(seat.index)"
+                                :dealer-position="ui.dealerPositions.get(seat.index)"></folding-component>
+
+
+            </div>
 
             <!--
                 <div v-if="ui.muckedCards.has(seat.index)">
@@ -59,6 +68,7 @@ import { TableUI } from '../../table-ui';
 import { RequestSeatCommand } from '../../../../commands/table/request-seat-command';
 
 import HandComponent from '../hand/HandComponent.vue';
+    import FoldingComponent from '../folding/FoldingComponent.vue';
 import TimerComponent from '../timer/TimerComponent.vue';
 
 const SeatComponent = Vue.extend ({
@@ -79,6 +89,7 @@ const SeatComponent = Vue.extend ({
     },
     components: {
         'hand-component': HandComponent,
+        'folding-component': FoldingComponent,
         'timer-component': TimerComponent
     },
     computed: {
