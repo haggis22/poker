@@ -29,11 +29,8 @@
                 [ Sitting Out ]
             </div>
             <hand-component v-if="seat.hand"
-                            :seat-index="seat.index"
                             :cards="seat.hand.cards"
-                            :start-dealing="true"
-                            :start-mucking="false"
-                            :ui="ui"></hand-component>
+                            :dealer-position="ui.dealerPositions.get(seat.index)"></hand-component>
 
             <!--
                 <div v-if="ui.muckedCards.has(seat.index)">

@@ -1,16 +1,10 @@
 ﻿<template>
     <div class="board" :class="boardClasses">
-        <div class="cards">
-            <card-component v-for="(card, index) in board.cards"
-                            :key="`card-${index}`"
-                            :card="card"
-                            :index="index"
-                            :start-dealing="true"
-                            :start-mucking="false"
-                            :is-showdown="ui.isShowdownRequired"
-                            :dealer-position="boardDealerPosition"
-                            :is-used="ui.isCardUsed(card)"></card-component>
-        </div>
+        <card-component v-for="(card, index) in board.cards"
+                        :key="`card-${index}`"
+                        :card="card"
+                        :index="index"
+                        @card-created="cardCreated"></card-component>
     </div>
 </template>
 
@@ -27,6 +21,8 @@ import Vue from 'vue';
 import CardComponent from '../card/CardComponent.vue';
 import { Board } from '../../../../casino/tables/boards/board';
 import { UIPosition } from '../../../ui-position';
+import { CardUI } from '../../card-ui';
+
 
 const BoardComponent = Vue.extend ({
 
@@ -44,7 +40,7 @@ const BoardComponent = Vue.extend ({
 
         let values = {
 
-            boardDealerPosition: new UIPosition(200, 40)
+            dealerPosition: new UIPosition(245, 160)
 
         };
 
@@ -70,7 +66,29 @@ const BoardComponent = Vue.extend ({
 
         }
 
+    },
+    methods: {
+
+        cardCreated(card: CardUI) {
+
+            console.log(`Starting animation for ${card.index}`)
+            card.top = this.dealerPosition.top;
+            card.left = this.dealerPosition.left;
+            card.isFacedown = true;
+
+            // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+            setTimeout(() => {
+
+                card.top = 12;
+                card.left = 25 + (card.index * 60);
+                card.isFacedown = false;
+
+            }, 300);
+
+        }
+
     }
+
 
 });
 

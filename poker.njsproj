@@ -224,6 +224,10 @@
     <TypeScriptCompile Include="src\casino\tables\states\dealing\deal-board-state.ts" />
     <TypeScriptCompile Include="src\casino\tables\table-observer.ts" />
     <TypeScriptCompile Include="src\casino\tables\table-summary.ts" />
+    <TypeScriptCompile Include="src\client\table\card-ui.ts" />
+    <TypeScriptCompile Include="src\client\ui-position.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\table\pending-commands.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

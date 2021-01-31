@@ -1,14 +1,10 @@
 ﻿<template>
     <div class="hand">
-        <card-component v-for="(card, index) in cards"
+        <card-component v-for="(card, index) in this.cards"
                         :key="`card-${index}`"
                         :card="card"
                         :index="index"
-                        :start-dealing="startDealing"
-                        :start-mucking="startMucking"
-                        :is-showdown="ui.isShowdownRequired"
-                        :dealer-position="ui.dealerPositions.get(seatIndex)"
-                        :is-used="ui.isCardUsed(card)"></card-component>
+                        @card-created="cardCreated"></card-component>
     </div>
 </template>
 
@@ -22,38 +18,55 @@ import Vue from 'vue';
 
 import { TableUI } from '../../table-ui';
     import CardComponent from '../card/CardComponent.vue';
+import { CardUI } from '../../card-ui';
+import { UIPosition } from '../../../ui-position';
+
+
 
 const HandComponent = Vue.extend ({
 
     props: {
-        seatIndex: {
-            type: Number,
-            required: true
-        },
         cards: {
             type: Array,
             required: true
         },
-        startDealing: {
-            type: Boolean,
-            required: true
-        },
-        startMucking: {
-            type: Boolean,
-            required: true
-        },
-        ui: {
-            type: TableUI,
+        dealerPosition: {
+            type: UIPosition,
             required: true
         }
     },
-    components: {
+    data: {
+
+    },
+
+   components: {
         'card-component': CardComponent
     },
     computed: {
 
 
     },
+    methods: {
+
+        cardCreated(card: CardUI) {
+
+            console.log(`Starting animation for ${card.index}`)
+            card.top = this.dealerPosition.top;
+            card.left = this.dealerPosition.left;
+            card.isFacedown = true;
+
+            // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+            setTimeout(() => {
+
+                card.top = 10;
+                card.left = 30 + (card.index * 20);
+                card.isFacedown = false;
+
+            }, 300);
+
+        }
+
+    }
 
 });
 

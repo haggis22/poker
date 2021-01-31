@@ -129,7 +129,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private setUpPositions() {
 
         this.dealerPositions = new Map<number, UIPosition>();
-        this.dealerPositions.set(0, new UIPosition(-60, 420));
+        this.dealerPositions.set(0, new UIPosition(-60, 390));
         this.dealerPositions.set(1, new UIPosition(250, 620));
         this.dealerPositions.set(2, new UIPosition(560, 420));
         this.dealerPositions.set(3, new UIPosition(560, -240));

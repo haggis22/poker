@@ -6,7 +6,11 @@ $card-font: "Times New Roman", serif;
 
     display: inline-block;
     font-family: $card-font;
+
     position: absolute;
+    transition: top 0.3s, left 0.3s;
+    transition-timing-function: ease-out;
+
 
     .card-inner {
         position: relative;
@@ -134,23 +138,5 @@ $card-font: "Times New Roman", serif;
         }
     }
 
-    /* this is for when the card is *NEAR* the player's hand but not quite in it */
-    &.dealing {
-        /* we need values for top & left so that it does the animation - without them the card just jumps straight there */
-        top: 0;
-        left: 40%;
-    }
-    /* this is for when the card is *NEAR* the player's hand but not quite in it */
-    &.player-holding {
-        /* we need values for top & left so that it does the animation - without them the card just jumps straight there */
-        top: 0;
-        left: 40%;
-    }
-
-    /* specify the transition for the second state (ending up in the player's hand, ending up in the muck) */
-    &.dealt, &.mucked {
-        transition: top 0.3s, left 0.3s;
-        transition-timing-function: ease-out;
-    }
 
 }
