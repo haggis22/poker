@@ -136,16 +136,16 @@ $diamond-color: red;
     }
 
 
-    &.dealer-holding {
+    &.dealer-holding, &.mucked {
         position: absolute;
     }
 
-    &.dealing {
+    &.dealing, &.mucking {
         position: absolute;
-        top: 0;
-        left: 40%;
         transition: top 0.3s, left 0.3s;
         transition-timing-function: ease-out;
     }
+
+
 
 }

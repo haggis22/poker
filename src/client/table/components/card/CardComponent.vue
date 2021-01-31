@@ -48,6 +48,8 @@ import { FacedownCard } from '../../../../cards/face-down-card';
         {
             isDealerHolding: true,
             isDealing: false,
+            isMucking: false,
+            isMucked: false,
             timer: ''
         };
 
