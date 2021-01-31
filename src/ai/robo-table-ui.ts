@@ -651,6 +651,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private betAction(action: BetAction): void {
 
+/*
         let seat = this.findSeat(action.seatIndex);
 
         let message = 'Unknown message';
@@ -676,21 +677,25 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         }  // switch
 
         this.log(message);
+*/s
 
-    }  // bet
+    }  // betAction
 
 
     private foldAction(action: FoldAction): void {
 
+/*
         let seat = this.findSeat(action.seatIndex);
 
         this.log(`${seat.getName()} folds`);
+*/
 
     }  // fold
 
 
     private flipCardsAction(action: FlipCardsAction): void {
 
+/*
         let seat = this.findSeat(action.seatIndex);
 
         if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
@@ -698,21 +703,25 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
             this.log(`${seat.getName()} has ${seat.hand.cards.map(card => card.toString()).join(" ")}`);
 
         }
+*/
 
     }  // flipCards
 
 
     private declareHandAction(action: DeclareHandAction): void {
 
+/*
         let seat = this.findSeat(action.seatIndex);
 
         this.log(`${seat.getName()} has ${this.game.handDescriber.describe(action.handEvaluation)}`);
+*/
 
     }  // declareHand
 
 
     private winPotAction(action: WinPotAction): void {
 
+/*
         let pot: WonPot = action.pot;
 
         let seat = this.findSeat(pot.seatIndex);
@@ -730,12 +739,14 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
             this.log(`${seat.getSeatName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`);
 
         }
+*/
         
     }  // winPot
 
 
     private betReturnedAction(action: BetReturnedAction): void {
 
+/*
         let seat = this.findSeat(action.seatIndex);
         
         if (seat.player) {
@@ -746,6 +757,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         else {
             this.log(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
         }
+*/
         
     }  // returnBet
 
