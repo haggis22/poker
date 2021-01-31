@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="card card-small-2" :class="cardClasses">
+    <div class="card card-small-2" :class="cardClasses" :style="{ 'top': `${top}px`, 'left': `${left}px`, 'z-index': this.index + 1 }">
         <div class="card-inner">
             <div class="card-front">
                 <div v-if="isFaceUp" class="symbols left">
@@ -27,7 +27,7 @@ import Vue from 'vue';
 
 import { Card } from '../../../../cards/card';
 import { FacedownCard } from '../../../../cards/face-down-card';
-    import { TableUI } from '../../table-ui';
+import { UIPosition } from '../../../ui-position';
 
     const CardComponent = Vue.extend({
 
@@ -36,17 +36,29 @@ import { FacedownCard } from '../../../../cards/face-down-card';
                 type: [Card, FacedownCard],
                 required: true
             },
-            ui: {
-                type: TableUI,
+            index: {
+                type: Number,
                 required: true
             },
             startDealing: {
                 type: Boolean,
-                required: false
+                required: true
             },
             startMucking: {
                 type: Boolean,
-                required: false
+                required: true
+            },
+            isShowdown: {
+                type: Boolean,
+                required: true
+            },
+            isUsed: {
+                type: Boolean,
+                required: true
+            },
+            dealerPosition: {
+                type: UIPosition,
+                required: true
             }
         },
 
@@ -54,11 +66,9 @@ import { FacedownCard } from '../../../../cards/face-down-card';
 
         let values =
         {
-            isDealerHolding: this.startDealing,
-            isDealing: false,
+            isDealing: this.startDealing,
             isDealt: false,
-            isPlayerHolding: this.startMucking,
-            isMucking: false,
+            isMucking: this.startMucking,
             isMucked: false,
             timer: ''
         };
@@ -71,32 +81,18 @@ import { FacedownCard } from '../../../../cards/face-down-card';
         // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
         this.timer = setTimeout(() => {
 
-            if (this.isDealerHolding) {
+            if (this.isDealing) {
 
                 console.log(`Moving from isDealerHolding to isDealing from ${this.card}`);
                 // In one stroke, set the card moving and take it out of the dealer's hand
-                this.isDealerHolding = !(this.isDealing = true);
-
-                this.timer = setTimeout(() => {
-
-                    console.log(`Removing isDealing from ${this.card}`);
-                    this.isDealing = !(this.isDealt = true);
-
-                }, 300);
+                this.isDealing = !(this.isDealt = true);
 
             }
 
-            if (this.isPlayerHolding) {
+            if (this.isMucking) {
 
                 // In one stroke, set the card moving and take it out of the player's hand
-                this.isPlayerHolding = !(this.isMucking = true);
-
-                this.timer = setTimeout(() => {
-
-                    console.log(`Removing isMucking from ${this.card}`);
-                    this.isMucking = !(this.isMucked = true);
-
-                }, 300);
+                this.isMucking = !(this.isMucked = true);
 
             }
 
@@ -116,8 +112,6 @@ import { FacedownCard } from '../../../../cards/face-down-card';
                 return null;
             }
 
-            console.log(`In cardClass for ${this.card}`);
-
             let classes: string[] = [];
 
             if (this.card instanceof Card) {
@@ -129,48 +123,58 @@ import { FacedownCard } from '../../../../cards/face-down-card';
                 classes.push('face-down');
             }
 
-            if (this.ui.isCardUsed(this.card)) {
+            if (this.isUsed) {
 
                 classes.push('used');
 
             }
 
-            if (this.isDealerHolding) {
-                classes.push('dealer-holding');
-                classes.push('face-down');
-            }
-            else if (this.isDealing) {
+            if (this.isDealing) {
                 classes.push('dealing');
+                classes.push('face-down');
             }
             else if (this.isDealt) {
                 classes.push('dealt');
             }
-            else if (this.isPlayerHolding) {
-                classes.push('player-holding');
-            }
             else if (this.isMucking) {
                 classes.push('mucking');
-                classes.push('face-down');
             }
             else if (this.isMucked) {
-
-                if (this.card instanceof Card) {
-
-                    classes.push('muck-fish');
-
-                }
-                else {
-
-                    classes.push('mucked');
-
-                }
-
+                classes.push('mucked');
+                classes.push('face-down');
             }
 
             return classes;
 
+        },
+        top: function () {
 
-        }
+            if (this.isDealing || this.isMucked) {
+
+                return this.dealerPosition.top;
+
+            }
+            else if (this.isDealt || this.isMucking) {
+
+                return 5;
+
+            }
+        },
+
+        left: function () {
+
+            if (this.isDealing || this.isMucked) {
+
+                return this.dealerPosition.left;
+
+            }
+            else if (this.isDealt || this.isMucking) {
+
+                return 15 + (this.index * 15);
+
+            }
+
+        },
 
     },
     methods: {

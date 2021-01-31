@@ -78,7 +78,8 @@
         }
     }
 
-    .cards {
+    .hand {
+
         text-align: center;
         height: 4.2em;
         width: 200px;
@@ -86,52 +87,12 @@
         padding-bottom: 5px;
         position: absolute;
 
-        .card {
-            vertical-align: top;
-            margin-top: 0;
-        }
-
-        .card-small-2 + .card-small-2 {
-
-            &.dealt,
-            &.muck-fish
-            {
-                margin-left: -30px;
-            }
-
-        }
-
         .sitting-out {
             height: 4.2em;
             line-height: 4.2em;
             text-transform: uppercase;
         }
 
-        .card.muck-fish {
-
-            .card-inner {
-                background-color: #999;
-                transition: background-color 0.25s;
-            }
-
-        }
     }
 
-    &.showdown {
-
-        .cards {
-
-            .card {
-
-                &:not(.used) {
-                    margin-top: 8px;
-
-                    .card-inner {
-                        background-color: #999;
-                        transition: background-color 0.25s;
-                    }
-                }
-            }
-        }
-    }
 }

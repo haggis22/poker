@@ -26,6 +26,7 @@ import { BetController } from "../../casino/tables/betting/bet-controller";
 import { PendingCommands } from "./pending-commands";
 import { ChipStacker } from "../../casino/tables/chips/chip-stacker";
 import { CurrentBalanceAction } from "../../actions/cashier/current-balance-action";
+import { UIPosition } from "../ui-position";
 
 
 const logger: Logger = new Logger();
@@ -79,6 +80,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     // Value = array of cards that have been mucked
     public muckedCards: Map<number, Array<Card | FacedownCard>>;
 
+    public dealerPositions: Map<number, UIPosition>;
 
 
 
@@ -118,6 +120,21 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.currentBalance = null;
 
         this.muckedCards = new Map<number, Array<Card | FacedownCard>>();
+
+        this.setUpPositions();
+
+
+    }
+
+    private setUpPositions() {
+
+        this.dealerPositions = new Map<number, UIPosition>();
+        this.dealerPositions.set(0, new UIPosition(-60, 420));
+        this.dealerPositions.set(1, new UIPosition(250, 620));
+        this.dealerPositions.set(2, new UIPosition(560, 420));
+        this.dealerPositions.set(3, new UIPosition(560, -240));
+        this.dealerPositions.set(4, new UIPosition(250, -380));
+        this.dealerPositions.set(5, new UIPosition(-50, -220));
 
     }
 

@@ -19,27 +19,31 @@
         </div>
         <div class="cards">
             <div v-if="!seat.player && !ui.getMySeat()">
-                <button type="button" 
+                <button type="button"
                         class="sit"
-                        v-on:click.stop="sit">Sit</button>
+                        v-on:click.stop="sit">
+                    Sit
+                </button>
             </div>
             <div v-if="seat.player && seat.player.isSittingOut" class="sitting-out">
                 [ Sitting Out ]
             </div>
-            <div v-if="seat.hand">
-                <card-component v-for="(card, index) in seat.hand.cards"
-                                :key="`card-${index}`"
-                                :card="card"
-                                :start-dealing="true"
-                                :ui="ui"></card-component>
-            </div>
-            <div v-if="ui.muckedCards.has(seat.index)">
-                <card-component v-for="(card, index) in ui.muckedCards.get(seat.index)"
-                                :key="`mucked-card-${index}`"
-                                :card="card"
-                                :start-mucking="true"
-                                :ui="ui"></card-component>
-            </div>
+            <hand-component v-if="seat.hand"
+                            :seat-index="seat.index"
+                            :cards="seat.hand.cards"
+                            :start-dealing="true"
+                            :start-mucking="false"
+                            :ui="ui"></hand-component>
+
+            <!--
+                <div v-if="ui.muckedCards.has(seat.index)">
+                    <card-component v-for="(card, index) in ui.muckedCards.get(seat.index)"
+                                    :key="`mucked-card-${index}`"
+                                    :card="card"
+                                    :start-mucking="true"
+                                    :ui="ui"></card-component>
+                </div>
+    -->
         </div>
     </div>
 </template>
@@ -56,10 +60,8 @@ import { Seat } from '../../../../casino/tables/seat';
 import { BetStatus} from '../../../../casino/tables/betting/bet-status';
 import { TableUI } from '../../table-ui';
 import { RequestSeatCommand } from '../../../../commands/table/request-seat-command';
-import { Card } from '../../../../cards/card';
-import { FacedownCard } from '../../../../cards/face-down-card';
 
-import CardComponent from '../card/CardComponent.vue';
+import HandComponent from '../hand/HandComponent.vue';
 import TimerComponent from '../timer/TimerComponent.vue';
 
 const SeatComponent = Vue.extend ({
@@ -79,7 +81,7 @@ const SeatComponent = Vue.extend ({
         }
     },
     components: {
-        'card-component': CardComponent,
+        'hand-component': HandComponent,
         'timer-component': TimerComponent
     },
     computed: {

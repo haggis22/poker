@@ -77,6 +77,8 @@
     <Content Include="src\client\table\components\chat\ChatComponent.vue" />
     <Content Include="src\client\table\components\dealer\dealer-box.scss" />
     <Content Include="src\client\table\components\dealer\DealerBoxComponent.vue" />
+    <Content Include="src\client\table\components\hand\hand.scss" />
+    <Content Include="src\client\table\components\hand\HandComponent.vue" />
     <Content Include="src\client\table\components\log\log.scss" />
     <Content Include="src\client\table\components\log\LogComponent.vue" />
     <Content Include="src\client\table\components\pot\pot.scss" />
@@ -128,6 +130,7 @@
     <Folder Include="src\client\table\components\chat\" />
     <Folder Include="src\client\table\components\chips\" />
     <Folder Include="src\client\table\components\betting-menu\" />
+    <Folder Include="src\client\table\components\hand\" />
     <Folder Include="src\client\table\components\timer\" />
     <Folder Include="src\client\table\components\table-menu\" />
     <Folder Include="src\client\table\components\pot\" />

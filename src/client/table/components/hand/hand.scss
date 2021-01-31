@@ -1,0 +1,46 @@
+﻿.cards {
+    text-align: center;
+    height: 4.2em;
+    width: 200px;
+    white-space: nowrap;
+    padding-bottom: 5px;
+    position: absolute;
+
+    .card {
+        vertical-align: top;
+        margin-top: 0;
+    }
+
+    /*
+    .card-small-2 + .card-small-2 {
+
+        &.dealt,
+        &.muck-fish {
+            margin-left: -30px;
+        }
+    }
+*/
+
+    &.showdown {
+
+        .card {
+
+            &:not(.used) {
+                margin-top: 8px;
+
+                .card-inner {
+                    background-color: #999;
+                    transition: background-color 0.25s;
+                }
+            }
+        }
+    }
+
+    .card.muck-fish {
+
+        .card-inner {
+            background-color: #999;
+            transition: background-color 0.25s;
+        }
+    }
+}

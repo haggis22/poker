@@ -19,10 +19,11 @@
             vertical-align: top;
             margin-top: 10px;
         }
-
+        /*
         .card-small-2 + .card-small-2 {
             margin-left: 13px;
         }
+*/
     }
 
     &.showdown {
@@ -37,7 +38,6 @@
                 }
 
                 &:not(.used) {
-
                     opacity: 0.6;
                     transition: opacity 0.25s;
 
@@ -45,10 +45,8 @@
                         background-color: #999;
                         transition: background-color 0.25s;
                     }
-
                 }
             }
-
         }
     }
 }
