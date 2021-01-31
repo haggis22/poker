@@ -32,24 +32,19 @@
 
                 <hand-component v-if="seat.hand"
                                 :cards="seat.hand.cards"
-                                :dealer-position="ui.dealerPositions.get(seat.index)"></hand-component>
+                                :dealer-position="dealerPosition"></hand-component>
 
                 <folding-component v-if="ui.muckedCards.has(seat.index)"
-                                :cards="ui.muckedCards.get(seat.index)"
-                                :dealer-position="ui.dealerPositions.get(seat.index)"></folding-component>
+                                   :cards="ui.muckedCards.get(seat.index)"
+                                   :dealer-position="dealerPosition"></folding-component>
+
+                <ghost-hand-component v-if="ui.muckedCards.has(seat.index)"
+                                   :cards="ui.muckedCards.get(seat.index)"
+                                   :dealer-position="dealerPosition"></ghost-hand-component>
 
 
             </div>
 
-            <!--
-                <div v-if="ui.muckedCards.has(seat.index)">
-                    <card-component v-for="(card, index) in ui.muckedCards.get(seat.index)"
-                                    :key="`mucked-card-${index}`"
-                                    :card="card"
-                                    :start-mucking="true"
-                                    :ui="ui"></card-component>
-                </div>
-    -->
         </div>
     </div>
 </template>
@@ -70,6 +65,7 @@ import { RequestSeatCommand } from '../../../../commands/table/request-seat-comm
 import HandComponent from '../hand/HandComponent.vue';
     import FoldingComponent from '../folding/FoldingComponent.vue';
 import TimerComponent from '../timer/TimerComponent.vue';
+import GhostHandComponent from '../ghost-hand/GhostHandComponent.vue';
 
 const SeatComponent = Vue.extend ({
 
@@ -87,9 +83,19 @@ const SeatComponent = Vue.extend ({
             required: true
         }
     },
+    data() {
+
+        let values = {
+            dealerPosition: this.ui.dealerPositions.get(this.seat.index)
+        };
+
+        return values;
+
+    },
     components: {
         'hand-component': HandComponent,
         'folding-component': FoldingComponent,
+        'ghost-hand-component': GhostHandComponent,
         'timer-component': TimerComponent
     },
     computed: {

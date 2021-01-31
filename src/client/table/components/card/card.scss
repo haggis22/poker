@@ -3,10 +3,8 @@
 $card-font: "Times New Roman", serif;
 
 .card {
-
     display: inline-block;
     font-family: $card-font;
-
     position: absolute;
     transition: top 0.3s, left 0.3s;
     transition-timing-function: ease-out;
@@ -32,6 +30,18 @@ $card-font: "Times New Roman", serif;
         .card-back {
             transform: rotateY(180deg);
         }
+    }
+
+    &.ghost {
+        opacity: 0.5;
+        transition: opacity 0.25s;
+
+        /*
+        .card-inner {
+            background-color: #999;
+            transition: background-color 0.25s;
+        }
+*/
     }
 
     &.face-down .card-inner {

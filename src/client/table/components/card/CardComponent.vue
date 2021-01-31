@@ -39,6 +39,10 @@ import { FacedownCard } from '../../../../cards/face-down-card';
             index: {
                 type: Number,
                 required: true
+            },
+            isGhost: {
+                type: Boolean,
+                required: false
             }
         },
 
@@ -94,6 +98,10 @@ import { FacedownCard } from '../../../../cards/face-down-card';
             }
             else {
                 classes.push('face-down');
+            }
+
+            if (this.isGhost) {
+                classes.push('ghost');
             }
 
             return classes;
