@@ -566,7 +566,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                             return this.broadcastCommand(betCommand);
 
                         }
-                        else if (rnd >= 0.20) {
+                        else if (rnd >= 0.05) {
 
                             // This represents a call (possibly all-in)
                             let betCommand: BetCommand = new BetCommand(this.table.id, call.chipsAdded);
