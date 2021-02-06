@@ -47,6 +47,14 @@ import { FacedownCard } from '../../../../cards/face-down-card';
             isGhost: {
                 type: Boolean,
                 required: false
+            },
+            isShowdown: {
+                type: Boolean,
+                required: false
+            },
+            isUsed: {
+                type: Boolean,
+                required: false
             }
         },
 
@@ -79,7 +87,7 @@ import { FacedownCard } from '../../../../cards/face-down-card';
         },
         top: function () {
 
-            return this.cardUI.top;
+            return this.cardUI.top - (this.isShowdown && this.isUsed ? 10 : 0);
 
         },
         left: function () {
@@ -110,6 +118,18 @@ import { FacedownCard } from '../../../../cards/face-down-card';
 
             if (this.isFolding) {
                 classes.push('folding');
+            }
+
+            if (this.isShowdown) {
+
+                classes.push('showdown');
+
+                if (this.isUsed) {
+
+                    classes.push('used');
+
+                }
+
             }
 
             return classes;

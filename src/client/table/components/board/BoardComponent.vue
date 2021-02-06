@@ -4,6 +4,8 @@
                         :key="`card-${index}`"
                         :card="card"
                         :index="index"
+                        :is-showdown="ui.isShowdownRequired"
+                        :is-used="ui.isCardUsed(card)"
                         @card-created="cardCreated"></card-component>
     </div>
 </template>
@@ -16,8 +18,7 @@ import './board.scss';
 
 import Vue from 'vue';
 
-    import { TableUI } from '../../table-ui';
-
+import { TableUI } from '../../table-ui';
 import CardComponent from '../card/CardComponent.vue';
 import { Board } from '../../../../casino/tables/boards/board';
 import { UIPosition } from '../../../ui-position';
@@ -128,7 +129,7 @@ const BoardComponent = Vue.extend ({
 
             card.isFacedown = false;
 
-        }, 100);
+        }, 200);
 
 
     }

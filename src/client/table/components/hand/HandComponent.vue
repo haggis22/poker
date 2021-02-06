@@ -4,6 +4,8 @@
                         :key="`hand-card-${index}`"
                         :card="card"
                         :index="index"
+                        :is-showdown="ui.isShowdownRequired"
+                        :is-used="ui.isCardUsed(card)"
                         @card-created="cardCreated"></card-component>
     </div>
 </template>
@@ -17,7 +19,8 @@ import './hand.scss';
 import Vue from 'vue';
 
     import CardComponent from '../card/CardComponent.vue';
-import { CardUI } from '../../card-ui';
+    import { CardUI } from '../../card-ui';
+    import { TableUI } from '../../table-ui';
 import { UIPosition } from '../../../ui-position';
 
 
@@ -32,7 +35,12 @@ const HandComponent = Vue.extend ({
         dealerPosition: {
             type: UIPosition,
             required: true
+        },
+        ui: {
+            type: TableUI,
+            required: true
         }
+
     },
     data() {
 

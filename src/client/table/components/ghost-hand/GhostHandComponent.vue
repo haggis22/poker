@@ -20,6 +20,7 @@ import Vue from 'vue';
     import CardComponent from '../card/CardComponent.vue';
 import { CardUI } from '../../card-ui';
 import { UIPosition } from '../../../ui-position';
+    import { TableUI } from '../../table-ui';
 
 
 
@@ -33,7 +34,12 @@ const GhostHandComponent = Vue.extend ({
         dealerPosition: {
             type: UIPosition,
             required: true
+        },
+        ui: {
+            type: TableUI,
+            required: true
         }
+
     },
     data() {
 

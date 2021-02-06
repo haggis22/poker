@@ -43,6 +43,12 @@ $card-font: "Times New Roman", serif;
 */
     }
 
+    &.showdown:not(.used) {
+        opacity: 0.5;
+        transition: opacity 0.25s;
+    }
+
+
     &.folding {
         animation-name: spin;
         animation-duration: 200ms;

@@ -28,22 +28,20 @@
             <div v-if="seat.player && seat.player.isSittingOut" class="sitting-out">
                 [ Sitting Out ]
             </div>
-            <div class="cards">
+            <hand-component v-if="seat.hand"
+                            :cards="seat.hand.cards"
+                            :ui="ui"
+                            :dealer-position="dealerPosition"></hand-component>
 
-                <hand-component v-if="seat.hand"
-                                :cards="seat.hand.cards"
-                                :dealer-position="dealerPosition"></hand-component>
+            <folding-component v-if="ui.muckedCards.has(seat.index)"
+                                :cards="ui.muckedCards.get(seat.index)"
+                                :ui="ui"
+                                :dealer-position="dealerPosition"></folding-component>
 
-                <folding-component v-if="ui.muckedCards.has(seat.index)"
-                                   :cards="ui.muckedCards.get(seat.index)"
-                                   :dealer-position="dealerPosition"></folding-component>
-
-                <ghost-hand-component v-if="ui.muckedCards.has(seat.index) && ui.mySeatIndex == seat.index"
-                                   :cards="ui.muckedCards.get(seat.index)"
-                                   :dealer-position="dealerPosition"></ghost-hand-component>
-
-
-            </div>
+            <ghost-hand-component v-if="ui.muckedCards.has(seat.index) && ui.mySeatIndex == seat.index"
+                                :cards="ui.muckedCards.get(seat.index)"
+                                :ui="ui"
+                                :dealer-position="dealerPosition"></ghost-hand-component>
 
         </div>
     </div>
