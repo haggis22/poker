@@ -77,13 +77,19 @@ const BoardComponent = Vue.extend ({
             card.isFacedown = true;
 
             // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
-            setTimeout(() => {
+            switch (card.index) {
 
-                card.top = 12;
-                card.left = 25 + (card.index * 60);
-                card.isFacedown = false;
+                case 0:
+                case 1:
+                case 2:
+                    setTimeout(() => { animateFlop(card) }, 100);
+                    break;
 
-            }, 300);
+                default:
+                    setTimeout(() => { animateOthers(card) }, 100);
+                    break;
+
+            }
 
         }
 
@@ -91,6 +97,30 @@ const BoardComponent = Vue.extend ({
 
 
 });
+
+    function animateFlop(card: CardUI): void {
+
+        card.top = 12;
+        card.left = 10;
+        card.isFacedown = false;
+
+        setTimeout(() => {
+
+            card.left = 25 + (card.index * 60);
+
+        }, 300);
+
+    }
+
+
+    function animateOthers(card: CardUI): void {
+
+        card.top = 12;
+        card.left = 25 + (card.index * 60);
+        card.isFacedown = false;
+
+    }
+
 
 export default BoardComponent;
 
