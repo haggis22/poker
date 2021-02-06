@@ -102,13 +102,19 @@ const BoardComponent = Vue.extend ({
 
         card.top = 12;
         card.left = 10;
-        card.isFacedown = false;
 
         setTimeout(() => {
 
-            card.left = 25 + (card.index * 60);
+            card.isFacedown = false;
+
+            setTimeout(() => {
+
+                card.left = 25 + (card.index * 60);
+
+            }, 300);
 
         }, 300);
+
 
     }
 
@@ -117,7 +123,13 @@ const BoardComponent = Vue.extend ({
 
         card.top = 12;
         card.left = 25 + (card.index * 60);
-        card.isFacedown = false;
+
+        setTimeout(() => {
+
+            card.isFacedown = false;
+
+        }, 100);
+
 
     }
 
