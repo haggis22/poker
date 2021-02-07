@@ -40,9 +40,24 @@ const ChipBoxComponent = Vue.extend ({
             required: false
         }
     },
+    watch: {
+
+        chipPosition: function (newValue, oldValue) {
+
+            if (newValue) {
+
+                this.releaseChip();
+
+            }
+
+        }
+
+    },
     data() {
 
         let values = {
+
+            lastChipReleased: null
 
         };
 
@@ -75,12 +90,23 @@ const ChipBoxComponent = Vue.extend ({
 
         getChipTop(index: number): number {
 
-            return this.chipPosition ? this.chipPosition.top : -20 - (index * 3);
+            return (this.chipPosition && this.lastChipReleased <= index) ? this.chipPosition.top : -20 - (index * 3);
 
         },
         getChipLeft(index: number): number {
 
-            return this.chipPosition ? this.chipPosition.left : 30;
+            return (this.chipPosition && this.lastChipReleased <= index) ? this.chipPosition.left : 30;
+
+        },
+        releaseChip(): void {
+
+            this.lastChipReleased = (this.lastChipReleased == null) ? this.chips.length - 1 : (this.lastChipReleased - 1);
+
+            if (this.lastChipReleased > 0) {
+
+                setTimeout(() => { this.releaseChip(); }, 100);
+
+            }
 
         }
 
