@@ -61,6 +61,8 @@
     <Content Include="src\client\lobby\lobby-client.ts" />
     <Content Include="src\client\styles\_buttons.scss" />
     <Content Include="src\client\styles\_cards.scss" />
+    <Content Include="src\client\table\components\bet-button\bet-button.scss" />
+    <Content Include="src\client\table\components\bet-button\BetButtonComponent.vue" />
     <Content Include="src\client\table\components\betting-menu\betting-menu.scss" />
     <Content Include="src\client\table\components\betting-menu\BettingMenuComponent.vue" />
     <Content Include="src\client\table\components\chips\chip-box.scss" />
@@ -137,6 +139,7 @@
     <Folder Include="src\client\table\components\hand\" />
     <Folder Include="src\client\table\components\folding\" />
     <Folder Include="src\client\table\components\ghost-hand\" />
+    <Folder Include="src\client\table\components\bet-button\" />
     <Folder Include="src\client\table\components\timer\" />
     <Folder Include="src\client\table\components\table-menu\" />
     <Folder Include="src\client\table\components\pot\" />

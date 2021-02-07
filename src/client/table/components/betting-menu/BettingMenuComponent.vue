@@ -2,6 +2,14 @@
 
     <div class="betting-menu">
 
+        <div class="bet-actions">
+
+            <bet-button-component :action="'Fold'" :is-activated="foldValue" @button-click="toggleFold"></bet-button-component>
+            <bet-button-component :action="'Check'" :is-activated="checkValue" @click.stop="checkValue = !checkValue"></bet-button-component>
+            <bet-button-component :action="'Bet'" :is-activated="raiseValue" @click.stop="raiseValue = !raiseValue" :amount="150" :chip-formatter="ui.chipFormatter"></bet-button-component>
+
+        </div>
+
         <div class="bet-actions" v-if="ui.isAnteTime()">
             <button type="button" v-on:click.stop="fold">
                 <div class="action">Sit Out</div>
@@ -28,20 +36,32 @@
 
         <div class="bet-actions" v-if="ui.isCheckBetTime()">
             <button type="button" v-on:click.stop="fold">
-                <div class="action">Fold</div>
+                <div class="light"></div>
+                <div class="text">
+                    <div class="action">Fold</div>
+                </div>
             </button>
             <button type="button" v-on:click.stop="check">
-                <div class="action">Check</div>
+                <div class="light"></div>
+                <div class="text">
+                    <div class="action">Check</div>
+                </div>
             </button>
             <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
-                <div class="action">
-                    <span v-if="alreadyHasBets">Raise</span>
-                    <span v-else>Bet</span>
+                <div class="light"></div>
+                <div class="text">
+                    <div class="action">
+                        <span v-if="alreadyHasBets">Raise</span>
+                        <span v-else>Bet</span>
+                    </div>
+                    <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
                 </div>
-                <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
             </button>
             <button v-if="!isRaiseAllowed" type="button" disabled>
-                <div class="action">Bet</div>
+                <div class="light"></div>
+                <div class="text">
+                    <div class="action">Bet</div>
+                </div>
             </button>
         </div>
 
@@ -90,7 +110,7 @@ import { Seat } from '../../../../casino/tables/seat';
 import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { BetCommand } from '../../../../commands/table/betting/bet-command';
 import { FoldCommand } from '../../../../commands/table/betting/fold-command';
-
+import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
 const TableMenuComponent = Vue.extend ({
 
@@ -109,10 +129,18 @@ const TableMenuComponent = Vue.extend ({
         }
 
     },
+    components: {
+
+        'bet-button-component': BetButtonComponent
+
+    },
     data() {
 
         let values =
         {
+            foldValue: false,
+            checkValue: false,
+            raiseValue: false
         }
 
         return values;
@@ -154,6 +182,12 @@ const TableMenuComponent = Vue.extend ({
 
     },
     methods: {
+
+        toggleFold: function (event) {
+
+            this.foldValue = !this.foldValue;
+
+        },
 
         ante: function (event) {
 
