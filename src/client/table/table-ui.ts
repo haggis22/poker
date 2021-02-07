@@ -81,6 +81,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public muckedCards: Map<number, Array<Card | FacedownCard>>;
 
     public dealerPositions: Map<number, UIPosition>;
+    public playerPositions: Map<number, UIPosition>;
 
 
 
@@ -135,6 +136,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.dealerPositions.set(3, new UIPosition(560, -270));
         this.dealerPositions.set(4, new UIPosition(250, -410));
         this.dealerPositions.set(5, new UIPosition(-50, -250));
+
+        this.playerPositions = new Map<number, UIPosition>();
+        this.playerPositions.set(0, new UIPosition(180, -125));
+        this.playerPositions.set(1, new UIPosition(25, -185));
+        this.playerPositions.set(2, new UIPosition(-125, -105));
+        this.playerPositions.set(3, new UIPosition(-125, 195));
+        this.playerPositions.set(4, new UIPosition(25, 200));
+        this.playerPositions.set(5, new UIPosition(163, 185));
 
     }
 

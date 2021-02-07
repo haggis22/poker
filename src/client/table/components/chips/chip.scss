@@ -1,19 +1,19 @@
 ﻿.poker-chip {
-
     display: block;
-
+    position: absolute;
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
-
     width: 25px;
     height: 25px;
     background: #555;
     border-radius: 50%;
     border: .1em dashed white;
-    transition: all .5s ease;
     backface-visibility: hidden;
-    transform: perspective(3000px) rotateX(55deg) rotateZ(-40deg);
     box-shadow: -1px 1px 0px #555, -2px 2px 0px #555;
+    transition: top 0.6s ease-out, left 0.6s ease-out, transform 0.2s ease-in;
 
+    &.angled {
+        transform: perspective(3000px) rotateX(55deg) rotateZ(-40deg);
+    }
 }

@@ -2,8 +2,8 @@
 
     <div :class="chipClasses" :style="{ 'background-color': chip.color, 
                                         'border-color': chip.accentColor,
-                                        'grid-row': row,
-                                        'grid-column': column }"></div>
+                                        'top': `${top}px`,
+                                        'left': `${left}px` }"></div>
 
 </template>
 
@@ -25,13 +25,17 @@ const ChipComponent = Vue.extend({
             type: Chip,
             required: true
         },
-        row: {
+        top: {
             type: Number,
             required: true
         },
-        column: {
+        left: {
             type: Number,
             required: true
+        },
+        isAngled: {
+            type: Boolean,
+            required: false
         }
 
     },
@@ -40,6 +44,12 @@ const ChipComponent = Vue.extend({
         chipClasses: function () {
 
             let classes: string[] = ['poker-chip'];
+
+            if (this.isAngled) {
+
+                classes.push('angled');
+
+            }
 
             return classes;
 

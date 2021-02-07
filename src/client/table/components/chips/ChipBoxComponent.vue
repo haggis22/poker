@@ -1,11 +1,12 @@
 ﻿<template>
 
-    <div class="chip-box" :style="{ 'grid-template-rows': `repeat(${chips.length}, 3px)`, 'height': `${(chips.length * 3) + 24}px` }">
+    <div class="chip-box">
         <chip-component v-for="(chip, index) in chips"
                         :key="`chip-${index}`"
                         :chip="chip"
-                        :column="1"
-                        :row="((chips.length - index) + 1)"></chip-component>
+                        :top="getChipTop(index)"
+                        :left="getChipLeft(index)"
+                        :is-angled="angleChips"></chip-component>
     </div>
 
 </template>
@@ -20,6 +21,7 @@ import Vue from 'vue';
 
 import { ChipStacker } from '../../../../casino/tables/chips/chip-stacker';
 import ChipComponent from './ChipComponent.vue';
+import { UIPosition } from '../../../ui-position';
 
 
 const ChipBoxComponent = Vue.extend ({
@@ -32,7 +34,20 @@ const ChipBoxComponent = Vue.extend ({
         chipStacker: {
             type: ChipStacker,
             required: true
+        },
+        chipPosition: {
+            type: UIPosition,
+            required: false
         }
+    },
+    data() {
+
+        let values = {
+
+        };
+
+        return values;
+
     },
     components: {
         'chip-component': ChipComponent
@@ -47,6 +62,25 @@ const ChipBoxComponent = Vue.extend ({
                 // ...we will map (reduce) that number to an actual array of that number.
                 // This will result in an Array<Chip>
                 .reduce((chips, stack) => { for (let ix: number = 0; ix < stack.count; ix++) { chips.push(stack.chip); } return chips; }, []);
+
+        },
+        angleChips: function (): boolean {
+
+            return this.chipPosition == null;
+
+        }
+
+    },
+    methods: {
+
+        getChipTop(index: number): number {
+
+            return this.chipPosition ? this.chipPosition.top : -20 - (index * 3);
+
+        },
+        getChipLeft(index: number): number {
+
+            return this.chipPosition ? this.chipPosition.left : 30;
 
         }
 

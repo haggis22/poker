@@ -2,7 +2,8 @@
 
     <div class="pot gathered" :class="potClasses">
         <chip-box-component :value="pot.amount"
-                            :chip-stacker="ui.chipStacker"></chip-box-component>
+                            :chip-stacker="ui.chipStacker"
+                            :chip-position="chipPosition"></chip-box-component>
         <div class="amount">{{ ui.chipFormatter.format(pot.amount) }}</div>
         <div class="name">{{ pot.getName() }}</div>
     </div>
@@ -19,6 +20,7 @@ import Vue from 'vue';
 import { WonPot } from '../../../../casino/tables/betting/won-pot';
     import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
+    import { UIPosition } from '../../../ui-position';
 
 const WonPotComponent = Vue.extend ({
 
@@ -31,6 +33,7 @@ const WonPotComponent = Vue.extend ({
             type: TableUI,
             required: true
         }
+
     },
     components: {
         'chip-box-component': ChipBoxComponent
@@ -40,7 +43,11 @@ const WonPotComponent = Vue.extend ({
         let values =
         {
             isPushed: false,
-            timer: ''
+            timer: '',
+
+            // this will specify where the chips will eventually end up
+            playerPosition: this.ui.playerPositions.get(this.pot.seatIndex),
+            chipPosition: null
         };
 
         return values;
@@ -54,6 +61,13 @@ const WonPotComponent = Vue.extend ({
         this.timer = setTimeout(() => {
 
             this.isPushed = true;
+
+            // start the chips flying at the player
+            setTimeout(() => {
+
+                this.chipPosition = this.playerPosition;
+
+            }, 1000);
 
         }, 10);
 
