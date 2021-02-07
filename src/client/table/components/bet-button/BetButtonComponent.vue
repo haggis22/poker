@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <button type="button" @click="$emit('button-click')">
+    <button type="button" class="bet-button" @click="$emit('button-click')">
         <div :class="lightClasses"></div>
         <div class="text">
             <div class="action">{{ action }}</div>
