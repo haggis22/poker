@@ -16,9 +16,20 @@
 
         <div class="bet-actions" v-if="ui.remainsToAct()">
 
-            <bet-button-component :action="'Fold'" :is-activated="isFoldActivated" @button-click="toggleFold"></bet-button-component>
-            <bet-button-component :action="'Check'" :is-activated="checkValue" @click.stop="checkValue = !checkValue"></bet-button-component>
-            <bet-button-component :action="'Bet'" :is-activated="raiseValue" @click.stop="raiseValue = !raiseValue" :amount="150" :chip-formatter="ui.chipFormatter"></bet-button-component>
+            <bet-button-component v-if="isFoldAllowed" :action="'Fold'" :is-activated="isFoldActivated" @button-click="toggleFold"></bet-button-component>
+            <bet-button-component v-if="isCheckAllowed" :action="'Check'" :is-activated="isCheckActivated" @button-click="toggleCheck"></bet-button-component>
+            <bet-button-component v-if="isCallAllowed"
+                                  :action="'Call'"
+                                  :is-activated="isCallActivated"
+                                  :amount="ui.myCall.chipsAdded"
+                                  :chip-formatter="ui.chipFormatter"
+                                  @button-click="toggleCall"></bet-button-component>
+            <bet-button-component v-if="isRaiseAllowed"
+                                  :action="betDescription"
+                                  :is-activated="isRaiseActivated"
+                                  :amount="ui.myBet.chipsAdded"
+                                  :chip-formatter="ui.chipFormatter"
+                                  @button-click="toggleRaise"></bet-button-component>
 
         </div>
 
@@ -145,12 +156,42 @@ const TableMenuComponent = Vue.extend ({
 
         isFoldAllowed: function () {
 
+            return true;
+
         },
 
         isFoldActivated: function (): Boolean {
 
             return this.ui.pendingBetCommand instanceof FoldCommand;
 
+        },
+
+        isCheckAllowed: function () {
+
+            return this.ui.myCall && this.ui.myCall.chipsAdded === 0;
+
+        },
+
+        isCheckActivated: function (): Boolean {
+
+            let command = this.ui.pendingBetCommand;
+
+            return command instanceof BetCommand && command.amount === 0;
+
+        },
+
+        isCallAllowed: function () {
+
+            return this.ui.myCall && this.ui.myCall.chipsAdded > 0;
+
+        },
+
+        isCallActivated: function (): Boolean {
+
+            let command = this.ui.pendingBetCommand;
+
+            return command instanceof BetCommand && this.ui.myCall && command.amount === this.ui.myCall.chipsAdded;
+            
         },
 
         isRaiseAllowed: function () {
@@ -166,22 +207,18 @@ const TableMenuComponent = Vue.extend ({
             return false;
 
         },
-        minimumRaise: function () {
 
-            let mySeat: Seat = this.ui.getMySeat();
+        isRaiseActivated: function (): Boolean {
 
-            if (mySeat) {
+            let command = this.ui.pendingBetCommand;
 
-                return this.ui.betController.calculateMinimumRaise(this.ui.table, mySeat);
-
-            }
-
-            return 0;
+            return command instanceof BetCommand && this.ui.myBet && command.amount >= this.ui.myBet.chipsAdded;
 
         },
-        alreadyHasBets: function () {
 
-            return this.ui.table.betStatus.numRaises > 0;
+        betDescription: function () {
+
+            return this.ui.table.betStatus.numRaises > 0 ? 'Raise' : 'Bet';
 
         }
 
@@ -200,32 +237,45 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
+        toggleCheck: function (event): void {
+
+            if (this.isCheckActivated) {
+
+                return this.ui.clearBetCommand();
+
+            }
+
+            this.ui.setBetCommand(new BetCommand(this.ui.table.id, 0));
+
+        },
+
+        toggleCall: function (event): void {
+
+            if (this.isCallActivated) {
+
+                return this.ui.clearBetCommand();
+
+            }
+
+            this.ui.setBetCommand(new BetCommand(this.ui.table.id, this.ui.myCall.chipsAdded));
+
+        },
+
+        toggleRaise: function (event): void {
+
+            if (this.isRaiseActivated) {
+
+                return this.ui.clearBetCommand();
+
+            }
+
+            this.ui.setBetCommand(new BetCommand(this.ui.table.id, this.ui.myBet.chipsAdded));
+
+        },
+
         ante: function (event) {
 
             this.ui.sendCommand(new AnteCommand(this.ui.table.id));
-
-        },
-
-        check: function (event) {
-
-            this.ui.sendCommand(new BetCommand(this.ui.table.id, 0));
-
-        },
-
-        call: function (event) {
-
-            this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myCall.chipsAdded));
-
-        },
-
-        bet: function (event) {
-
-            this.ui.sendCommand(new BetCommand(this.ui.table.id, this.ui.myBet.chipsAdded));
-
-        },
-
-        fold: function (event) {
-
 
         },
 
