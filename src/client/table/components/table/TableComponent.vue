@@ -30,7 +30,7 @@
                                :ui="ui">
                 </pot-component>
                 <won-pot-component v-for="pot in ui.wonPots"
-                                   :key="'won-pot-' + pot.index"
+                                   :key="`won-pot-${pot.index}-${pot.seatIndex}`"
                                    :pot="pot"
                                    :ui="ui">
                 </won-pot-component>
