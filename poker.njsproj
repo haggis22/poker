@@ -237,9 +237,6 @@
     <TypeScriptCompile Include="src\client\ui-position.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\client\table\pending-commands.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\client\table\components\table\TableComponent.vue" />
     <TypeScriptCompile Include="src\client\router\index.ts" />
     <TypeScriptCompile Include="src\commands\cashier\check-balance-command.ts" />
@@ -251,6 +248,9 @@
     <TypeScriptCompile Include="src\commands\lobby\lobby-command.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\commands\table\betting\raise-command.ts" />
+    <TypeScriptCompile Include="src\commands\table\betting\check-command.ts" />
+    <TypeScriptCompile Include="src\commands\table\betting\call-command.ts" />
     <TypeScriptCompile Include="src\commands\table\betting\blind-command.ts" />
     <TypeScriptCompile Include="src\commands\table\betting\ante-command.ts" />
     <TypeScriptCompile Include="src\commands\table\chat\chat-command.ts" />

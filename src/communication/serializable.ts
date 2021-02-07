@@ -100,6 +100,9 @@ export { Fold } from "../casino/tables/betting/fold";
 export { FoldAction } from "../actions/table/betting/fold-action";
 export { FoldCommand } from "../commands/table/betting/fold-command";
 export { BetCommand } from "../commands/table/betting/bet-command";
+export { CallCommand } from "../commands/table/betting/call-command";
+export { CheckCommand } from "../commands/table/betting/check-command";
+export { RaiseCommand } from "../commands/table/betting/raise-command";
 export { AnteCommand } from "../commands/table/betting/ante-command";
 export { BlindCommand } from "../commands/table/betting/blind-command";
 

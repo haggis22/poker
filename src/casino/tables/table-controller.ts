@@ -789,7 +789,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async bet(command: BetCommand): Promise<void> {
 
-        this.log(`Received BetCommand from ${command.userID}, tableState: ${this.table.state.constructor.name}`);
+        this.log(`Received ${command.constructor.name} from ${command.userID}, tableState: ${this.table.state.constructor.name}`);
 
         if (this.table.state instanceof BetState) {
 

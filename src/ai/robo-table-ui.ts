@@ -15,7 +15,7 @@ import { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 import { RequestSeatCommand } from "../commands/table/request-seat-command";
 import { SetStatusCommand } from "../commands/table/set-status-command";
 import { AddChipsCommand } from "../commands/cashier/add-chips-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, BetCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, AnteTurnAction, IsInHandAction, AuthenticateCommand, AuthenticatedAction, JoinTableCommand, SetStatusAction } from "../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, CallCommand, AnteCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, Card, AnteTurnAction, IsInHandAction, AuthenticateCommand, AuthenticatedAction, JoinTableCommand, SetStatusAction, RaiseCommand, CheckCommand } from "../communication/serializable";
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
@@ -223,12 +223,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     private broadcastCommand(command: Command): void {
 
         this.log(`Sent ${command.constructor.name}`);
-
-        if (command instanceof BetCommand)
-        {
-            this.log(`  ${command.toString()}`);
-        }
-
 
         for (let handler of this.commandHandlers) {
 
@@ -561,17 +555,15 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
                             this.log(`Raise => tracker.currentBet = ${betStatus.currentBet}, betAmount = ${betAmount}, playerChips = ${seat.player.chips}, playerCurrentBet = ${this.betController.getCurrentBet(this.table.betStatus, seat.index)}`);
 
-                            let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
-
-                            return this.broadcastCommand(betCommand);
+                            return this.broadcastCommand(new RaiseCommand(this.table.id, betAmount));
 
                         }
                         else if (rnd >= 0.01) {
 
                             // This represents a call (possibly all-in)
-                            let betCommand: BetCommand = new BetCommand(this.table.id, call.chipsAdded);
+                            let callCommand: CallCommand = new CallCommand(this.table.id, call.chipsAdded);
 
-                            return this.broadcastCommand(betCommand);
+                            return this.broadcastCommand(callCommand);
 
                         }
                         else {
@@ -595,9 +587,14 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                         // This represents a bet out (or a check, if the player has no chips)
                         let betAmount: number = Math.random() > 0.1 && minimumRaise != null && minimumRaise.chipsAdded > 0 ? minimumRaise.chipsAdded : 0;
 
-                        let betCommand: BetCommand = new BetCommand(this.table.id, betAmount);
+                        if (betAmount > 0) {
 
-                        this.broadcastCommand(betCommand);
+                            return this.broadcastCommand(new RaiseCommand(this.table.id, betAmount));
+
+                        }
+                        
+                        return this.broadcastCommand(new CheckCommand(this.table.id));
+
 
                     }, TIME_TO_THINK);
 
@@ -630,11 +627,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player.userID === this.user.id) {
 
-                let betCommand: AnteCommand = new AnteCommand(this.table.id);
-
-                this.broadcastCommand(betCommand);
-
-                return;
+                return this.broadcastCommand(new AnteCommand(this.table.id));
 
             }  // if it's my turn
 

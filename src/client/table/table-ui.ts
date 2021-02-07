@@ -73,7 +73,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private usedCards: Array<Card>;
 
     // fields specific to acting in advance
-    public pendingBetCommand: TableCommand;
+    public pendingBetCommand: BetCommand | FoldCommand;
+    private pendingBetNumRaises: number;
 
     // Key = seatIndex
     // Value = array of cards that have been mucked
@@ -388,12 +389,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`Sent ${command.constructor.name}`);
 
-        if (command instanceof BetCommand)
-        {
-            this.log(`  ${command.toString()}`);
-        }
-
-
         for (let handler of this.commandHandlers) {
 
             handler.handleCommand(command);
@@ -652,7 +647,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myCall = null;
         this.myBet = null;
 
-        this.pendingBetCommand = null;
+        this.clearBetCommand();
 
     }
 
@@ -754,6 +749,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`Seats To Act: [ ${action.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
         this.log(`Table Seats To Act: [ ${this.table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
+
+        if (this.pendingBetCommand) {
+
+            if (this.pendingBetNumRaises == null || action.betStatus.numRaises > this.pendingBetNumRaises) {
+
+                // TODO: Maybe leave in place if it is Call Any, or a raise more than what the action took it to
+                this.clearBetCommand();
+
+            }
+
+        }
 
         for (let pot of this.table.betStatus.pots) {
         
@@ -936,11 +942,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                 // Automatically ante if isSittingOut == false, prompt the player if isSittingOut == undefined
                 if (seat.player.userID === this.user.id && seat.player.isSittingOut === false) {
 
-                    let betCommand: AnteCommand = new AnteCommand(this.table.id);
-
-                    this.broadcastCommand(betCommand);
-
-                    return;
+                    return this.broadcastCommand(new AnteCommand(this.table.id));
 
                 }  // if it's my turn
 
@@ -1219,15 +1221,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // chat
 
 
-    public clearBetCommand() {
+    public clearBetCommand(): void {
 
         this.pendingBetCommand = null;
+        this.pendingBetNumRaises = null;
 
     }
 
-    public setBetCommand(betCommand: TableCommand) {
+    public setBetCommand(betCommand: BetCommand | FoldCommand) {
 
         this.pendingBetCommand = betCommand;
+
+        // Remember the level of action when this bet was set - if it goes up then we don't want to keep doing this action
+        this.pendingBetNumRaises = this.table.betStatus.numRaises;
 
         setTimeout(() => { this.checkPendingBetCommand(); }, 50);
 
@@ -1241,8 +1247,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             // TODO: Validate first against local BetController and only send if valid?
             if (this.mySeatIndex != null && this.table.betStatus && this.table.betStatus.seatIndex == this.mySeatIndex) {
 
-                let command: TableCommand = this.pendingBetCommand;
-                this.pendingBetCommand = null;
+                let command: BetCommand | FoldCommand = this.pendingBetCommand;
+
+                this.clearBetCommand();
 
                 this.broadcastCommand(command);
                 return true;

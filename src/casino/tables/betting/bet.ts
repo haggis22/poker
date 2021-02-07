@@ -51,29 +51,4 @@
 
     }
 
-
-    public getActionName(): string {
-
-        switch (this.actionType) {
-
-            case Bet.ACTION.CHECK:
-                return 'Checks';
-
-            case Bet.ACTION.OPEN:
-                return 'Bets';
-
-            case Bet.ACTION.CALL:
-                return 'Calls';
-
-            case Bet.ACTION.RAISE:
-                return 'Raises';
-
-        }   // switch
-
-        return '';
-
-    }   // getActionName
-
-
-
 }
