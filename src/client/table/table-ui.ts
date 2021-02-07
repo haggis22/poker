@@ -23,10 +23,10 @@ import { HandCompleteAction } from "../../actions/table/game/hand-complete-actio
 import { IChipFormatter } from "../../casino/tables/chips/chip-formatter";
 import { Timer } from "../../timers/timer";
 import { BetController } from "../../casino/tables/betting/bet-controller";
-import { PendingCommands } from "./pending-commands";
 import { ChipStacker } from "../../casino/tables/chips/chip-stacker";
 import { CurrentBalanceAction } from "../../actions/cashier/current-balance-action";
 import { UIPosition } from "../ui-position";
+import { TableCommand } from "../../commands/table/table-command";
 
 
 const logger: Logger = new Logger();
@@ -73,8 +73,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private usedCards: Array<Card>;
 
     // fields specific to acting in advance
-    public pendingCommands: PendingCommands;
-    private pendingTimer: ReturnType<typeof setTimeout>;
+    public pendingBetCommand: TableCommand;
 
     // Key = seatIndex
     // Value = array of cards that have been mucked
@@ -500,25 +499,23 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    public isAnteTime(): boolean {
+    public remainsToAnte(): boolean {
 
         return this.mySeatIndex != null && this.table.state instanceof BlindsAndAntesState && this.myCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
 
-    }   // isAnteTime
+    }
 
+    public remainsToAct(): boolean {
+
+        return this.mySeatIndex != null && this.table.state instanceof BetState && (this.table.betStatus.seatIndex === this.mySeatIndex || this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex));
+
+    }
 
     public isCheckBetTime(): boolean {
 
         return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded === 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
 
     }
-
-    public isPendingCheckBetTime(): boolean {
-
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded === 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
-
-    }
-
 
     public isCallRaiseTime(): boolean {
 
@@ -655,16 +652,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myCall = null;
         this.myBet = null;
 
-        clearTimeout(this.pendingTimer);
-
-        if (!this.pendingCommands) {
-            this.pendingCommands = new PendingCommands();
-        }
-        else {
-            this.pendingCommands.clear();
-        }
-
-
+        this.pendingBetCommand = null;
 
     }
 
@@ -885,22 +873,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (action.betStatus.seatIndex == this.mySeatIndex) {
 
-                // it's our turn, so don't allow any of the pending actions to still take hold
-                clearTimeout(this.pendingTimer);
+                // if we had a betting action readied, then send it now
+                if (this.checkPendingBetCommand()) {
 
-                if (this.pendingCommands.fold) {
-
-                    // We are taking an action, so clear anything that is pending and try to fold immediately
-                    this.pendingCommands.clear();
-                    return this.broadcastCommand(new FoldCommand(this.table.id));
-
-                }
-
-                if (this.pendingCommands.check) {
-
-                    // We are taking an action, so clear anything that is pending and try to fold immediately
-                    this.pendingCommands.clear();
-                    return this.broadcastCommand(new BetCommand(this.table.id, 0));
+                    return;
 
                 }
 
@@ -1243,48 +1219,41 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // chat
 
 
-    public setPendingFold(foldActivated: boolean): void {
+    public clearBetCommand() {
 
-        // kill anything that might already be waiting to execute
-        clearTimeout(this.pendingTimer);
+        this.pendingBetCommand = null;
 
-        this.pendingCommands.check = this.pendingCommands.bet = false;
+    }
 
-        if (foldActivated) {
+    public setBetCommand(betCommand: TableCommand) {
 
-            this.pendingTimer = setTimeout(() => { this.pendingCommands.fold = true }, this.TIME_PENDING_ACTION);
+        this.pendingBetCommand = betCommand;
 
-        }
-        else {
+        setTimeout(() => { this.checkPendingBetCommand(); }, 50);
 
-            // turning off folding can happen immediately
-            this.pendingCommands.fold = false;
-
-        }
-
-    }  // setPendingFold
+    }
 
 
-    public setPendingCheck(checkActivated: boolean): void {
+    private checkPendingBetCommand(): boolean {
 
-        // kill anything that might already be waiting to execute
-        clearTimeout(this.pendingTimer);
+        if (this.pendingBetCommand) {
 
-        this.pendingCommands.fold = this.pendingCommands.bet = false;
+            // TODO: Validate first against local BetController and only send if valid?
+            if (this.mySeatIndex != null && this.table.betStatus && this.table.betStatus.seatIndex == this.mySeatIndex) {
 
-        if (checkActivated) {
+                let command: TableCommand = this.pendingBetCommand;
+                this.pendingBetCommand = null;
 
-            this.pendingTimer = setTimeout(() => { this.pendingCommands.check = true }, this.TIME_PENDING_ACTION);
+                this.broadcastCommand(command);
+                return true;
 
-        }
-        else {
-
-            // turning off checking can happen immediately
-            this.pendingCommands.check = false;
+            }
 
         }
 
-    }  // setPendingCheck
+        return false;
+
+    }   // checkPendingBetCommand
 
 
     public getMuckedCards(seatIndex: number): Array<Card | FacedownCard> {

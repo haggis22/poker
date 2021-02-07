@@ -9,10 +9,7 @@
                                   :ui="ui"
                                   :is-sitting-out.sync="ui.isSittingOut">
             </table-menu-component>
-            <betting-menu-component v-if="ui.getMySeat()"
-                                  :ui="ui"
-                                  :pending-fold.sync="ui.pendingCommands.fold">
-            </betting-menu-component>
+            <betting-menu-component v-if="ui.getMySeat()" :ui="ui"></betting-menu-component>
         </div>
         <div v-else>
             We have no table yet.

@@ -11,6 +11,7 @@ import { Blind } from "./blind";
 import { Ante } from "./ante";
 import { InvalidBet } from "./invalid-bet";
 import { InvalidFold } from "./invalid-fold";
+import { TableCommand } from "../../../commands/table/table-command";
 
 
 export class BetController {
@@ -80,7 +81,6 @@ export class BetController {
         return status.seatIndexesRemainToAct.shift();
 
     }   // getNextBetterIndex
-
 
 
 

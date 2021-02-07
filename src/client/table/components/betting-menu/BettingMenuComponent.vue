@@ -2,15 +2,7 @@
 
     <div class="betting-menu">
 
-        <div class="bet-actions">
-
-            <bet-button-component :action="'Fold'" :is-activated="foldValue" @button-click="toggleFold"></bet-button-component>
-            <bet-button-component :action="'Check'" :is-activated="checkValue" @click.stop="checkValue = !checkValue"></bet-button-component>
-            <bet-button-component :action="'Bet'" :is-activated="raiseValue" @click.stop="raiseValue = !raiseValue" :amount="150" :chip-formatter="ui.chipFormatter"></bet-button-component>
-
-        </div>
-
-        <div class="bet-actions" v-if="ui.isAnteTime()">
+        <div class="bet-actions" v-if="ui.remainsToAnte()">
             <button type="button" v-on:click.stop="fold">
                 <div class="action">Sit Out</div>
             </button>
@@ -22,77 +14,88 @@
             </button>
         </div>
 
-        <div class="bet-actions" v-if="ui.isPendingCheckBetTime()">
-            <label>
-                <input type="checkbox" value="true" :checked="pendingFold" @change="ui.setPendingFold($event.target.checked)" /> Fold
-            </label>
-            <label>
-                <input type="checkbox" value="true" :checked="pendingCheck" @change="ui.setPendingCheck($event.target.checked)" /> Check
-            </label>
-            <label>
-                <input type="checkbox" /> Bet {{ ui.chipFormatter.format(ui.myBet.totalBet) }}
-            </label>
+        <div class="bet-actions" v-if="ui.remainsToAct()">
+
+            <bet-button-component :action="'Fold'" :is-activated="isFoldActivated" @button-click="toggleFold"></bet-button-component>
+            <bet-button-component :action="'Check'" :is-activated="checkValue" @click.stop="checkValue = !checkValue"></bet-button-component>
+            <bet-button-component :action="'Bet'" :is-activated="raiseValue" @click.stop="raiseValue = !raiseValue" :amount="150" :chip-formatter="ui.chipFormatter"></bet-button-component>
+
         </div>
 
-        <div class="bet-actions" v-if="ui.isCheckBetTime()">
-            <button type="button" v-on:click.stop="fold">
-                <div class="light"></div>
-                <div class="text">
-                    <div class="action">Fold</div>
-                </div>
-            </button>
-            <button type="button" v-on:click.stop="check">
-                <div class="light"></div>
-                <div class="text">
-                    <div class="action">Check</div>
-                </div>
-            </button>
-            <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
-                <div class="light"></div>
-                <div class="text">
-                    <div class="action">
-                        <span v-if="alreadyHasBets">Raise</span>
-                        <span v-else>Bet</span>
+        <!--
+
+            <div class="bet-actions" v-if="ui.isPendingCheckBetTime()">
+                <label>
+                    <input type="checkbox" value="true" :checked="pendingFold" @change="ui.setPendingFold($event.target.checked)" /> Fold
+                </label>
+                <label>
+                    <input type="checkbox" value="true" :checked="pendingCheck" @change="ui.setPendingCheck($event.target.checked)" /> Check
+                </label>
+                <label>
+                    <input type="checkbox" /> Bet {{ ui.chipFormatter.format(ui.myBet.totalBet) }}
+                </label>
+            </div>
+
+            <div class="bet-actions" v-if="ui.isCheckBetTime()">
+                <button type="button" v-on:click.stop="fold">
+                    <div class="light"></div>
+                    <div class="text">
+                        <div class="action">Fold</div>
                     </div>
+                </button>
+                <button type="button" v-on:click.stop="check">
+                    <div class="light"></div>
+                    <div class="text">
+                        <div class="action">Check</div>
+                    </div>
+                </button>
+                <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
+                    <div class="light"></div>
+                    <div class="text">
+                        <div class="action">
+                            <span v-if="alreadyHasBets">Raise</span>
+                            <span v-else>Bet</span>
+                        </div>
+                        <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
+                    </div>
+                </button>
+                <button v-if="!isRaiseAllowed" type="button" disabled>
+                    <div class="light"></div>
+                    <div class="text">
+                        <div class="action">Bet</div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="bet-actions" v-if="ui.isPendingCallRaiseTime()">
+                <label>
+                    <input type="checkbox" value="true" :checked="pendingFold" @change="ui.setPendingFold($event.target.checked)" /> Fold
+                </label>
+                <label>
+                    <input type="checkbox" /> Call
+                </label>
+                <label>
+                    <input type="checkbox" /> Raise to {{ ui.chipFormatter.format(ui.myBet.totalBet) }}
+                </label>
+            </div>
+
+            <div class="bet-actions" v-if="ui.isCallRaiseTime()">
+                <button type="button" v-on:click.stop="fold">
+                    <div class="action">Fold</div>
+                </button>
+                <button type="button" v-on:click.stop="call">
+                    <div class="action">Call</div>
+                    <div class="amount">{{ ui.chipFormatter.format(ui.myCall.chipsAdded) }}</div>
+                </button>
+                <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
+                    <div class="action">Raise</div>
                     <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
-                </div>
-            </button>
-            <button v-if="!isRaiseAllowed" type="button" disabled>
-                <div class="light"></div>
-                <div class="text">
-                    <div class="action">Bet</div>
-                </div>
-            </button>
-        </div>
-
-        <div class="bet-actions" v-if="ui.isPendingCallRaiseTime()">
-            <label>
-                <input type="checkbox" value="true" :checked="pendingFold" @change="ui.setPendingFold($event.target.checked)" /> Fold
-            </label>
-            <label>
-                <input type="checkbox" /> Call
-            </label>
-            <label>
-                <input type="checkbox" /> Raise to {{ ui.chipFormatter.format(ui.myBet.totalBet) }}
-            </label>
-        </div>
-
-        <div class="bet-actions" v-if="ui.isCallRaiseTime()">
-            <button type="button" v-on:click.stop="fold">
-                <div class="action">Fold</div>
-            </button>
-            <button type="button" v-on:click.stop="call">
-                <div class="action">Call</div>
-                <div class="amount">{{ ui.chipFormatter.format(ui.myCall.chipsAdded) }}</div>
-            </button>
-            <button v-if="isRaiseAllowed" type="button" v-on:click.stop="bet">
-                <div class="action">Raise</div>
-                <div class="amount">{{ ui.chipFormatter.format(ui.myBet.totalBet) }}</div>
-            </button>
-            <button v-if="!isRaiseAllowed" type="button" disabled>
-                <div class="action">Raise</div>
-            </button>
-        </div>
+                </button>
+                <button v-if="!isRaiseAllowed" type="button" disabled>
+                    <div class="action">Raise</div>
+                </button>
+            </div>
+    -->
 
     </div>
 
@@ -118,14 +121,6 @@ const TableMenuComponent = Vue.extend ({
         ui: {
             type: TableUI,
             required: true
-        },
-        pendingFold: {
-            type: Boolean,
-            required: false
-        },
-        pendingCheck: {
-            type: Boolean,
-            required: false
         }
 
     },
@@ -147,6 +142,16 @@ const TableMenuComponent = Vue.extend ({
 
     },
     computed: {
+
+        isFoldAllowed: function () {
+
+        },
+
+        isFoldActivated: function (): Boolean {
+
+            return this.ui.pendingBetCommand instanceof FoldCommand;
+
+        },
 
         isRaiseAllowed: function () {
 
@@ -183,9 +188,15 @@ const TableMenuComponent = Vue.extend ({
     },
     methods: {
 
-        toggleFold: function (event) {
+        toggleFold: function (event): void {
 
-            this.foldValue = !this.foldValue;
+            if (this.isFoldActivated) {
+
+                return this.ui.clearBetCommand();
+
+            }
+
+            this.ui.setBetCommand(new FoldCommand(this.ui.table.id));
 
         },
 
@@ -215,7 +226,6 @@ const TableMenuComponent = Vue.extend ({
 
         fold: function (event) {
 
-            this.ui.sendCommand(new FoldCommand(this.ui.table.id));
 
         },
 
