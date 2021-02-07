@@ -931,6 +931,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (action.timesUp > Date.now()) {
 
+                // if we had a betting action readied, then send it now
+                if (this.checkPendingBetCommand()) {
+
+                    return;
+
+                }
+
                 let timer: Timer = new Timer(action.timesUp);
                 timer.start();
                 this.seatTimer.set(seat.index, timer);

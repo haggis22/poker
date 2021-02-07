@@ -3,27 +3,38 @@
     <div class="betting-menu">
 
         <div class="bet-actions" v-if="ui.remainsToAnte()">
-            <button type="button" v-on:click.stop="fold">
-                <div class="action">Sit Out</div>
-            </button>
-            <button type="button" v-on:click.stop="ante">
-                <div class="action">Ante</div>
-                <div class="amount">
-                    {{ ui.chipFormatter.format(ui.myCall.chipsAdded) }}
-                </div>
-            </button>
+
+            <bet-button-component :action="'Sit Out'"
+                                  :is-activated="isFoldActivated"
+                                  @button-click="toggleFold"></bet-button-component>
+
+            <bet-button-component :action="'Ante'"
+                                  :is-activated="isAnteActivated"
+                                  :amount="ui.myCall.chipsAdded"
+                                  :chip-formatter="ui.chipFormatter"
+                                  @button-click="toggleAnte"></bet-button-component>
+
         </div>
 
         <div class="bet-actions" v-if="ui.remainsToAct()">
 
-            <bet-button-component v-if="isFoldAllowed" :action="'Fold'" :is-activated="isFoldActivated" @button-click="toggleFold"></bet-button-component>
-            <bet-button-component v-if="isCheckAllowed" :action="'Check'" :is-activated="isCheckActivated" @button-click="toggleCheck"></bet-button-component>
+            <bet-button-component v-if="isFoldAllowed" 
+                                  :action="'Fold'" 
+                                  :is-activated="isFoldActivated" 
+                                  @button-click="toggleFold"></bet-button-component>
+
+            <bet-button-component v-if="isCheckAllowed" 
+                                  :action="'Check'" 
+                                  :is-activated="isCheckActivated" 
+                                  @button-click="toggleCheck"></bet-button-component>
+
             <bet-button-component v-if="isCallAllowed"
                                   :action="'Call'"
                                   :is-activated="isCallActivated"
                                   :amount="ui.myCall.chipsAdded"
                                   :chip-formatter="ui.chipFormatter"
                                   @button-click="toggleCall"></bet-button-component>
+
             <bet-button-component v-if="isRaiseAllowed"
                                   :action="betDescription"
                                   :is-activated="isRaiseActivated"
@@ -45,7 +56,6 @@ import './betting-menu.scss';
 import Vue from 'vue';
 
 import { TableUI } from '../../table-ui';
-import { Seat } from '../../../../casino/tables/seat';
 import { AnteCommand } from '../../../../commands/table/betting/ante-command';
 import { CheckCommand } from '../../../../commands/table/betting/check-command';
 import { CallCommand } from '../../../../commands/table/betting/call-command';
@@ -90,6 +100,12 @@ const TableMenuComponent = Vue.extend ({
         isFoldActivated: function (): Boolean {
 
             return this.ui.pendingBetCommand instanceof FoldCommand;
+
+        },
+
+        isAnteActivated: function (): Boolean {
+
+            return this.ui.pendingBetCommand instanceof AnteCommand;
 
         },
 
@@ -150,6 +166,18 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
+        toggleAnte: function (event): void {
+
+            if (this.isAnteActivated) {
+
+                return this.ui.clearBetCommand();
+
+            }
+
+            this.ui.setBetCommand(new AnteCommand(this.ui.table.id));
+
+        },
+
         toggleCheck: function (event): void {
 
             if (this.isCheckActivated) {
@@ -184,13 +212,7 @@ const TableMenuComponent = Vue.extend ({
 
             this.ui.setBetCommand(new RaiseCommand(this.ui.table.id, this.ui.myBet.chipsAdded));
 
-        },
-
-        ante: function (event) {
-
-            this.ui.sendCommand(new AnteCommand(this.ui.table.id));
-
-        },
+        }
 
     }  // methods
 
