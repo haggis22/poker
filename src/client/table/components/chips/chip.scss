@@ -11,7 +11,7 @@
     border: .1em dashed white;
     backface-visibility: hidden;
     box-shadow: -1px 1px 0px #555, -2px 2px 0px #555;
-    transition: top 0.6s ease-out, left 0.6s ease-out, transform 0.2s ease-in;
+    transition: top 0.6s ease-out, left 0.6s ease-out, transform 1s ease-in;
 
     &.angled {
         transform: perspective(3000px) rotateX(55deg) rotateZ(-40deg);
