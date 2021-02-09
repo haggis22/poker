@@ -1,0 +1,22 @@
+﻿.winning-hand {
+    color: black;
+    background: gold;
+    text-align: center;
+    text-transform: uppercase;
+    padding: 10px 100px;
+    border: 2px solid darkgoldenrod;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    z-index: 20;
+
+    /* hide it at first and fade them in quickly */
+    opacity: 0;
+
+    &.announced {
+        opacity: 1;
+        transition: opacity 0.25s;
+    }
+}

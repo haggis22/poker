@@ -40,6 +40,9 @@
                 <board-component :board="ui.table.board"
                                  :ui="ui">
                 </board-component>
+                <winning-hand-component v-if="ui.winningHand" 
+                                        :hand-description="ui.winningHand">
+                </winning-hand-component>
             </div>
         </div><!-- table seats-6 -->
     </div>
@@ -58,6 +61,7 @@ import BetComponent from '../bet/BetComponent.vue';
 import PotComponent from '../pot/PotComponent.vue';
 import WonPotComponent from '../pot/WonPotComponent.vue';
 import BoardComponent from '../board/BoardComponent.vue';
+import WinningHandComponent from '../winning-hand/WinningHandComponent.vue';
 
 const TableComponent = Vue.extend({
     props: {
@@ -73,6 +77,7 @@ const TableComponent = Vue.extend({
         'pot-component': PotComponent,
         'won-pot-component': WonPotComponent,
         'board-component': BoardComponent,
+        'winning-hand-component': WinningHandComponent
     }
 });
 

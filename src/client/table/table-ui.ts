@@ -26,7 +26,6 @@ import { BetController } from "../../casino/tables/betting/bet-controller";
 import { ChipStacker } from "../../casino/tables/chips/chip-stacker";
 import { CurrentBalanceAction } from "../../actions/cashier/current-balance-action";
 import { UIPosition } from "../ui-position";
-import { TableCommand } from "../../commands/table/table-command";
 
 
 const logger: Logger = new Logger();
@@ -83,6 +82,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public dealerPositions: Map<number, UIPosition>;
     public playerPositions: Map<number, UIPosition>;
 
+    public winningHand: string;
+
 
 
 
@@ -124,6 +125,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.setUpPositions();
 
+        this.winningHand = null;
 
     }
 
@@ -334,7 +336,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof WinPotAction) {
 
-            return this.winPot(action);
+            return this.winPotAction(action);
 
         }
 
@@ -848,6 +850,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.muckedCards.clear();
 
+        this.winningHand = null;
+
     }  // handComplete
 
 
@@ -1119,7 +1123,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // declareHand
 
 
-    private winPot(action: WinPotAction): void {
+    private winPotAction(action: WinPotAction): void {
 
         let pot: WonPot = action.pot;
 
@@ -1130,6 +1134,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let potDescription = pot.index > 0 ? `side pot #${pot.index}` : `the main pot`;
 
         let handDescription = pot.handEvaluation ? ` with ${this.game.handDescriber.describe(pot.handEvaluation)}` : '';
+
+        this.winningHand = this.game.handDescriber.describe(pot.handEvaluation);
 
         let message:string = null;
 
