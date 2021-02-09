@@ -46,9 +46,6 @@ const BetComponent = Vue.extend ({
     },
     created() {
 
-
-        console.log(`Created BetComponent for seatIndex ${this.bet.seatIndex}, amount ${this.bet.totalBet}`);
-
         // After only the briefest of pauses, we're going to have this bubble appear
         this.timer = setTimeout(() => {
 

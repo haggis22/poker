@@ -99,6 +99,8 @@
     <Content Include="src\client\table\components\timer\timer.scss" />
     <Content Include="src\client\table\components\timer\TimerComponent.vue" />
     <Content Include="src\client\lobby\Lobby.vue" />
+    <Content Include="src\client\table\components\winning-hand\winning-hand.scss" />
+    <Content Include="src\client\table\components\winning-hand\WinningHandComponent.vue" />
     <Content Include="src\client\table\Table.vue" />
     <Content Include="src\games\game-factory.ts">
       <SubType>Code</SubType>
@@ -140,6 +142,7 @@
     <Folder Include="src\client\table\components\folding\" />
     <Folder Include="src\client\table\components\ghost-hand\" />
     <Folder Include="src\client\table\components\bet-button\" />
+    <Folder Include="src\client\table\components\winning-hand\" />
     <Folder Include="src\client\table\components\timer\" />
     <Folder Include="src\client\table\components\table-menu\" />
     <Folder Include="src\client\table\components\pot\" />
