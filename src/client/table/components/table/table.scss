@@ -53,9 +53,20 @@ $table-width: 800px;
             font-weight: bold;
             line-height: 40px;
         }
-
     }
 
+    &::after {
+        content: "";
+        background-image: url('https://media.gettyimages.com/illustrations/cartoon-corn-dog-illustration-id165797767?s=612x612');
+        background-repeat: no-repeat;
+        opacity:0.2;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        position: absolute;
+        z-index: -1;
+    }
 }
 
 

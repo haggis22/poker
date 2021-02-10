@@ -51,7 +51,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public mySeatIndex: number;
 
     public myCall: Bet;
-    public myBet: Bet;
+    public myMinRaise: Bet;
+    public myMaxRaise: Bet;
+
     public currentBalance: number;
 
     public seatAction: Map<number, string>;
@@ -516,33 +518,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         return this.mySeatIndex != null && this.table.state instanceof BetState && (this.table.betStatus.seatIndex === this.mySeatIndex || this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex));
 
     }
-
-    public isCheckBetTime(): boolean {
-
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded === 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
-
-    }
-
-    public isCallRaiseTime(): boolean {
-
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded > 0 && this.table.betStatus.seatIndex === this.mySeatIndex;
-
-    }
-
-    public isPendingCallRaiseTime(): boolean {
-
-        return this.mySeatIndex != null && this.table.state instanceof BetState && this.myCall != null && this.myCall.chipsAdded > 0 && this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex);
-
-    }
-
-
-
-    public calculateCall(): Bet {
-
-        return this.betController.calculateCall(this.table, this.table.seats[this.mySeatIndex]);
-
-    }
-
+    
 
     private playerSeated(action: PlayerSeatedAction): void {
 
@@ -655,8 +631,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private clearLocalBets(): void {
 
         // null is different from 0 in that it indicates that the given option is not even available
-        this.myCall = null;
-        this.myBet = null;
+        this.myCall = this.myMinRaise = this.myMaxRaise = null;
 
         this.clearBetCommand();
 
@@ -716,13 +691,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
             this.myCall = this.betController.calculateCall(this.table, seat);
-            this.myBet = this.betController.calculateMinimumRaise(this.table, seat, this.myCall);
+            this.myMinRaise = this.betController.calculateMinimumRaise(this.table, seat, this.myCall);
+            this.myMaxRaise = this.betController.calculateMaximumRaise(this.table, seat, this.myCall);
 
         }
         else {
 
-            this.myCall = null;
-            this.myBet = null;
+            this.myCall = this.myMinRaise = this.myMaxRaise = null;
 
         }
 
@@ -740,13 +715,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.myCall = this.betController.calculateCall(this.table, seat);
 
             // no betting, only calling, with antes
-            this.myBet = null;
+            this.myMinRaise = this.myMaxRaise = null;
 
         }
         else {
 
-            this.myCall = null;
-            this.myBet = null;
+            this.myCall = this.myMinRaise = this.myMaxRaise = null;
 
         }
 
@@ -870,20 +844,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.myCall = this.betController.calculateCall(this.table, mySeat);
 
-        // Raise the minimum value for the UI player to bet/raise, if necessary
-        // Don't lower it if they have previously set it to be higher
-        if (!this.myBet) {
+        // Calculate the min and max raises allowed here
+        this.myMinRaise = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
+        this.myMaxRaise = this.betController.calculateMaximumRaise(this.table, mySeat, this.myCall);
 
-            this.myBet = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
+        // if they have already specified a bet then make sure it is still within this range
+        if (this.pendingBetCommand instanceof BetCommand) {
 
-        }
-        else {
+            // they are set to bet less than the allowed amount, so clear their action
+            if (this.pendingBetCommand.amount < this.myMinRaise.chipsAdded) {
 
-            let minBet: Bet = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
+                this.clearBetCommand();
 
-            // In order to bet/raise we need to put in more chips than we currently have set up, so up the current setting
-            if (minBet && minBet.chipsAdded > this.myBet.chipsAdded) {
-                this.myBet = minBet;
             }
 
         }
@@ -938,7 +910,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             let mySeat: Seat = this.getMySeat();
 
             this.myCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
-            this.myBet = null;
+            this.myMinRaise = this.myMaxRaise = null;
 
             this.clearSeatTimers();
 
