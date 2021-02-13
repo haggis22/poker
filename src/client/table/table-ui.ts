@@ -296,7 +296,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof BetTurnAction) {
 
-            return this.betTurn(action);
+            return this.betTurnAction(action);
         }
 
         if (action instanceof AnteTurnAction) {
@@ -829,7 +829,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // handComplete
 
 
-    private betTurn(action: BetTurnAction): void {
+    private betTurnAction(action: BetTurnAction): void {
 
         // Remove any previous action for the current "to-act" player
         // Map.delete is safe to use, even if the key does not already exist
@@ -851,8 +851,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // if they have already specified a bet then make sure it is still within this range
         if (this.pendingBetCommand instanceof BetCommand) {
 
+            if (this.myMinRaise == null) {
+
+                // they are not eligible to bet/raise, so clear their action
+                this.clearBetCommand();
+
+            }
+
             // they are set to bet less than the allowed amount, so clear their action
-            if (this.pendingBetCommand.amount < this.myMinRaise.chipsAdded) {
+            else if (this.pendingBetCommand.amount < this.myMinRaise.chipsAdded) {
+
+                this.clearBetCommand();
+
+            }
+
+            // they are set to bet more than the allowed amount, so clear their action
+            else if (this.myMaxRaise && this.pendingBetCommand.amount > this.myMaxRaise.chipsAdded) {
 
                 this.clearBetCommand();
 
