@@ -128,10 +128,13 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
     private setUp(): void {
 
         let cornDog: Table = this.createCornDog();
-        this.log(`Created table CornDog with ID ${cornDog.id}`);
+        this.log(`Created table ${cornDog.name} with ID ${ cornDog.id }`);
 
         let kershner: Table = this.createKershner();
-        this.log(`Created table Kershner with ID ${kershner.id}`);
+        this.log(`Created table ${kershner.name} with ID ${kershner.id}`);
+
+        let cornDogNL: Table = this.createCornDogNL();
+        this.log(`Created table {cornDogNL.name} with ID ${cornDogNL.id}`);
 
     }  // setUp
 
@@ -172,6 +175,44 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         return table;
 
     }  // createCornDog
+
+
+    createCornDogNL(): Table {
+
+        let tableID = ++this.nextID;
+
+        // # seats, # seconds to act
+        let rules = new TableRules(/* numSeats */ 6, /* timeToAnte */ 5, /* timeToAct */ 5);
+
+        let ante = 0;
+
+        // Both of the regular blinds are live bets (they could towards the current round of betting)
+        let blinds: Blind[] =
+            [
+                new Blind(Blind.TYPE_SMALL, 'the small blind', 25, true),
+                new Blind(Blind.TYPE_BIG, 'the big blind', 50, true)
+            ];
+
+        let bets: number[] = [50, 50, 50, 50];
+        let maxRaises: number = null;
+
+        let stakes = new Stakes(ante, blinds, bets, Stakes.NO_LIMIT, maxRaises);
+
+        let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', stakes, rules);
+
+        let tableController: TableController = new TableController(table, new Deck());
+        tableController.addTableObserver(this);
+
+        this.tableControllerMap.set(table.id, tableController);
+
+        // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
+        tableController.setGame((new GameFactory()).create(PokerGameTexasHoldEm.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameOmaha.ID));
+
+        return table;
+
+    }  // createCornDogNL
 
 
     createKershner(): Table {
