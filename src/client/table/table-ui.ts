@@ -301,7 +301,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof AnteTurnAction) {
 
-            return this.anteTurn(action);
+            return this.anteTurnAction(action);
 
         }
 
@@ -921,7 +921,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // setIsInHand
 
 
-    private anteTurn(action: AnteTurnAction): void {
+    private anteTurnAction(action: AnteTurnAction): void {
 
         let seat = this.findSeat(this.table.betStatus.seatIndex);
 
