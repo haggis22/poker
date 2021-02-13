@@ -14,7 +14,7 @@ import { Logger } from "../../logging/logger";
 import { TableConnectedAction } from "../../actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../commands/table/table-snapshot-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction, CheckBalanceCommand, TableAction } from "../../communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { GameFactory } from "../../games/game-factory";
@@ -848,8 +848,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.myMinRaise = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
         this.myMaxRaise = this.betController.calculateMaximumRaise(this.table, mySeat, this.myCall);
 
+
+        if (this.pendingBetCommand instanceof CallCommand) {
+
+            if (this.myCall == null) {
+
+                this.clearBetCommand();
+
+            }
+
+        }
+
         // if they have already specified a bet then make sure it is still within this range
-        if (this.pendingBetCommand instanceof BetCommand) {
+        else if (this.pendingBetCommand instanceof RaiseCommand) {
 
             if (this.myMinRaise == null) {
 
