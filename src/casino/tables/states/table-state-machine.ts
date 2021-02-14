@@ -1,4 +1,5 @@
 ﻿import { TableState } from "./table-state";
+import { BetweenHandsState } from "./between-hands-state";
 import { OpenState } from "./open-state";
 
 export class TableStateMachine {
@@ -11,26 +12,25 @@ export class TableStateMachine {
 
         this.states = new Array<TableState>();
 
-        // All state machines start with OpenState
-        this.states = [new OpenState(), ...states];
+        // All state machines start with BetweenHandsState
+        this.states = [new BetweenHandsState(), ...states];
 
-        this.currentStateIndex = 0;
+        this.currentStateIndex = null;
 
     }
 
     public goToOpenState(): TableState {
 
-        this.currentStateIndex = 0;
+        this.currentStateIndex = null;
 
-        // ALL state machines start with OpenState()
-        return this.states[this.currentStateIndex];
+        return new OpenState();
 
     }
 
 
     public nextState(): TableState {
 
-        this.currentStateIndex++;
+        this.currentStateIndex = this.currentStateIndex == null ? 0 : this.currentStateIndex + 1;
 
         if (this.currentStateIndex >= this.states.length) {
 

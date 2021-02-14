@@ -72,6 +72,7 @@ export { DealBoardState } from "../casino/tables/states/dealing/deal-board-state
 export { ShowdownState } from "../casino/tables/states/showdown-state";
 export { HandCompleteState } from "../casino/tables/states/hand-complete-state";
 export { OpenState } from "../casino/tables/states/open-state";
+export { BetweenHandsState } from "../casino/tables/states/between-hands-state";
 
 export { TableSnapshotCommand } from "../commands/table/table-snapshot-command";
 export { SetGameAction } from "../actions/table/game/set-game-action";

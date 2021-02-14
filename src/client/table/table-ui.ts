@@ -239,7 +239,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof TableStateAction) {
 
-            return this.tableState();
+            return this.tableStateAction(action);
 
         }
 
@@ -509,7 +509,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public remainsToAnte(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BlindsAndAntesState && this.myCall != null && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
+        return this.mySeatIndex != null && this.table.state instanceof BlindsAndAntesState && this.myCall != null;
+        // && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
 
     }
 
@@ -638,12 +639,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    private tableState(): void {
+    private tableStateAction(action: TableStateAction): void {
 
         let state = this.table.state;
 
         this.clearLocalBets();
-
 
         if (state instanceof StartHandState) {
 
@@ -706,10 +706,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private anteState(): void {
 
-        // reset the player's default bet to match the ante
-        let seat: Seat = this.findSeat(this.mySeatIndex);
+        let seat: Seat = this.getMySeat();
 
-        if (seat) {
+        if (seat && seat.isInHand) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
             this.myCall = this.betController.calculateCall(this.table, seat);
@@ -717,14 +716,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             // no betting, only calling, with antes
             this.myMinRaise = this.myMaxRaise = null;
 
+            // If I am marked as "not sitting out" then ready my blinds & ante bet
+            if (seat.player.isSittingOut === false) {
+
+                this.setBetCommand(new AnteCommand(this.table.id));
+
+            }  
+
         }
         else {
 
             this.myCall = this.myMinRaise = this.myMaxRaise = null;
 
         }
-
-
 
     }  // anteState
 
@@ -954,29 +958,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             }
 
-            if (seat.isInHand && seat.player) {
-
-                // Automatically ante if isSittingOut == false, prompt the player if isSittingOut == undefined
-                if (seat.player.userID === this.user.id && seat.player.isSittingOut === false) {
-
-                    return this.broadcastCommand(new AnteCommand(this.table.id));
-
-                }  // if it's my turn
-
-            }   // seat has a player
-
-
-            this.log(`${seat.getName()} is MIA`);
-            return;
-
         }
         else {
 
-            this.log(`In anteTurn, could not find seat for index ${this.table.betStatus.seatIndex}`);
+            this.log(`In anteTurnActionremainsToAnte, could not find seat for index ${this.table.betStatus.seatIndex}`);
 
         }
 
-    }  // anteTurn
+    }  // anteTurnAction
 
 
 

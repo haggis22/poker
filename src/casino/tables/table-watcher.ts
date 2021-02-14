@@ -407,10 +407,8 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private tableStateAction(action: TableStateAction): void {
 
-        let state = action.state || new OpenState();
-
-        this.table.state = state;
-        this.log(`TableState: ${state.constructor.name}`);
+        this.table.state = action.state;
+        this.log(`TableState: ${action.state.constructor.name}`);
 
     }   // changeTableState
 

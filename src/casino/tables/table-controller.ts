@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -1056,6 +1056,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.log(`TableState: ${state.constructor.name}`);
 
         this.queueAction(new TableStateAction(this.table.id, state));
+
+        if (state instanceof OpenState) {
+
+            // Reset blinds, buttons, etc - when we start up again then all will be new
+
+        }
+
 
         if (state.requiresMultiplePlayers()) {
 
