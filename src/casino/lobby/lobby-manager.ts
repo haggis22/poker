@@ -166,7 +166,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
         let betController: BetController = new BetController();
-        let buttonController: IButtonController = new NormalButtonController(tableID);
+        let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(table, deck, betController, buttonController);
         tableController.addTableObserver(this);
@@ -207,7 +207,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
         let betController: BetController = new BetController();
-        let buttonController: IButtonController = new NormalButtonController(tableID);
+        let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(table, deck, betController, buttonController);
         tableController.addTableObserver(this);
@@ -248,7 +248,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
         let betController: BetController = new BetController();
-        let buttonController: IButtonController = new NormalButtonController(tableID);
+        let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(table, deck, betController, buttonController);
         tableController.addTableObserver(this);

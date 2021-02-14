@@ -4,18 +4,19 @@ import { Table } from "../table";
 export class NormalButtonController implements IButtonController {
 
 
-    private tableID: number;
+    private buttonIndex: number;
 
-    constructor(tableID: number) {
 
-        this.tableID = tableID;
+    constructor() {
+
+        this.buttonIndex = null;
 
     }
 
 
     private log(message: string): void {
 
-        console.log('\x1b[31m%s\x1b[0m', `NormalButtonController Table ${this.tableID}: ${message}`);
+        console.log('\x1b[31m%s\x1b[0m', `NormalButtonController: ${message}`);
 
     }
 
@@ -46,29 +47,29 @@ export class NormalButtonController implements IButtonController {
         }
 
         // If the button has not been set then randomly assign it to one of the seats
-        let buttonIndex: number = table.buttonIndex == null ? Math.floor(Math.random() * table.seats.length) : (table.buttonIndex + 1);
+        this.buttonIndex = this.buttonIndex == null ? Math.floor(Math.random() * table.seats.length) : (this.buttonIndex + 1);
 
         let foundButton = false;
 
         while (!foundButton) {
 
-            if (buttonIndex >= table.seats.length) {
+            if (this.buttonIndex >= table.seats.length) {
 
-                buttonIndex = 0;
+                this.buttonIndex = 0;
 
             }
 
-            if (table.seats[buttonIndex].isInHand) {
+            if (table.seats[this.buttonIndex].isInHand) {
                 foundButton = true;
             }
             else {
-                buttonIndex++;
+                this.buttonIndex++;
             }
 
         }
 
-        table.buttonIndex = buttonIndex;
-        this.log(`In moveButton for table ${table.id} - setting button to ${buttonIndex}`);
+        table.buttonIndex = this.buttonIndex;
+        this.log(`In moveButton for table ${table.id} - setting button to ${this.buttonIndex}`);
         return true;
 
     }
