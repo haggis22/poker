@@ -11,19 +11,29 @@ import { Blind } from "./blind";
 import { Ante } from "./ante";
 import { InvalidBet } from "./invalid-bet";
 import { InvalidFold } from "./invalid-fold";
-import { TableCommand } from "../../../commands/table/table-command";
+import { IButtonController } from "../buttons/i-button-controller";
 
 
 export class BetController {
 
 
+
     constructor() {
+
     }
+
+
 
 
     private log(message: string): void {
 
         console.log('\x1b[31m%s\x1b[0m', `BetController ${message}`);
+
+    }
+
+    public resetOpenState(status: BetStatus): void {
+
+        this.reset(status);
 
     }
 
@@ -224,7 +234,13 @@ export class BetController {
 
             }
 
-            if (table.betStatus.seatIndex != seat.index) {
+            if (!table.betStatus.forcedBets) {
+
+                return new InvalidBet(seat.index, 'There is no ante/blind to pay');
+
+            }
+
+            if (table.betStatus.forcedBets.seatIndex != seat.index) {
 
                 return new InvalidBet(seat.index, "It is not your turn to act");
 
@@ -238,9 +254,7 @@ export class BetController {
 
             let betResults: Bet[] = new Array<Bet>();
 
-            let requiredBets: Array<Blind| Ante> = table.betStatus.requiredBets[seat.index] || new Array<Blind | Ante>();
-
-            for (let requiredBet of requiredBets) {
+            for (let requiredBet of table.betStatus.forcedBets.bets) {
 
                 if (requiredBet instanceof Ante) {
 
@@ -302,19 +316,17 @@ export class BetController {
 
         if (table.state instanceof BlindsAndAntesState) {
 
-            // If we are ante-ing and the player still needs to act, then calculate the amount they need to put in
-            if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
-
-                if (!table.betStatus.requiredBets[seat.index]) {
-                    return new Bet(seat.index, 0, 0, Bet.TYPE.ANTE, Bet.ACTION.CHECK);
-                }
-
-                let totalRequiredBet: number = table.betStatus.requiredBets[seat.index].reduce((total, bet) => total + bet.amount, 0);
-                let chipsRequired = Math.min(seat.player.chips, totalRequiredBet);
-
-                return new Bet(seat.index, chipsRequired, chipsRequired, Bet.TYPE.ANTE, Bet.ACTION.CALL);
-
+            // Make sure there is a forced bet, and it is on the given player's turn - otherwise, dump out
+            if (table.betStatus.forcedBets == null || table.betStatus.forcedBets.seatIndex !== seat.index) {
+                return null;
             }
+
+            let totalRequiredBet: number = table.betStatus.forcedBets.bets.reduce((total, bet) => total + bet.amount, 0);
+            let chipsRequired = Math.min(seat.player.chips, totalRequiredBet);
+
+            let actionType: number = totalRequiredBet ? Bet.ACTION.CALL : Bet.ACTION.CHECK;
+
+            return new Bet(seat.index, /* totalBet */ chipsRequired, /* chipsAdded */ chipsRequired, Bet.TYPE.ANTE, actionType);
 
         }
         else if (table.state instanceof BetState) {

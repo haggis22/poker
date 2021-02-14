@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ForcedBets } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -131,8 +131,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.betTimerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
-        this.buttonController = buttonController;
         this.betController = betController;
+        this.buttonController = buttonController;
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();
         this.standUpRequests = new Map<number, StandUpCommand>();
@@ -181,13 +181,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     }
 
-
-
-    private snapshot(obj: any): any {
-
-        return this.copier.copy(obj);
-
-    }
 
     public getTableSummary(): TableSummary {
 
@@ -334,7 +327,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (command instanceof AnteCommand) {
 
-            return await this.ante(command);
+            return await this.anteCommand(command);
 
         }
 
@@ -728,7 +721,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    private async ante(command: AnteCommand): Promise<void> {
+    private async anteCommand(command: AnteCommand): Promise<void> {
 
         this.log(`Received AnteCommand from ${command.userID}, tableState: ${this.table.state.constructor.name}`);
 
@@ -758,21 +751,21 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             }
 
             this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
-            this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
             await this.wait(this.TIME_ANTE);
 
             // if the player has not specified in or out, then ante-ing put them firmly in the "not-sitting-out" camp
+            // We check this flag so that we're not spamming out SetStatusActions when the status hasn't changed
             if (bettorSeat.player.isSittingOut === null) {
 
                 this.markSittingOut(bettorSeat, false);
 
             }
 
-            return await this.advanceAnteTurn();
+            return await this.checkForcedBets();
 
         }
-
 
     }  // ante
 
@@ -818,7 +811,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 }
 
-                this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+                this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
                 await this.wait(this.TIME_BET);
 
@@ -1053,9 +1046,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (state instanceof OpenState) {
 
-            // Reset blinds, buttons, etc - when we start up again then all will be new
-            this.buttonController.reset();
-            return;
+            return this.resetOpenState();
 
         }
 
@@ -1107,7 +1098,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (state instanceof BlindsAndAntesState) {
 
-            return await this.collectAntes(state);
+            return await this.checkForcedBets();
 
         }
 
@@ -1130,12 +1121,29 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
+    private resetOpenState(): void {
+
+        // Reset blinds, buttons, etc - when we start up again then all will be new
+        this.betController.resetOpenState(this.table.betStatus);
+        this.buttonController.resetOpenState();
+        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+
+    }
+
+    private resetBets(): void {
+
+        this.betController.reset(this.table.betStatus);
+        this.buttonController.resetHand();
+        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+
+    }
+
+
     private async startHand(): Promise<void> {
 
         this.deck.shuffle();
 
-        this.betController.reset(this.table.betStatus);
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+        this.resetBets();
 
         for (let seat of this.table.seats) {
 
@@ -1303,74 +1311,48 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
-    private async collectAntes(anteState: BlindsAndAntesState): Promise<void> {
+    private async checkForcedBets(): Promise<void> {
 
-        this.log('In collectAntes');
+        this.log('In checkForcedBets');
 
-        this.betController.calculateForcedBets(this.table, this.isSeatEligibleToAnte);
+        if (!(this.table.state instanceof BlindsAndAntesState)) {
 
-        this.log(`ANTE ORDER: [ ${this.table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
-        return await this.validateAnteerOrMoveOn();
-
-    }   // collectAntes
-
-
-    private async validateAnteerOrMoveOn(): Promise<void> {
-
-        let seatIndexToAct: number = this.betController.getNextBettorIndex(this.table.betStatus);
-
-        if (seatIndexToAct === undefined) {
-
-            if (this.getSeatIndexesStillInHand().size < 2) {
-
-                // completeBetting will automatically look for bets that need returning if we don't have enough players
-                return await this.completeBetting();
-
-            }
-
-            return await this.completeAntesAndBlinds();
+            let error = new Error('Should not be here');
+            this.log(error.stack);
+            throw error;
 
         }
 
-        // Make sure they haven't left the table or anything
-        let seat: Seat = this.table.seats[seatIndexToAct];
+        let forcedBets: ForcedBets = this.buttonController.calculateForcedBets(this.table);
 
-        if (!seat.isInHand) {
+        // Whether there is a forced bet or not we want to update everyone's version of the truth
+        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
-            // go to the next seat
-            return await this.validateAnteerOrMoveOn();
+        if (forcedBets != null) {
+
+            this.log(`There is a ForcedBet for seat ${forcedBets.seatIndex}: ${forcedBets.bets.join(" ")}`);
+
+            let anteSeat: Seat = this.table.seats[forcedBets.seatIndex];
+
+            let millisToAct: number = this.table.rules.timeToAnte * 1000;
+            let timesUp: number = Date.now() + millisToAct;
+
+            // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending an Ante command
+            this.betTimerMap.set(anteSeat.index, setTimeout(async () => {
+
+                return this.rejectAnte(anteSeat);
+
+            }, millisToAct));
+
+            // We found a forced bet, so ship it out and we're done
+            return this.queueAction(new AnteTurnAction(this.table.id, timesUp));
 
         }
 
-        await this.setAnteTurn(seatIndexToAct);
+        // completeBetting will automatically look for bets that need returning if we don't have enough players
+        return await this.completeBetting();
 
-    }  // validateAnteerOrMoveOn
-
-
-    private async setAnteTurn(seatIndexToAct: number): Promise<void> {
-
-        // assume they're in, at least until they fail to pay the ante.
-        // The table won't take the ante bet if they're not marked as in already.
-        // They need to have a blank hand for the table to accept the ante as a bet
-        let anteSeat: Seat = this.table.seats[seatIndexToAct];
-
-        this.table.betStatus.seatIndex = seatIndexToAct;
-
-        let millisToAct: number = this.table.rules.timeToAnte * 1000;
-        let timesUp: number = Date.now() + millisToAct;
-
-        // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending an Ante command
-        this.betTimerMap.set(seatIndexToAct, setTimeout(async () => {
-
-            return this.rejectAnte(anteSeat);
-
-        }, millisToAct));
-
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
-        this.queueAction(new AnteTurnAction(this.table.id, this.snapshot(this.table.betStatus), timesUp));
-
-
-    }  // setAnteTurn
+    }   // checkForcedBets
 
 
     private async rejectAnte(anteSeat: Seat): Promise<void> {
@@ -1386,7 +1368,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.markSittingOut(anteSeat, true);
 
-        return await this.advanceAnteTurn();
+        return await this.checkForcedBets();
 
     }   // rejectAnte
 
@@ -1410,22 +1392,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         }
 
     }  // markSittingOut
-
-
-    private async advanceAnteTurn(): Promise<void> {
-
-        // this.log('In advanceAnteTurn');
-        if (!(this.table.state instanceof BlindsAndAntesState)) {
-
-            let error = new Error('Should not be here');
-            this.log(error.stack);
-            throw error;
-
-        }
-
-        return await this.validateAnteerOrMoveOn();
-
-    }   // advanceAnteTurn
 
 
 
@@ -1491,78 +1457,53 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
-    private async completeAntesAndBlinds(): Promise<void> {
+    private async completeBetting(): Promise<void> {
 
-        this.log('Finished betting');
+        this.log('In completeBetting');
 
-        // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
-        this.table.betStatus.seatIndex = null;
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+        if (this.table.state instanceof BetState) {
 
-        this.log('Betting is complete');
-        this.queueAction(new BettingCompleteAction(this.table.id));
-
-        await this.wait(this.TIME_LAST_BET_MADE);
-
-        // look for uncalled bets (or pieces of bets of bets that were not fully called)
-        // await this.returnBets(this.betController.checkBetsToReturn(this.table.betStatus));
-
-        this.log('Gather antes');
-        this.queueAction(new GatherAntesAction(this.table.id));
-
-        this.betController.gatherAntes(this.table.betStatus, this.getSeatIndexesStillInHand());
-
-        // give it a minute before clearing out all the actions
-        await this.wait(this.TIME_GATHERING_BETS);
-
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
-
-        this.queueAction(new GatherAntesCompleteAction(this.table.id));
-
-        // See if we maybe want to do something special once players are all-in
-        await this.checkAllIn();
-
-        if (!this.table.betStatus.pots.length) {
-
-            // We don't have enough players, so go back to the open state
-            return this.goToOpenState();
+            // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
+            this.table.betStatus.seatIndex = null;
+            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
         }
 
-        //      await this.wait(this.TIME_BETTING_COMPLETE);
-        return await this.goToNextState();
-
-
-    }  // completeAntesAndBlinds
-
-
-    private async completeBetting(): Promise<void> {
-
-        this.log('Finished betting');
-
-        // It is no longer anyone's turn to act, so turn off the actor and broadcast this state to everyone
-        this.table.betStatus.seatIndex = null;
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
-
-        this.log('Betting is complete');
         this.queueAction(new BettingCompleteAction(this.table.id));
-
         await this.wait(this.TIME_LAST_BET_MADE);
 
         // look for uncalled bets (or pieces of bets of bets that were not fully called)
         await this.returnBets(this.betController.checkBetsToReturn(this.table.betStatus));
 
-        this.log('Gather bets');
-        this.queueAction(new GatherBetsAction(this.table.id));
+        if (this.table.state instanceof BlindsAndAntesState) {
 
-        this.betController.gatherBets(this.table.betStatus, this.getSeatIndexesStillInHand());
+            this.log('Gather antes');
+            this.queueAction(new GatherAntesAction(this.table.id));
 
-        // give it a minute before clearing out all the actions
-        await this.wait(this.TIME_GATHERING_BETS);
+            this.betController.gatherAntes(this.table.betStatus, this.getSeatIndexesStillInHand());
 
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+            // give it a minute before clearing out all the actions
+            await this.wait(this.TIME_GATHERING_BETS);
 
-        this.queueAction(new GatherBetsCompleteAction(this.table.id));
+            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+            this.queueAction(new GatherAntesCompleteAction(this.table.id));
+
+        }
+
+        else if (this.table.state instanceof BetState) {
+
+            this.log('Gather bets');
+            this.queueAction(new GatherBetsAction(this.table.id));
+
+            this.betController.gatherBets(this.table.betStatus, this.getSeatIndexesStillInHand());
+
+            // give it a minute before clearing out all the actions
+            await this.wait(this.TIME_GATHERING_BETS);
+
+            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+            this.queueAction(new GatherBetsCompleteAction(this.table.id));
+
+        }
 
         // See if we maybe want to do something special once players are all-in
         await this.checkAllIn();
@@ -1574,7 +1515,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-//      await this.wait(this.TIME_BETTING_COMPLETE);
+
+        //      await this.wait(this.TIME_BETTING_COMPLETE);
         return await this.goToNextState();
 
     }  // completeBetting
@@ -1631,7 +1573,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         let millisToAct: number = this.table.rules.timeToAct * 1000;
         let timesUp: number = Date.now() + millisToAct;
 
-        this.queueAction(new BetTurnAction(this.table.id, this.snapshot(this.table.betStatus), timesUp));
+        this.queueAction(new BetTurnAction(this.table.id, this.table.betStatus, timesUp));
 
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
         this.betTimerMap.set(seatIndexToAct, setTimeout(async () => {
@@ -1809,7 +1751,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
         await this.wait(this.TIME_RETURN_BET);
 
@@ -1938,7 +1880,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             this.queueAction(new PotCardsUsedAction(this.table.id, [...usedCardsSet.values()]));
 
             // we have popped the pot off, so update that so it effectively gets replaced by the WonPot objects
-            this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
             await this.wait(this.TIME_WIN_POT);
 
@@ -1957,8 +1899,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         }
 
         // clear all betting action
-        this.betController.reset(this.table.betStatus);
-        this.queueAction(new UpdateBetsAction(this.table.id, this.snapshot(this.table.betStatus)));
+        this.resetBets();
 
         await this.wait(this.TIME_POST_SHOWDOWN);
 
@@ -2014,8 +1955,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table.board.reset();
         this.queueAction(new ClearBoardAction(this.table.id));
 
-        this.betController.reset(this.table.betStatus);
-        this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+        this.resetBets();
 
         return await this.goToNextState();
 

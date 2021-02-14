@@ -478,11 +478,11 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     }  // betTurn
 
+
     private anteTurnAction(action: AnteTurnAction): void {
 
-        this.table.betStatus = action.betStatus;
-
     }  // anteTurn
+
 
     private isSeatEligibleToAnte(seat: Seat): boolean {
 

@@ -4,14 +4,12 @@ import { BetStatus} from "../../../casino/tables/betting/bet-status";
 export class AnteTurnAction extends TableAction {
 
     public tableID: number;
-    public betStatus: BetStatus;
     public timesUp: number;
 
-    constructor(tableID: number, betStatus: BetStatus, timesUp: number) {
+    constructor(tableID: number, timesUp: number) {
 
         super(tableID);
 
-        this.betStatus = betStatus;
         this.timesUp = timesUp;
 
     }

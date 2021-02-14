@@ -17,4 +17,10 @@ export class Blind {
 
     }
 
+    public toString(): string {
+
+        return `[ Blind, type: ${this.type}, name: ${this.name}, amount: ${this.amount}, isLiveBet: ${this.isLiveBet} ]`;
+    }
+
+
 }

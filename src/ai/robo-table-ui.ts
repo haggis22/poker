@@ -617,11 +617,11 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     private anteTurnAction(action: AnteTurnAction): void {
 
-        let betStatus: BetStatus = action.betStatus;
+        let betStatus: BetStatus = this.table.betStatus;
 
-        let seat = this.findSeat(betStatus.seatIndex);
+        let seat = this.findSeat(betStatus.forcedBets.seatIndex);
 
-        this.log(`It is ${seat.getName()}'s turn to ante, tracker.seatIndex: ${betStatus.seatIndex}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
+        this.log(`It is ${seat.getName()}'s turn to ante, ante index: ${seat.index}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
 
         if (seat.isInHand && seat.player) {
 

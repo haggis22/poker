@@ -927,18 +927,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private anteTurnAction(action: AnteTurnAction): void {
 
-        let seat = this.findSeat(this.table.betStatus.seatIndex);
+        let anteSeat: Seat = this.findSeat(this.table.betStatus.forcedBets.seatIndex);
 
-        this.log(`In anteTurn, tracker.seatIndex = ${this.table.betStatus.seatIndex}`);
+        this.log(`In anteTurn, seatIndex = ${anteSeat.index}`);
 
-        if (seat) {
+        if (anteSeat) {
 
-            this.log(`It is ${seat.getName()}'s turn to ante`);
+            this.log(`It is ${anteSeat.getName()}'s turn to ante`);
 
             // Set the amount required to call the ante
             let mySeat: Seat = this.getMySeat();
 
-            this.myCall = this.betController.calculateCall(this.table, this.findSeat(this.mySeatIndex));
+            this.myCall = this.betController.calculateCall(this.table, anteSeat);
             this.myMinRaise = this.myMaxRaise = null;
 
             this.clearSeatTimers();
@@ -954,7 +954,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 let timer: Timer = new Timer(action.timesUp);
                 timer.start();
-                this.seatTimer.set(seat.index, timer);
+                this.seatTimer.set(anteSeat.index, timer);
 
             }
 

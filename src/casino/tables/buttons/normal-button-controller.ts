@@ -1,15 +1,22 @@
 import { IButtonController } from "./i-button-controller";
 import { Table } from "../table";
+import { ForcedBets } from "../betting/forced-bets";
+import { Seat } from "../seat";
+import { Ante } from "../betting/ante";
+import { Blind } from "../betting/blind";
 
 export class NormalButtonController implements IButtonController {
 
 
     private buttonIndex: number;
 
+    private forcedBetIndex: number;
+
+
 
     constructor() {
 
-        this.buttonIndex = null;
+        this.resetOpenState();
 
     }
 
@@ -21,8 +28,15 @@ export class NormalButtonController implements IButtonController {
     }
 
 
-    public reset() {
+    public resetOpenState(): void {
 
+        this.buttonIndex = null;
+
+    }
+
+    public resetHand(): void {
+
+        this.forcedBetIndex = null;
 
     }
 
@@ -72,7 +86,68 @@ export class NormalButtonController implements IButtonController {
         this.log(`In moveButton for table ${table.id} - setting button to ${this.buttonIndex}`);
         return true;
 
-    }
+    }  // moveButton
+
+
+    public calculateForcedBets(table: Table): ForcedBets {
+
+        if (this.buttonIndex == null) {
+            throw new Error("Cannot determine forced bets if buttonIndex is null");
+        }
+
+        // we just did the button on a previous call, so we're all done
+        if (this.buttonIndex === this.forcedBetIndex) {
+
+            return null;
+
+        }
+
+        let startingIndex: number = this.forcedBetIndex = this.forcedBetIndex == null ? this.buttonIndex + 1 : this.forcedBetIndex + 1;
+
+        while (true) {
+
+            if (this.forcedBetIndex >= table.seats.length) {
+                this.forcedBetIndex = 0;
+            }
+
+            let seat: Seat = table.seats[this.forcedBetIndex];
+
+            if (seat.player && !seat.player.isSittingOut) {
+
+                let bets: Array<Ante | Blind> = new Array<Ante | Blind>();
+
+                if (table.stakes.ante > 0) {
+
+                    bets.push(new Ante(table.stakes.ante));
+
+                }
+
+                if (bets.length) {
+
+                    let forcedBets: ForcedBets = new ForcedBets(this.forcedBetIndex, bets);
+                    table.betStatus.forcedBets = forcedBets;
+                    return forcedBets;
+
+                }
+
+            }
+
+            this.forcedBetIndex++;
+
+            if (this.forcedBetIndex >= table.seats.length) {
+                this.forcedBetIndex = 0;
+            }
+
+            if (this.forcedBetIndex == startingIndex)
+            {
+                table.betStatus.forcedBets = null;
+                return null;
+
+            }
+
+        }
+
+    }  // calculateForcedBets
 
 
 }

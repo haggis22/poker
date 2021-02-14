@@ -1,4 +1,6 @@
 ﻿import { Pot } from "./pot";
+import { Ante } from "./ante";
+import { ForcedBets } from "./forced-bets";
 
 export class BetStatus {
 
@@ -7,6 +9,8 @@ export class BetStatus {
 
     public seatIndex: number;
     public seatIndexesRemainToAct: number[];
+
+    public forcedBets: ForcedBets;
 
     public currentBet: number;
     public lastLiveBet: number;
@@ -46,6 +50,8 @@ export class BetStatus {
         this.antes = {};
 
         this.bigBlindIndex = null;
+
+        this.forcedBets = null;
 
     }
 

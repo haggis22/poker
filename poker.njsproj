@@ -227,6 +227,7 @@
     <TypeScriptCompile Include="src\casino\tables\betting\ante.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\bet-status.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\blind.ts" />
+    <TypeScriptCompile Include="src\casino\tables\betting\forced-bets.ts" />
     <TypeScriptCompile Include="src\casino\tables\buttons\i-button-controller.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\invalid-fold.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\invalid-bet.ts" />
