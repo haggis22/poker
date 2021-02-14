@@ -63,6 +63,7 @@ import { InvalidBet } from "./betting/invalid-bet";
 import { InvalidFold } from "./betting/invalid-fold";
 import { TableObserver } from "./table-observer";
 import { IServerClient } from "../../communication/server-side/i-server-client";
+import { IButtonController } from "./buttons/i-button-controller";
 
 const logger: Logger = new Logger();
 
@@ -101,6 +102,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     // Track betTimers per seat
     private betTimerMap: Map<number, ReturnType<typeof setTimeout>>;
 
+    private buttonController: IButtonController;
     private betController: BetController;
 
     private setStatusRequests: Map<number, SetStatusCommand>;
@@ -117,7 +119,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(table: Table, deck: Deck) {
+    constructor(table: Table, deck: Deck, betController: BetController, buttonController: IButtonController) {
 
         this.table = table;
         this.deck = deck;
@@ -129,7 +131,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.betTimerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
-        this.betController = new BetController();
+        this.buttonController = buttonController;
+        this.betController = betController;
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();
         this.standUpRequests = new Map<number, StandUpCommand>();
@@ -972,15 +975,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }  // isReadyForHand
 
 
-    private isHandStillLive(): boolean {
-
-        return this.table.seats.filter(seat => seat.isInHand).length > 1;
-
-    }   // isHandStillLive
-
-
-
-
 
     private countPlayersInHand(): number {
 
@@ -1060,6 +1054,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (state instanceof OpenState) {
 
             // Reset blinds, buttons, etc - when we start up again then all will be new
+            this.buttonController.reset();
+            return;
 
         }
 
@@ -1157,49 +1153,26 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        await this.setButton();
+        let buttonSuccess: boolean = this.buttonController.moveButton(this.table);
 
-        return await this.goToNextState();
+        if (buttonSuccess) {
+
+            this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
+            await this.wait(this.TIME_SET_BUTTON);
+            return await this.goToNextState();
+
+        }
+
+        return await this.goToOpenState();
 
     }   // startHand
 
 
-    private async setButton(): Promise<void> {
+    private async goToOpenState(): Promise<void> {
 
-        if (!this.isHandStillLive()) {
+        return await this.changeTableState(this.game.stateMachine.goToOpenState());
 
-            // We don't have enough players, so go back to the open state
-            return await this.changeTableState(this.game.stateMachine.goToOpenState());
-
-        }
-
-        let foundButton = false;
-        let buttonIndex: number = this.table.buttonIndex == null ? 0 : (this.table.buttonIndex + 1);
-
-        while (!foundButton) {
-
-            if (buttonIndex >= this.table.seats.length) {
-
-                buttonIndex = 0;
-
-            }
-
-            if (this.table.seats[buttonIndex].isInHand) {
-                foundButton = true;
-            }
-            else {
-                buttonIndex++;
-            }
-
-        }
-
-        this.table.buttonIndex = buttonIndex;
-
-        this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
-
-        await this.wait(this.TIME_SET_BUTTON);
-
-    }   // setButton
+    }  // goToOpenState
 
 
     private findNextSeatWithAHand(seatIndex: number): number {
@@ -1552,7 +1525,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (!this.table.betStatus.pots.length) {
 
             // We don't have enough players, so go back to the open state
-            return await this.changeTableState(this.game.stateMachine.goToOpenState());
+            return this.goToOpenState();
 
         }
 
@@ -1597,7 +1570,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         if (!this.table.betStatus.pots.length) {
 
             // We don't have enough players, so go back to the open state
-            return await this.changeTableState(this.game.stateMachine.goToOpenState());
+            return this.goToOpenState();
 
         }
 

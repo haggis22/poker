@@ -51,6 +51,7 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\actions\table\game\flip-cards-action.ts" />
+    <Content Include="src\casino\tables\buttons\normal-button-controller.ts" />
     <Content Include="src\casino\tables\chips\money-formatter.ts">
       <SubType>Code</SubType>
     </Content>
@@ -126,6 +127,7 @@
     <Folder Include="src\actions\table\chat\" />
     <Folder Include="src\casino\lobby\" />
     <Folder Include="src\casino\cashier\" />
+    <Folder Include="src\casino\tables\buttons\" />
     <Folder Include="src\casino\tables\chips\" />
     <Folder Include="src\casino\tables\states\dealing\" />
     <Folder Include="src\client\lobby\components\lobby\" />
@@ -225,6 +227,7 @@
     <TypeScriptCompile Include="src\casino\tables\betting\ante.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\bet-status.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\blind.ts" />
+    <TypeScriptCompile Include="src\casino\tables\buttons\i-button-controller.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\invalid-fold.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\invalid-bet.ts" />
     <TypeScriptCompile Include="src\casino\tables\betting\won-pot.ts" />
