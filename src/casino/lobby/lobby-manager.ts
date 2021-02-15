@@ -231,7 +231,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         // # seats, # seconds to act
         let rules = new TableRules(6, 5, 5);
 
-        let ante = 25;
+        let ante = 0;
 
         // Both of the regular blinds are live bets (they could towards the current round of betting)
         let blinds: Blind[] =

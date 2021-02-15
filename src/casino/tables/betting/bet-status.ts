@@ -68,4 +68,16 @@ export class BetStatus {
 
     }
 
+    public hasAntes(): boolean {
+
+        return Object.keys(this.antes).length > 0;
+
+    }
+
+    public hasBets(): boolean {
+
+        return Object.keys(this.bets).length > 0;
+
+    }
+
 }

@@ -1477,44 +1477,58 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (this.table.state instanceof BlindsAndAntesState) {
 
-            this.log('Gather antes');
-            this.queueAction(new GatherAntesAction(this.table.id));
+            // Only gather antes, not the blinds!
+            if (this.table.betStatus.hasAntes()) {
 
-            this.betController.gatherAntes(this.table.betStatus, this.getSeatIndexesStillInHand());
+                this.log('Gather antes');
+                this.queueAction(new GatherAntesAction(this.table.id));
 
-            // give it a minute before clearing out all the actions
-            await this.wait(this.TIME_GATHERING_BETS);
+                this.betController.gatherAntes(this.table.betStatus, this.getSeatIndexesStillInHand());
 
-            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
-            this.queueAction(new GatherAntesCompleteAction(this.table.id));
+                // give it a minute before clearing out all the actions
+                await this.wait(this.TIME_GATHERING_BETS);
+
+                this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+                this.queueAction(new GatherAntesCompleteAction(this.table.id));
+
+            }
+            else {
+                this.log('No antes to gather');
+            }
 
         }
 
         else if (this.table.state instanceof BetState) {
 
-            this.log('Gather bets');
-            this.queueAction(new GatherBetsAction(this.table.id));
+            if (this.table.betStatus.hasBets()) {
 
-            this.betController.gatherBets(this.table.betStatus, this.getSeatIndexesStillInHand());
+                this.log('Gather bets');
+                this.queueAction(new GatherBetsAction(this.table.id));
 
-            // give it a minute before clearing out all the actions
-            await this.wait(this.TIME_GATHERING_BETS);
+                this.betController.gatherBets(this.table.betStatus, this.getSeatIndexesStillInHand());
 
-            this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
-            this.queueAction(new GatherBetsCompleteAction(this.table.id));
+                // give it a minute before clearing out all the actions
+                await this.wait(this.TIME_GATHERING_BETS);
+
+                this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
+                this.queueAction(new GatherBetsCompleteAction(this.table.id));
+
+            }
+            else {
+                this.log('No bets to gather');
+            }
 
         }
 
         // See if we maybe want to do something special once players are all-in
         await this.checkAllIn();
 
-        if (!this.table.betStatus.pots.length) {
+        if (this.table.seats.filter(seat => seat.isInHand).length < 2) {
 
             // We don't have enough players, so go back to the open state
             return this.goToOpenState();
 
         }
-
 
         //      await this.wait(this.TIME_BETTING_COMPLETE);
         return await this.goToNextState();
