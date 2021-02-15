@@ -10,13 +10,23 @@ export class NormalButtonController implements IButtonController {
 
     private buttonIndex: number;
 
+    // A set of all the seat indexes that have already paid their ForcedBet. I was doing something where
+    // it would go around until it hit the same number again, but when the original blinder didn't pay and
+    // were folded, then they would always get skipped and so blinding would go on forever.
+    private hasForcedBet: Set<number>;
+
+    private expectedBlinds: Map<number, Array<Blind>>;
+
     private forcedBetIndex: number;
 
 
 
     constructor() {
 
+        this.hasForcedBet = new Set<number>();
+
         this.resetOpenState();
+
 
     }
 
@@ -30,6 +40,8 @@ export class NormalButtonController implements IButtonController {
 
     public resetOpenState(): void {
 
+        this.resetHand();
+
         this.buttonIndex = null;
 
     }
@@ -37,6 +49,7 @@ export class NormalButtonController implements IButtonController {
     public resetHand(): void {
 
         this.forcedBetIndex = null;
+        this.hasForcedBet.clear();
 
     }
 
@@ -52,6 +65,8 @@ export class NormalButtonController implements IButtonController {
 
         this.log(`In moveButton for table ${table.id}`)
 
+        this.expectedBlinds = new Map<number, Array<Blind>>();
+
         if (!this.isHandStillLive(table)) {
 
             // We don't have enough players, so can't set the button
@@ -60,8 +75,12 @@ export class NormalButtonController implements IButtonController {
 
         }
 
+        let numPlayers: number = table.seats.filter(seat => seat.isInHand).length;
+
         // If the button has not been set then randomly assign it to one of the seats
         this.buttonIndex = this.buttonIndex == null ? Math.floor(Math.random() * table.seats.length) : (this.buttonIndex + 1);
+
+        table.betStatus.bigBlindIndex = null;
 
         let foundButton = false;
 
@@ -84,9 +103,90 @@ export class NormalButtonController implements IButtonController {
 
         table.buttonIndex = this.buttonIndex;
         this.log(`In moveButton for table ${table.id} - setting button to ${this.buttonIndex}`);
+
+
+        if (table.stakes.blinds.length) {
+
+            // TODO: parcel out the blinds according to the stakes properly
+            let smallBlind: Blind = table.stakes.blinds.find(blind => blind.type == Blind.TYPE_SMALL);
+            let bigBlind: Blind = table.stakes.blinds.find(blind => blind.type == Blind.TYPE_BIG);
+
+            if (numPlayers == 2) {
+
+                // heads-up, the button is the small blind...
+                this.expectedBlinds.set(this.buttonIndex, [smallBlind]);
+
+                // find the big blind index 
+                let bbIndex = this.findNextActiveSeatIndex(table, this.buttonIndex + 1);
+                if (bbIndex == null) {
+                    throw new Error("Could not find Big Blind index");
+                }
+
+                this.expectedBlinds.set(bbIndex, [bigBlind]);
+                table.betStatus.bigBlindIndex = bbIndex;
+
+
+            }
+            else {
+
+                // ...usually, the blinds start from the left of the dealer
+                let sbIndex: number = this.findNextActiveSeatIndex(table, this.buttonIndex + 1);
+
+                if (sbIndex == null) {
+                    throw new Error("Could not find Small Blind index");
+                }
+
+                this.expectedBlinds.set(sbIndex, [smallBlind]);
+
+                // find the big blind index 
+                let bbIndex = this.findNextActiveSeatIndex(table, sbIndex + 1);
+                if (bbIndex == null) {
+                    throw new Error("Could not find Big Blind index");
+                }
+
+                this.expectedBlinds.set(bbIndex, [bigBlind]);
+                table.betStatus.bigBlindIndex = bbIndex;
+
+            }
+
+        }
+            
+
         return true;
 
     }  // moveButton
+
+
+    private findNextActiveSeatIndex(table: Table, startIndex: number): number {
+
+        if (startIndex >= table.seats.length) {
+            startIndex = 0;
+        }
+
+        let seatIndex: number = startIndex;
+
+        while (true) {
+
+            if (table.seats[seatIndex].isInHand) {
+
+                return seatIndex;
+
+            }
+
+            seatIndex++;
+
+            if (seatIndex >= table.seats.length) {
+                seatIndex = 0;
+            }
+
+            // We went all the way around and found nothing
+            if (seatIndex === startIndex) {
+                return null;
+            }
+
+        }
+
+    }
 
 
     public calculateForcedBets(table: Table): ForcedBets {
@@ -102,7 +202,19 @@ export class NormalButtonController implements IButtonController {
 
         }
 
-        let startingIndex: number = this.forcedBetIndex = this.forcedBetIndex == null ? this.buttonIndex + 1 : this.forcedBetIndex + 1;
+        if (this.forcedBetIndex == null) {
+
+            // start to the left of the button!
+            this.forcedBetIndex = this.buttonIndex + 1;
+
+        }
+        else {
+
+            this.forcedBetIndex = this.forcedBetIndex + 1;
+
+        }
+
+        let startingIndex: number = this.forcedBetIndex;
 
         while (true) {
 
@@ -114,11 +226,20 @@ export class NormalButtonController implements IButtonController {
 
             if (seat.player && !seat.player.isSittingOut) {
 
+                // mark them has having had their forced bet calculated
+                this.hasForcedBet.add(seat.index);
+
                 let bets: Array<Ante | Blind> = new Array<Ante | Blind>();
 
                 if (table.stakes.ante > 0) {
 
                     bets.push(new Ante(table.stakes.ante));
+
+                }
+
+                if (this.expectedBlinds.has(seat.index)) {
+
+                    bets.push(...this.expectedBlinds.get(seat.index));
 
                 }
 
@@ -138,8 +259,10 @@ export class NormalButtonController implements IButtonController {
                 this.forcedBetIndex = 0;
             }
 
-            if (this.forcedBetIndex == startingIndex)
+            if (this.hasForcedBet.has(this.forcedBetIndex))
             {
+                // we've already given this seat a bet 
+
                 table.betStatus.forcedBets = null;
                 return null;
 

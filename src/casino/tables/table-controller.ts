@@ -1132,7 +1132,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private resetBets(): void {
 
-        this.betController.reset(this.table.betStatus);
+        this.betController.resetHand(this.table.betStatus);
         this.buttonController.resetHand();
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
@@ -1472,8 +1472,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.queueAction(new BettingCompleteAction(this.table.id));
         await this.wait(this.TIME_LAST_BET_MADE);
 
-        // look for uncalled bets (or pieces of bets of bets that were not fully called)
-        await this.returnBets(this.betController.checkBetsToReturn(this.table.betStatus));
 
         if (this.table.state instanceof BlindsAndAntesState) {
 
@@ -1501,6 +1499,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         else if (this.table.state instanceof BetState) {
 
             if (this.table.betStatus.hasBets()) {
+
+                // look for uncalled bets (or pieces of bets of bets that were not fully called)
+                await this.returnBets(this.betController.checkBetsToReturn(this.table.betStatus));
 
                 this.log('Gather bets');
                 this.queueAction(new GatherBetsAction(this.table.id));

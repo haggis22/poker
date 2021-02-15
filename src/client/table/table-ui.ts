@@ -1250,19 +1250,42 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private checkPendingBetCommand(): boolean {
 
-        if (this.pendingBetCommand) {
+        if (this.pendingBetCommand && this.mySeatIndex != null) {
+
+            if (this.table.state instanceof BlindsAndAntesState) {
+
+                if (this.table.betStatus && this.table.betStatus.forcedBets && this.table.betStatus.forcedBets.seatIndex == this.mySeatIndex) {
+
+                    let command: BetCommand | FoldCommand = this.pendingBetCommand;
+
+                    this.clearBetCommand();
+
+                    if (command instanceof AnteCommand) {
+
+                        this.broadcastCommand(command);
+                        return true;
+
+                    }
+
+                }
+
+            }  // Blinds 'n Ante
 
             // TODO: Validate first against local BetController and only send if valid?
-            if (this.mySeatIndex != null && this.table.betStatus && this.table.betStatus.seatIndex == this.mySeatIndex) {
+            else if (this.table.state instanceof BetState) {
 
-                let command: BetCommand | FoldCommand = this.pendingBetCommand;
+                if (this.table.betStatus && this.table.betStatus.seatIndex == this.mySeatIndex) {
 
-                this.clearBetCommand();
+                    let command: BetCommand | FoldCommand = this.pendingBetCommand;
 
-                this.broadcastCommand(command);
-                return true;
+                    this.clearBetCommand();
 
-            }
+                    this.broadcastCommand(command);
+                    return true;
+
+                }
+
+            }  // BetState
 
         }
 

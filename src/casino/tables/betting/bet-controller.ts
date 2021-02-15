@@ -33,12 +33,12 @@ export class BetController {
 
     public resetOpenState(status: BetStatus): void {
 
-        this.reset(status);
+        this.resetHand(status);
 
     }
 
 
-    public reset(status: BetStatus): void {
+    public resetHand(status: BetStatus): void {
 
         status.bettingRound = 0;
         status.pots.length = 0;
@@ -208,20 +208,6 @@ export class BetController {
         return bet;
 
     }
-
-
-    private doesPlayerHaveChipsInPotAlready(betStatus: BetStatus, seatIndex: number): boolean {
-
-        for (let pot of betStatus.pots) {
-            if (pot.isSeatInPot(seatIndex)) {
-                return true;
-            }
-        }
-
-        return false;
-
-    }   // doesPlayerHaveChipsInPotAlready
-
 
 
     public validateBlindsAndAnte(table: Table, seat: Seat): InvalidBet | Bet[] {
@@ -824,129 +810,6 @@ export class BetController {
         table.betStatus.seatIndexesRemainToAct = [...seatsToAct];
 
     }  // calculateSeatIndexesRemainToAct
-
-
-    public calculateForcedBets(table: Table, isSeatEligible: (seat: Seat) => boolean): void {
-
-        this.clearBettorsToAct(table.betStatus);
-        this.clearRequiredBets(table.betStatus);
-
-        if (table.stakes.ante === 0 && table.stakes.blinds.length === 0) {
-
-            // No blinds or antes, so we're done
-            return;
-
-        }
-
-        // First count how many players CAN act this round - if only 1 (or 0) then there's nothing to do
-        // This is not the same as blowing through rounds because we're down to just one player because everyone else folded.
-        // In this case, at least one person must be all-in, so we're going to keep dealing cards, but we don't need to bet.
-        let numEligibleSeats: number = table.seats.filter(s => isSeatEligible(s)).length;
-        if (numEligibleSeats < table.stakes.blinds.length) {
-
-            // we don't have enough players with money to pay the blinds, so dump out
-            return;
-
-        }
-
-        // Usually start to the left of the button...
-        let possibleStartingIndex: number = table.buttonIndex + 1;
-        let lastPossibleIndex: number = table.buttonIndex;
-
-        if (numEligibleSeats === table.stakes.blinds.length) {
-
-            // When the number of players matches the blinds, then put the button on the small blind so that they act first pre-flop
-            // So button is first to act...
-            possibleStartingIndex = table.buttonIndex;
-
-            // ...and the player before the button is last to act
-            lastPossibleIndex = table.buttonIndex - 1;
-
-        }
-
-
-        // Make sure that our start and finish spots are within the valid range of seat indexes
-        while (possibleStartingIndex >= table.seats.length) {
-            possibleStartingIndex -= table.seats.length;
-        }
-
-        while (lastPossibleIndex < 0) {
-            lastPossibleIndex += table.seats.length;
-        }
-
-
-        // Go through the rest of the players at the table and see whether or not they need to take an action
-        let seatsToAct = [];
-
-        let done: boolean = false;
-        let ix: number = possibleStartingIndex;
-
-        let blindsToHandOut: Blind[] = [...table.stakes.blinds];
-
-        while (!done) {
-
-            if (isSeatEligible(table.seats[ix])) {
-
-                seatsToAct.push(ix);
-
-                if (table.stakes.ante > 0) {
-
-                    if (!table.betStatus.requiredBets.hasOwnProperty(ix)) {
-                        table.betStatus.requiredBets[ix] = new Array<Ante | Blind>();
-                    }
-
-                    table.betStatus.requiredBets[ix].push(new Ante(table.stakes.ante));
-
-                }
-
-                if (blindsToHandOut.length) {
-
-                    if (!table.betStatus.requiredBets.hasOwnProperty(ix)) {
-                        table.betStatus.requiredBets[ix] = new Array<Ante | Blind>();
-                    }
-
-                    // Pop the first blind off the front of the array
-                    let blind: Blind = blindsToHandOut.shift();
-
-                    if (blind.type == Blind.TYPE_BIG) {
-
-                        table.betStatus.bigBlindIndex = ix;
-
-                    }
-
-                    // the blind is not "owed" - this is just the usual blind order
-                    table.betStatus.requiredBets[ix].push(new Blind(blind.type, blind.name, blind.amount, blind.isLiveBet));
-
-                }
-
-            }
-
-            if (ix === lastPossibleIndex) {
-                done = true;
-            }
-            else {
-
-                ix++;
-
-                if (ix >= table.seats.length) {
-                    ix = 0;
-                }
-
-            }
-
-        }
-
-        this.log(`End calculateForcedBets, seatsToAct: [ ${seatsToAct.join(" ")} ]`);
-        for (let seatIndex in table.betStatus.requiredBets) {
-
-            this.log(`  ForcedBets, seatIndex ${seatIndex}: [ ${table.betStatus.requiredBets[seatIndex].map(bet => `${bet.constructor.name} ${bet.amount}`).join(",") } ]`)
-
-        }
-
-
-        table.betStatus.seatIndexesRemainToAct = [...seatsToAct];
-
-    }  // calculateForcedBets
 
 
 }
