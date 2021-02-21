@@ -1489,6 +1489,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
                 this.queueAction(new GatherAntesCompleteAction(this.table.id));
 
+                if (this.table.seats.filter(seat => seat.isInHand).length < 2) {
+
+                    // We don't have enough players, so go back to the open state
+                    this.log(`In BlindsAndAntesState in completeBetting and we don't have enough players - going to OpenState`);
+                    return this.goToOpenState();
+
+                }
+
             }
             else {
                 this.log('No antes to gather');
@@ -1523,13 +1531,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // See if we maybe want to do something special once players are all-in
         await this.checkAllIn();
-
-        if (this.table.seats.filter(seat => seat.isInHand).length < 2) {
-
-            // We don't have enough players, so go back to the open state
-            return this.goToOpenState();
-
-        }
 
         //      await this.wait(this.TIME_BETTING_COMPLETE);
         return await this.goToNextState();
