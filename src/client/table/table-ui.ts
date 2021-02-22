@@ -1119,9 +1119,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let potDescription = pot.index > 0 ? `side pot #${pot.index}` : `the main pot`;
 
-        let handDescription = pot.handEvaluation ? ` with ${this.game.handDescriber.describe(pot.handEvaluation)}` : '';
+        let handDescription = ' before showdown';
 
-        this.winningHand = this.game.handDescriber.describe(pot.handEvaluation);
+        // this.winningHand is responsible for showing the winning hand in a banner
+        // If there is no showdown then just leave it as `null`
+
+        if (pot.handEvaluation) {
+
+            this.winningHand = this.game.handDescriber.describe(pot.handEvaluation);
+            handDescription = ` with ${this.game.handDescriber.describe(pot.handEvaluation)}`;
+
+        }
+        else {
+            this.winningHand = null;
+        }
 
         let message:string = null;
 
@@ -1305,6 +1316,29 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         return [];
 
     }  // getMuckedCards
+
+
+    public isActionOn(seatIndex: number): boolean {
+
+        if (this.table && this.table.betStatus) {
+
+            if (this.table.state instanceof BlindsAndAntesState) {
+
+                return this.table.betStatus.forcedBets && this.table.betStatus.forcedBets.seatIndex == seatIndex;
+
+            }
+
+            else if (this.table.state instanceof BetState) {
+
+                return this.table.betStatus.seatIndex == seatIndex;
+
+            }
+
+        }
+
+        return false;
+
+    }  // isActionOn
 
 
 }
