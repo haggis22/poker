@@ -102,7 +102,7 @@ const SeatComponent = Vue.extend ({
 
             let classes = [ 'seat', `seat-${this.seat.index}`];
 
-            if (this.betStatus && this.betStatus.seatIndex == this.seat.index) {
+            if (this.ui.isActionOn(this.seat.index)) {
 
                 classes.push('action-on');
 
