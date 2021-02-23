@@ -7,8 +7,12 @@
         </div>
         <div class="avatar">
             <div class="action-container">
-                <timer-component v-if="ui.seatTimer.has(seat.index)" :timer="ui.seatTimer.get(seat.index)"></timer-component>
-                <div class="action" v-if="ui.seatAction.has(seat.index)">{{ ui.seatAction.get(seat.index) }}</div>
+                <timer-component v-if="ui.seatTimer.hasOwnProperty(seat.index)" :timer="ui.seatTimer[seat.index]"></timer-component>
+                <div class="action" v-if="ui.seatAction.has(seat.index)">
+                    {{
+ ui.seatAction.get(seat.index)
+                    }}
+                </div>
             </div>
         </div>
         <div :class="chipsClasses">
@@ -19,7 +23,7 @@
         </div>
         <div class="cards">
             <div v-if="!seat.player && !ui.getMySeat()">
-                <button type="button"
+                <button type="button"   
                         class="sit"
                         v-on:click.stop="sit">
                     Sit
@@ -97,6 +101,12 @@ const SeatComponent = Vue.extend ({
         'timer-component': TimerComponent
     },
     computed: {
+
+        hasTimer: function () {
+
+            return this.ui && this.ui.seatTimer && this.ui.seatTimer.hasOwnProperty(this.seat.index);
+
+        },
 
         seatClasses: function () {
 

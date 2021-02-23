@@ -57,7 +57,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public currentBalance: number;
 
     public seatAction: Map<number, string>;
-    public seatTimer: Map<number, Timer>;
+    public seatTimer: object;
 
     public wonPots: WonPot[];
 
@@ -100,7 +100,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.seatAction = new Map<number, string>();
-        this.seatTimer = new Map<number, Timer>();
+        this.seatTimer = {};
         this.wonPots = [];
 
         this.isGatheringAntes = this.isGatheringBets = false;
@@ -833,6 +833,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // handComplete
 
 
+    private isInHandAction(action: IsInHandAction): void {
+
+        let seat = this.findSeat(action.seatIndex);
+
+        if (seat) {
+
+            // this.log(`${seat.getName()} isInHandssssss: ${action.isInHand}`);
+
+        }
+
+    }  // isInHandAction
+
+
     private betTurnAction(action: BetTurnAction): void {
 
         // Remove any previous action for the current "to-act" player
@@ -851,7 +864,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // Calculate the min and max raises allowed here
         this.myMinRaise = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
         this.myMaxRaise = this.betController.calculateMaximumRaise(this.table, mySeat, this.myCall);
-
 
         if (this.pendingBetCommand instanceof CallCommand) {
 
@@ -904,64 +916,56 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             let timer: Timer = new Timer(action.timesUp);
             timer.start();
-            this.seatTimer.set(seat.index, timer);
+            this.seatTimer[seat.index] = timer;
 
         }
 
 
-    }  // betTurn
-
-
-    private isInHandAction(action: IsInHandAction): void {
-
-        let seat = this.findSeat(action.seatIndex);
-
-        if (seat) {
-
-            // this.log(`${seat.getName()} isInHandssssss: ${action.isInHand}`);
-
-        }
-
-    }  // setIsInHand
+    }  // betTurnAction
 
 
     private anteTurnAction(action: AnteTurnAction): void {
 
-        let anteSeat: Seat = this.findSeat(this.table.betStatus.forcedBets.seatIndex);
+        let anteSeatIndex: number = this.table.betStatus.forcedBets.seatIndex;
 
-        this.log(`In anteTurn, seatIndex = ${anteSeat.index}`);
+        // Remove any previous action for the current "to-act" player
+        // Map.delete is safe to use, even if the key does not already exist
+        this.seatAction.delete(anteSeatIndex);
+
+        let anteSeat: Seat = this.findSeat(anteSeatIndex);
+        this.log(`It is ${anteSeat.getName()}'s turn to ante`);
+
+        this.clearSeatTimers();
+
+        this.myCall = this.myMinRaise = this.myMaxRaise = null;
 
         if (anteSeat) {
 
-            this.log(`It is ${anteSeat.getName()}'s turn to ante`);
-
-            // Set the amount required to call the ante
-            let mySeat: Seat = this.getMySeat();
-
-            this.myCall = this.betController.calculateCall(this.table, anteSeat);
-            this.myMinRaise = this.myMaxRaise = null;
-
-            this.clearSeatTimers();
-
             if (action.timesUp > Date.now()) {
 
-                // if we had a betting action readied, then send it now
-                if (this.checkPendingBetCommand()) {
+                if (anteSeatIndex == this.mySeatIndex) {
 
-                    return;
+                    this.myCall = this.betController.calculateCall(this.table, anteSeat);
+
+                    // if we had a betting action readied, then send it now
+                    if (this.checkPendingBetCommand()) {
+
+                        return;
+
+                    }
 
                 }
 
                 let timer: Timer = new Timer(action.timesUp);
                 timer.start();
-                this.seatTimer.set(anteSeat.index, timer);
+                this.seatTimer[anteSeat.index] = timer;
 
             }
 
         }
         else {
 
-            this.log(`In anteTurnActionremainsToAnte, could not find seat for index ${this.table.betStatus.seatIndex}`);
+            this.log(`In anteTurnAction, could not find seat for index ${anteSeatIndex}`);
 
         }
 
@@ -1034,11 +1038,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private killSeatTimer(seatIndex: number): void {
 
         // it's OK to delete something that might not exist
-        let timer: Timer = this.seatTimer.get(seatIndex);
+        let timer: Timer = this.seatTimer[seatIndex];
 
         if (timer) {
             timer.stop();
-            this.seatTimer.delete(seatIndex);
+            delete this.seatTimer[seatIndex];
         }
 
     }   // killSeatTimer
@@ -1047,12 +1051,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private clearSeatTimers(): void {
 
         // Stop any seat timer that is already running
-        for (let [key, value] of this.seatTimer) {
-            value.stop();
-        }
-
         // Remove all timers from the map
-        this.seatTimer.clear();
+        for (let prop in this.seatTimer) {
+
+            this.seatTimer[prop].stop();
+            delete this.seatTimer[prop];
+
+        }
 
     }  // clearSeatTimers
 
