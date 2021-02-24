@@ -7,11 +7,9 @@
         </div>
         <div class="avatar">
             <div class="action-container">
-                <timer-component v-if="ui.seatTimer.hasOwnProperty(seat.index)" :timer="ui.seatTimer[seat.index]"></timer-component>
+                <timer-component v-if="ui.seatTimer.has(seat.index)" :timer="ui.seatTimer.get(seat.index)"></timer-component>
                 <div class="action" v-if="ui.seatAction.has(seat.index)">
-                    {{
- ui.seatAction.get(seat.index)
-                    }}
+                    {{ ui.seatAction.get(seat.index) }}
                 </div>
             </div>
         </div>
@@ -104,7 +102,9 @@ const SeatComponent = Vue.extend ({
 
         hasTimer: function () {
 
-            return this.ui && this.ui.seatTimer && this.ui.seatTimer.hasOwnProperty(this.seat.index);
+            // the value of this seat's index in the seatTimer object map will be `null` if there is
+            // not a currently-active Timer object
+            return this.ui && this.ui.seatTimer && this.ui.seatTimer.get(this.seat.index) != null;
 
         },
 

@@ -57,7 +57,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public currentBalance: number;
 
     public seatAction: Map<number, string>;
-    public seatTimer: object;
+    public seatTimer: Map<number, Timer>;
 
     public wonPots: WonPot[];
 
@@ -100,7 +100,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.table = null;
 
         this.seatAction = new Map<number, string>();
-        this.seatTimer = {};
+        this.seatTimer = new Map<number, Timer>();
+
         this.wonPots = [];
 
         this.isGatheringAntes = this.isGatheringBets = false;
@@ -444,6 +445,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.user.id);
 
         this.mySeatIndex = mySeat ? mySeat.index : null;
+
+        /*
+        // Set up the Maps with default values so that they can be reactive
+        for (let seatIndex: number = 0; seatIndex < action.table.seats.length; seatIndex++) {
+
+            this.seatAction.set(seatIndex, null);
+            this.seatTimer.set(seatIndex, null);
+
+        }
+        */
 
     }  // tableSnapshotAction
 
@@ -916,7 +927,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             let timer: Timer = new Timer(action.timesUp);
             timer.start();
-            this.seatTimer[seat.index] = timer;
+            this.seatTimer.set(seat.index, timer);
 
         }
 
@@ -958,7 +969,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 let timer: Timer = new Timer(action.timesUp);
                 timer.start();
-                this.seatTimer[anteSeat.index] = timer;
+                this.seatTimer.set(anteSeat.index, timer);
 
             }
 
@@ -1037,12 +1048,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private killSeatTimer(seatIndex: number): void {
 
-        // it's OK to delete something that might not exist
-        let timer: Timer = this.seatTimer[seatIndex];
+        let timer: Timer = this.seatTimer.get(seatIndex);
+
 
         if (timer) {
+
             timer.stop();
-            delete this.seatTimer[seatIndex];
+            this.seatTimer.delete(seatIndex);
+
         }
 
     }   // killSeatTimer
@@ -1052,12 +1065,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // Stop any seat timer that is already running
         // Remove all timers from the map
-        for (let prop in this.seatTimer) {
+        for (let timer of this.seatTimer.values()) {
 
-            this.seatTimer[prop].stop();
-            delete this.seatTimer[prop];
+            if (timer) {
+
+                timer.stop();
+
+            }
 
         }
+
+        this.seatTimer.clear();
 
     }  // clearSeatTimers
 
