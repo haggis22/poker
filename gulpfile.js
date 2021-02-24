@@ -26,5 +26,4 @@ gulp.task('default',
     gulp.series('clean', gulp.parallel('ts')));
 */
 
-gulp.task('default',
-    gulp.parallel('ts'));
+gulp.task('default', gulp.parallel('ts'));
