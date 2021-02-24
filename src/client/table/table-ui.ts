@@ -1064,8 +1064,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private clearSeatTimers(): void {
 
         // Stop any seat timer that is already running
-        // Remove all timers from the map
-        for (let timer of this.seatTimer.values()) {
+        for (let [seatIndex, timer] of this.seatTimer) {
 
             if (timer) {
 
@@ -1075,6 +1074,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
+        // Remove all timers from the map
         this.seatTimer.clear();
 
     }  // clearSeatTimers
