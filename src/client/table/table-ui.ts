@@ -970,6 +970,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                 let timer: Timer = new Timer(action.timesUp);
                 timer.start();
                 this.seatTimer.set(anteSeat.index, timer);
+                this.log(`Setting ante turn timer for seat ${anteSeat.index} to ${action.timesUp}`);
 
             }
 
@@ -1046,22 +1047,26 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // betAction
 
 
+
+
     private killSeatTimer(seatIndex: number): void {
+
+        this.log(`In killSeatTimer for seatIndex ${seatIndex}`);
 
         let timer: Timer = this.seatTimer.get(seatIndex);
 
-
         if (timer) {
-
+            this.log(`Stopping and deleting timer for seatIndex ${seatIndex}`);
             timer.stop();
             this.seatTimer.delete(seatIndex);
-
         }
 
     }   // killSeatTimer
 
 
     private clearSeatTimers(): void {
+
+        this.log('In clearSeatTimers');
 
         // Stop any seat timer that is already running
         for (let [seatIndex, timer] of this.seatTimer) {
