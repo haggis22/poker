@@ -172,7 +172,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof AuthenticatedAction) {
 
-            return this.authenticated(action);
+            return this.authenticatedAction(action);
 
         }
 
@@ -206,36 +206,36 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof SetGameAction) {
 
-            return this.setGame(action);
+            return this.setGameAction(action);
 
         }
 
         if (action instanceof PlayerSeatedAction) {
 
-            return this.playerSeated(action);
+            return this.playerSeatedAction(action);
 
         }
 
         if (action instanceof SeatVacatedAction) {
 
-            return this.seatVacated(action);
+            return this.seatVacatedAction(action);
 
         }
 
         if (action instanceof SetStatusAction) {
 
-            return this.setStatus(action);
+            return this.setStatusAction(action);
 
         }
 
         if (action instanceof AddChipsAction) {
 
-            return this.addChips(action);
+            return this.addChipsAction(action);
         }
 
         if (action instanceof StackUpdateAction) {
 
-            return this.stackUpdate(action);
+            return this.stackUpdateAction(action);
         }
 
         if (action instanceof TableStateAction) {
@@ -246,52 +246,52 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof UpdateBetsAction) {
 
-            return this.updateBets(action);
+            return this.updateBetsAction(action);
 
         }
 
         if (action instanceof GatherBetsAction) {
 
-            return this.gatherBets(action);
+            return this.gatherBetsAction(action);
 
         }
 
         if (action instanceof GatherBetsCompleteAction) {
 
-            return this.gatherBetsComplete(action);
+            return this.gatherBetsCompleteAction(action);
 
         }
 
         if (action instanceof GatherAntesAction) {
 
-            return this.gatherAntes(action);
+            return this.gatherAntesAction(action);
 
         }
 
         if (action instanceof GatherAntesCompleteAction) {
 
-            return this.gatherAntesComplete(action);
+            return this.gatherAntesCompleteAction(action);
 
         }
 
         if (action instanceof MoveButtonAction) {
 
-            return this.moveButton(action);
+            return this.moveButtonAction(action);
         }
 
         if (action instanceof DealCardAction) {
 
-            return this.dealCard(action);
+            return this.dealCardAction(action);
         }
 
         if (action instanceof DealBoardAction) {
 
-            return this.dealBoard(action);
+            return this.dealBoardAction(action);
         }
 
         if (action instanceof HandCompleteAction) {
 
-            return this.handComplete(action);
+            return this.handCompleteAction(action);
 
         }
 
@@ -327,48 +327,48 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof FlipCardsAction) {
 
-            return this.flipCards(action);
+            return this.flipCardsAction(action);
 
         }
 
         if (action instanceof DeclareHandAction) {
 
-            return this.declareHand(action);
+            return this.declareHandAction(action);
 
         }
 
         if (action instanceof WinPotAction) {
 
-            return this.winPotAction(action);
+            return this.winPotActionAction(action);
 
         }
 
         if (action instanceof BetReturnedAction) {
 
-            return this.betReturned(action);
+            return this.betReturnedAction(action);
         }
 
         if (action instanceof BettingCompleteAction) {
 
-            return this.bettingComplete(action);
+            return this.bettingCompleteAction(action);
 
         }
 
         if (action instanceof ShowdownAction) {
 
-            return this.showdown(action);
+            return this.showdownAction(action);
 
         }
 
         if (action instanceof PotCardsUsedAction) {
 
-            return this.potCardsUsed(action);
+            return this.potCardsUsedAction(action);
 
         }
 
         if (action instanceof ChatAction) {
 
-            return this.chat(action);
+            return this.chatAction(action);
 
         }
 
@@ -459,7 +459,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // tableSnapshotAction
 
 
-    private setGame(action: SetGameAction): void {
+    private setGameAction(action: SetGameAction): void {
 
         if (!this.game || this.game.id != action.gameID) {
 
@@ -480,7 +480,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // authenticate
 
 
-    public authenticated(action: AuthenticatedAction): void {
+    public authenticatedAction(action: AuthenticatedAction): void {
 
         this.log(`Heared AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${this.tableID}`);
         this.user = action.user;
@@ -532,7 +532,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
     
 
-    private playerSeated(action: PlayerSeatedAction): void {
+    private playerSeatedAction(action: PlayerSeatedAction): void {
 
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
@@ -553,7 +553,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // seatPlayer
 
 
-    private seatVacated(action: SeatVacatedAction): void {
+    private seatVacatedAction(action: SeatVacatedAction): void {
 
         let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
 
@@ -575,7 +575,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private setStatus(action: SetStatusAction): void {
+    private setStatusAction(action: SetStatusAction): void {
 
         if (this.user && this.user.id === action.userID) {
 
@@ -605,7 +605,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // findPlayer
 
 
-    private addChips(action: AddChipsAction): void {
+    private addChipsAction(action: AddChipsAction): void {
 
         let player: Player = this.findPlayer(action.userID);
 
@@ -619,7 +619,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private stackUpdate(action: StackUpdateAction): void {
+    private stackUpdateAction(action: StackUpdateAction): void {
 
         let player = this.findPlayer(action.playerID);
 
@@ -745,7 +745,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private updateBets(action: UpdateBetsAction): void {
+    private updateBetsAction(action: UpdateBetsAction): void {
 
         this.log(`Seats To Act: [ ${action.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
         this.log(`Table Seats To Act: [ ${this.table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
@@ -778,7 +778,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private moveButton(action: MoveButtonAction): void {
+    private moveButtonAction(action: MoveButtonAction): void {
 
         let seat = this.findSeat(this.table.buttonIndex);
 
@@ -789,7 +789,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // moveButton
 
 
-    private dealCard(action: DealCardAction): void {
+    private dealCardAction(action: DealCardAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -817,7 +817,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         return `${card.value.symbol}${card.suit.symbol}`;
     }
 
-    private dealBoard(action: DealBoardAction): void {
+    private dealBoardAction(action: DealBoardAction): void {
 
 
         let message: string = `The board is dealt ${ action.cards.map(card => this.describeCard(card)).join(" ") }`;
@@ -828,7 +828,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }   // dealBoard
 
 
-    private handComplete(action: HandCompleteAction): void {
+    private handCompleteAction(action: HandCompleteAction): void {
 
         // If we have pots, then we can't have any WonPots - clear 'em
         this.wonPots.length = 0;
@@ -1110,7 +1110,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // fold
 
 
-    private flipCards(action: FlipCardsAction): void {
+    private flipCardsAction(action: FlipCardsAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -1125,7 +1125,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // flipCards
 
 
-    private declareHand(action: DeclareHandAction): void {
+    private declareHandAction(action: DeclareHandAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -1137,7 +1137,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // declareHand
 
 
-    private winPotAction(action: WinPotAction): void {
+    private winPotActionAction(action: WinPotAction): void {
 
         let pot: WonPot = action.pot;
 
@@ -1181,7 +1181,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // winPot
 
 
-    private betReturned(action: BetReturnedAction): void {
+    private betReturnedAction(action: BetReturnedAction): void {
 
         let seat = this.findSeat(action.seatIndex);
         
@@ -1199,21 +1199,21 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // returnBet
 
 
-    private bettingComplete(action: BettingCompleteAction): void {
+    private bettingCompleteAction(action: BettingCompleteAction): void {
 
         this.clearLocalBets();
 
     }  // bettingComplete
 
 
-    private showdown(action: ShowdownAction): void {
+    private showdownAction(action: ShowdownAction): void {
 
         this.isShowdownRequired = action.isShowdownRequired;
 
     }  // showdown
 
 
-    private potCardsUsed(action: PotCardsUsedAction): void {
+    private potCardsUsedAction(action: PotCardsUsedAction): void {
 
         this.usedCards.length = 0;
 
@@ -1231,13 +1231,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // isCardUsed
 
 
-    private gatherBets(action: GatherBetsAction): void {
+    private gatherBetsAction(action: GatherBetsAction): void {
 
         this.isGatheringBets = true;
 
     }  // gatherBets
 
-    private gatherBetsComplete(action: GatherBetsCompleteAction): void {
+    private gatherBetsCompleteAction(action: GatherBetsCompleteAction): void {
 
         this.isGatheringBets = false;
         this.seatAction.clear();
@@ -1245,13 +1245,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // gatherBetsComplete
 
 
-    private gatherAntes(action: GatherAntesAction): void {
+    private gatherAntesAction(action: GatherAntesAction): void {
 
         this.isGatheringAntes  = true;
 
     }  // gatherAntes
 
-    private gatherAntesComplete(action: GatherAntesCompleteAction): void {
+    private gatherAntesCompleteAction(action: GatherAntesCompleteAction): void {
 
         this.isGatheringAntes = false;
         this.seatAction.clear();
@@ -1260,7 +1260,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    private chat(action: ChatAction): void {
+    private chatAction(action: ChatAction): void {
 
         this.messages.push(`${action.username}: ${action.message}`);
         this.log(`${action.username}: ${action.message}`);
