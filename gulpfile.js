@@ -14,7 +14,7 @@ gulp.task('clean', function () {
 
 gulp.task('ts', () => {
 
-    return gulp.src(['src/**/*.ts', '!src/client/**/*.ts'])
+    return gulp.src(['src/**/*.ts'])
         .pipe(tsProject())
         .pipe(gulp.dest('dist'));
 

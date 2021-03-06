@@ -1,26 +1,39 @@
 ﻿{
   "compilerOptions": {
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "downlevelIteration": true,
-    "moduleResolution": "Node",
-    "module": "CommonJS",
     "target": "esnext",
-    "watch": false,
-    "allowJs": true
-    /*
-    "baseUrl": "src",
+    "module": "esnext",
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "types": [
+      "webpack-env"
+    ],
     "paths": {
-      "@/*": [ "/*" ],
-      "@tables/*": [ "casino/tables/*" ],
-      "@lobby/*": [ "casino/lobby/*" ],
-      "@games/*": [ "games/*" ],
-      "@cards/*": [ "cards/*" ],
-      "@server/*": [ "communication/server-side/*" ]
-    }
-*/
+      "@/*": [ "src/*" ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
   },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
   "exclude": [
-    "./**/*.js"
+    "node_modules"
   ]
-} 
+}
