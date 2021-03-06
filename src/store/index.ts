@@ -1,24 +1,14 @@
 import { createStore } from "vuex";
-import { TableSummary } from '@/app/casino/tables/table-summary';
+
+import lobby from './lobby';
 
 export default createStore({
-    state: {
 
-        count: 0,
-        tables: new Array<TableSummary>()
-
-    },
-    mutations: {
-        increment(state, step) {
-            state.count += step;
-        },
-        tableSummaries(state, tables) {
-
-            state.tables = [...tables ]
+    modules: {
+        lobby: {
+            namespaced: true,
+            ...lobby
         }
-    },
+    }
 
-    actions: {},
-
-    modules: {}
 });

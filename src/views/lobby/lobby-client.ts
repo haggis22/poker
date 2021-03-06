@@ -21,7 +21,6 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
     public chipFormatter: IChipFormatter;
     public user: UserSummary;
-    public tables: TableSummary[];
 
     private commandHandlers: CommandHandler[];
 
@@ -31,7 +30,6 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
-        this.tables = [];
 
     }
 
@@ -121,10 +119,7 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
     public listTablesAction(action: ListTablesAction): void {
 
-        this.tables = [...action.tables];
-
-        store.commit('increment', action.tables.length);
-        store.commit('tableSummaries', action.tables)
+        store.commit('lobby/tableSummaries', action.tables)
 
     }   // listTablesAction
 

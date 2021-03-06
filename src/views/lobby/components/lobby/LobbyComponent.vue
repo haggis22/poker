@@ -54,7 +54,7 @@
 
             tables(): Array<TableSummary> {
 
-                return this.$store.state.tables
+                return this.$store.state.lobby.tables;
 
             }
 
