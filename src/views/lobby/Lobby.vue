@@ -23,11 +23,11 @@
 
         name: "Lobby",
         components: {
-            'lobby-component': LobbyComponent
+            LobbyComponent
         },
         data() {
 
-            let values = {
+            const values = {
                 client: null as LobbyClient
             };
 
@@ -42,8 +42,8 @@
 
                 console.log('Connection opened');
 
-                let client: LobbyClient = new LobbyClient(new MoneyFormatter());
-                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
+                const client: LobbyClient = new LobbyClient(new MoneyFormatter());
+                const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
 
                 // Now join all the links in the chain
                 client.registerCommandHandler(gameClient);
