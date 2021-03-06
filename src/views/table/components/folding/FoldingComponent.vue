@@ -15,16 +15,16 @@
 
 import './folding.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { TableUI } from '../../table-ui';
-import CardComponent from '../card/CardComponent.vue';
-import { CardUI } from '../../card-ui';
-import { UIPosition } from '../../../ui-position';
+    import { UIPosition } from '@/app/ui/ui-position';
+    import CardComponent from '../card/CardComponent.vue';
+    import { CardUI } from '../../card-ui';
+    import { TableUI } from '../../table-ui';
 
 
 
-const FoldingComponent = Vue.extend ({
+    const FoldingComponent = defineComponent({
 
     props: {
         cards: {

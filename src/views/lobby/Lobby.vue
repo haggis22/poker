@@ -9,7 +9,7 @@
 
 <script lang="ts">
 
-    import Vue from 'vue';
+    import { defineComponent } from "vue";
 
     import { LobbyClient } from './lobby-client';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
@@ -19,7 +19,8 @@
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
 
 
-    export default {
+    export default defineComponent({
+
         name: "Lobby",
         components: {
             'lobby-component': LobbyComponent
@@ -27,7 +28,7 @@
         data() {
 
             let values = {
-                client: null
+                client: null as LobbyClient
             };
 
             return values;
@@ -37,7 +38,7 @@
 
             const ws = new WebSocket('ws://localhost:3000');
 
-            ws.addEventListener('open', () => { 
+            ws.addEventListener('open', () => {
 
                 console.log('Connection opened');
 
@@ -56,6 +57,6 @@
 
         }
 
-    };
+    });
 
 </script>

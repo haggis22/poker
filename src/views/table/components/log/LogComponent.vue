@@ -16,11 +16,11 @@
 
 import './log.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
     import { TableUI } from '../../table-ui';
 
-const LogComponent = Vue.extend ({
+const LogComponent = defineComponent({
 
     props: {
         ui: {

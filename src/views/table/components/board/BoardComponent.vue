@@ -16,16 +16,16 @@
 
 import './board.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
+import { Board } from '@/app/casino/tables/boards/board';
+import { UIPosition } from '@/app/ui/ui-position';
+import { CardUI } from '../../card-ui';
 import { TableUI } from '../../table-ui';
 import CardComponent from '../card/CardComponent.vue';
-import { Board } from '../../../../casino/tables/boards/board';
-import { UIPosition } from '../../../ui-position';
-import { CardUI } from '../../card-ui';
 
 
-const BoardComponent = Vue.extend ({
+    const BoardComponent = defineComponent({
 
     props: {
         board: {

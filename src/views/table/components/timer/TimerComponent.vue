@@ -7,13 +7,13 @@
 
 <script lang="ts">
 
-import './timer.scss';
+    import './timer.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { Timer } from '../../../../timers/timer';
+    import { Timer } from '@/app/timers/timer';
 
-const TimerComponent = Vue.extend ({
+    const TimerComponent = defineComponent ({
 
     props: {
         timer: {
@@ -35,7 +35,7 @@ const TimerComponent = Vue.extend ({
 
     computed: {
 
-        width: function () {
+        width: function (): string {
 
             if (this.localTimer) {
 
@@ -47,7 +47,7 @@ const TimerComponent = Vue.extend ({
 
         },
 
-        classes: function () {
+        classes: function (): Array<string> {
 
             let classes = [ 'timer' ];
 

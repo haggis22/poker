@@ -38,13 +38,13 @@
     
 import './table-menu.scss';
 
-import Vue from 'vue';
+import { defineComponent, vModelCheckbox } from 'vue';
 
 import { TableUI } from '../../table-ui';
-import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '../../../../communication/serializable';
+import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
 
 
-const TableMenuComponent = Vue.extend ({
+    const TableMenuComponent = defineComponent({
 
     props: {
 
@@ -60,37 +60,34 @@ const TableMenuComponent = Vue.extend ({
     },
     data() {
 
-        let values =
-        {
-            numAddChips: 1000,
+        return {
+            numAddChips: '1000',
             step: 100,
             showAddChips: false
         };
 
-        return values;
-
     },
     computed: {
 
-        addChipsButtonReady: function () {
+        addChipsButtonReady: function (): boolean {
 
             return !this.showAddChips;
 
         },
 
-        minBuyIn: function () {
+        minBuyIn: function (): number {
 
             return this.showAddChips ? 0 : null;
 
         },
 
-        maxBuyIn: function () {
+        maxBuyIn: function (): number {
 
             return (this.showAddChips && this.ui) ? this.ui.currentBalance : null;
 
         },
 
-        addChipsDialogReady: function () {
+        addChipsDialogReady: function (): boolean {
 
             return this.showAddChips && this.maxBuyIn > 0;
 
@@ -100,28 +97,30 @@ const TableMenuComponent = Vue.extend ({
     },
     methods: {
 
-        setStatus: function (event) {
+        setStatus: function (event: Event): void {
 
             // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
-            this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, event.target.checked));
-            this.$emit('update:isSittingOut', event.target.checked);
+            if (event.target instanceof HTMLInputElement) {
+                this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, event.target.checked));
+                this.$emit('update:isSittingOut', event.target.checked);
+            }
 
         },
 
-        standUp: function (event) {
+        standUp: function (): void {
 
             this.ui.sendCommand(new StandUpCommand(this.ui.table.id));
 
         },
 
-        checkBalance: function (event) {
+        checkBalance: function (): void {
 
             this.ui.checkBalance();
             this.showAddChips = true;
 
         },
 
-        buyIn: function (event) {
+        buyIn: function (): void {
 
             let numChips = parseInt(this.numAddChips, 10);
 
@@ -144,7 +143,7 @@ const TableMenuComponent = Vue.extend ({
             }
 
         },
-        cancelBuyIn: function (event) {
+        cancelBuyIn: function () {
 
             this.showAddChips = false;
 

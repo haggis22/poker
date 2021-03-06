@@ -13,12 +13,12 @@
 
 import './chip.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { Chip } from '../../../../casino/tables/chips/chip';
+import { Chip } from '@/app/casino/tables/chips/chip';
 
 
-const ChipComponent = Vue.extend({
+    const ChipComponent = defineComponent({
 
     props: {
         chip: {

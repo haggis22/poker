@@ -23,13 +23,14 @@
 
 import './card.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { Card } from '../../../../cards/card';
-import { CardUI } from '../../card-ui';
-import { FacedownCard } from '../../../../cards/face-down-card';
+    import { Card } from '@/app/cards/card';
+    import { FacedownCard } from '@/app/cards/face-down-card';
 
-    const CardComponent = Vue.extend({
+    import { CardUI } from '../../card-ui';
+
+    const CardComponent = defineComponent({
 
         props: {
             card: {
@@ -75,22 +76,22 @@ import { FacedownCard } from '../../../../cards/face-down-card';
     },
     computed: {
 
-        isVisible: function () {
+        isVisible: function (): boolean {
 
             return this.cardUI.top != null;
 
         },
-        isFaceUp: function () {
+        isFaceUp: function (): boolean {
 
             return this.card instanceof Card;
 
         },
-        top: function () {
+        top: function (): number {
 
             return this.cardUI.top - (this.isShowdown && this.isUsed ? 10 : 0);
 
         },
-        left: function () {
+        left: function (): number {
 
             return this.cardUI.left;
 
@@ -139,9 +140,6 @@ import { FacedownCard } from '../../../../cards/face-down-card';
     },
     methods: {
 
-    },
-    beforeDestroy() {
-        clearTimeout(this.timer);
     }
 
 });

@@ -9,9 +9,9 @@
 
 import './dealer-box.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-const DealerComponent = Vue.extend ({
+const DealerComponent = defineComponent ({
 
     props: {
 

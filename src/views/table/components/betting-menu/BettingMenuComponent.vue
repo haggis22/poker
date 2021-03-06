@@ -74,17 +74,17 @@
     
 import './betting-menu.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from "vue";
 
+import { AnteCommand } from '@/app/commands/table/betting/ante-command';
+import { CheckCommand } from '@/app/commands/table/betting/check-command';
+import { CallCommand } from '@/app/commands/table/betting/call-command';
+import { RaiseCommand } from '@/app/commands/table/betting/raise-command';
+import { FoldCommand } from '@/app/commands/table/betting/fold-command';
 import { TableUI } from '../../table-ui';
-import { AnteCommand } from '../../../../commands/table/betting/ante-command';
-import { CheckCommand } from '../../../../commands/table/betting/check-command';
-import { CallCommand } from '../../../../commands/table/betting/call-command';
-import { RaiseCommand } from '../../../../commands/table/betting/raise-command';
-import { FoldCommand } from '../../../../commands/table/betting/fold-command';
 import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
-const TableMenuComponent = Vue.extend ({
+    const TableMenuComponent = defineComponent({
 
     props: {
         ui: {
@@ -118,33 +118,33 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
-        isFoldActivated: function (): Boolean {
+        isFoldActivated: function (): boolean {
 
             return this.ui.pendingBetCommand instanceof FoldCommand;
 
         },
 
-        isAnteActivated: function (): Boolean {
+        isAnteActivated: function (): boolean {
 
             return this.ui.pendingBetCommand instanceof AnteCommand;
 
         },
 
-        isCheckAllowed: function () {
+        isCheckAllowed: function (): boolean {
 
             return this.ui.myCall && this.ui.myCall.chipsAdded === 0;
 
         },
 
-        isCheckActivated: function (): Boolean {
+        isCheckActivated: function (): boolean {
 
             return this.ui.pendingBetCommand instanceof CheckCommand;
 
         },
 
-        isCallAllowed: function () {
+        isCallAllowed: function (): boolean {
 
-            return this.ui.myCall && this.ui.myCall.chipsAdded > 0;
+            return this.ui.myCall!.chipsAdded > 0;
 
         },
 
@@ -154,25 +154,25 @@ const TableMenuComponent = Vue.extend ({
             
         },
 
-        isLimitRaiseAllowed: function () {
+        isLimitRaiseAllowed: function (): boolean {
 
             return this.ui.myMinRaise && this.ui.myMaxRaise && this.ui.myMinRaise.chipsAdded == this.ui.myMaxRaise.chipsAdded;
 
         },
 
-        isRaiseActivated: function (): Boolean {
+        isRaiseActivated: function (): boolean {
 
             return this.ui.pendingBetCommand instanceof RaiseCommand;
 
         },
 
-        betDescription: function () {
+        betDescription: function (): string {
 
             return this.ui.table.betStatus.numRaises > 0 ? 'Raise To' : 'Bet';
 
         },
 
-        raiseDialogReady: function () {
+        raiseDialogReady: function (): boolean {
 
             return this.showRaise;
 
@@ -194,7 +194,7 @@ const TableMenuComponent = Vue.extend ({
     },
     methods: {
 
-        toggleFold: function (event): void {
+        toggleFold: function (): void {
 
             if (this.isFoldActivated) {
 
@@ -206,7 +206,7 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
-        toggleAnte: function (event): void {
+        toggleAnte: function (): void {
 
             if (this.isAnteActivated) {
 
@@ -218,7 +218,7 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
-        toggleCheck: function (event): void {
+        toggleCheck: function (): void {
 
             if (this.isCheckActivated) {
 
@@ -230,7 +230,7 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
-        toggleCall: function (event): void {
+        toggleCall: function (): void {
 
             if (this.isCallActivated) {
 
@@ -242,7 +242,7 @@ const TableMenuComponent = Vue.extend ({
 
         },
 
-        toggleLimitRaise: function (event): void {
+        toggleLimitRaise: function (): void {
 
             if (this.isRaiseActivated) {
 

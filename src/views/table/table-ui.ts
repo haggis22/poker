@@ -429,7 +429,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    private checkBalance(): void {
+    public checkBalance(): void {
 
         this.currentBalance = null;
         this.sendCommand(new CheckBalanceCommand());

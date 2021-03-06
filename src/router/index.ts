@@ -12,8 +12,7 @@ const routes: Array<RouteRecordRaw> = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () =>
-            import(/* webpackChunkName: "lobby" */ '../views/lobby/Lobby.vue')
+        component: () => import(/* webpackChunkName: "lobby" */ '../views/lobby/Lobby.vue')
     },
     {
         path: "/table/:tableID",
@@ -21,8 +20,8 @@ const routes: Array<RouteRecordRaw> = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () =>
-            import(/* webpackChunkName: "table" */ '../views/table/Table.vue')
+        component: () => import(/* webpackChunkName: "table" */ '../views/table/Table.vue'),
+        props: true
     }
 
 ];

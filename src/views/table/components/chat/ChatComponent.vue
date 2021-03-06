@@ -18,12 +18,12 @@
 
 import './chat.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
     import { TableUI } from '../../table-ui';
-    import { ChatCommand } from '../../../../commands/table/chat/chat-command';
+    import { ChatCommand } from '@/app/commands/table/chat/chat-command';
 
-const ChatComponent = Vue.extend ({
+    const ChatComponent = defineComponent({
 
     props: {
         ui: {
@@ -35,7 +35,7 @@ const ChatComponent = Vue.extend ({
 
         let values =
         {
-            message: null
+            message: null as string
         };
 
         return values;

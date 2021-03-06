@@ -16,16 +16,17 @@
 
 import './hand.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
+
+    import { UIPosition } from '@/app/ui/ui-position';
 
     import CardComponent from '../card/CardComponent.vue';
     import { CardUI } from '../../card-ui';
     import { TableUI } from '../../table-ui';
-import { UIPosition } from '../../../ui-position';
 
 
 
-const HandComponent = Vue.extend ({
+const HandComponent = defineComponent ({
 
     props: {
         cards: {

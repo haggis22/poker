@@ -13,18 +13,16 @@
 <script lang="ts">
 
 
-import './ghost-hand.scss';
+    import './ghost-hand.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
+    import { UIPosition } from '@/app/ui/ui-position';
     import CardComponent from '../card/CardComponent.vue';
-import { CardUI } from '../../card-ui';
-import { UIPosition } from '../../../ui-position';
+    import { CardUI } from '../../card-ui';
     import { TableUI } from '../../table-ui';
 
-
-
-const GhostHandComponent = Vue.extend ({
+    const GhostHandComponent = defineComponent({
 
     props: {
         cards: {

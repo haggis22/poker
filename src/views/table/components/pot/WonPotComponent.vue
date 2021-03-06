@@ -15,14 +15,15 @@
 
 import './pot.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { WonPot } from '../../../../casino/tables/betting/won-pot';
+import { WonPot } from '@/app/casino/tables/betting/won-pot';
+    import { UIPosition } from '@/app/ui/ui-position';
+
     import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
-    import { UIPosition } from '../../../ui-position';
 
-const WonPotComponent = Vue.extend ({
+    const WonPotComponent = defineComponent({
 
     props: {
         pot: {
@@ -43,11 +44,11 @@ const WonPotComponent = Vue.extend ({
         let values =
         {
             isPushed: false,
-            timer: '',
+            timer: null as ReturnType<typeof setTimeout>
 
             // this will specify where the chips will eventually end up
             playerPosition: this.ui.playerPositions.get(this.pot.seatIndex),
-            chipPosition: null
+            chipPosition: null as UIPosition
         };
 
         return values;
@@ -55,7 +56,7 @@ const WonPotComponent = Vue.extend ({
     },
     created() {
 
-        console.log(`Created WonPotComponent for pot index ${this.pot.potIndex}, amount ${this.pot.amount}`);
+        console.log(`Created WonPotComponent for pot index ${this.pot.index}, amount ${this.pot.amount}`);
 
         // After only the briefest of pauses, we're going to start pushing this pot towards its winner
         this.timer = setTimeout(() => {

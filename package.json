@@ -3,15 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "description": "Corn Dog Poker Club",
-  "main": "server.js",
   "author": {
     "name": "Daniel Shell"
   },
   "scripts": {
-    "start": "nodemon dist/server/server",
+    "start": "nodemon dist-server/server/server",
     "build-server": "gulp",
-    "build-client": "webpack --mode development",
-    "build-client-prod": "webpack --mode production",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"

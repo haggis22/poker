@@ -15,16 +15,16 @@
 <script lang="ts">
 
 
-import './chip-box.scss';
+    import './chip-box.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { ChipStacker } from '../../../../casino/tables/chips/chip-stacker';
-import ChipComponent from './ChipComponent.vue';
-import { UIPosition } from '../../../ui-position';
+    import { Chip } from '@/app/casino/tables/chips/chip';
+    import { ChipStacker } from '@/app/casino/tables/chips/chip-stacker';
+    import { UIPosition } from '@/app/ui/ui-position';
+    import ChipComponent from './ChipComponent.vue';
 
-
-const ChipBoxComponent = Vue.extend ({
+    const ChipBoxComponent = defineComponent({
 
     props: {
         value: {
@@ -57,7 +57,7 @@ const ChipBoxComponent = Vue.extend ({
 
         let values = {
 
-            lastChipReleased: null
+            lastChipReleased: null as number
 
         };
 
@@ -69,7 +69,7 @@ const ChipBoxComponent = Vue.extend ({
     },
     computed: {
 
-        chips: function () {
+        chips: function (): Array<Chip> {
 
             // chipStacker.colorUp returns an array of ChipStack objects, each of which represents a chip type and a number of them...
             // of chips

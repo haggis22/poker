@@ -2,6 +2,10 @@
 
     <div>
 
+        <div v-if="client != null">NumTables: {{ client.tables.length }}</div>
+
+        <div>Count: {{ count }}</div>
+
         <table cellpadding="5" cellspacing="0">
             <thead>
                 <tr>
@@ -29,18 +33,29 @@
 
 import './lobby.scss';
 
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import { LobbyClient } from '../../lobby-client';
 
 
-const LobbyComponent = Vue.extend({
+    const LobbyComponent = defineComponent({
 
     props: {
         client: {
             type: LobbyClient,
             required: true
-        }
+        },
     },
+        computed: {
+
+            count(): number {
+
+                return this.$store.state.count;
+
+            }
+
+
+        },
+
     components: {
     }
 

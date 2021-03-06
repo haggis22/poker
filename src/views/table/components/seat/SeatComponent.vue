@@ -53,21 +53,21 @@
 <script lang="ts">
 
 
-import './seat.scss';
+    import './seat.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { Seat } from '../../../../casino/tables/seat';
-import { BetStatus} from '../../../../casino/tables/betting/bet-status';
-import { TableUI } from '../../table-ui';
-import { RequestSeatCommand } from '../../../../commands/table/request-seat-command';
+    import { Seat } from '@/app/casino/tables/seat';
+    import { BetStatus} from '@/app/casino/tables/betting/bet-status';
+    import { RequestSeatCommand } from '@/app/commands/table/request-seat-command';
 
-import HandComponent from '../hand/HandComponent.vue';
+    import HandComponent from '../hand/HandComponent.vue';
     import FoldingComponent from '../folding/FoldingComponent.vue';
-import TimerComponent from '../timer/TimerComponent.vue';
-import GhostHandComponent from '../ghost-hand/GhostHandComponent.vue';
+    import TimerComponent from '../timer/TimerComponent.vue';
+    import GhostHandComponent from '../ghost-hand/GhostHandComponent.vue';
+    import { TableUI } from '../../table-ui';
 
-const SeatComponent = Vue.extend ({
+    const SeatComponent = defineComponent({
 
     props: {
         seat: {
@@ -100,7 +100,7 @@ const SeatComponent = Vue.extend ({
     },
     computed: {
 
-        hasTimer: function () {
+        hasTimer: function (): boolean {
 
             // the value of this seat's index in the seatTimer object map will be `null` if there is
             // not a currently-active Timer object
@@ -108,7 +108,7 @@ const SeatComponent = Vue.extend ({
 
         },
 
-        seatClasses: function () {
+        seatClasses: function (): Array<string> {
 
             let classes = [ 'seat', `seat-${this.seat.index}`];
 
@@ -154,7 +154,7 @@ const SeatComponent = Vue.extend ({
     },
     methods: {
 
-        sit: function (event) {
+        sit: function () {
 
             if (this.ui && this.ui.table && this.seat) {
 

@@ -15,12 +15,13 @@
     
 import './bet-button.scss';
 
-    import Vue from 'vue';
+    import { defineComponent } from "vue";
 
-import { MoneyFormatter } from '../../../../casino/tables/chips/money-formatter';
+    import { MoneyFormatter } from "@/app/casino/tables/chips/money-formatter";
 
 
-const BetButtonComponent = Vue.extend ({
+
+    const BetButtonComponent = defineComponent({
 
     props: {
 

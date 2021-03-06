@@ -15,13 +15,14 @@
 
 import './pot.scss';
 
-import Vue from 'vue';
+    import { defineComponent } from 'vue';
 
-import { Pot } from '../../../../casino/tables/betting/pot';
+import { Pot } from '@/app/casino/tables/betting/pot';
+
     import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
 
-const PotComponent = Vue.extend ({
+    const PotComponent = defineComponent({
 
     props: {
         pot: {
@@ -41,7 +42,7 @@ const PotComponent = Vue.extend ({
         let values =
         {
             isGathered: false,
-            timer: ''
+            timer: null as ReturnType<typeof setTimeout>
         };
 
         return values;

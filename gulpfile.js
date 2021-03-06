@@ -2,7 +2,7 @@
 const del = require('del');
 
 const ts = require('gulp-typescript');
-const tsProject = ts.createProject('tsconfig.json');
+const tsProject = ts.createProject('tsconfig-server.json');
 
 
 gulp.task('clean', function () {
@@ -14,9 +14,9 @@ gulp.task('clean', function () {
 
 gulp.task('ts', () => {
 
-    return gulp.src(['src/**/*.ts'])
+    return gulp.src(['src/app/**/*.ts'])
         .pipe(tsProject())
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('dist-server'));
 
 });
 

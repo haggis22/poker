@@ -9,16 +9,15 @@
 
 <script lang="ts">
 
-
 import './bet.scss';
 
-import Vue from 'vue';
+import { defineComponent } from "vue";
 
-import { Bet } from '../../../../app/casino/tables/betting/bet';
+import { Bet } from '@/app/casino/tables/betting/bet';
 import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
 
-const BetComponent = Vue.extend ({
+const BetComponent = defineComponent ({
 
     props: {
         bet: {
@@ -38,7 +37,7 @@ const BetComponent = Vue.extend ({
         let values =
         {
             isAnnounced: false,
-            timer: ''
+            timer: null as ReturnType<typeof setTimeout>
         };
 
         return values;
@@ -94,6 +93,6 @@ const BetComponent = Vue.extend ({
 
 });
 
-export default BetComponent;
+    export default BetComponent;
 
 </script>

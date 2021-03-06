@@ -52,7 +52,7 @@
 
     import './table.scss';
 import './table-seats-6.scss';
-import Vue from 'vue';
+import { defineComponent } from 'vue';
     import { TableUI } from '../../table-ui';
 
     import SeatComponent from '../seat/SeatComponent.vue';
@@ -63,7 +63,7 @@ import WonPotComponent from '../pot/WonPotComponent.vue';
 import BoardComponent from '../board/BoardComponent.vue';
 import WinningHandComponent from '../winning-hand/WinningHandComponent.vue';
 
-const TableComponent = Vue.extend({
+    const TableComponent = defineComponent({
     props: {
         ui: {
             type: TableUI,

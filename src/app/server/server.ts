@@ -5,6 +5,7 @@ import * as WebSocket from 'ws';
 import { AddressInfo } from 'net';
 
 import { UserManager } from '../players/user-manager';
+
 import { LobbyManager } from '../casino/lobby/lobby-manager';
 import { CashierManager } from '../casino/cashier/cashier-manager';
 

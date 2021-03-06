@@ -20,7 +20,7 @@
 
 <script lang="ts">
 
-    import Vue from 'vue';
+    import { defineComponent } from "vue";
 
     import { TableUI } from './table-ui';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
@@ -34,9 +34,9 @@
     import BettingMenuComponent from './components/betting-menu/BettingMenuComponent.vue';
     import ChatComponent from './components/chat/ChatComponent.vue';
 
-
-    export default {
+    export default defineComponent({
         name: "Table",
+
         components: {
             'table-component': TableComponent,
             'log-component': LogComponent,
@@ -44,14 +44,19 @@
             'betting-menu-component': BettingMenuComponent,
             'chat-component': ChatComponent
         },
+        props: [
+            // passed in from the route
+            "tableID"
+        ],
         data() {
 
             let values = {
 
-                tableID: parseInt(this.$route.params.tableID, 10),
+                tableID: parseInt(this.tableID, 10),
 
-                ui: null,
-                ws: null
+                ui: null as TableUI,
+                ws: null as WebSocket
+
             };
 
             return values;
@@ -86,6 +91,6 @@
 
         }
 
-    };
+    });
 
 </script>

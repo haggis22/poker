@@ -10,9 +10,9 @@
 
 import './winning-hand.scss';
 
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 
-const WinningHandComponent = Vue.extend ({
+    const WinningHandComponent = defineComponent ({
 
     props: {
         handDescription: {
@@ -25,7 +25,8 @@ const WinningHandComponent = Vue.extend ({
 
         let values = {
 
-            isAnnounced: false
+            isAnnounced: false,
+            timer: null as ReturnType<typeof setTimeout>
 
         };
 
