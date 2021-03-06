@@ -11,7 +11,11 @@ import { IChipFormatter } from "../../app/casino/tables/chips/chip-formatter";
 import { Action } from "../../app/actions/action";
 import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction } from "../../app/communication/serializable";
 
+import store from '../../store/index';
+
 const logger: Logger = new Logger();
+
+
 
 export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
@@ -56,7 +60,7 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         this.log(`Sent ${command.constructor.name}`);
 
-        for (let handler of this.commandHandlers) {
+        for (const handler of this.commandHandlers) {
 
             handler.handleCommand(command);
 
@@ -80,7 +84,7 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         }
 
-        let action: Action = message.action;
+        const action: Action = message.action;
 
         if (action instanceof AuthenticatedAction) {
 
@@ -118,6 +122,9 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
     public listTablesAction(action: ListTablesAction): void {
 
         this.tables = [...action.tables];
+
+        store.commit('increment', action.tables.length);
+        store.commit('tableSummaries', action.tables)
 
     }   // listTablesAction
 
