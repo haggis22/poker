@@ -4,14 +4,14 @@ import { CommandHandler } from "../../app/commands/command-handler";
 import { Message } from "../../app/messages/message";
 import { ActionMessage } from "../../app/messages/action-message";
 import { Command } from "../../app/commands/command";
-import { UserSummary } from "../../app/players/user-summary";
 import { Logger } from "../../app/logging/logger";
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { IChipFormatter } from "../../app/casino/tables/chips/chip-formatter";
 import { Action } from "../../app/actions/action";
 import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction } from "../../app/communication/serializable";
 
-import store from '../../store/index';
+import store from '@/store/index';
+import * as MutationTypes from '@/store/lobby/mutation-types';
 
 const logger: Logger = new Logger();
 
@@ -20,7 +20,6 @@ const logger: Logger = new Logger();
 export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
     public chipFormatter: IChipFormatter;
-    public user: UserSummary;
 
     private commandHandlers: CommandHandler[];
 
@@ -110,7 +109,8 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
     public authenticated(action: AuthenticatedAction): void {
 
         this.log(`Heared AuthenticatedAction for ${action.user.username}, sending SubscribeLobbyCommand`);
-        this.user = action.user;
+
+        store.commit(MutationTypes.USER_SUMMARY, action.user);
 
         this.broadcastCommand(new SubscribeLobbyCommand());
 
@@ -119,7 +119,7 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
     public listTablesAction(action: ListTablesAction): void {
 
-        store.commit('lobby/tableSummaries', action.tables)
+        store.commit(MutationTypes.TABLE_SUMMARIES, action.tables)
 
     }   // listTablesAction
 

@@ -1,6 +1,6 @@
 import { createStore } from "vuex";
 
-import lobby from './lobby';
+import lobby from './lobby/lobby';
 
 export default createStore({
 
