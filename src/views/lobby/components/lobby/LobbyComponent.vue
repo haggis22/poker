@@ -2,6 +2,8 @@
 
     <div>
 
+        <h2 v-if="user">Welcome, {{ userName }}</h2>
+
         <table cellpadding="5" cellspacing="0" class="table-tables">
             <thead>
                 <tr>
@@ -32,6 +34,7 @@
     import { defineComponent } from 'vue';
     import { LobbyClient } from '../../lobby-client';
     import { TableSummary } from '@/app/casino/tables/table-summary';
+import { UserSummary } from '@/app/players/user-summary';
 
 
     const LobbyComponent = defineComponent({
@@ -51,6 +54,18 @@
 
         },
         computed: {
+
+            user(): UserSummary {
+
+                return this.$store.state.lobby.user;
+
+            },
+
+            userName(): string {
+
+                return this.user?.name;
+
+            },
 
             tables(): Array<TableSummary> {
 
