@@ -32,9 +32,12 @@
     import './lobby.scss';
 
     import { defineComponent } from 'vue';
+
     import { LobbyClient } from '../../lobby-client';
     import { TableSummary } from '@/app/casino/tables/table-summary';
-import { UserSummary } from '@/app/players/user-summary';
+    import { UserSummary } from '@/app/players/user-summary';
+
+    
 
 
     const LobbyComponent = defineComponent({
