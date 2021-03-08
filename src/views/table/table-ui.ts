@@ -27,7 +27,8 @@ import { ChipStacker } from "../../app/casino/tables/chips/chip-stacker";
 import { CurrentBalanceAction } from "../../app/actions/cashier/current-balance-action";
 import { UIPosition } from "../../app/ui/ui-position";
 
-import tableState from "@/store/table/table-state";
+import { userState } from "@/store/user-state";
+import { tableState } from "@/store/table-state";
 
 
 const logger: Logger = new Logger();
@@ -417,7 +418,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private getUser(): UserSummary {
 
-        return tableState.getUser.value;
+        return userState.getUser.value;
 
     }
 
@@ -457,8 +458,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private tableSnapshotAction(action: TableSnapshotAction): void {
 
         this.log(`Heard TableSnapshotAction for ${action.table.id}`);
-
-        tableState.setTable(action.table);
 
         // See if I'm alreading sitting at the table
         let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.getUser().id);
@@ -502,7 +501,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public authenticatedAction(action: AuthenticatedAction): void {
 
         this.log(`Heard AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${this.tableID}`);
-        tableState.setUser(action.user);
+        userState.setUser(action.user);
 
         this.broadcastCommand(new JoinTableCommand(this.tableID));
 

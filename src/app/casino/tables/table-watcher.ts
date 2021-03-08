@@ -32,7 +32,7 @@ import { GameFactory } from "../../games/game-factory";
 import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-action";
 
 import { reactive } from "vue";
-import tableState from "@/store/table/table-state";
+import { tableState } from "@/store/table-state";
 
 // const logger: Logger = new Logger();
 

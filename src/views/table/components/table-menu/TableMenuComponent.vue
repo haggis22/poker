@@ -36,14 +36,14 @@
 
 <script lang="ts">
     
-import './table-menu.scss';
+    import './table-menu.scss';
 
-import { defineComponent, vModelCheckbox } from 'vue';
+    import { defineComponent, vModelCheckbox } from 'vue';
 
-import { TableUI } from '../../table-ui';
-import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
+    import { TableUI } from '../../table-ui';
+    import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
 
-    import tableState from "@/store/table/table-state";
+    import { tableState } from "@/store/table-state";
 
     const TableMenuComponent = defineComponent({
 

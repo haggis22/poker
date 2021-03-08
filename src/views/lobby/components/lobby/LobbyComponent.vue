@@ -37,8 +37,8 @@
     import { TableSummary } from '@/app/casino/tables/table-summary';
     import { UserSummary } from '@/app/players/user-summary';
 
-    
-    import lobbyState from "@/store/lobby/lobby-state";
+    import { userState } from "@/store/user-state";
+    import { lobbyState } from "@/store/lobby-state";
 
 
 
@@ -66,7 +66,7 @@
 
             user(): UserSummary {
 
-                return lobbyState.getUser.value
+                return userState.getUser.value
 
             },
 

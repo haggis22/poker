@@ -65,7 +65,7 @@
     import BoardComponent from '../board/BoardComponent.vue';
     import WinningHandComponent from '../winning-hand/WinningHandComponent.vue';
 
-    import tableState from "@/store/table/table-state";
+    import { tableState } from "@/store/table-state";
 
 
     const TableComponent = defineComponent({

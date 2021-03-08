@@ -67,7 +67,7 @@
     import GhostHandComponent from '../ghost-hand/GhostHandComponent.vue';
     import { TableUI } from '../../table-ui';
 
-    import tableState from "@/store/table/table-state";
+    import { tableState } from "@/store/table-state";
 
     const SeatComponent = defineComponent({
 

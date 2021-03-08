@@ -2,8 +2,6 @@
 
     <div>
         
-        <div v-if="table != null">Chips[0]: {{ table.seats[0].player.chips }} </div>
-
         <div v-if="ui != null && table != null">
             <table-component :ui="ui"></table-component>
             <chat-component :ui="ui"></chat-component>
@@ -38,7 +36,7 @@
     import BettingMenuComponent from './components/betting-menu/BettingMenuComponent.vue';
     import ChatComponent from './components/chat/ChatComponent.vue';
 
-    import tableState from "@/store/table/table-state";
+    import { tableState } from "@/store/table-state";
 
 
     export default defineComponent({

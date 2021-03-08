@@ -84,7 +84,7 @@ import { FoldCommand } from '@/app/commands/table/betting/fold-command';
 import { TableUI } from '../../table-ui';
     import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
-    import tableState from "@/store/table/table-state";
+    import { tableState } from "@/store/table-state";
 
     const TableMenuComponent = defineComponent({
 

@@ -23,7 +23,7 @@ import './chat.scss';
     import { TableUI } from '../../table-ui';
     import { ChatCommand } from '@/app/commands/table/chat/chat-command';
 
-    import tableState from "@/store/table/table-state";
+    import { tableState } from "@/store/table-state";
 
 
     const ChatComponent = defineComponent({
