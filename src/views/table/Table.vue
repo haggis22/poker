@@ -1,7 +1,10 @@
 <template>
 
     <div>
-        <div v-if="ui != null && ui.table != null">
+        
+        <div v-if="table != null">Chips[0]: {{ table.seats[0].player.chips }} </div>
+
+        <div v-if="ui != null && table != null">
             <table-component :ui="ui"></table-component>
             <chat-component :ui="ui"></chat-component>
             <log-component :ui="ui"></log-component>
@@ -20,8 +23,9 @@
 
 <script lang="ts">
 
-    import { defineComponent } from "vue";
+    import { defineComponent, reactive } from "vue";
 
+    import { Table } from "@/app/casino/tables/table";
     import { TableUI } from './table-ui';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
     import { TableWatcher } from '../../app/casino/tables/table-watcher';
@@ -34,25 +38,44 @@
     import BettingMenuComponent from './components/betting-menu/BettingMenuComponent.vue';
     import ChatComponent from './components/chat/ChatComponent.vue';
 
+    import tableState from "@/store/table/table-state";
+
+
     export default defineComponent({
+
         name: "Table",
 
-        components: {
-            'table-component': TableComponent,
-            'log-component': LogComponent,
-            'table-menu-component': TableMenuComponent,
-            'betting-menu-component': BettingMenuComponent,
-            'chat-component': ChatComponent
+        provide: {
+            tableState: tableState
         },
-        props: [
-            // passed in from the route
-            "tableID"
-        ],
+
+        setup() {
+
+            const values = {
+
+                table: reactive(tableState.getTable)
+
+            };
+
+            return values;
+
+
+        },
+
+        components: {
+
+            TableComponent,
+            LogComponent,
+            TableMenuComponent,
+            BettingMenuComponent,
+            ChatComponent
+
+        },
         data() {
 
             let values = {
 
-                tableID: parseInt(this.tableID, 10),
+                tableID: Number(this.$route.params.tableID),
 
                 ui: null as TableUI,
                 ws: null as WebSocket
@@ -60,6 +83,10 @@
             };
 
             return values;
+
+        },
+        computed: {
+
 
         },
         created() {

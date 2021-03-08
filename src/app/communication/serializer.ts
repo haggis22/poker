@@ -1,7 +1,4 @@
 ﻿import * as serialization from "./serializable";
-import { ActionMessage } from "../messages/action-message";
-import { Action } from "../actions/action";
-import { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 
 const serializedConstructorName: string = "__serializedClass";
 

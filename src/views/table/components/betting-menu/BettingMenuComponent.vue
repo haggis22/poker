@@ -82,11 +82,24 @@ import { CallCommand } from '@/app/commands/table/betting/call-command';
 import { RaiseCommand } from '@/app/commands/table/betting/raise-command';
 import { FoldCommand } from '@/app/commands/table/betting/fold-command';
 import { TableUI } from '../../table-ui';
-import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
+    import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
+
+    import tableState from "@/store/table/table-state";
 
     const TableMenuComponent = defineComponent({
 
-    props: {
+        setup() {
+
+            const values =
+            {
+                table: tableState.getTable.value
+            };
+
+            return values;
+
+        },
+
+        props: {
         ui: {
             type: TableUI,
             required: true
@@ -168,7 +181,7 @@ import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
         betDescription: function (): string {
 
-            return this.ui.table.betStatus.numRaises > 0 ? 'Raise To' : 'Bet';
+            return this.table.betStatus.numRaises > 0 ? 'Raise To' : 'Bet';
 
         },
 
@@ -202,7 +215,7 @@ import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
             }
 
-            this.ui.setBetCommand(new FoldCommand(this.ui.table.id));
+            this.ui.setBetCommand(new FoldCommand(this.table.id));
 
         },
 
@@ -214,7 +227,7 @@ import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
             }
 
-            this.ui.setBetCommand(new AnteCommand(this.ui.table.id));
+            this.ui.setBetCommand(new AnteCommand(this.table.id));
 
         },
 
@@ -226,7 +239,7 @@ import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
             }
 
-            this.ui.setBetCommand(new CheckCommand(this.ui.table.id));
+            this.ui.setBetCommand(new CheckCommand(this.table.id));
 
         },
 
@@ -238,7 +251,7 @@ import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
             }
 
-            this.ui.setBetCommand(new CallCommand(this.ui.table.id, this.ui.myCall.chipsAdded));
+            this.ui.setBetCommand(new CallCommand(this.table.id, this.ui.myCall.chipsAdded));
 
         },
 
@@ -250,7 +263,7 @@ import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
             }
 
-            this.ui.setBetCommand(new RaiseCommand(this.ui.table.id, this.ui.myMinRaise.chipsAdded));
+            this.ui.setBetCommand(new RaiseCommand(this.table.id, this.ui.myMinRaise.chipsAdded));
 
         }
 

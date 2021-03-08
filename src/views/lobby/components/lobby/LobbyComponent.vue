@@ -38,9 +38,15 @@
     import { UserSummary } from '@/app/players/user-summary';
 
     
+    import lobbyState from "@/store/lobby/lobby-state";
+
 
 
     const LobbyComponent = defineComponent({
+
+        setup() {
+
+        },
 
         props: {
             client: {
@@ -60,7 +66,7 @@
 
             user(): UserSummary {
 
-                return this.$store.state.lobby.user;
+                return lobbyState.getUser.value
 
             },
 
@@ -72,7 +78,7 @@
 
             tables(): Array<TableSummary> {
 
-                return this.$store.state.lobby.tables;
+                return lobbyState.getTables.value
 
             }
 

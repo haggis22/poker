@@ -27,6 +27,8 @@ import { ChipStacker } from "../../app/casino/tables/chips/chip-stacker";
 import { CurrentBalanceAction } from "../../app/actions/cashier/current-balance-action";
 import { UIPosition } from "../../app/ui/ui-position";
 
+import tableState from "@/store/table/table-state";
+
 
 const logger: Logger = new Logger();
 
@@ -34,14 +36,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private readonly TIME_PENDING_ACTION: number = 300;
 
-    public user: UserSummary | null;
-
     private commandHandlers: CommandHandler[];
 
     public chipFormatter: IChipFormatter;
 
     private tableID: number;
-    public table: Table;
 
     public game: Game | null;
     public betController: BetController;
@@ -92,14 +91,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     constructor(tableID: number, chipFormatter: IChipFormatter) {
 
-        this.user = null;
-
         this.tableID = tableID;
         this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Array<CommandHandler>();
             
-        this.table = null;
         this.game = null;
 
         this.seatAction = new Map<number, string>();
@@ -204,7 +200,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
 
-        if (action instanceof TableAction && this.table == null) {
+        if (action instanceof TableAction && this.getTable() == null) {
 
             // we don't have a table yet, so we can't do anything else
             return;
@@ -419,10 +415,24 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
+    private getUser(): UserSummary {
+
+        return tableState.getUser.value;
+
+    }
+
+    private getTable(): Table {
+
+        return tableState.getTable.value;
+
+    }
+
+
+
     public getMySeat(): Seat {
 
-        if (this.mySeatIndex != null && this.table && this.table.seats) {
-            return this.table.seats[this.mySeatIndex];
+        if (this.mySeatIndex != null && this.getTable()?.seats) {
+            return this.getTable().seats[this.mySeatIndex];
         }
 
         return null;
@@ -446,10 +456,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private tableSnapshotAction(action: TableSnapshotAction): void {
 
-        this.table = action.table;
+        this.log(`Heard TableSnapshotAction for ${action.table.id}`);
+
+        tableState.setTable(action.table);
 
         // See if I'm alreading sitting at the table
-        let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.user.id);
+        let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.getUser().id);
 
         this.mySeatIndex = mySeat ? mySeat.index : null;
 
@@ -489,8 +501,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public authenticatedAction(action: AuthenticatedAction): void {
 
-        this.log(`Heared AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${this.tableID}`);
-        this.user = action.user;
+        this.log(`Heard AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${this.tableID}`);
+        tableState.setUser(action.user);
 
         this.broadcastCommand(new JoinTableCommand(this.tableID));
 
@@ -500,48 +512,28 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isInHand(): boolean {
 
-        console.log(`table: ${(this.table != null)}`);
-        console.log(`seats: ${(this.table.seats != null)}`);
-        console.log(`mySeatIndex: ${this.mySeatIndex}`);
-        if (this.mySeatIndex != null) {
-
-            console.log(`mySeat: ${(this.table.seats[this.mySeatIndex] != null)}`);
-
-            if (this.table.seats[this.mySeatIndex]) {
-
-                console.log(`isInHand: ${this.table.seats[this.mySeatIndex].isInHand}`);
-
-            }
-
-
-        }
-
-        return this.table
-            && this.table.seats
-            && (this.mySeatIndex != null)
-            && this.table.seats[this.mySeatIndex]
-            && this.table.seats[this.mySeatIndex].isInHand;
+        return this.getMySeat()?.isInHand;
 
     }
 
 
     public remainsToAnte(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BlindsAndAntesState && this.myCall != null;
+        return this.mySeatIndex != null && this.getTable().state instanceof BlindsAndAntesState && this.myCall != null;
         // && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
 
     }
 
     public remainsToAct(): boolean {
 
-        return this.mySeatIndex != null && this.table.state instanceof BetState && (this.table.betStatus.seatIndex === this.mySeatIndex || this.table.betStatus.doesSeatRemainToAct(this.mySeatIndex));
+        return this.mySeatIndex != null && this.getTable().state instanceof BetState && (this.getTable().betStatus.seatIndex === this.mySeatIndex || this.getTable().betStatus.doesSeatRemainToAct(this.mySeatIndex));
 
     }
     
 
     private playerSeatedAction(action: PlayerSeatedAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        let seat = action.seatIndex < this.getTable().seats.length ? this.getTable().seats[action.seatIndex] : null;
 
         if (seat) {
 
@@ -549,9 +541,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.messages.push(message);
 
             this.log(message);
-            this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
+            this.log(`Players: [ ${this.getTable().seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
-            if (seat.player.userID === this.user.id) {
+            if (seat.player.userID === this.getUser().id) {
                 this.mySeatIndex = action.seatIndex;
             }
 
@@ -562,7 +554,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private seatVacatedAction(action: SeatVacatedAction): void {
 
-        let seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        let seat = action.seatIndex < this.getTable().seats.length ? this.getTable().seats[action.seatIndex] : null;
 
         if (seat) {
 
@@ -574,7 +566,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.messages.push(message);
 
             this.log(message);
-            this.log(`Players: [ ${this.table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
+            this.log(`Players: [ ${this.getTable().seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
         }
 
@@ -584,7 +576,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private setStatusAction(action: SetStatusAction): void {
 
-        if (this.user && this.user.id === action.userID) {
+        if (this.getUser()?.id === action.userID) {
 
             this.isSittingOut = action.isSittingOut;
 
@@ -596,8 +588,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private findSeat(seatIndex: number): Seat {
 
-        if (seatIndex >= 0 && seatIndex < this.table.seats.length) {
-            return this.table.seats[seatIndex];
+        if (seatIndex >= 0 && seatIndex < this.getTable().seats.length) {
+            return this.getTable().seats[seatIndex];
         }
 
         throw new Error(`Seat index out of range: ${seatIndex}`);
@@ -606,7 +598,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
      
     private findPlayer(userID: number): Player {
 
-        let seat = this.table.seats.find(s => s.player && s.player.userID == userID);
+        let seat = this.getTable().seats.find(s => s.player && s.player.userID == userID);
         return seat ? seat.player : null;
 
     }   // findPlayer
@@ -659,9 +651,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private tableStateAction(action: TableStateAction): void {
 
-        if (this.table) {
+        if (this.getTable()) {
 
-            let state = this.table.state;
+            let state = this.getTable().state;
 
             this.clearLocalBets();
 
@@ -692,7 +684,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private startHand(): void {
 
-        for (let seat of this.table.seats) {
+        for (let seat of this.getTable().seats) {
 
             if (seat.player) {
 
@@ -712,9 +704,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            this.myCall = this.betController.calculateCall(this.table, seat);
-            this.myMinRaise = this.betController.calculateMinimumRaise(this.table, seat, this.myCall);
-            this.myMaxRaise = this.betController.calculateMaximumRaise(this.table, seat, this.myCall);
+            this.myCall = this.betController.calculateCall(this.getTable(), seat);
+            this.myMinRaise = this.betController.calculateMinimumRaise(this.getTable(), seat, this.myCall);
+            this.myMaxRaise = this.betController.calculateMaximumRaise(this.getTable(), seat, this.myCall);
 
         }
         else {
@@ -733,7 +725,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat && seat.isInHand) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            this.myCall = this.betController.calculateCall(this.table, seat);
+            this.myCall = this.betController.calculateCall(this.getTable(), seat);
 
             // no betting, only calling, with antes
             this.myMinRaise = this.myMaxRaise = null;
@@ -741,7 +733,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             // If I am marked as "not sitting out" then ready my blinds & ante bet
             if (seat.player.isSittingOut === false) {
 
-                this.setBetCommand(new AnteCommand(this.table!.id));
+                this.setBetCommand(new AnteCommand(this.getTable()!.id));
 
             }  
 
@@ -758,8 +750,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private updateBetsAction(action: UpdateBetsAction): void {
 
+        let table: Table = this.getTable();
+
         this.log(`Seats To Act: [ ${action.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
-        this.log(`Table Seats To Act: [ ${this.table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
+        this.log(`Table Seats To Act: [ ${table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
 
         if (this.pendingBetCommand) {
 
@@ -772,18 +766,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        for (let pot of this.table.betStatus.pots) {
+        for (let pot of table.betStatus.pots) {
         
             let potDesc = `${pot.getName()}: ${this.chipFormatter.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
-            potDesc += pot.getSeatsInPot().map(seatIndex => this.table.seats[seatIndex].getName()).join(", ");
+            potDesc += pot.getSeatsInPot().map(seatIndex => table.seats[seatIndex].getName()).join(", ");
             this.log(potDesc);
         
         }
 
-        let betsString = Object.keys(this.table.betStatus.bets)
+        let betsString = Object.keys(table.betStatus.bets)
             .map(seatIndexString => {
                 const seatIndex = parseInt(seatIndexString, 10);
-                return `${this.table.seats[seatIndex].getName()}: ${this.chipFormatter.format(this.table.betStatus.bets[seatIndex].totalBet)}`
+                return `${table.seats[seatIndex].getName()}: ${this.chipFormatter.format(table.betStatus.bets[seatIndex].totalBet)}`
             }).join(", ");
         if (betsString.length) {
             this.log(`  Bets: ${betsString}`);
@@ -795,7 +789,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private moveButtonAction(action: MoveButtonAction): void {
 
-        let seat = this.findSeat(this.table.buttonIndex);
+        let seat = this.findSeat(this.getTable().buttonIndex);
 
         let message: string = `${seat.getName()} now has the button`;
         this.messages.push(message);
@@ -885,11 +879,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let mySeat: Seat = this.getMySeat();
 
-        this.myCall = this.betController.calculateCall(this.table, mySeat);
+        let table: Table = this.getTable();
+
+        this.myCall = this.betController.calculateCall(table, mySeat);
 
         // Calculate the min and max raises allowed here
-        this.myMinRaise = this.betController.calculateMinimumRaise(this.table, mySeat, this.myCall);
-        this.myMaxRaise = this.betController.calculateMaximumRaise(this.table, mySeat, this.myCall);
+        this.myMinRaise = this.betController.calculateMinimumRaise(table, mySeat, this.myCall);
+        this.myMaxRaise = this.betController.calculateMaximumRaise(table, mySeat, this.myCall);
 
         if (this.pendingBetCommand instanceof CallCommand) {
 
@@ -952,7 +948,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private anteTurnAction(action: AnteTurnAction): void {
 
-        let anteSeatIndex: number = this.table.betStatus.forcedBets.seatIndex;
+        const table: Table = this.getTable();
+
+        let anteSeatIndex: number = table.betStatus.forcedBets.seatIndex;
 
         // Remove any previous action for the current "to-act" player
         // Map.delete is safe to use, even if the key does not already exist
@@ -971,7 +969,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 if (anteSeatIndex == this.mySeatIndex) {
 
-                    this.myCall = this.betController.calculateCall(this.table, anteSeat);
+                    this.myCall = this.betController.calculateCall(table, anteSeat);
 
                     // if we had a betting action readied, then send it now
                     if (this.checkPendingBetCommand()) {
@@ -1286,7 +1284,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.pendingBetCommand = betCommand;
 
         // Remember the level of action when this bet was set - if it goes up then we don't want to keep doing this action
-        this.pendingBetNumRaises = this.table.betStatus.numRaises;
+        this.pendingBetNumRaises = this.getTable().betStatus.numRaises;
 
         setTimeout(() => { this.checkPendingBetCommand(); }, 50);
 
@@ -1295,11 +1293,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private checkPendingBetCommand(): boolean {
 
+        const table: Table = this.getTable();
+
         if (this.pendingBetCommand && this.mySeatIndex != null) {
 
-            if (this.table!.state instanceof BlindsAndAntesState) {
+            if (table?.state instanceof BlindsAndAntesState) {
 
-                if (this.table!.betStatus!.forcedBets!.seatIndex == this.mySeatIndex) {
+                if (table?.betStatus?.forcedBets?.seatIndex == this.mySeatIndex) {
 
                     let command: BetCommand | FoldCommand = this.pendingBetCommand;
 
@@ -1317,9 +1317,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             }  // Blinds 'n Ante
 
             // TODO: Validate first against local BetController and only send if valid?
-            else if (this.table.state instanceof BetState) {
+            else if (this.getTable().state instanceof BetState) {
 
-                if (this.table.betStatus && this.table.betStatus.seatIndex == this.mySeatIndex) {
+                if (table.betStatus && table.betStatus.seatIndex == this.mySeatIndex) {
 
                     let command: BetCommand | FoldCommand = this.pendingBetCommand;
 
@@ -1354,17 +1354,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public isActionOn(seatIndex: number): boolean {
 
-        if (this.table && this.table.betStatus) {
+        const table: Table = this.getTable();
 
-            if (this.table.state instanceof BlindsAndAntesState) {
+        if (table && table.betStatus) {
 
-                return this.table.betStatus.forcedBets && this.table.betStatus.forcedBets.seatIndex == seatIndex;
+            if (table.state instanceof BlindsAndAntesState) {
+
+                return table.betStatus.forcedBets && table.betStatus.forcedBets.seatIndex == seatIndex;
 
             }
 
-            else if (this.table.state instanceof BetState) {
+            else if (table.state instanceof BetState) {
 
-                return this.table.betStatus.seatIndex == seatIndex;
+                return table.betStatus.seatIndex == seatIndex;
 
             }
 

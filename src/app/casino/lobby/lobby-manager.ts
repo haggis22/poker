@@ -267,6 +267,11 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
 
     public getTableController(tableID: number): TableController {
 
+        if (typeof tableID == "string") {
+            console.log('*** Converting tableID to number');
+            tableID = parseInt(tableID, 10);
+        }
+
         // will be `undefined` if the ID is unknown
         return this.tableControllerMap.get(tableID);
 
@@ -275,7 +280,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
 
     private addTableClient(tableID: number, client: IServerClient): void {
 
-        let tableController = this.getTableController(tableID);
+        const tableController: TableController = this.getTableController(tableID);
 
         this.log(`In addTableClient, found tableController for ${tableID} ? ${(tableController != null)}`);
 

@@ -10,8 +10,8 @@ import { IChipFormatter } from "../../app/casino/tables/chips/chip-formatter";
 import { Action } from "../../app/actions/action";
 import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction } from "../../app/communication/serializable";
 
-import store from '@/store/index';
-import * as MutationTypes from '@/store/lobby/mutation-types';
+import lobbyState from "@/store/lobby/lobby-state";
+
 
 const logger: Logger = new Logger();
 
@@ -110,7 +110,8 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         this.log(`Heared AuthenticatedAction for ${action.user.username}, sending SubscribeLobbyCommand`);
 
-        store.commit(MutationTypes.USER_SUMMARY, action.user);
+        // store.commit(MutationTypes.USER_SUMMARY, action.user);
+        lobbyState.setUser(action.user);
 
         this.broadcastCommand(new SubscribeLobbyCommand());
 
@@ -119,7 +120,8 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
     public listTablesAction(action: ListTablesAction): void {
 
-        store.commit(MutationTypes.TABLE_SUMMARIES, action.tables)
+        // store.commit(MutationTypes.TABLE_SUMMARIES, action.tables)
+        lobbyState.setTables(action.tables);
 
     }   // listTablesAction
 

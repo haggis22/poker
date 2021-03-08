@@ -31,6 +31,8 @@ import { Game } from "../../games/game";
 import { GameFactory } from "../../games/game-factory";
 import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-action";
 
+import { reactive } from "vue";
+import tableState from "@/store/table/table-state";
 
 // const logger: Logger = new Logger();
 
@@ -38,7 +40,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
 
     private tableID: number;
-    private table: Table;
     private game: Game;
 
     private commandHandlers: CommandHandler[];
@@ -50,7 +51,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     constructor(tableID: number) {
 
         this.tableID = tableID;
-        this.table = null;
 
         this.commandHandlers = new Array<CommandHandler>();
         this.messageHandlers = new Array<MessageHandler>();
@@ -156,6 +156,12 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }   // broadcastCommand
 
 
+    private getTable(): Table {
+
+        return tableState.getTable.value;
+
+    }
+
 
     private handleAction(action: TableAction): void {
 
@@ -173,7 +179,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         }
 
 
-        if (this.table == null) {
+        if (this.getTable() == null) {
 
             // we don't have a table yet, so we can't do anything else
             return;
@@ -317,7 +323,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private tableSnapshotAction(action: TableSnapshotAction): void {
 
-        this.table = action.table;
+        tableState.setTable(action.table);
 
     }
 
@@ -332,7 +338,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private playerSeatedAction(action: PlayerSeatedAction): void {
 
-        const seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        const seat = action.seatIndex < this.getTable().seats.length ? this.getTable().seats[action.seatIndex] : null;
 
         if (seat) {
 
@@ -346,7 +352,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private seatVacatedAction(action: SeatVacatedAction): void {
 
-        const seat = action.seatIndex < this.table.seats.length ? this.table.seats[action.seatIndex] : null;
+        const seat = action.seatIndex < this.getTable().seats.length ? this.getTable().seats[action.seatIndex] : null;
 
         if (seat) {
 
@@ -407,7 +413,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private tableStateAction(action: TableStateAction): void {
 
-        this.table.state = action.state;
+        this.getTable().state = action.state;
         this.log(`TableState: ${action.state.constructor.name}`);
 
     }   // changeTableState
@@ -415,15 +421,15 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private updateBetsAction(action: UpdateBetsAction): void {
 
-        this.table.betStatus = action.betStatus;
+        this.getTable().betStatus = action.betStatus;
 
     }  // updateBets
 
 
     private findSeat(seatIndex: number): Seat {
 
-        if (seatIndex >= 0 && seatIndex < this.table.seats.length) {
-            return this.table.seats[seatIndex];
+        if (seatIndex >= 0 && seatIndex < this.getTable().seats.length) {
+            return this.getTable().seats[seatIndex];
         }
 
         throw new Error(`Seat index out of range: ${seatIndex}`);
@@ -433,7 +439,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private findPlayer(userID: number): Player {
 
-        let seat = this.table.seats.find(s => s.player && s.player.userID == userID);
+        let seat = this.getTable().seats.find(s => s.player && s.player.userID == userID);
         return seat ? seat.player : null;
 
     }   // findPlayer
@@ -441,7 +447,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private moveButtonAction(action: MoveButtonAction): void {
 
-        this.table.buttonIndex = action.seatIndex;
+        this.getTable().buttonIndex = action.seatIndex;
 
     }  // moveButton
 
@@ -459,7 +465,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         for (let card of action.cards) {
 
-            this.table.board.deal(card);
+            this.getTable().board.deal(card);
 
         }
 
@@ -467,14 +473,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private clearBoardAction(action: ClearBoardAction): void {
 
-        this.table.board.reset();
+        this.getTable().board.reset();
 
     }  // clearBoard
 
 
     private betTurnAction(action: BetTurnAction): void {
 
-        this.table.betStatus = action.betStatus;
+        this.getTable().betStatus = action.betStatus;
 
     }  // betTurn
 

@@ -43,8 +43,19 @@ import { defineComponent, vModelCheckbox } from 'vue';
 import { TableUI } from '../../table-ui';
 import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
 
+    import tableState from "@/store/table/table-state";
 
     const TableMenuComponent = defineComponent({
+
+        setup() {
+
+            return {
+
+                table: tableState.getTable.value
+
+            }
+
+        },
 
     props: {
 
@@ -101,7 +112,7 @@ import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communi
 
             // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
             if (event.target instanceof HTMLInputElement) {
-                this.ui.sendCommand(new SetStatusCommand(this.ui.table.id, event.target.checked));
+                this.ui.sendCommand(new SetStatusCommand(this.table.id, event.target.checked));
                 this.$emit('update:isSittingOut', event.target.checked);
             }
 
@@ -109,7 +120,7 @@ import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communi
 
         standUp: function (): void {
 
-            this.ui.sendCommand(new StandUpCommand(this.ui.table.id));
+            this.ui.sendCommand(new StandUpCommand(this.table.id));
 
         },
 
@@ -135,7 +146,7 @@ import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communi
 
                 if (numChips <= this.ui.currentBalance) {
 
-                    this.ui.sendCommand(new AddChipsCommand(this.ui.table.id, numChips));
+                    this.ui.sendCommand(new AddChipsCommand(this.table.id, numChips));
                     this.showAddChips = false;
 
                 }

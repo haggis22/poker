@@ -23,9 +23,21 @@ import './chat.scss';
     import { TableUI } from '../../table-ui';
     import { ChatCommand } from '@/app/commands/table/chat/chat-command';
 
+    import tableState from "@/store/table/table-state";
+
+
     const ChatComponent = defineComponent({
 
-    props: {
+        setup() {
+
+            return {
+
+                table: tableState.getTable.value
+
+            };
+
+        },
+        props: {
         ui: {
             type: TableUI,
             required: true
@@ -48,7 +60,7 @@ import './chat.scss';
 
             if (this.message && this.message.length) {
 
-                this.ui.sendCommand(new ChatCommand(this.ui.table.id, this.message));
+                this.ui.sendCommand(new ChatCommand(this.table.id, this.message));
                 this.message = '';
 
             }

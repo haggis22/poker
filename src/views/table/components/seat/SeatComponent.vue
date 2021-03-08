@@ -67,7 +67,19 @@
     import GhostHandComponent from '../ghost-hand/GhostHandComponent.vue';
     import { TableUI } from '../../table-ui';
 
+    import tableState from "@/store/table/table-state";
+
     const SeatComponent = defineComponent({
+
+        setup() {
+
+            return {
+
+                table: tableState.getTable.value
+
+            }
+
+        },
 
     props: {
         seat: {
@@ -156,9 +168,9 @@
 
         sit: function () {
 
-            if (this.ui && this.ui.table && this.seat) {
+            if (this.ui && this.table && this.seat) {
 
-                this.ui.sendCommand(new RequestSeatCommand(this.ui.table.id, this.seat.index));
+                this.ui.sendCommand(new RequestSeatCommand(this.table.id, this.seat.index));
 
             }
 
