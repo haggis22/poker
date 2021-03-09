@@ -52,7 +52,14 @@ import './chat.scss';
 
         return values;
 
-    },
+        },
+
+        computed: {
+
+            getMessages: (): string[] => tableState.getMessages.value
+
+        },
+
     methods: {
 
 

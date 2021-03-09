@@ -31,8 +31,6 @@ import { Game } from "../../games/game";
 import { GameFactory } from "../../games/game-factory";
 import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-action";
 
-import { reactive } from "vue";
-import { tableState } from "@/store/table-state";
 
 // const logger: Logger = new Logger();
 
@@ -40,6 +38,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
 
     private tableID: number;
+    private table: Table;
     private game: Game;
 
     private commandHandlers: CommandHandler[];
@@ -51,6 +50,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     constructor(tableID: number) {
 
         this.tableID = tableID;
+        this.table = null;
 
         this.commandHandlers = new Array<CommandHandler>();
         this.messageHandlers = new Array<MessageHandler>();
@@ -158,7 +158,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private getTable(): Table {
 
-        return tableState.getTable.value;
+        return this.table;
 
     }
 
@@ -323,7 +323,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private tableSnapshotAction(action: TableSnapshotAction): void {
 
-        tableState.setTable(action.table);
+        this.table = action.table;
 
     }
 

@@ -5,7 +5,7 @@
         <div v-if="ui != null && table != null">
             <table-component :ui="ui"></table-component>
             <chat-component :ui="ui"></chat-component>
-            <log-component :ui="ui"></log-component>
+            <log-component></log-component>
             <table-menu-component v-if="ui.getMySeat()"
                                   :ui="ui"
                                   :is-sitting-out.sync="ui.isSittingOut">

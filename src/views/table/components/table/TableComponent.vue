@@ -9,7 +9,7 @@
 
                 <seat-component v-for="seat in table.seats"
                                 :key="'seat-' + seat.index"
-                                :seat="seat"
+                                :seat-index="seat.index"
                                 :ui="ui"
                                 :bet-status="table.betStatus">
                 </seat-component>

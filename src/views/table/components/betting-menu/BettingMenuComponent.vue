@@ -92,7 +92,7 @@ import { TableUI } from '../../table-ui';
 
             const values =
             {
-                table: tableState.getTable.value
+                table: tableState.getTable
             };
 
             return values;

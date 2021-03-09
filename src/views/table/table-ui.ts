@@ -43,7 +43,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private tableID: number;
 
-    public game: Game | null;
     public betController: BetController;
     public chipStacker: ChipStacker;
 
@@ -81,8 +80,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     // Value = array of cards that have been mucked
     public muckedCards: Map<number, Array<Card | FacedownCard>>;
 
-    public dealerPositions!: Map<number, UIPosition>;
-    public playerPositions!: Map<number, UIPosition>;
+    public dealerPositions: Map<number, UIPosition>;
+    public playerPositions: Map<number, UIPosition>;
 
     public winningHand: string | null;
 
@@ -97,16 +96,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.commandHandlers = new Array<CommandHandler>();
             
-        this.game = null;
-
         this.seatAction = new Map<number, string>();
         this.seatTimer = new Map<number, Timer>();
 
         this.wonPots = [];
 
         this.isGatheringAntes = this.isGatheringBets = false;
-
-        this.messages = [];
 
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
@@ -428,6 +423,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
+    private getGame() {
+
+        return tableState.getGame.value;
+
+    }
+
 
 
     public getMySeat(): Seat {
@@ -458,6 +459,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private tableSnapshotAction(action: TableSnapshotAction): void {
 
         this.log(`Heard TableSnapshotAction for ${action.table.id}`);
+        tableState.setTable(action.table);
 
         // See if I'm alreading sitting at the table
         let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.getUser().id);
@@ -479,11 +481,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private setGameAction(action: SetGameAction): void {
 
-        if (!this.game || this.game.id != action.gameID) {
+        let game = this.getGame();
+
+        if (!game || game.id != action.gameID) {
 
             // Looks up the rules for the game based on ID, rather than passing a game object through the pipes
-            this.game = (new GameFactory()).create(action.gameID);
-            this.log(`The game is ${this.game.getName()}`);
+            tableState.setGame((new GameFactory()).create(action.gameID));
+
+            game = this.getGame();
+            this.log(`The game is ${game.getName()}`);
 
         }
 
@@ -532,17 +538,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private playerSeatedAction(action: PlayerSeatedAction): void {
 
-        let seat = action.seatIndex < this.getTable().seats.length ? this.getTable().seats[action.seatIndex] : null;
+        const table: Table = this.getTable();
 
-        if (seat) {
+        const result = tableState.setPlayer(action.seatIndex, action.player);
+
+        if (result) {
 
             let message = `${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`;
-            this.messages.push(message);
-
+            tableState.addMessage(message);
             this.log(message);
-            this.log(`Players: [ ${this.getTable().seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
+            this.log(`Players: [ ${table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
-            if (seat.player.userID === this.getUser().id) {
+            if (action.player.userID === this.getUser().id) {
                 this.mySeatIndex = action.seatIndex;
             }
 
@@ -562,7 +569,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             }
 
             let message = `${seat.getSeatName()} is now open`;
-            this.messages.push(message);
+            tableState.addMessage(message);
 
             this.log(message);
             this.log(`Players: [ ${this.getTable().seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
@@ -791,7 +798,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let seat = this.findSeat(this.getTable().buttonIndex);
 
         let message: string = `${seat.getName()} now has the button`;
-        this.messages.push(message);
+        tableState.addMessage(message);
         this.log(message);
 
     }   // moveButton
@@ -814,7 +821,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        this.messages.push(message);
+        tableState.addMessage(message);
         this.log(message);
 
     }   // dealCard
@@ -830,7 +837,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let message: string = `The board is dealt ${ action.cards.map(card => this.describeCard(card)).join(" ") }`;
 
-        this.messages.push(message);
+        tableState.addMessage(message);
         this.log(message);
 
     }   // dealBoard
@@ -1053,7 +1060,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        this.messages.push(message);
+        tableState.addMessage(message);
         this.log(message);
 
     }  // betAction
@@ -1111,7 +1118,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let message: string = `${seat.getName()} folds`;
 
-        this.messages.push(message);
+        tableState.addMessage(message);
         this.log(message);
 
         this.seatAction.set(seat.index, 'FOLD');
@@ -1129,7 +1136,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
 
             let message: string = `${seat.getName()} has ${seat.hand.cards.map(card => card.toString()).join(" ")}`;
-            this.messages.push(message);
+            tableState.addMessage(message);
             this.log(message);
 
         }
@@ -1140,10 +1147,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private declareHandAction(action: DeclareHandAction): void {
 
         let seat = this.findSeat(action.seatIndex);
+        const game = this.getGame();
 
-        let message: string = `${seat.getName()} has ${this.game!.handDescriber.describe(action.handEvaluation)}`;
+        let message: string = `${seat.getName()} has ${game?.handDescriber.describe(action.handEvaluation)}`;
 
-        this.messages.push(message);
+        tableState.addMessage(message);
         this.log(message);
 
     }  // declareHand
@@ -1164,10 +1172,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // this.winningHand is responsible for showing the winning hand in a banner
         // If there is no showdown then just leave it as `null`
 
+        const game = this.getGame();
+
         if (pot.handEvaluation) {
 
-            this.winningHand = this.game!.handDescriber.describe(pot.handEvaluation);
-            handDescription = ` with ${this.game!.handDescriber.describe(pot.handEvaluation)}`;
+            this.winningHand = game?.handDescriber.describe(pot.handEvaluation);
+            handDescription = ` with ${game?.handDescriber.describe(pot.handEvaluation)}`;
 
         }
         else {
@@ -1178,7 +1188,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             ? `${seat.getName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`
             : `${seat.getSeatName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`;
 
-        this.messages.push(message);
+        tableState.addMessage(message);
         this.log(message);
         
     }  // winPot
@@ -1191,7 +1201,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat.player) {
 
             let message: string = `${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`;
-            this.messages.push(message);
+            tableState.addMessage(message);
             this.log(message);
         
         }
@@ -1265,7 +1275,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private chatAction(action: ChatAction): void {
 
-        this.messages.push(`${action.username}: ${action.message}`);
+        const message = `${action.username}: ${action.message}`;
+        tableState.addMessage(message);
+
         this.log(`${action.username}: ${action.message}`);
 
     }  // chat

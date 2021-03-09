@@ -2,7 +2,7 @@
 
     <div class="action-log">
 
-        <div v-for="(message, index) in ui.messages" 
+        <div v-for="(message, index) in getMessages" 
              :key="`log-${index}`"
              class="message">{{ message }}</div>
 
@@ -18,16 +18,17 @@ import './log.scss';
 
     import { defineComponent } from 'vue';
 
-    import { TableUI } from '../../table-ui';
+    import { tableState } from "@/store/table-state";
+
 
 const LogComponent = defineComponent({
 
-    props: {
-        ui: {
-            type: TableUI,
-            required: true
-        }
+    computed: {
+
+        getMessages: (): string[] => tableState.getMessages.value
+
     },
+
     methods: {
 
 

@@ -1,8 +1,7 @@
 ﻿<template>
     <div v-if="seat != null" :class="seatClasses">
         <div class="name">
-            <span v-if="seat.player != null">
-                {{ seat.player.name }}
+            <span>Name: {{ seat.player?.name }}
             </span>
         </div>
         <div class="avatar">
@@ -14,6 +13,7 @@
             </div>
         </div>
         <div :class="chipsClasses">
+
             <span v-if="seat.player != null">
                 <span v-if="seat.isAllIn()">[ ALL IN ]</span>
                 <span v-else>{{ ui.chipFormatter.format(seat.player.chips) }}</span>
@@ -55,8 +55,9 @@
 
     import './seat.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, ref, computed } from 'vue';
 
+    import { Table } from '@/app/casino/tables/table';
     import { Seat } from '@/app/casino/tables/seat';
     import { BetStatus} from '@/app/casino/tables/betting/bet-status';
     import { RequestSeatCommand } from '@/app/commands/table/request-seat-command';
@@ -68,118 +69,194 @@
     import { TableUI } from '../../table-ui';
 
     import { tableState } from "@/store/table-state";
+    import { Player } from '@/app/players/player';
+    import { UIPosition } from '@/app/ui/ui-position';
 
     const SeatComponent = defineComponent({
 
-        setup() {
+
+        props: {
+            seatIndex: {
+                type: Number,
+                required: true
+            },
+            betStatus: {
+                type: BetStatus,
+                required: true
+            },
+            ui: {
+                type: TableUI,
+                required: true
+            }
+        },
+        setup(props) {
+
+            const table: Table = tableState.getTable.value;
+            const seats = ref(table.seats);
+
+            const dealerPosition = ref(props.ui.dealerPositions.get(props.seatIndex));
+
+            const person = ref({ name: 'Danny', age: 49 });
+            const family = ref({ dad: person });
+
+            const seatClasses = computed((): string[] => {
+
+                let classes = ['seat', `seat-${props.seatIndex}`];
+
+                if (props.ui.isActionOn(props.seatIndex)) {
+
+                    classes.push('action-on');
+
+                }
+
+                if (seats.value[props.seatIndex].player?.isSittingOut) {
+                    classes.push('sitting-out');
+                }
+
+                if (props.ui.isShowdownRequired) {
+
+                    classes.push('showdown');
+
+                }
+
+                if (seats.value[props.seatIndex].isAllIn()) {
+
+                    classes.push('all-in');
+
+                }
+
+                return classes;
+
+            });
+
+            const chipsClasses = () => {
+
+                let classes = ['chips'];
+
+                if (seats.value[props.seatIndex].isInHand && seats.value[props.seatIndex].player?.chips === 0) {
+
+                    classes.push('all-in');
+
+                }
+
+                return classes;
+
+            };
 
             return {
+                table: tableState.getTable,
+                seats: seats,
+                dealerPosition,
+                seatClasses,
+                chipsClasses,
+                person,
+                family
+            };
 
-                table: tableState.getTable.value
+        },
+        data() {
+
+            let values = {
+            };
+
+            return values;
+
+        },
+        components: {
+            HandComponent,
+            FoldingComponent,
+            GhostHandComponent,
+            TimerComponent
+        },
+        computed: {
+
+            seat: function (): Seat {
+
+                return this.seats[this.seatIndex];
+
+            },
+
+            chips: function (): number {
+
+                return this.seat.player?.chips;
 
             }
 
         },
+        /*
+        computed: {
 
-    props: {
-        seat: {
-            type: Seat,
-            required: true
+            hasTimer: function (): boolean {
+
+                // the value of this seat's index in the seatTimer object map will be `null` if there is
+                // not a currently-active Timer object
+                return this.ui && this.ui.seatTimer && this.ui.seatTimer.get(this.seatIndex) != null;
+
+            },
+
+            seatClasses: function (): Array<string> {
+
+                let classes = ['seat', `seat-${this.seatIndex}`];
+
+                if (this.ui.isActionOn(this.seatIndex)) {
+
+                    classes.push('action-on');
+
+                }
+
+                if (this.seat.player && this.seat.player.isSittingOut) {
+                    classes.push('sitting-out');
+                }
+
+                if (this.ui.isShowdownRequired) {
+
+                    classes.push('showdown');
+
+                }
+
+                if (this.seat.isAllIn()) {
+
+                    classes.push('all-in');
+
+                }
+
+                return classes;
+
+            },
+            chipsClasses: function () {
+
+                let classes = ['chips'];
+
+                if (this.seat && this.seat.isInHand && this.seat.player && this.seat.player.chips === 0) {
+
+                    classes.push('all-in');
+
+                }
+
+                return classes;
+
+            }
         },
-        betStatus: {
-            type: BetStatus,
-            required: true
-        },
-        ui: {
-            type: TableUI,
-            required: true
+            */
+
+        methods: {
+
+            sit: function () {
+
+                if (this.ui && this.seats[this.seatIndex]) {
+
+                    this.ui.sendCommand(new RequestSeatCommand(this.table.id, this.seatIndex));
+
+                }
+
+                this.family.dad.name = 'Alexander';
+
+            }
+
         }
-    },
-    data() {
-
-        let values = {
-            dealerPosition: this.ui.dealerPositions.get(this.seat.index)
-        };
-
-        return values;
-
-    },
-    components: {
-        'hand-component': HandComponent,
-        'folding-component': FoldingComponent,
-        'ghost-hand-component': GhostHandComponent,
-        'timer-component': TimerComponent
-    },
-    computed: {
-
-        hasTimer: function (): boolean {
-
-            // the value of this seat's index in the seatTimer object map will be `null` if there is
-            // not a currently-active Timer object
-            return this.ui && this.ui.seatTimer && this.ui.seatTimer.get(this.seat.index) != null;
-
-        },
-
-        seatClasses: function (): Array<string> {
-
-            let classes = [ 'seat', `seat-${this.seat.index}`];
-
-            if (this.ui.isActionOn(this.seat.index)) {
-
-                classes.push('action-on');
-
-            }
-
-            if (this.seat.player && this.seat.player.isSittingOut) {
-                classes.push('sitting-out');
-            }
-
-            if (this.ui.isShowdownRequired) {
-
-                classes.push('showdown');
-
-            }
-
-            if (this.seat.isAllIn()) {
-
-                classes.push('all-in');
-
-            }
-
-            return classes;
-
-        },
-        chipsClasses: function () {
-
-            let classes = ['chips'];
-
-            if (this.seat && this.seat.isInHand && this.seat.player && this.seat.player.chips === 0) {
-
-                classes.push('all-in');
-
-            }
-
-            return classes;
-
-        }
-
-    },
-    methods: {
-
-        sit: function () {
-
-            if (this.ui && this.table && this.seat) {
-
-                this.ui.sendCommand(new RequestSeatCommand(this.table.id, this.seat.index));
-
-            }
-
-        }
-
-    }
 
 
-});
+    });
 
 export default SeatComponent;
 
