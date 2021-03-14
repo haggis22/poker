@@ -47,7 +47,6 @@
 
             return {
 
-                timer,
                 width,
                 classes
 
