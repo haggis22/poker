@@ -55,8 +55,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public currentBalance: number;
 
-    public seatAction: Map<number, string>;
-    public seatTimer: Map<number, Timer>;
 
     public wonPots: WonPot[];
 
@@ -96,9 +94,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.commandHandlers = new Array<CommandHandler>();
             
-        this.seatAction = new Map<number, string>();
-        this.seatTimer = new Map<number, Timer>();
-
         this.wonPots = [];
 
         this.isGatheringAntes = this.isGatheringBets = false;
@@ -470,8 +465,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // Set up the Maps with default values so that they can be reactive
         for (let seatIndex: number = 0; seatIndex < action.table.seats.length; seatIndex++) {
 
-            this.seatAction.set(seatIndex, null);
-            this.seatTimer.set(seatIndex, null);
+            tableState.clearAction(seatIndex);
+            tableState.cleatTimer(seatIndex);
 
         }
         */
@@ -876,12 +871,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // Remove any previous action for the current "to-act" player
         // Map.delete is safe to use, even if the key does not already exist
-        this.seatAction.delete(action.betStatus.seatIndex);
+        tableState.clearAction(action.betStatus.seatIndex);
 
         let seat = this.findSeat(action.betStatus.seatIndex);
         this.log(`It is ${seat.getName()}'s turn to act`);
 
-        this.clearSeatTimers();
+        tableState.clearTimers();
 
         let mySeat: Seat = this.getMySeat();
 
@@ -943,8 +938,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             }
 
             let timer: Timer = new Timer(action.timesUp);
-            timer.start();
-            this.seatTimer.set(seat.index, timer);
+            tableState.startTimer(seat.index, timer);
 
         }
 
@@ -959,13 +953,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let anteSeatIndex: number = table.betStatus.forcedBets.seatIndex;
 
         // Remove any previous action for the current "to-act" player
-        // Map.delete is safe to use, even if the key does not already exist
-        this.seatAction.delete(anteSeatIndex);
+        tableState.clearAction(anteSeatIndex);
 
         let anteSeat: Seat = this.findSeat(anteSeatIndex);
         this.log(`It is ${anteSeat.getName()}'s turn to ante`);
 
-        this.clearSeatTimers();
+        tableState.clearTimers();
 
         this.myCall = this.myMinRaise = this.myMaxRaise = null;
 
@@ -987,8 +980,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                 }
 
                 let timer: Timer = new Timer(action.timesUp);
-                timer.start();
-                this.seatTimer.set(anteSeat.index, timer);
+                tableState.startTimer(anteSeat.index, timer);
                 this.log(`Setting ante turn timer for seat ${anteSeat.index} to ${action.timesUp}`);
 
             }
@@ -1008,7 +1000,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat = this.findSeat(action.seatIndex);
 
-        this.killSeatTimer(action.seatIndex);
+        tableState.clearTimer(action.seatIndex);
 
         if (action.seatIndex == this.mySeatIndex) {
 
@@ -1023,13 +1015,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action.bet.betType == Bet.TYPE.ANTE) {
 
             message = `${seat.getName()} antes ${this.chipFormatter.format(action.bet.totalBet)}`;
-            this.seatAction.set(seat.index, 'ANTE');
+            tableState.setAction(seat.index, 'ANTE');
 
         }
         else if (action.bet.betType == Bet.TYPE.BLIND) {
 
             message = `${seat.getName()} blinds ${this.chipFormatter.format(action.bet.totalBet)}`;
-            this.seatAction.set(seat.index, 'BLIND');
+            tableState.setAction(seat.index, 'BLIND');
 
         }
         else if (action.bet.betType == Bet.TYPE.REGULAR) {
@@ -1038,22 +1030,22 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 case Bet.ACTION.CHECK:
                     message = `${seat.getName()} checks`;
-                    this.seatAction.set(seat.index, 'CHECK');
+                    tableState.setAction(seat.index, 'CHECK');
                     break;
 
                 case Bet.ACTION.OPEN:
                     message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
-                    this.seatAction.set(seat.index, 'BET');
+                    tableState.setAction(seat.index, 'BET');
                     break;
 
                 case Bet.ACTION.CALL:
                     message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
-                    this.seatAction.set(seat.index, 'CALL');
+                    tableState.setAction(seat.index, 'CALL');
                     break;
 
                 case Bet.ACTION.RAISE:
                     message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
-                    this.seatAction.set(seat.index, 'RAISE');
+                    tableState.setAction(seat.index, 'RAISE');
                     break;
 
             }  // switch
@@ -1066,49 +1058,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // betAction
 
 
-
-
-    private killSeatTimer(seatIndex: number): void {
-
-        this.log(`In killSeatTimer for seatIndex ${seatIndex}`);
-
-        let timer: Timer = this.seatTimer.get(seatIndex);
-
-        if (timer) {
-            this.log(`Stopping and deleting timer for seatIndex ${seatIndex}`);
-            timer.stop();
-            this.seatTimer.delete(seatIndex);
-        }
-
-    }   // killSeatTimer
-
-
-    private clearSeatTimers(): void {
-
-        this.log('In clearSeatTimers');
-
-        // Stop any seat timer that is already running
-        for (let [seatIndex, timer] of this.seatTimer) {
-
-            if (timer) {
-
-                timer.stop();
-
-            }
-
-        }
-
-        // Remove all timers from the map
-        this.seatTimer.clear();
-
-    }  // clearSeatTimers
-
-
     private foldAction(action: FoldAction): void {
 
         let seat = this.findSeat(action.seatIndex);
 
-        this.killSeatTimer(action.seatIndex);
+        tableState.clearTimer(action.seatIndex);
 
         if (!this.muckedCards.get(action.seatIndex)) {
             this.muckedCards.set(action.seatIndex, new Array<Card | FacedownCard>());
@@ -1121,7 +1075,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         tableState.addMessage(message);
         this.log(message);
 
-        this.seatAction.set(seat.index, 'FOLD');
+        tableState.setAction(seat.index, 'FOLD');
 
 
 
@@ -1253,7 +1207,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private gatherBetsCompleteAction(action: GatherBetsCompleteAction): void {
 
         this.isGatheringBets = false;
-        this.seatAction.clear();
+        tableState.clearActions();
 
     }  // gatherBetsComplete
 
@@ -1267,7 +1221,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private gatherAntesCompleteAction(action: GatherAntesCompleteAction): void {
 
         this.isGatheringAntes = false;
-        this.seatAction.clear();
+        tableState.clearActions();
 
     }  // gatherBetsComplete
 

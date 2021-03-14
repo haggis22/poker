@@ -1,14 +1,14 @@
 ﻿<template>
     <div v-if="seat != null" :class="seatClasses">
         <div class="name">
-            <span>Name: {{ seat.player?.name }}
+            <span>{{ seat.player?.name }}
             </span>
         </div>
         <div class="avatar">
             <div class="action-container">
-                <timer-component v-if="ui.seatTimer.has(seat.index)" :timer="ui.seatTimer.get(seat.index)"></timer-component>
-                <div class="action" v-if="ui.seatAction.has(seat.index)">
-                    {{ ui.seatAction.get(seat.index) }}
+                <timer-component v-if="getTimer" :timer="getTimer"></timer-component>
+                <div class="action" v-if="getAction">
+                    {{ getAction }}
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
 
     import './seat.scss';
 
-    import { defineComponent, ref, computed } from 'vue';
+    import { defineComponent, ref, computed, reactive, watch } from 'vue';
 
     import { Table } from '@/app/casino/tables/table';
     import { Seat } from '@/app/casino/tables/seat';
@@ -71,6 +71,7 @@
     import { tableState } from "@/store/table-state";
     import { Player } from '@/app/players/player';
     import { UIPosition } from '@/app/ui/ui-position';
+    import { Timer } from '@/app/timers/timer';
 
     const SeatComponent = defineComponent({
 
@@ -91,25 +92,27 @@
         },
         setup(props) {
 
+            const seatIndex: number = props.seatIndex;
+
             const table: Table = tableState.getTable.value;
             const seats = ref(table.seats);
 
-            const dealerPosition = ref(props.ui.dealerPositions.get(props.seatIndex));
+            const dealerPosition = ref(props.ui.dealerPositions.get(seatIndex));
 
             const person = ref({ name: 'Danny', age: 49 });
             const family = ref({ dad: person });
 
             const seatClasses = computed((): string[] => {
 
-                let classes = ['seat', `seat-${props.seatIndex}`];
+                let classes = ['seat', `seat-${seatIndex}`];
 
-                if (props.ui.isActionOn(props.seatIndex)) {
+                if (props.ui.isActionOn(seatIndex)) {
 
                     classes.push('action-on');
 
                 }
 
-                if (seats.value[props.seatIndex].player?.isSittingOut) {
+                if (seats.value[seatIndex].player?.isSittingOut) {
                     classes.push('sitting-out');
                 }
 
@@ -119,7 +122,7 @@
 
                 }
 
-                if (seats.value[props.seatIndex].isAllIn()) {
+                if (seats.value[seatIndex].isAllIn()) {
 
                     classes.push('all-in');
 
@@ -129,11 +132,23 @@
 
             });
 
+            const getAction = computed((): string => {
+
+                return tableState.getActions.value.get(seatIndex);
+
+            });
+
+            const getTimer = computed((): Timer => {
+
+                return tableState.getTimers.value.get(seatIndex);
+
+            });
+
             const chipsClasses = () => {
 
                 let classes = ['chips'];
 
-                if (seats.value[props.seatIndex].isInHand && seats.value[props.seatIndex].player?.chips === 0) {
+                if (seats.value[seatIndex].isInHand && seats.value[seatIndex].player?.chips === 0) {
 
                     classes.push('all-in');
 
@@ -150,7 +165,9 @@
                 seatClasses,
                 chipsClasses,
                 person,
-                family
+                family,
+                getAction,
+                getTimer
             };
 
         },

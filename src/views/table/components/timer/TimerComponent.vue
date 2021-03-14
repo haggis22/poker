@@ -9,62 +9,59 @@
 
     import './timer.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { Timer } from '@/app/timers/timer';
 
     const TimerComponent = defineComponent ({
 
-    props: {
-        timer: {
-            type: Timer,
-            required: true
-        }
-    },
+        props: {
+            timer: {
+                type: Timer,
+                required: true
+            }
+        },
+        setup(props) {
 
-    data() {
+            const timer = props.timer;
 
-        let values =
-        {
-            localTimer: this.timer
-        };
+            let width = computed((): string => {
 
-        return values;
+                return timer.percentRemaining + '%';
 
-    },
+            });
 
-    computed: {
+            let classes = computed((): string[] => {
 
-        width: function (): string {
+                const classes = ['timer'];
 
-            if (this.localTimer) {
+                if (timer.percentRemaining < 20) {
 
-                return this.localTimer.percentRemaining() + '%';
+                    classes.push('danger');
+
+                }
+
+                return classes;
+
+            });
+
+            return {
+
+                timer,
+                width,
+                classes
 
             }
 
-            return '0';
 
         },
 
-        classes: function (): Array<string> {
-
-            let classes = [ 'timer' ];
-
-            if (this.localTimer && this.localTimer.percentRemaining() < 20) {
-
-                classes.push('danger');
-
-            }
-
-            return classes;
+        unmounted() {
 
         }
 
-    }
+    });
 
-});
-
-export default TimerComponent;
+    export default TimerComponent;
 
 </script>
