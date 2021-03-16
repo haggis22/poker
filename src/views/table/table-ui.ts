@@ -533,8 +533,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private playerSeatedAction(action: PlayerSeatedAction): void {
 
-        const table: Table = this.getTable();
-
         const result = tableState.setPlayer(action.seatIndex, action.player);
 
         if (result) {
@@ -542,7 +540,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             let message = `${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`;
             tableState.addMessage(message);
             this.log(message);
-            this.log(`Players: [ ${table.seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
 
             if (action.player.userID === this.getUser().id) {
                 this.mySeatIndex = action.seatIndex;

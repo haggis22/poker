@@ -2,6 +2,12 @@
 
     <div v-if="ui != null && table != null">
 
+        <div>
+            <ul>
+                <li v-for="seat in table.seats">seatIndex {{ seat.index }}: {{ seat.player ? seat.player.name : "Open" }}</li>
+            </ul>
+        </div>
+
         <div class="table seats-6">
 
             <div class="betting-line">

@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from "vue";
+import { ref, toRefs, reactive, computed } from "vue";
 
 import { Table } from '@/app/casino/tables/table';
 import { Game } from '@/app/games/game';
@@ -7,7 +7,7 @@ import { Seat } from '@/app/casino/tables/seat';
 import { Timer } from '@/app/timers/timer';
 
 
-const state = ref({
+const state = reactive({
 
     table: null as Table,
     game: null as Game,
@@ -19,34 +19,57 @@ const state = ref({
 });
 
 
-const getTable = computed((): Table => state.value.table);
+const getTable = computed((): Table => state.table);
 
 const setTable = (table: Table): void => {
-    state.value.table = table;
+    state.table = table;
 };
 
-const getGame = computed(() => state.value.game);
+const getGame = computed(() => state.game);
 
 const setGame = (game: Game): void => {
-    state.value.game = game;
+    state.game = game;
 }
 
-const getMessages = computed(() => state.value.messages);
+const getMessages = computed(() => state.messages);
 
 const addMessage = (message: string): void => {
 
-    state.value.messages.push(message);
+    state.messages.push(message);
 
 }
 
+const getSeat = (seatIndex: number): Seat => {
+
+    const table: Table = getTable.value;
+
+    return table?.seats[seatIndex];
+
+};
+
+const getPlayer = (seatIndex: number): Player => {
+
+    const table: Table = getTable.value;
+
+    const seat = table?.seats[seatIndex];
+    
+    return seat.player;
+
+};
+
+
 const setPlayer = (seatIndex: number, player: Player): boolean => {
 
-    state.value.table.seats[0].player.name = "Matthew";
+    let mattSeat: Seat = getSeat(0);
+    if (mattSeat) {
+        mattSeat.player.name = "Matthew";
+    }
 
-    if (seatIndex >= 0 && seatIndex < state.value.table.seats.length) {
+    let seat: Seat = getSeat(seatIndex);
 
-        state.value.table.seats[seatIndex].player = player;
+    if (seat) {
 
+        seat.player = player;
         return true;
 
     }
@@ -55,27 +78,27 @@ const setPlayer = (seatIndex: number, player: Player): boolean => {
 
 }
 
-const getActions = computed((): Map<number, string> => state.value.seatActions);
+const getActions = computed((): Map<number, string> => state.seatActions);
 
 const setAction = (seatIndex: number, action: string): void => {
 
-    state.value.seatActions.set(seatIndex, action);
+    state.seatActions.set(seatIndex, action);
 
 };
 
 const clearAction = (seatIndex: number): void => {
 
-    state.value.seatActions.delete(seatIndex);
+    state.seatActions.delete(seatIndex);
 
 }
 
 const clearActions = (): void => {
 
-    state.value.seatActions.clear();
+    state.seatActions.clear();
 
 }
 
-const getTimers = computed((): Map<number, Timer> => state.value.seatTimers);
+const getTimers = computed((): Map<number, Timer> => state.seatTimers);
 
 
 const startTimer = (seatIndex: number, timer: Timer): void => {
@@ -85,7 +108,7 @@ const startTimer = (seatIndex: number, timer: Timer): void => {
     const reactiveTimer = reactive(timer);
 
     reactiveTimer.timer = setTimeout(() => { stepDownTimer(reactiveTimer); }, Timer.STEP_TIME);
-    state.value.seatTimers.set(seatIndex, reactiveTimer);
+    state.seatTimers.set(seatIndex, reactiveTimer);
 
 };
 
@@ -127,7 +150,7 @@ const clearTimer = (seatIndex: number): void => {
 
     }
 
-    state.value.seatTimers.delete(seatIndex);
+    state.seatTimers.delete(seatIndex);
 
 }
 
@@ -142,7 +165,7 @@ const clearTimers = (): void => {
 
     }
 
-    state.value.seatTimers.clear();
+    state.seatTimers.clear();
 
 }
 
@@ -158,6 +181,9 @@ export const tableState = {
     getMessages,
     addMessage,
 
+    getSeat,
+
+    getPlayer,
     setPlayer,
 
     getActions,

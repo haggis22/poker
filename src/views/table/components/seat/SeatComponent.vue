@@ -1,7 +1,9 @@
 ﻿<template>
     <div v-if="seat" :class="seatClasses">
         <div class="name">
-            <span v-if="player">{{ player.name }}</span>
+            <div>Player null? {{ player == null }}</div>
+            <div>Seat {{ seat.player?.name }}</div>
+            <span>P: {{ player?.name }}</span>
         </div>
         <div class="avatar">
             <div class="action-container">
@@ -10,9 +12,9 @@
             </div>
         </div>
         <div :class="chipsClasses">
-            <span v-if="player">
+            <span v-if="seat.player">
                 <span v-if="seat.isAllIn()">[ ALL IN ]</span>
-                <span v-else>{{ ui.chipFormatter.format(chips) }}</span>
+                <span v-else>{{ ui.chipFormatter.format(seat.player?.chips) }}</span>
             </span>
         </div>
         <div class="cards">
@@ -89,28 +91,16 @@
 
             const seatIndex: number = props.seatIndex;
 
-            const table: Table = tableState.getTable.value;
-            const seats = ref(table.seats);
-
             const dealerPosition = props.ui.dealerPositions.get(seatIndex);
 
-            const seat = computed((): Seat => {
+            const table = computed((): Table => tableState.getTable.value);
 
-                return table.seats[seatIndex];
+            const seat = computed((): Seat => { return table.value?.seats[seatIndex]; });
 
-            })
+            const player = computed(() => { return table.value?.seats[seatIndex].player; });
 
-            const player = computed((): Player => {
+            const chips = computed((): number => player.value?.chips);
 
-                return seat.value.player;
-
-            });
-
-            const chips = computed((): number => {
-
-                return player.value?.chips;
-
-            });
 
             const seatClasses = computed((): string[] => {
 
@@ -122,7 +112,7 @@
 
                 }
 
-                if (seats.value[seatIndex].player?.isSittingOut) {
+                if (player.value?.isSittingOut) {
                     classes.push('sitting-out');
                 }
 
@@ -132,7 +122,7 @@
 
                 }
 
-                if (seats.value[seatIndex].isAllIn()) {
+                if (seat.value.isAllIn()) {
 
                     classes.push('all-in');
 
@@ -170,13 +160,14 @@
 
             const sit = () => {
 
-                props.ui.sendCommand(new RequestSeatCommand(table.id, seatIndex));
+                props.ui.sendCommand(new RequestSeatCommand(table.value.id, seatIndex));
 
             };
 
 
             return {
 
+                table,
                 seat,
                 player,
                 chips,
