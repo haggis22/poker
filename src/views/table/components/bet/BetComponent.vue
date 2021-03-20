@@ -2,7 +2,7 @@
     <div v-if="bet.totalBet > 0" :class="betClasses">
         <chip-box-component :value="bet.totalBet"
                             :chip-stacker="ui.chipStacker"></chip-box-component>
-        <div class="amount">{{ ui.chipFormatter.format(bet.totalBet) }}</div>
+        <div class="amount">{{ chipFormatter.format(bet.totalBet) }}</div>
     </div>
 </template>
 
@@ -11,11 +11,12 @@
 
 import './bet.scss';
 
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 
 import { Bet } from '@/app/casino/tables/betting/bet';
 import { TableUI } from '../../table-ui';
 import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
+import { tableState } from '@/store/table-state';
 
 const BetComponent = defineComponent ({
 
@@ -28,6 +29,18 @@ const BetComponent = defineComponent ({
             type: TableUI,
             required: true
         }
+    },
+    setup() {
+
+        const chipFormatter = computed(() => tableState.getChipFormatter.value);
+
+
+        return {
+
+            chipFormatter
+
+        };
+
     },
     components: {
         'chip-box-component': ChipBoxComponent

@@ -15,10 +15,10 @@
     
 import './bet-button.scss';
 
-    import { defineComponent } from "vue";
+    import { defineComponent, computed } from "vue";
 
     import { MoneyFormatter } from "@/app/casino/tables/chips/money-formatter";
-
+    import { tableState } from '@/store/table-state';
 
 
     const BetButtonComponent = defineComponent({
@@ -36,13 +36,21 @@ import './bet-button.scss';
         amount: {
             type: Number,
             required: false
-        },
-        chipFormatter: {
-            type: MoneyFormatter,
-            required: false
         }
 
-    },
+        },
+        setup() {
+
+            const chipFormatter = computed(() => tableState.getChipFormatter.value);
+
+            return {
+
+                chipFormatter
+
+            };
+
+
+        },
     computed: {
 
         lightClasses: function () {

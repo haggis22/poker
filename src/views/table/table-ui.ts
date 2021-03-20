@@ -39,16 +39,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private commandHandlers: CommandHandler[];
 
-    public chipFormatter: IChipFormatter;
-
-    private tableID: number;
-
     public betController: BetController;
     public chipStacker: ChipStacker;
 
-
     public currentBalance: number;
-
 
     public wonPots: WonPot[];
 
@@ -71,10 +65,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    constructor(tableID: number, chipFormatter: IChipFormatter) {
-
-        this.tableID = tableID;
-        this.chipFormatter = chipFormatter;
+    constructor() {
 
         this.commandHandlers = new Array<CommandHandler>();
             
@@ -148,7 +139,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof TableConnectedAction) {
 
             // we are connected, so request a snapshot of the table for this user
-            this.broadcastCommand(new TableSnapshotCommand(action.tableID))
+            this.broadcastCommand(new TableSnapshotCommand(tableState.getTableID.value))
             return;
 
         }
@@ -479,10 +470,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public authenticatedAction(action: AuthenticatedAction): void {
 
-        this.log(`Heard AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${this.tableID}`);
+        let tableID: number = tableState.getTableID.value;
+
+        this.log(`Heard AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${tableID}`);
         userState.setUser(action.user);
 
-        this.broadcastCommand(new JoinTableCommand(this.tableID));
+        this.broadcastCommand(new JoinTableCommand(tableID));
 
     }   // authenticated
 
@@ -585,7 +578,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (player) {
 
-            this.log(`${player.name} adds ${this.chipFormatter.format(action.amount)} in chips`);
+            this.log(`${player.name} adds ${tableState.getChipFormatter.value.format(action.amount)} in chips`);
 
         }
 
@@ -660,7 +653,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player) {
 
-                this.log(`${seat.getSeatName()}: ${seat.player.name}: ${this.chipFormatter.format(seat.player.chips)}${seat.player.isSittingOut ? ' [sitting out]' : ''}`);
+                this.log(`${seat.getSeatName()}: ${seat.player.name}: ${tableState.getChipFormatter.value.format(seat.player.chips)}${seat.player.isSittingOut ? ' [sitting out]' : ''}`);
 
             }
 
@@ -742,7 +735,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         for (let pot of table.betStatus.pots) {
         
-            let potDesc = `${pot.getName()}: ${this.chipFormatter.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
+            let potDesc = `${pot.getName()}: ${tableState.getChipFormatter.value.format(pot.amount)} - ${pot.getNumPlayers()} player${pot.getNumPlayers() === 1 ? '' : 's'}: `;
             potDesc += pot.getSeatsInPot().map(seatIndex => table.seats[seatIndex].getName()).join(", ");
             this.log(potDesc);
         
@@ -751,7 +744,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         let betsString = Object.keys(table.betStatus.bets)
             .map(seatIndexString => {
                 const seatIndex = parseInt(seatIndexString, 10);
-                return `${table.seats[seatIndex].getName()}: ${this.chipFormatter.format(table.betStatus.bets[seatIndex].totalBet)}`
+                return `${table.seats[seatIndex].getName()}: ${tableState.getChipFormatter.value.format(table.betStatus.bets[seatIndex].totalBet)}`
             }).join(", ");
         if (betsString.length) {
             this.log(`  Bets: ${betsString}`);
@@ -999,13 +992,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action.bet.betType == Bet.TYPE.ANTE) {
 
-            message = `${seat.getName()} antes ${this.chipFormatter.format(action.bet.totalBet)}`;
+            message = `${seat.getName()} antes ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
             tableState.setAction(seat.index, 'ANTE');
 
         }
         else if (action.bet.betType == Bet.TYPE.BLIND) {
 
-            message = `${seat.getName()} blinds ${this.chipFormatter.format(action.bet.totalBet)}`;
+            message = `${seat.getName()} blinds ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
             tableState.setAction(seat.index, 'BLIND');
 
         }
@@ -1019,17 +1012,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
                     break;
 
                 case Bet.ACTION.OPEN:
-                    message = `${seat.getName()} bets ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    message = `${seat.getName()} bets ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
                     tableState.setAction(seat.index, 'BET');
                     break;
 
                 case Bet.ACTION.CALL:
-                    message = `${seat.getName()} calls ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    message = `${seat.getName()} calls ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
                     tableState.setAction(seat.index, 'CALL');
                     break;
 
                 case Bet.ACTION.RAISE:
-                    message = `${seat.getName()} raises to ${this.chipFormatter.format(action.bet.totalBet)}`;
+                    message = `${seat.getName()} raises to ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
                     tableState.setAction(seat.index, 'RAISE');
                     break;
 
@@ -1129,8 +1122,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
         let message: string = seat.player
-            ? `${seat.getName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`
-            : `${seat.getSeatName()} wins ${this.chipFormatter.format(pot.amount)} from ${potDescription}${handDescription}`;
+            ? `${seat.getName()} wins ${tableState.getChipFormatter.value.format(pot.amount)} from ${potDescription}${handDescription}`
+            : `${seat.getSeatName()} wins ${tableState.getChipFormatter.value.format(pot.amount)} from ${potDescription}${handDescription}`;
 
         tableState.addMessage(message);
         this.log(message);
@@ -1144,13 +1137,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         
         if (seat.player) {
 
-            let message: string = `${this.chipFormatter.format(action.amount)} is returned to ${seat.getName()}`;
+            let message: string = `${tableState.getChipFormatter.value.format(action.amount)} is returned to ${seat.getName()}`;
             tableState.addMessage(message);
             this.log(message);
         
         }
         else {
-            this.log(`Need to return ${this.chipFormatter.format(action.amount)} to ${seat.getName()}, but the player is gone`);
+            this.log(`Need to return ${tableState.getChipFormatter.value.format(action.amount)} to ${seat.getName()}, but the player is gone`);
         }
         
     }  // returnBet

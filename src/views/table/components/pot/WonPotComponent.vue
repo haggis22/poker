@@ -4,7 +4,7 @@
         <chip-box-component :value="pot.amount"
                             :chip-stacker="ui.chipStacker"
                             :chip-position="chipPosition"></chip-box-component>
-        <div class="amount">{{ ui.chipFormatter.format(pot.amount) }}</div>
+        <div class="amount">{{ chipFormatter.format(pot.amount) }}</div>
         <div class="name">{{ pot.getName() }}</div>
     </div>
 
@@ -15,27 +15,38 @@
 
 import './pot.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
-import { WonPot } from '@/app/casino/tables/betting/won-pot';
+    import { WonPot } from '@/app/casino/tables/betting/won-pot';
     import { UIPosition } from '@/app/ui/ui-position';
 
     import { TableUI } from '../../table-ui';
-import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
+    import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
+    import { tableState } from '@/store/table-state';
 
     const WonPotComponent = defineComponent({
 
-    props: {
-        pot: {
-            type: WonPot,
-            required: true
+        props: {
+            pot: {
+                type: WonPot,
+                required: true
+            },
+            ui: {
+                type: TableUI,
+                required: true
+            }
         },
-        ui: {
-            type: TableUI,
-            required: true
-        }
+        setup() {
 
-    },
+            const chipFormatter = computed(() => tableState.getChipFormatter.value);
+
+            return {
+
+                chipFormatter
+
+            };
+
+        },
     components: {
         'chip-box-component': ChipBoxComponent
     },
@@ -44,7 +55,7 @@ import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
         let values =
         {
             isPushed: false,
-            timer: null as ReturnType<typeof setTimeout>
+            timer: null as ReturnType<typeof setTimeout>,
 
             // this will specify where the chips will eventually end up
             playerPosition: this.ui.playerPositions.get(this.pot.seatIndex),

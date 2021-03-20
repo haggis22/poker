@@ -12,7 +12,7 @@
         <div :class="chipsClasses">
             <span v-if="player">
                 <span v-if="seat.isAllIn()">[ ALL IN ]</span>
-                <span v-else>{{ ui.chipFormatter.format(chips) }}</span>
+                <span v-else>{{ chipFormatter.format(chips) }}</span>
             </span>
         </div>
         <div class="cards">
@@ -165,6 +165,7 @@
 
             });
 
+            const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
             return {
 
@@ -180,9 +181,13 @@
                 muckedCards,
 
                 isMySeat,
+                amISitting,
 
                 // methods
-                sit
+                sit,
+
+                chipFormatter
+
             };
 
         },

@@ -12,8 +12,7 @@
 
                 <bet-button-component :action="'Ante'"
                                       :is-activated="isAnteActivated"
-                                      :amount="ui.myCall.chipsAdded"
-                                      :chip-formatter="ui.chipFormatter"
+                                      :amount="myCall.chipsAdded"
                                       @button-click="toggleAnte"></bet-button-component>
 
             </div>
@@ -37,26 +36,24 @@
                 <bet-button-component v-if="isCallAllowed"
                                       :action="'Call'"
                                       :is-activated="isCallActivated"
-                                      :amount="ui.myCall.chipsAdded"
-                                      :chip-formatter="ui.chipFormatter"
+                                      :amount="myCall.chipsAdded"
                                       @button-click="toggleCall"></bet-button-component>
 
                 <bet-button-component v-if="isLimitRaiseAllowed"
                                       :action="betDescription"
                                       :is-activated="isRaiseActivated"
-                                      :amount="ui.myMinRaise.totalBet"
-                                      :chip-formatter="ui.chipFormatter"
+                                      :amount="myMinRaise.totalBet"
                                       @button-click="toggleLimitRaise"></bet-button-component>
 
             </div><!-- buttons -->
 
             <div v-if="raiseDialogReady" class="raise-dialog">
                 <div>
-                    <span class="min-raise">{{ ui.chipFormatter.format(minRaise) }}</span>
+                    <span class="min-raise">{{ chipFormatter.format(minRaise) }}</span>
                     <input type="range" v-model="raiseChips" :min="minRaise" :max="maxRaise" :step="step" />
-                    <span class="max-raise">{{ ui.chipFormatter.format(maxRaise) }}</span>
+                    <span class="max-raise">{{ chipFormatter.format(maxRaise) }}</span>
                 </div>
-                <div class="buy-amount">{{ ui.chipFormatter.format(raiseChips) }}</div>
+                <div class="buy-amount">{{ chipFormatter.format(raiseChips) }}</div>
                 <div>
                     <button type="button" class="raise" @click.stop="raise">Raise</button>
                     <button type="button" class="cancel" @click.stop="cancelRaise">Cancel</button>
@@ -89,6 +86,7 @@ import './betting-menu.scss';
     import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
     import { tableState } from "@/store/table-state";
+    import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 
     const TableMenuComponent = defineComponent({
 
@@ -130,6 +128,8 @@ import './betting-menu.scss';
 
             const maxRaise = computed((): number => myMaxRaise.value ? myMaxRaise.value.totalBet : 0);
 
+            const chipFormatter = computed((): IChipFormatter => tableState.getChipFormatter.value);
+
             return {
 
                 pendingBetCommand,
@@ -158,7 +158,9 @@ import './betting-menu.scss';
                 raiseDialogReady,
 
                 minRaise,
-                maxRaise
+                maxRaise,
+
+                chipFormatter
 
             };
 

@@ -13,11 +13,13 @@ import { BetStatus } from '@/app/casino/tables/betting/bet-status';
 import { Card } from '@/app/cards/card';
 import { FacedownCard } from '@/app/cards/face-down-card';
 import { Hand } from '@/app/hands/hand';
+import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 
 
 const state = reactive({
 
     tableID: null as number,
+    chipFormatter: null as IChipFormatter,
 
     table: null as Table,
     game: null as Game,
@@ -59,6 +61,14 @@ const setTableState = (tableState: TableState): void => {
     state.table.state = tableState;
 
 };
+
+const getChipFormatter = computed(() => state.chipFormatter);
+
+const setChipFormatter = (formatter: IChipFormatter): void => {
+
+    state.chipFormatter = formatter;
+
+}
 
 
 const getGame = computed(() => state.game);
@@ -364,6 +374,9 @@ export const tableState = {
     getTable,
     setTable,
     setTableState,
+
+    getChipFormatter,
+    setChipFormatter,
 
     getGame,
     setGame,

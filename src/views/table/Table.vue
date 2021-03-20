@@ -51,7 +51,8 @@
 
             const route = useRoute();
 
-            const tableID = ref(Number(route.params.tableID));
+            tableState.setTableID(Number(route.params.tableID));
+
             const ui = ref(null as TableUI);
 
             const table = computed((): Table => tableState.getTable.value);
@@ -62,7 +63,10 @@
 
                 console.log('Connection opened');
 
-                ui.value = new TableUI(tableID.value, new MoneyFormatter());
+                tableState.setChipFormatter(new MoneyFormatter());
+
+                ui.value = new TableUI();
+
                 //                let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
                 let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
 
@@ -81,9 +85,7 @@
 
             return {
 
-                tableID,
                 ui,
-                ws,
 
                 table
 

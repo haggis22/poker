@@ -18,11 +18,11 @@
         </div>
         <div v-if="addChipsDialogReady" class="add-chips-dialog">
             <div>
-                <span class="min-buy-in">{{ ui.chipFormatter.format(minBuyIn) }}</span>
+                <span class="min-buy-in">{{ chipFormatter.format(minBuyIn) }}</span>
                 <input type="range" v-model="numAddChips" :min="minBuyIn" :max="maxBuyIn" :step="step" />
-                <span class="max-buy-in">{{ ui.chipFormatter.format(maxBuyIn) }}</span>
+                <span class="max-buy-in">{{ chipFormatter.format(maxBuyIn) }}</span>
             </div>
-            <div class="buy-amount">{{ ui.chipFormatter.format(numAddChips) }}</div>
+            <div class="buy-amount">{{ chipFormatter.format(numAddChips) }}</div>
             <div>
                 <button type="button" class="buy-in" @click.stop="buyIn">Buy In</button>
                 <button type="button" class="cancel" @click.stop="cancelBuyIn">Cancel</button>
@@ -38,7 +38,7 @@
     
     import './table-menu.scss';
 
-    import { defineComponent, vModelCheckbox } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { TableUI } from '../../table-ui';
     import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
@@ -49,11 +49,15 @@
 
         setup() {
 
+            const chipFormatter = computed(() => tableState.getChipFormatter.value);
+
             return {
+
+                chipFormatter,
 
                 table: tableState.getTable.value
 
-            }
+            };
 
         },
 
