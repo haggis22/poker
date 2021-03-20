@@ -494,14 +494,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
-    public remainsToAct(): boolean {
-
-        let mySeatIndex: number = tableState.getMySeatIndex.value;
-
-        return  mySeatIndex != null && this.getTable().state instanceof BetState && (this.getTable().betStatus.seatIndex === mySeatIndex || this.getTable().betStatus.doesSeatRemainToAct(mySeatIndex));
-
-    }
-    
 
     private playerSeatedAction(action: PlayerSeatedAction): void {
 

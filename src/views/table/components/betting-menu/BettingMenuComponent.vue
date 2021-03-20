@@ -19,7 +19,7 @@
 
         </div>
 
-        <div class="bet-actions" v-if="ui.remainsToAct()">
+        <div class="bet-actions" v-if="remainsToAct">
 
             <div class="buttons">
 
@@ -87,9 +87,17 @@ import './betting-menu.scss';
 
     import { tableState } from "@/store/table-state";
     import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
+    import { BetState } from '@/app/casino/tables/states/betting/bet-state';
 
     const TableMenuComponent = defineComponent({
 
+        props: {
+            ui: {
+                type: TableUI,
+                required: true
+            }
+
+        },
         setup() {
 
             const pendingBetCommand = computed((): BetCommand | FoldCommand => tableState.getPendingBetCommand.value);
@@ -130,6 +138,18 @@ import './betting-menu.scss';
 
             const chipFormatter = computed((): IChipFormatter => tableState.getChipFormatter.value);
 
+            const remainsToAct = computed((): boolean => {
+
+                let mySeatIndex: number = tableState.getMySeatIndex.value;
+
+                return mySeatIndex != null
+                    && tableState.getTable.value.state instanceof BetState
+                    // either it's my turn right now, or it's coming up
+                    && (tableState.getBetStatus.value.seatIndex == mySeatIndex || tableState.getBetStatus.value.doesSeatRemainToAct(mySeatIndex));
+
+
+            });
+
             return {
 
                 pendingBetCommand,
@@ -160,20 +180,15 @@ import './betting-menu.scss';
                 minRaise,
                 maxRaise,
 
-                chipFormatter
+                chipFormatter,
+
+                remainsToAct
 
             };
 
 
         },
 
-        props: {
-        ui: {
-            type: TableUI,
-            required: true
-        }
-
-    },
     components: {
 
         'bet-button-component': BetButtonComponent
