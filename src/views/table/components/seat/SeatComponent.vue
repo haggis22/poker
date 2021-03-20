@@ -10,13 +10,13 @@
             </div>
         </div>
         <div :class="chipsClasses">
-            <span v-if="seat.player">
+            <span v-if="player">
                 <span v-if="seat.isAllIn()">[ ALL IN ]</span>
-                <span v-else>{{ ui.chipFormatter.format(seat.player?.chips) }}</span>
+                <span v-else>{{ ui.chipFormatter.format(chips) }}</span>
             </span>
         </div>
         <div class="cards">
-            <div v-if="!player && !ui.getMySeat()">
+            <div v-if="!player && !amISitting">
                 <button type="button"   
                         class="sit"
                         v-on:click.stop="sit">
@@ -31,13 +31,13 @@
                             :ui="ui"
                             :dealer-position="dealerPosition"></hand-component>
 
-            <folding-component v-if="ui.muckedCards.has(seat.index)"
-                                :cards="ui.muckedCards.get(seat.index)"
+            <folding-component v-if="muckedCards"
+                                :cards="muckedCards"
                                 :ui="ui"
                                 :dealer-position="dealerPosition"></folding-component>
 
-            <ghost-hand-component v-if="ui.muckedCards.has(seat.index) && ui.mySeatIndex == seat.index"
-                                :cards="ui.muckedCards.get(seat.index)"
+            <ghost-hand-component v-if="muckedCards && isMySeat"
+                                :cards="muckedCards"
                                 :ui="ui"
                                 :dealer-position="dealerPosition"></ghost-hand-component>
 
@@ -51,7 +51,7 @@
 
     import './seat.scss';
 
-    import { defineComponent, ref, computed, reactive, watch } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { Table } from '@/app/casino/tables/table';
     import { Seat } from '@/app/casino/tables/seat';
@@ -67,6 +67,8 @@
     import { tableState } from "@/store/table-state";
     import { Player } from '@/app/players/player';
     import { Timer } from '@/app/timers/timer';
+    import { FacedownCard } from '@/app/cards/face-down-card';
+    import { Card } from '@/app/cards/card';
 
     const SeatComponent = defineComponent({
 
@@ -95,10 +97,9 @@
 
             const seat = computed((): Seat => { return table.value.seats[seatIndex]; });
 
-            const player = computed(() => { return seat.value?.player; });
+            const player = computed((): Player => { return seat.value?.player; });
 
             const chips = computed((): number => player.value?.chips);
-
 
             const seatClasses = computed((): string[] => {
 
@@ -130,17 +131,13 @@
 
             });
 
-            const getAction = computed((): string => {
+            const getAction = computed((): string => tableState.getActions.value.get(seatIndex));
 
-                return tableState.getActions.value.get(seatIndex);
+            const getTimer = computed((): Timer => tableState.getTimers.value.get(seatIndex));
 
-            });
+            const isMySeat = computed((): boolean => tableState.getMySeatIndex.value == seatIndex);
 
-            const getTimer = computed((): Timer => {
-
-                return tableState.getTimers.value.get(seatIndex);
-
-            });
+            const amISitting = computed((): boolean => tableState.getMySeatIndex.value != null);
 
             const chipsClasses = computed((): string[] => {
 
@@ -162,6 +159,12 @@
 
             };
 
+            const muckedCards = computed((): (Card | FacedownCard)[] => {
+
+                return tableState.getMuckedCards.value.get(seatIndex);
+
+            });
+
 
             return {
 
@@ -174,6 +177,9 @@
                 chipsClasses,
                 getAction,
                 getTimer,
+                muckedCards,
+
+                isMySeat,
 
                 // methods
                 sit

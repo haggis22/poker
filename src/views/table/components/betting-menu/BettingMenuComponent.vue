@@ -74,14 +74,18 @@
     
 import './betting-menu.scss';
 
-    import { defineComponent } from "vue";
+    import { defineComponent, computed } from "vue";
 
-import { AnteCommand } from '@/app/commands/table/betting/ante-command';
-import { CheckCommand } from '@/app/commands/table/betting/check-command';
-import { CallCommand } from '@/app/commands/table/betting/call-command';
-import { RaiseCommand } from '@/app/commands/table/betting/raise-command';
-import { FoldCommand } from '@/app/commands/table/betting/fold-command';
-import { TableUI } from '../../table-ui';
+    import { AnteCommand } from '@/app/commands/table/betting/ante-command';
+    import { BetCommand } from '@/app/commands/table/betting/bet-command';
+    import { CheckCommand } from '@/app/commands/table/betting/check-command';
+    import { CallCommand } from '@/app/commands/table/betting/call-command';
+    import { RaiseCommand } from '@/app/commands/table/betting/raise-command';
+    import { FoldCommand } from '@/app/commands/table/betting/fold-command';
+    import { Bet } from '@/app/casino/tables/betting/bet';
+
+
+    import { TableUI } from '../../table-ui';
     import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
     import { tableState } from "@/store/table-state";
@@ -90,12 +94,74 @@ import { TableUI } from '../../table-ui';
 
         setup() {
 
-            const values =
-            {
-                table: tableState.getTable
+            const pendingBetCommand = computed((): BetCommand | FoldCommand => tableState.getPendingBetCommand.value);
+
+            const myCall = computed((): Bet => tableState.getMyCall.value);
+            const myMinRaise = computed((): Bet => tableState.getMyMinRaise.value);
+            const myMaxRaise = computed((): Bet => tableState.getMyMaxRaise.value);
+
+            const numRaises = computed((): number => tableState.getBetStatus.value?.numRaises || 0);
+
+            const isFoldAllowed = computed((): boolean => true);
+
+            const isFoldActivated = computed((): boolean => pendingBetCommand.value instanceof FoldCommand);
+
+            const isAnteActivated = computed((): boolean => pendingBetCommand.value instanceof AnteCommand);
+
+            const isCheckAllowed = computed((): boolean => myCall.value && myCall.value.chipsAdded === 0);
+
+            const isCheckActivated = computed((): boolean => pendingBetCommand.value instanceof CheckCommand);
+
+            const isCallAllowed = computed((): boolean => myCall.value && myCall.value.chipsAdded > 0);
+
+            const isCallActivated = computed((): boolean => pendingBetCommand.value instanceof CallCommand);
+
+            const isLimitRaiseAllowed = computed((): boolean => myMinRaise.value && myMaxRaise.value && myMinRaise.value.chipsAdded === myMaxRaise.value.chipsAdded);
+
+            const isRaiseActivated = computed((): boolean => pendingBetCommand.value instanceof RaiseCommand);
+
+            const betDescription = computed((): string => numRaises.value > 0 ? 'Raise To' : 'Bet');
+
+            let showRaise: boolean;
+
+            const raiseDialogReady = computed((): boolean => showRaise);
+
+            const minRaise = computed((): number => myMinRaise.value ? myMinRaise.value.totalBet : 0);
+
+            const maxRaise = computed((): number => myMaxRaise.value ? myMaxRaise.value.totalBet : 0);
+
+            return {
+
+                pendingBetCommand,
+
+                myCall,
+                myMinRaise,
+                myMaxRaise,
+
+                numRaises,
+
+                isFoldAllowed,
+                isFoldActivated,
+
+                isAnteActivated,
+
+                isCheckAllowed,
+                isCheckActivated,
+
+                isCallAllowed,
+                isCallActivated,
+
+                isLimitRaiseAllowed,
+                isRaiseActivated,
+
+                betDescription,
+                raiseDialogReady,
+
+                minRaise,
+                maxRaise
+
             };
 
-            return values;
 
         },
 
@@ -123,88 +189,6 @@ import { TableUI } from '../../table-ui';
         return values;
 
     },
-    computed: {
-
-        isFoldAllowed: function () {
-
-            return true;
-
-        },
-
-        isFoldActivated: function (): boolean {
-
-            return this.ui.pendingBetCommand instanceof FoldCommand;
-
-        },
-
-        isAnteActivated: function (): boolean {
-
-            return this.ui.pendingBetCommand instanceof AnteCommand;
-
-        },
-
-        isCheckAllowed: function (): boolean {
-
-            return this.ui.myCall && this.ui.myCall.chipsAdded === 0;
-
-        },
-
-        isCheckActivated: function (): boolean {
-
-            return this.ui.pendingBetCommand instanceof CheckCommand;
-
-        },
-
-        isCallAllowed: function (): boolean {
-
-            return this.ui.myCall!.chipsAdded > 0;
-
-        },
-
-        isCallActivated: function (): Boolean {
-
-            return this.ui.pendingBetCommand instanceof CallCommand;
-            
-        },
-
-        isLimitRaiseAllowed: function (): boolean {
-
-            return this.ui.myMinRaise && this.ui.myMaxRaise && this.ui.myMinRaise.chipsAdded == this.ui.myMaxRaise.chipsAdded;
-
-        },
-
-        isRaiseActivated: function (): boolean {
-
-            return this.ui.pendingBetCommand instanceof RaiseCommand;
-
-        },
-
-        betDescription: function (): string {
-
-            return this.table.betStatus.numRaises > 0 ? 'Raise To' : 'Bet';
-
-        },
-
-        raiseDialogReady: function (): boolean {
-
-            return this.showRaise;
-
-        },
-
-        minRaise: function (): number {
-
-            return this.ui.myMinRaise ? this.ui.myMinRaise.totalBet : 0;
-
-        },
-
-        maxRaise: function (): number {
-
-            return this.ui.myMaxRaise ? this.ui.myMaxRaise.totalBet : 0;
-
-        }
-
-
-    },
     methods: {
 
         toggleFold: function (): void {
@@ -215,7 +199,7 @@ import { TableUI } from '../../table-ui';
 
             }
 
-            this.ui.setBetCommand(new FoldCommand(this.table.id));
+            this.ui.setBetCommand(new FoldCommand(tableState.getTableID.value));
 
         },
 
@@ -227,7 +211,7 @@ import { TableUI } from '../../table-ui';
 
             }
 
-            this.ui.setBetCommand(new AnteCommand(this.table.id));
+            this.ui.setBetCommand(new AnteCommand(tableState.getTableID.value));
 
         },
 
@@ -239,7 +223,7 @@ import { TableUI } from '../../table-ui';
 
             }
 
-            this.ui.setBetCommand(new CheckCommand(this.table.id));
+            this.ui.setBetCommand(new CheckCommand(tableState.getTableID.value));
 
         },
 
@@ -251,7 +235,7 @@ import { TableUI } from '../../table-ui';
 
             }
 
-            this.ui.setBetCommand(new CallCommand(this.table.id, this.ui.myCall.chipsAdded));
+            this.ui.setBetCommand(new CallCommand(tableState.getTableID.value, tableState.getMyCall.value.chipsAdded));
 
         },
 
@@ -263,7 +247,7 @@ import { TableUI } from '../../table-ui';
 
             }
 
-            this.ui.setBetCommand(new RaiseCommand(this.table.id, this.ui.myMinRaise.chipsAdded));
+            this.ui.setBetCommand(new RaiseCommand(tableState.getTableID.value, tableState.getMyMinRaise.value.chipsAdded));
 
         }
 

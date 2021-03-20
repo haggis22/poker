@@ -5,25 +5,61 @@ import { Game } from '@/app/games/game';
 import { Player } from '@/app/players/player';
 import { Seat } from '@/app/casino/tables/seat';
 import { Timer } from '@/app/timers/timer';
+import { TableState } from '@/app/casino/tables/states/table-state';
+import { BetCommand } from '@/app/commands/table/betting/bet-command';
+import { FoldCommand } from '@/app/commands/table/betting/fold-command';
+import { Bet } from '@/app/casino/tables/betting/bet';
+import { BetStatus } from '@/app/casino/tables/betting/bet-status';
+import { Card } from '@/app/cards/card';
+import { FacedownCard } from '@/app/cards/face-down-card';
+import { Hand } from '@/app/hands/hand';
 
 
 const state = reactive({
+
+    tableID: null as number,
 
     table: null as Table,
     game: null as Game,
     messages: [] as string[],
 
+    mySeatIndex: null as number,
+
     seatActions: new Map<number, string>(),
-    seatTimers: new Map<number, Timer>()
+    seatTimers: new Map<number, Timer>(),
+
+    // Key = seatIndex
+    // Value = array of cards that have been mucked
+    muckedCards: new Map<number, Array<Card | FacedownCard>>(),
+
+    // fields specific to acting in advance
+    pendingBetCommand: null as BetCommand | FoldCommand,
+    pendingBetNumRaises: null as number,
+
+    myCall: null as Bet,
+    myMinRaise: null as Bet,
+    myMaxRaise: null as Bet
+
 
 });
 
+
+const getTableID = computed((): number => state.tableID);
+
+const setTableID = (tableID: number) => { state.tableID = tableID; };
 
 const getTable = computed((): Table => state.table);
 
 const setTable = (table: Table): void => {
     state.table = table;
 };
+
+const setTableState = (tableState: TableState): void => {
+
+    state.table.state = tableState;
+
+};
+
 
 const getGame = computed(() => state.game);
 
@@ -39,13 +75,14 @@ const addMessage = (message: string): void => {
 
 }
 
-const getSeat = (seatIndex: number): Seat => {
+const getMySeatIndex = computed(() => state.mySeatIndex);
 
-    const table: Table = getTable.value;
+const setMySeatIndex = (seatIndex: number): void => {
 
-    return table?.seats[seatIndex];
+    state.mySeatIndex = seatIndex;
 
-};
+}
+
 
 const getPlayer = (seatIndex: number): Player => {
 
@@ -53,20 +90,14 @@ const getPlayer = (seatIndex: number): Player => {
 
     const seat = table?.seats[seatIndex];
     
-    return seat.player;
+    return table?.seats[seatIndex].player;
 
 };
 
 
 const setPlayer = (seatIndex: number, player: Player): boolean => {
 
-    let mattSeat: Seat = getSeat(0);
-    if (mattSeat) {
-        mattSeat.player.name = "Matthew";
-        mattSeat.player = player;
-    }
-
-    let seat: Seat = getSeat(seatIndex);
+    let seat: Seat = state.table.seats[seatIndex];
 
     if (seat) {
 
@@ -78,6 +109,56 @@ const setPlayer = (seatIndex: number, player: Player): boolean => {
     return false;
 
 }
+
+const setPlayerStatus = (userID: number, isSittingOut: boolean): boolean => {
+
+    for (let seat of state.table.seats) {
+
+        if (seat.player?.userID === userID) {
+
+            seat.player.isSittingOut = isSittingOut;
+            return true;
+
+        }
+
+    }
+
+    return false;
+
+}   // setPlayerStatus
+
+
+const setPlayerChips = (playerID: number, chips: number): boolean => {
+
+    for (let seat of state.table.seats) {
+
+        if (seat.player?.userID === playerID) {
+
+            seat.player.chips = chips;
+            return true;
+
+        }
+
+    }
+
+    return false;
+
+}  // setPlayerChips
+
+
+const setIsInHand = (seatIndex: number, isInHand: boolean): boolean => {
+
+    let seat: Seat = state.table.seats[seatIndex];
+    
+    if (seat) {
+        seat.isInHand = isInHand;
+        return true;
+    }
+
+    return false;
+
+}  // setIsInHand
+
 
 const getActions = computed((): Map<number, string> => state.seatActions);
 
@@ -170,11 +251,119 @@ const clearTimers = (): void => {
 
 }
 
+const getPendingBetCommand = computed((): BetCommand | FoldCommand => state.pendingBetCommand);
+
+const setPendingBetCommand = (command: BetCommand | FoldCommand): void => {
+
+    state.pendingBetCommand = command;
+
+};
+
+const getPendingBetNumRaises = computed(() => state.pendingBetNumRaises);
+
+const setPendingBetNumRaises = (numRaises: number): void => {
+
+    state.pendingBetNumRaises = numRaises;
+};
+
+const getMyCall = computed(() => state.myCall);
+
+const getMyMinRaise = computed(() => state.myMinRaise);
+
+const getMyMaxRaise = computed(() => state.myMaxRaise);
+
+const setMyCall = (call: Bet): void => {
+
+    state.myCall = call;
+
+};
+
+const setMyMinRaise = (raise: Bet): void => {
+
+    state.myMinRaise = raise;
+
+};
+
+const setMyMaxRaise = (raise: Bet): void => {
+
+    state.myMaxRaise = raise;
+
+};
+
+
+
+const getBetStatus = computed(() => state.table?.betStatus);
+
+const setBetStatus = (status: BetStatus): void => {
+
+    state.table.betStatus = status;
+
+};
+
+const setButtonIndex = (seatIndex: number): void => {
+
+    state.table.buttonIndex = seatIndex;
+
+};
+
+const dealCard = (seatIndex: number, card: Card | FacedownCard): void => {
+
+    state.table.seats[seatIndex].deal(card);
+
+};
+
+const setHand = (seatIndex: number, hand: Hand): void => {
+
+    state.table.seats[seatIndex].hand = hand;
+    
+};
+
+const clearHand = (seatIndex: number): (Card | FacedownCard)[] => {
+
+    return state.table.seats[seatIndex].clearHand();
+
+};
+
+const getMuckedCards = computed(() => state.muckedCards);
+
+const setMuckedCards = (seatIndex: number, cards: (Card | FacedownCard)[]): void => {
+
+    state.muckedCards.set(seatIndex, [...cards]);
+
+};
+
+const clearMuckedCards = (): void => {
+
+    state.muckedCards.clear();
+
+};
+
+const dealBoard = (cards: Card[]): void => {
+
+    for (let card of cards) {
+
+        state.table.board.deal(card);
+
+    }
+
+};
+
+const clearBoard = (): void => {
+
+    state.table.board.reset();
+
+};
+
+
 
 export const tableState = {
 
+    getTableID,
+    setTableID,
+
     getTable,
     setTable,
+    setTableState,
 
     getGame,
     setGame,
@@ -182,10 +371,16 @@ export const tableState = {
     getMessages,
     addMessage,
 
-    getSeat,
+    getMySeatIndex,
+    setMySeatIndex,
+
+    /* Seat mutations */
+    setIsInHand,
 
     getPlayer,
     setPlayer,
+    setPlayerStatus,
+    setPlayerChips,
 
     getActions,
     setAction,
@@ -195,7 +390,37 @@ export const tableState = {
     getTimers,
     startTimer,
     clearTimer,
-    clearTimers
+    clearTimers,
+
+    getPendingBetCommand,
+    setPendingBetCommand,
+    getPendingBetNumRaises,
+    setPendingBetNumRaises,
+
+    getMyCall, 
+    setMyCall,
+
+    getMyMinRaise,
+    setMyMinRaise,
+
+    getMyMaxRaise,
+    setMyMaxRaise,
+
+    getBetStatus,
+    setBetStatus,
+
+    setButtonIndex,
+
+    dealCard,
+    setHand,   // used for flipping cards over
+    clearHand,  // used for folding
+
+    getMuckedCards,
+    setMuckedCards,
+    clearMuckedCards,
+
+    dealBoard,
+    clearBoard
 
 };
 

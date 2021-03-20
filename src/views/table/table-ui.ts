@@ -14,7 +14,7 @@ import { Logger } from "../../app/logging/logger";
 import { TableConnectedAction } from "../../app/actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../app/commands/table/table-snapshot-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand } from "../../app/communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction } from "../../app/communication/serializable";
 import { Game } from "../../app/games/game";
 import { SetGameAction } from "../../app/actions/table/game/set-game-action";
 import { GameFactory } from "../../app/games/game-factory";
@@ -47,12 +47,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     public chipStacker: ChipStacker;
 
 
-    public mySeatIndex: number | null;
-
-    public myCall: Bet | null;
-    public myMinRaise: Bet | null;
-    public myMaxRaise: Bet | null;
-
     public currentBalance: number;
 
 
@@ -63,20 +57,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public messages: string[];
 
-    public isSittingOut: boolean | null;
-
     public isShowdownRequired: boolean;
 
     // indicates which cards were used in calculating the winning hand for a given pot
     private usedCards: Array<Card>;
-
-    // fields specific to acting in advance
-    public pendingBetCommand!: BetCommand | FoldCommand | null;
-    private pendingBetNumRaises!: number | null;
-
-    // Key = seatIndex
-    // Value = array of cards that have been mucked
-    public muckedCards: Map<number, Array<Card | FacedownCard>>;
 
     public dealerPositions: Map<number, UIPosition>;
     public playerPositions: Map<number, UIPosition>;
@@ -100,29 +84,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
-        this.mySeatIndex = null;
 
         this.clearLocalBets();
 
         this.betController = new BetController();
         this.chipStacker = new ChipStacker();
 
-        this.isSittingOut = null;
-
         this.isShowdownRequired = false;
         this.usedCards = new Array<Card>();
 
         this.currentBalance = null;
 
-        this.muckedCards = new Map<number, Array<Card | FacedownCard>>();
-
         this.setUpPositions();
 
         this.winningHand = null;
-
-        this.myCall = null;
-        this.myMinRaise = null;
-        this.myMaxRaise = null;
 
     }
 
@@ -283,6 +258,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             return this.dealBoardAction(action);
         }
 
+        if (action instanceof ClearBoardAction) {
+
+            return this.clearBoardAction(action);
+
+        }
+
         if (action instanceof HandCompleteAction) {
 
             return this.handCompleteAction(action);
@@ -316,6 +297,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof FoldAction) {
 
             return this.foldAction(action);
+
+        }
+
+        if (action instanceof ClearHandAction) {
+
+            return this.clearHandAction(action);
 
         }
 
@@ -428,8 +415,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public getMySeat(): Seat {
 
-        if (this.mySeatIndex != null && this.getTable()?.seats) {
-            return this.getTable().seats[this.mySeatIndex];
+        if (tableState.getMySeatIndex.value != null) {
+
+            return this.getTable().seats[tableState.getMySeatIndex.value];
+
         }
 
         return null;
@@ -459,17 +448,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         // See if I'm alreading sitting at the table
         let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.getUser().id);
 
-        this.mySeatIndex = mySeat ? mySeat.index : null;
-
-        /*
-        // Set up the Maps with default values so that they can be reactive
-        for (let seatIndex: number = 0; seatIndex < action.table.seats.length; seatIndex++) {
-
-            tableState.clearAction(seatIndex);
-            tableState.cleatTimer(seatIndex);
-
-        }
-        */
+        tableState.setMySeatIndex(mySeat ? mySeat.index : null);
 
     }  // tableSnapshotAction
 
@@ -481,10 +460,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (!game || game.id != action.gameID) {
 
             // Looks up the rules for the game based on ID, rather than passing a game object through the pipes
-            tableState.setGame((new GameFactory()).create(action.gameID));
-
-            game = this.getGame();
-            this.log(`The game is ${game.getName()}`);
+            let newGame = (new GameFactory()).create(action.gameID);
+            tableState.setGame(newGame);
+            this.log(`The game is ${newGame.getName()}`);
 
         }
 
@@ -516,17 +494,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
-
     public remainsToAnte(): boolean {
 
-        return this.mySeatIndex != null && this.getTable().state instanceof BlindsAndAntesState && this.myCall != null;
-        // && (this.table.seats[this.mySeatIndex].player.isSittingOut === null);
+        return tableState.getMySeatIndex.value != null && this.getTable().state instanceof BlindsAndAntesState && tableState.getMyCall.value != null;
+        // && (this.table.seats[tableState.getMySeatIndex.value].player.isSittingOut === null);
 
     }
 
     public remainsToAct(): boolean {
 
-        return this.mySeatIndex != null && this.getTable().state instanceof BetState && (this.getTable().betStatus.seatIndex === this.mySeatIndex || this.getTable().betStatus.doesSeatRemainToAct(this.mySeatIndex));
+        let mySeatIndex: number = tableState.getMySeatIndex.value;
+
+        return  mySeatIndex != null && this.getTable().state instanceof BetState && (this.getTable().betStatus.seatIndex === mySeatIndex || this.getTable().betStatus.doesSeatRemainToAct(mySeatIndex));
 
     }
     
@@ -542,7 +521,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             this.log(message);
 
             if (action.player.userID === this.getUser().id) {
-                this.mySeatIndex = action.seatIndex;
+                tableState.setMySeatIndex(action.seatIndex);
             }
 
         }
@@ -552,13 +531,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private seatVacatedAction(action: SeatVacatedAction): void {
 
-        let seat = action.seatIndex < this.getTable().seats.length ? this.getTable().seats[action.seatIndex] : null;
+        const result = tableState.setPlayer(action.seatIndex, /* player */ null);
 
-        if (seat) {
+        if (result) {
 
-            if (seat.index === this.mySeatIndex) {
-                this.mySeatIndex = null;
+            if (action.seatIndex === tableState.getMySeatIndex.value) {
+                tableState.setMySeatIndex(null);
             }
+
+            let seat: Seat = this.getTable().seats[action.seatIndex];
 
             let message = `${seat.getSeatName()} is now open`;
             tableState.addMessage(message);
@@ -574,11 +555,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private setStatusAction(action: SetStatusAction): void {
 
-        if (this.getUser()?.id === action.userID) {
-
-            this.isSittingOut = action.isSittingOut;
-
-        }
+        tableState.setPlayerStatus(action.userID, action.isSittingOut);
 
     }  // setStatus
 
@@ -618,14 +595,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private stackUpdateAction(action: StackUpdateAction): void {
 
-        let player = this.findPlayer(action.playerID);
-
-        if (player) {
-
-            player.chips = action.chips;
-            this.log(`${player.name} now has ${this.chipFormatter.format(action.chips)}`);
-    
-        }
+        tableState.setPlayerChips(action.playerID, action.chips);
 
     }  // updateStack
 
@@ -637,11 +607,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    private clearLocalBets(): void {
+    private clearRequiredBetValues(): void {
 
         // null is different from 0 in that it indicates that the given option is not even available
-        this.myCall = this.myMinRaise = this.myMaxRaise = null;
+        tableState.setMyCall(null);
+        tableState.setMyMinRaise(null);
+        tableState.setMyMaxRaise(null);
 
+
+    }  // clearRequiredBetLimits
+
+
+    private clearLocalBets(): void {
+
+        this.clearRequiredBetValues();
         this.clearBetCommand();
 
     }
@@ -649,32 +628,27 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private tableStateAction(action: TableStateAction): void {
 
-        if (this.getTable()) {
+        tableState.setTableState(action.state);
 
-            let state = this.getTable().state;
+        this.clearLocalBets();
 
-            this.clearLocalBets();
+        if (action.state instanceof StartHandState) {
 
-            if (state instanceof StartHandState) {
-
-                return this.startHand();
-
-            }
-
-            if (state instanceof BetState) {
-
-                return this.betState();
-
-            }
-
-            if (state instanceof BlindsAndAntesState) {
-
-                return this.anteState();
-
-            }
+            return this.startHand();
 
         }
 
+        if (action.state instanceof BetState) {
+
+            return this.betState();
+
+        }
+
+        if (action.state instanceof BlindsAndAntesState) {
+
+            return this.anteState();
+
+        }
 
     }  // changeTableState
 
@@ -702,14 +676,16 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            this.myCall = this.betController.calculateCall(this.getTable(), seat);
-            this.myMinRaise = this.betController.calculateMinimumRaise(this.getTable(), seat, this.myCall);
-            this.myMaxRaise = this.betController.calculateMaximumRaise(this.getTable(), seat, this.myCall);
+            let myCall: Bet = this.betController.calculateCall(this.getTable(), seat);
+
+            tableState.setMyCall(myCall);
+            tableState.setMyMinRaise(this.betController.calculateMinimumRaise(this.getTable(), seat, myCall));
+            tableState.setMyMaxRaise(this.betController.calculateMaximumRaise(this.getTable(), seat, myCall));
 
         }
         else {
 
-            this.myCall = this.myMinRaise = this.myMaxRaise = null;
+            this.clearRequiredBetValues();
 
         }
 
@@ -720,13 +696,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat: Seat = this.getMySeat();
 
+        this.clearRequiredBetValues();
+
         if (seat && seat.isInHand) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            this.myCall = this.betController.calculateCall(this.getTable(), seat);
+            tableState.setMyCall(this.betController.calculateCall(this.getTable(), seat));
 
-            // no betting, only calling, with antes
-            this.myMinRaise = this.myMaxRaise = null;
+            // no betting, only calling, with antes, so nothing to do for myMinRaise or myMaxRaise
 
             // If I am marked as "not sitting out" then ready my blinds & ante bet
             if (seat.player.isSittingOut === false) {
@@ -736,11 +713,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             }  
 
         }
-        else {
-
-            this.myCall = this.myMinRaise = this.myMaxRaise = null;
-
-        }
 
     }  // anteState
 
@@ -748,14 +720,18 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private updateBetsAction(action: UpdateBetsAction): void {
 
+        tableState.setBetStatus(action.betStatus);
+
         let table: Table = this.getTable();
 
         this.log(`Seats To Act: [ ${action.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
         this.log(`Table Seats To Act: [ ${table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
 
-        if (this.pendingBetCommand) {
+        let pendingBetNumRaises: number = tableState.getPendingBetNumRaises.value;
 
-            if (this.pendingBetNumRaises == null || action.betStatus.numRaises > this.pendingBetNumRaises) {
+        if (tableState.getPendingBetCommand.value) {
+
+            if (pendingBetNumRaises == null || action.betStatus.numRaises > pendingBetNumRaises) {
 
                 // TODO: Maybe leave in place if it is Call Any, or a raise more than what the action took it to
                 this.clearBetCommand();
@@ -787,7 +763,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private moveButtonAction(action: MoveButtonAction): void {
 
-        this.getTable().buttonIndex = action.seatIndex;
+        tableState.setButtonIndex(action.seatIndex);
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -799,6 +775,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
     private dealCardAction(action: DealCardAction): void {
+
+        tableState.dealCard(action.seatIndex, action.card);
 
         let seat = this.findSeat(action.seatIndex);
 
@@ -828,15 +806,23 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private dealBoardAction(action: DealBoardAction): void {
 
+        tableState.dealBoard(action.cards);
 
         let message: string = `The board is dealt ${ action.cards.map(card => this.describeCard(card)).join(" ") }`;
 
         tableState.addMessage(message);
         this.log(message);
 
-    }   // dealBoard
+    }   // dealBoardAction
 
 
+    private clearBoardAction(action: ClearBoardAction): void {
+
+        tableState.clearBoard();
+
+    }
+
+    
     private handCompleteAction(action: HandCompleteAction): void {
 
         // If we have pots, then we can't have any WonPots - clear 'em
@@ -846,7 +832,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.isShowdownRequired = false;
         this.usedCards.length = 0;
 
-        this.muckedCards.clear();
+        tableState.clearMuckedCards();
 
         this.winningHand = null;
 
@@ -855,13 +841,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private isInHandAction(action: IsInHandAction): void {
 
-        let seat = this.findSeat(action.seatIndex);
-
-        if (seat) {
-
-            // this.log(`${seat.getName()} isInHandssssss: ${action.isInHand}`);
-
-        }
+        tableState.setIsInHand(action.seatIndex, action.isInHand);
 
     }  // isInHandAction
 
@@ -879,17 +859,23 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let mySeat: Seat = this.getMySeat();
 
-        let table: Table = this.getTable();
+        let table: Table = tableState.getTable.value;
 
-        this.myCall = this.betController.calculateCall(table, mySeat);
+        let myCall: Bet = this.betController.calculateCall(table, mySeat);
+        let myMinRaise: Bet = this.betController.calculateMinimumRaise(table, mySeat, myCall);
+        let myMaxRaise: Bet = this.betController.calculateMaximumRaise(table, mySeat, myCall);
+
+        tableState.setMyCall(myCall);
 
         // Calculate the min and max raises allowed here
-        this.myMinRaise = this.betController.calculateMinimumRaise(table, mySeat, this.myCall);
-        this.myMaxRaise = this.betController.calculateMaximumRaise(table, mySeat, this.myCall);
+        tableState.setMyMinRaise(myMinRaise);
+        tableState.setMyMaxRaise(myMaxRaise);
 
-        if (this.pendingBetCommand instanceof CallCommand) {
+        let pendingBetCommand: BetCommand | FoldCommand = tableState.getPendingBetCommand.value;
 
-            if (this.myCall == null) {
+        if (pendingBetCommand instanceof CallCommand) {
+
+            if (myCall == null) {
 
                 this.clearBetCommand();
 
@@ -898,9 +884,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
 
         // if they have already specified a bet then make sure it is still within this range
-        else if (this.pendingBetCommand instanceof RaiseCommand) {
+        else if (pendingBetCommand instanceof RaiseCommand) {
 
-            if (this.myMinRaise == null) {
+            if (myMinRaise == null) {
 
                 // they are not eligible to bet/raise, so clear their action
                 this.clearBetCommand();
@@ -908,14 +894,14 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             }
 
             // they are set to bet less than the allowed amount, so clear their action
-            else if (this.pendingBetCommand.amount < this.myMinRaise.chipsAdded) {
+            else if (pendingBetCommand.amount < myMinRaise.chipsAdded) {
 
                 this.clearBetCommand();
 
             }
 
             // they are set to bet more than the allowed amount, so clear their action
-            else if (this.myMaxRaise && this.pendingBetCommand.amount > this.myMaxRaise.chipsAdded) {
+            else if (myMaxRaise && pendingBetCommand.amount > myMaxRaise.chipsAdded) {
 
                 this.clearBetCommand();
 
@@ -925,7 +911,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action.timesUp > Date.now()) {
 
-            if (action.betStatus.seatIndex == this.mySeatIndex) {
+            if (action.betStatus.seatIndex === tableState.getMySeatIndex.value) {
 
                 // if we had a betting action readied, then send it now
                 if (this.checkPendingBetCommand()) {
@@ -959,15 +945,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         tableState.clearTimers();
 
-        this.myCall = this.myMinRaise = this.myMaxRaise = null;
+        this.clearRequiredBetValues();
 
         if (anteSeat) {
 
             if (action.timesUp > Date.now()) {
 
-                if (anteSeatIndex == this.mySeatIndex) {
+                if (anteSeatIndex == tableState.getMySeatIndex.value) {
 
-                    this.myCall = this.betController.calculateCall(table, anteSeat);
+                    tableState.setMyCall(this.betController.calculateCall(table, anteSeat));
 
                     // if we had a betting action readied, then send it now
                     if (this.checkPendingBetCommand()) {
@@ -1001,7 +987,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         tableState.clearTimer(action.seatIndex);
 
-        if (action.seatIndex == this.mySeatIndex) {
+        if (action.seatIndex == tableState.getMySeatIndex.value) {
 
             // I have made a bet, so clear out my planned betting amounts, or they can be used the next time
             this.clearLocalBets();
@@ -1059,15 +1045,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private foldAction(action: FoldAction): void {
 
-        let seat = this.findSeat(action.seatIndex);
-
         tableState.clearTimer(action.seatIndex);
 
-        if (!this.muckedCards.get(action.seatIndex)) {
-            this.muckedCards.set(action.seatIndex, new Array<Card | FacedownCard>());
-        }
+        tableState.clearHand(action.seatIndex);
 
-        this.muckedCards.get(action.seatIndex)!.push(...action.cards);
+        tableState.setMuckedCards(action.seatIndex, action.cards);
+
+        let seat = this.findSeat(action.seatIndex);
 
         let message: string = `${seat.getName()} folds`;
 
@@ -1076,17 +1060,24 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         tableState.setAction(seat.index, 'FOLD');
 
-
-
-
     }  // fold
+
+
+    private clearHandAction(action: ClearHandAction): void {
+
+        tableState.clearHand(action.seatIndex);
+
+    }
+
 
 
     private flipCardsAction(action: FlipCardsAction): void {
 
+        tableState.setHand(action.seatIndex, action.hand);
+
         let seat = this.findSeat(action.seatIndex);
 
-        if (seat.hand && seat.hand.cards && seat.hand.cards.length) {
+        if (seat.hand?.cards?.length) {
 
             let message: string = `${seat.getName()} has ${seat.hand.cards.map(card => card.toString()).join(" ")}`;
             tableState.addMessage(message);
@@ -1094,7 +1085,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-    }  // flipCards
+    }  // flipCardsAction
 
 
     private declareHandAction(action: DeclareHandAction): void {
@@ -1238,17 +1229,17 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public clearBetCommand(): void {
 
-        this.pendingBetCommand = null;
-        this.pendingBetNumRaises = null;
+        tableState.setPendingBetCommand(null);
+        tableState.setPendingBetNumRaises(null);
 
     }
 
     public setBetCommand(betCommand: BetCommand | FoldCommand) {
 
-        this.pendingBetCommand = betCommand;
+        tableState.setPendingBetCommand(betCommand);
 
         // Remember the level of action when this bet was set - if it goes up then we don't want to keep doing this action
-        this.pendingBetNumRaises = this.getTable().betStatus.numRaises;
+        tableState.setPendingBetNumRaises(tableState.getBetStatus.value.numRaises);
 
         setTimeout(() => { this.checkPendingBetCommand(); }, 50);
 
@@ -1259,19 +1250,19 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         const table: Table = this.getTable();
 
-        if (this.pendingBetCommand && this.mySeatIndex != null) {
+        let pendingBetCommand = tableState.getPendingBetCommand.value;
+
+        if (pendingBetCommand && tableState.getMySeatIndex.value != null) {
 
             if (table?.state instanceof BlindsAndAntesState) {
 
-                if (table?.betStatus?.forcedBets?.seatIndex == this.mySeatIndex) {
-
-                    let command: BetCommand | FoldCommand = this.pendingBetCommand;
+                if (table?.betStatus?.forcedBets?.seatIndex == tableState.getMySeatIndex.value) {
 
                     this.clearBetCommand();
 
-                    if (command instanceof AnteCommand) {
+                    if (pendingBetCommand instanceof AnteCommand) {
 
-                        this.broadcastCommand(command);
+                        this.broadcastCommand(pendingBetCommand);
                         return true;
 
                     }
@@ -1283,13 +1274,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             // TODO: Validate first against local BetController and only send if valid?
             else if (this.getTable().state instanceof BetState) {
 
-                if (table.betStatus && table.betStatus.seatIndex == this.mySeatIndex) {
-
-                    let command: BetCommand | FoldCommand = this.pendingBetCommand;
+                if (table.betStatus && table.betStatus.seatIndex == tableState.getMySeatIndex.value) {
 
                     this.clearBetCommand();
 
-                    this.broadcastCommand(command);
+                    this.broadcastCommand(pendingBetCommand);
                     return true;
 
                 }
@@ -1301,19 +1290,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         return false;
 
     }   // checkPendingBetCommand
-
-
-    public getMuckedCards(seatIndex: number): Array<Card | FacedownCard> {
-
-        if (this.muckedCards && this.muckedCards.get(seatIndex)) {
-
-            return [...this.muckedCards.get(seatIndex)];
-
-        }
-
-        return [];
-
-    }  // getMuckedCards
 
 
     public isActionOn(seatIndex: number): boolean {

@@ -2,7 +2,7 @@
 
     <div>
         
-        <div v-if="ui != null && table != null">
+        <div v-if="table != null">
             <table-component :ui="ui"></table-component>
             <chat-component :ui="ui"></chat-component>
             <log-component></log-component>
@@ -21,12 +21,12 @@
 
 <script lang="ts">
 
-    import { defineComponent, reactive } from "vue";
+    import { defineComponent, computed, reactive, ref } from "vue";
+    import { useRoute } from 'vue-router';
 
     import { Table } from "@/app/casino/tables/table";
     import { TableUI } from './table-ui';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
-    import { TableWatcher } from '../../app/casino/tables/table-watcher';
     import { GameClient } from '../../app/communication/client-side/game-client';
     import { BrowserWebSocketWrapper } from '../../app/communication/client-side/browser-web-socket-wrapper';
 
@@ -49,14 +49,45 @@
 
         setup() {
 
-            const values = {
+            const route = useRoute();
 
-                table: reactive(tableState.getTable)
+            const tableID = ref(Number(route.params.tableID));
+            const ui = ref(null as TableUI);
+
+            const table = computed((): Table => tableState.getTable.value);
+
+            const ws = new WebSocket('ws://localhost:3000');
+
+            ws.addEventListener('open', () => {
+
+                console.log('Connection opened');
+
+                ui.value = new TableUI(tableID.value, new MoneyFormatter());
+                //                let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
+                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
+
+                // Now join all the links in the chain
+                ui.value.registerCommandHandler(gameClient);
+                gameClient.registerMessageHandler(ui.value);
+
+                /*
+                                tableWatcher.registerMessageHandler(ui);
+                                tableWatcher.registerCommandHandler(gameClient);
+                */
+
+                ui.value.authenticate();
+
+            });
+
+            return {
+
+                tableID,
+                ui,
+                ws,
+
+                table
 
             };
-
-            return values;
-
 
         },
 
@@ -69,54 +100,6 @@
             ChatComponent
 
         },
-        data() {
-
-            let values = {
-
-                tableID: Number(this.$route.params.tableID),
-
-                ui: null as TableUI,
-                ws: null as WebSocket
-
-            };
-
-            return values;
-
-        },
-        computed: {
-
-
-        },
-        created() {
-
-            const ws = new WebSocket('ws://localhost:3000');
-
-            ws.addEventListener('open', () => {
-
-                console.log('Connection opened');
-
-                let ui: TableUI = new TableUI(this.tableID, new MoneyFormatter());
-//                let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
-                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
-
-                // Now join all the links in the chain
-                ui.registerCommandHandler(gameClient);
-                gameClient.registerMessageHandler(ui);
-
-/*
-                tableWatcher.registerMessageHandler(ui);
-                tableWatcher.registerCommandHandler(gameClient);
-*/
-
-
-                this.ui = ui;
-                this.ws = ws;
-
-                ui.authenticate();
-
-            });
-
-        }
 
     });
 

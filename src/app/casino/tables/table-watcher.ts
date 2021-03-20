@@ -390,9 +390,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
             this.log('Could not find seat');
         }
 
-
-
-    }  // setPlayerActive
+    }  // isInHandAction
 
 
 
@@ -489,19 +487,11 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     }  // anteTurn
 
 
-    private isSeatEligibleToAnte(seat: Seat): boolean {
-
-        return seat && seat.player && !seat.player.isSittingOut && seat.player.chips > 0;
-
-    }
-
-
-
     private betAction(action: BetAction): void {
 
         // For now, we're not doing anything - we'll wait for the UpdateBetsAction
 
-    }  // bet
+    }  // betAction
 
 
     private flipCardsAction(action: FlipCardsAction): void {
