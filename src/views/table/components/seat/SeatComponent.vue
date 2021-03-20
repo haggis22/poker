@@ -1,9 +1,7 @@
 ﻿<template>
     <div v-if="seat" :class="seatClasses">
         <div class="name">
-            <div>Player null? {{ player == null }}</div>
-            <div>Seat {{ seat.player?.name }}</div>
-            <span>P: {{ player?.name }}</span>
+            <span v-if="player">{{ player.name }}</span>
         </div>
         <div class="avatar">
             <div class="action-container">
@@ -95,9 +93,9 @@
 
             const table = computed((): Table => tableState.getTable.value);
 
-            const seat = computed((): Seat => { return table.value?.seats[seatIndex]; });
+            const seat = computed((): Seat => { return table.value.seats[seatIndex]; });
 
-            const player = computed(() => { return table.value?.seats[seatIndex].player; });
+            const player = computed(() => { return seat.value?.player; });
 
             const chips = computed((): number => player.value?.chips);
 

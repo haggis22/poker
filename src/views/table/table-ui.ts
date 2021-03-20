@@ -787,7 +787,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private moveButtonAction(action: MoveButtonAction): void {
 
-        let seat = this.findSeat(this.getTable().buttonIndex);
+        this.getTable().buttonIndex = action.seatIndex;
+
+        let seat = this.findSeat(action.seatIndex);
 
         let message: string = `${seat.getName()} now has the button`;
         tableState.addMessage(message);

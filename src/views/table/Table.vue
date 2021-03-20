@@ -96,16 +96,18 @@
                 console.log('Connection opened');
 
                 let ui: TableUI = new TableUI(this.tableID, new MoneyFormatter());
-                let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
+//                let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
                 let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
 
                 // Now join all the links in the chain
-                ui.registerCommandHandler(tableWatcher);
+                ui.registerCommandHandler(gameClient);
+                gameClient.registerMessageHandler(ui);
 
+/*
                 tableWatcher.registerMessageHandler(ui);
                 tableWatcher.registerCommandHandler(gameClient);
+*/
 
-                gameClient.registerMessageHandler(tableWatcher);
 
                 this.ui = ui;
                 this.ws = ws;

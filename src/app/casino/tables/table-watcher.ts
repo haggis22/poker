@@ -343,7 +343,6 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
         if (seat) {
 
             seat.player = action.player;
-
             // this.log(` ${action.player.name} sat in ${seat.getSeatName()}`);
 
         }

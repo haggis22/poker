@@ -63,6 +63,7 @@ const setPlayer = (seatIndex: number, player: Player): boolean => {
     let mattSeat: Seat = getSeat(0);
     if (mattSeat) {
         mattSeat.player.name = "Matthew";
+        mattSeat.player = player;
     }
 
     let seat: Seat = getSeat(seatIndex);
