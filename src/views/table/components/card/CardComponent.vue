@@ -21,14 +21,15 @@
 
 <script lang="ts">
 
-import './card.scss';
+    import './card.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed, reactive, onMounted } from 'vue';
 
     import { Card } from '@/app/cards/card';
     import { FacedownCard } from '@/app/cards/face-down-card';
 
     import { CardUI } from '../../card-ui';
+    import { tableState } from '@/store/table-state';
 
     const CardComponent = defineComponent({
 
@@ -49,100 +50,83 @@ import './card.scss';
                 type: Boolean,
                 required: false
             },
-            isShowdown: {
-                type: Boolean,
-                required: false
-            },
             isUsed: {
                 type: Boolean,
                 required: false
             }
-        },
-
-    data() {
-
-        let values =
-        {
-            cardUI: new CardUI(this.index)
-        };
-
-        return values;
-
-    },
-    mounted() {
-
-        this.$emit('card-created', this.cardUI);
-
-    },
-    computed: {
-
-        isVisible: function (): boolean {
-
-            return this.cardUI.top != null;
 
         },
-        isFaceUp: function (): boolean {
+        setup(props, context) {
 
-            return this.card instanceof Card;
+            const cardUI = reactive(new CardUI(props.index));
 
-        },
-        top: function (): number {
+            const isVisible = computed((): boolean => cardUI.top != null);
+            const isFaceUp = computed((): boolean => props.card instanceof Card);
 
-            return this.cardUI.top - (this.isShowdown && this.isUsed ? 10 : 0);
+            const top = computed((): number => cardUI.top - (tableState.getShowdownRequired.value && (props.isUsed ? 10 : 0)));
 
-        },
-        left: function (): number {
+            const left = computed((): number => cardUI.left);
 
-            return this.cardUI.left;
+            const cardClasses = computed(() => {
 
-        },
-        cardClasses: function () {
+                let classes: string[] = ['card', 'card-small-2'];
 
-            let classes: string[] = [ 'card', 'card-small-2' ];
+                if (props.card instanceof Card) {
 
-            if (this.card instanceof Card) {
+                    classes.push(props.card.suit.text);
 
-                classes.push(this.card.suit.text);
+                    if (cardUI.isFacedown) {
+                        classes.push('face-down');
+                    }
 
-                if (this.cardUI.isFacedown) {
+                }
+                else {
                     classes.push('face-down');
                 }
 
-            }
-            else {
-                classes.push('face-down');
-            }
+                if (props.isGhost) {
+                    classes.push('ghost');
+                }
 
-            if (this.isGhost) {
-                classes.push('ghost');
-            }
+                if (props.isFolding) {
+                    classes.push('folding');
+                }
 
-            if (this.isFolding) {
-                classes.push('folding');
-            }
+                if (tableState.getShowdownRequired.value) {
 
-            if (this.isShowdown) {
+                    classes.push('showdown');
 
-                classes.push('showdown');
+                    if (props.isUsed) {
 
-                if (this.isUsed) {
+                        classes.push('used');
 
-                    classes.push('used');
+                    }
 
                 }
 
-            }
+                return classes;
 
-            return classes;
+            });
+
+            onMounted(() => {
+
+                context.emit('card-created', cardUI);
+
+            });
+
+            return {
+
+                isVisible,
+                isFaceUp,
+                top,
+                left,
+                cardClasses
+
+            };
 
         }
 
-    },
-    methods: {
-
-    }
-
-});
+    });
 
     
 export default CardComponent;

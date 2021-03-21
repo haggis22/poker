@@ -4,7 +4,6 @@
                         :key="`card-${index}`"
                         :card="card"
                         :index="index"
-                        :is-showdown="ui.isShowdownRequired"
                         :is-used="ui.isCardUsed(card)"
                         @card-created="cardCreated"></card-component>
     </div>
@@ -13,91 +12,88 @@
 
 <script lang="ts">
 
+    import './board.scss';
 
-import './board.scss';
+    import { defineComponent, computed } from 'vue';
 
-    import { defineComponent } from 'vue';
-
-import { Board } from '@/app/casino/tables/boards/board';
-import { UIPosition } from '@/app/ui/ui-position';
-import { CardUI } from '../../card-ui';
-import { TableUI } from '../../table-ui';
-import CardComponent from '../card/CardComponent.vue';
+    import { Board } from '@/app/casino/tables/boards/board';
+    import { UIPosition } from '@/app/ui/ui-position';
+    import { CardUI } from '../../card-ui';
+    import { TableUI } from '../../table-ui';
+    import CardComponent from '../card/CardComponent.vue';
+    import { tableState } from '@/store/table-state';
 
 
     const BoardComponent = defineComponent({
 
-    props: {
-        board: {
-            type: Object as () => Board,
-            required: true
+        props: {
+
+            board: {
+                type: Object as () => Board,
+                required: true
+            },
+            ui: {
+                type: TableUI,
+                required: true
+            }
         },
-        ui: {
-            type: TableUI,
-            required: true
-        }
-    },
-    data() {
+        setup(props) {
 
-        let values = {
+            const dealerPosition = new UIPosition(245, 158);
 
-            dealerPosition: new UIPosition(245, 158)
+            const boardClasses = computed((): string[] => {
 
-        };
+                let classes = [];
 
-        return values;
+                if (tableState.getShowdownRequired.value) {
 
-    },
-    components: {
-        'card-component': CardComponent
-    },
-    computed: {
+                    classes.push('showdown');
 
-        boardClasses: function () {
+                }
 
-            let classes = [];
+                return classes;
 
-            if (this.ui.isShowdownRequired) {
+            });
 
-                classes.push('showdown');
+            const cardCreated = (card: CardUI): void => {
 
-            }
+                console.log(`Starting animation for ${card.index}`)
+                card.top = dealerPosition.top;
+                card.left = dealerPosition.left;
+                card.isFacedown = true;
 
-            return classes;
+                // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+                switch (card.index) {
 
-        }
+                    case 0:
+                    case 1:
+                    case 2:
+                        setTimeout(() => { animateFlop(card) }, 100);
+                        break;
 
-    },
-    methods: {
+                    default:
+                        setTimeout(() => { animateOthers(card) }, 100);
+                        break;
 
-        cardCreated(card: CardUI) {
+                }  // switch
 
-            console.log(`Starting animation for ${card.index}`)
-            card.top = this.dealerPosition.top;
-            card.left = this.dealerPosition.left;
-            card.isFacedown = true;
-
-            // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
-            switch (card.index) {
-
-                case 0:
-                case 1:
-                case 2:
-                    setTimeout(() => { animateFlop(card) }, 100);
-                    break;
-
-                default:
-                    setTimeout(() => { animateOthers(card) }, 100);
-                    break;
-
-            }
-
-        }
-
-    }
+            };
 
 
-});
+            return {
+
+                dealerPosition,
+                boardClasses,
+                cardCreated
+
+            };
+
+        },
+        components: {
+            'card-component': CardComponent
+        },
+
+    });
 
     function animateFlop(card: CardUI): void {
 

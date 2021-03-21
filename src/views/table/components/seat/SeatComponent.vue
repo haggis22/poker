@@ -115,10 +115,8 @@
                     classes.push('sitting-out');
                 }
 
-                if (props.ui.isShowdownRequired) {
-
+                if (tableState.getShowdownRequired.value) {
                     classes.push('showdown');
-
                 }
 
                 if (seat.value.isAllIn()) {

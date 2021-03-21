@@ -38,7 +38,7 @@
     
     import './table-menu.scss';
 
-    import { defineComponent, computed } from 'vue';
+    import { defineComponent, computed, ref } from 'vue';
 
     import { TableUI } from '../../table-ui';
     import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
@@ -47,129 +47,117 @@
 
     const TableMenuComponent = defineComponent({
 
-        setup() {
+        props: {
+
+            ui: {
+                type: TableUI,
+                required: true
+            },
+            isSittingOut: {
+                type: Boolean,
+                required: false
+            },
+
+        },
+        setup(props) {
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
+
+            const numAddChips = ref('1000');
+            const step = ref(100);
+            const showAddChips = ref(false);
+
+            const currentBalance = computed((): number => tableState.getCurrentBalance.value);
+
+            const addChipsButtonReady = computed((): boolean => !showAddChips.value);
+
+            const minBuyIn = computed((): number => showAddChips.value ? 0 : null);
+
+            const maxBuyIn = computed((): number => currentBalance.value);
+
+            const addChipsDialogReady = computed((): boolean => showAddChips.value && maxBuyIn.value > 0);
+
+            const setStatus = (event: Event): void => {
+
+                // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
+                if (event.target instanceof HTMLInputElement) {
+                    props.ui.sendCommand(new SetStatusCommand(tableState.getTableID.value, event.target.checked));
+                    // this.$emit('update:isSittingOut', event.target.checked);
+                }
+
+            };
+
+            const standUp = (): void => {
+
+                props.ui.sendCommand(new StandUpCommand(tableState.getTableID.value));
+
+            };
+
+            const checkBalance = (): void => {
+
+                props.ui.checkBalance();
+                showAddChips.value = true;
+
+            };
+
+            const buyIn = (): void => {
+
+                let numChips: number = parseInt(numAddChips.value, 10);
+
+                if (!isNaN(numChips)) {
+
+                    if (numChips === 0) {
+
+                        showAddChips.value = false;
+                        return;
+
+                    }
+
+                    if (numChips <= currentBalance.value) {
+
+                        props.ui.sendCommand(new AddChipsCommand(tableState.getTableID.value, numChips));
+                        showAddChips.value = false;
+
+                    }
+
+                }
+
+            };
+
+            const cancelBuyIn = (): void => {
+
+                showAddChips.value = false;
+
+            };
+
+
 
             return {
 
                 chipFormatter,
 
-                table: tableState.getTable.value
+                numAddChips,
+                step,
+                showAddChips,
+
+                currentBalance,
+                addChipsButtonReady,
+                minBuyIn,
+                maxBuyIn,
+                addChipsDialogReady,
+
+                setStatus,
+                standUp,
+                checkBalance,
+                buyIn,
+                cancelBuyIn
 
             };
 
         },
 
-    props: {
+    });
 
-        ui: {
-            type: TableUI,
-            required: true
-        },
-        isSittingOut: {
-            type: Boolean, 
-            required: false
-        },
-
-    },
-    data() {
-
-        return {
-            numAddChips: '1000',
-            step: 100,
-            showAddChips: false
-        };
-
-    },
-    computed: {
-
-        addChipsButtonReady: function (): boolean {
-
-            return !this.showAddChips;
-
-        },
-
-        minBuyIn: function (): number {
-
-            return this.showAddChips ? 0 : null;
-
-        },
-
-        maxBuyIn: function (): number {
-
-            return (this.showAddChips && this.ui) ? this.ui.currentBalance : null;
-
-        },
-
-        addChipsDialogReady: function (): boolean {
-
-            return this.showAddChips && this.maxBuyIn > 0;
-
-        }
-
-
-    },
-    methods: {
-
-        setStatus: function (event: Event): void {
-
-            // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
-            if (event.target instanceof HTMLInputElement) {
-                this.ui.sendCommand(new SetStatusCommand(this.table.id, event.target.checked));
-                this.$emit('update:isSittingOut', event.target.checked);
-            }
-
-        },
-
-        standUp: function (): void {
-
-            this.ui.sendCommand(new StandUpCommand(this.table.id));
-
-        },
-
-        checkBalance: function (): void {
-
-            this.ui.checkBalance();
-            this.showAddChips = true;
-
-        },
-
-        buyIn: function (): void {
-
-            let numChips = parseInt(this.numAddChips, 10);
-
-            if (!isNaN(numChips)) {
-
-                if (numChips === 0) {
-
-                    this.showAddChips = false;
-                    return;
-
-                }
-
-                if (numChips <= this.ui.currentBalance) {
-
-                    this.ui.sendCommand(new AddChipsCommand(this.table.id, numChips));
-                    this.showAddChips = false;
-
-                }
-
-            }
-
-        },
-        cancelBuyIn: function () {
-
-            this.showAddChips = false;
-
-        }
-
-
-
-    }
-
-});
-
-export default TableMenuComponent;
+    export default TableMenuComponent;
 
 </script>

@@ -23,7 +23,6 @@ import { HandCompleteAction } from "../../app/actions/table/game/hand-complete-a
 import { IChipFormatter } from "../../app/casino/tables/chips/chip-formatter";
 import { Timer } from "../../app/timers/timer";
 import { BetController } from "../../app/casino/tables/betting/bet-controller";
-import { ChipStacker } from "../../app/casino/tables/chips/chip-stacker";
 import { CurrentBalanceAction } from "../../app/actions/cashier/current-balance-action";
 import { UIPosition } from "../../app/ui/ui-position";
 
@@ -39,19 +38,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private commandHandlers: CommandHandler[];
 
-    public betController: BetController;
-    public chipStacker: ChipStacker;
-
-    public currentBalance: number;
-
     public wonPots: WonPot[];
 
     public isGatheringAntes: boolean;
     public isGatheringBets: boolean;
 
     public messages: string[];
-
-    public isShowdownRequired: boolean;
 
     // indicates which cards were used in calculating the winning hand for a given pot
     private usedCards: Array<Card>;
@@ -78,13 +70,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.clearLocalBets();
 
-        this.betController = new BetController();
-        this.chipStacker = new ChipStacker();
-
-        this.isShowdownRequired = false;
         this.usedCards = new Array<Card>();
-
-        this.currentBalance = null;
 
         this.setUpPositions();
 
@@ -418,7 +404,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public checkBalance(): void {
 
-        this.currentBalance = null;
+        tableState.setCurrentBalance(null);
         this.sendCommand(new CheckBalanceCommand());
 
     }   // checkBalance
@@ -426,7 +412,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private currentBalanceAction(action: CurrentBalanceAction): void {
 
-        this.currentBalance = action.balance;
+        tableState.setCurrentBalance(action.balance);
 
     }  // currentBalanceAction
 
@@ -642,11 +628,11 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            let myCall: Bet = this.betController.calculateCall(this.getTable(), seat);
+            let myCall: Bet = tableState.getBetController.value.calculateCall(this.getTable(), seat);
 
             tableState.setMyCall(myCall);
-            tableState.setMyMinRaise(this.betController.calculateMinimumRaise(this.getTable(), seat, myCall));
-            tableState.setMyMaxRaise(this.betController.calculateMaximumRaise(this.getTable(), seat, myCall));
+            tableState.setMyMinRaise(tableState.getBetController.value.calculateMinimumRaise(this.getTable(), seat, myCall));
+            tableState.setMyMaxRaise(tableState.getBetController.value.calculateMaximumRaise(this.getTable(), seat, myCall));
 
         }
         else {
@@ -667,7 +653,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat && seat.isInHand) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            tableState.setMyCall(this.betController.calculateCall(this.getTable(), seat));
+            tableState.setMyCall(tableState.getBetController.value.calculateCall(this.getTable(), seat));
 
             // no betting, only calling, with antes, so nothing to do for myMinRaise or myMaxRaise
 
@@ -795,7 +781,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.wonPots.length = 0;
 
         // showdown is no longer required - clear the flags that were highlighting cards
-        this.isShowdownRequired = false;
+        tableState.setShowdownRequired(false);
         this.usedCards.length = 0;
 
         tableState.clearMuckedCards();
@@ -829,9 +815,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let table: Table = tableState.getTable.value;
 
-        let myCall: Bet = this.betController.calculateCall(table, mySeat);
-        let myMinRaise: Bet = this.betController.calculateMinimumRaise(table, mySeat, myCall);
-        let myMaxRaise: Bet = this.betController.calculateMaximumRaise(table, mySeat, myCall);
+        let myCall: Bet = tableState.getBetController.value.calculateCall(table, mySeat);
+        let myMinRaise: Bet = tableState.getBetController.value.calculateMinimumRaise(table, mySeat, myCall);
+        let myMaxRaise: Bet = tableState.getBetController.value.calculateMaximumRaise(table, mySeat, myCall);
 
         tableState.setMyCall(myCall);
 
@@ -920,7 +906,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 if (anteSeatIndex == tableState.getMySeatIndex.value) {
 
-                    tableState.setMyCall(this.betController.calculateCall(table, anteSeat));
+                    tableState.setMyCall(tableState.getBetController.value.calculateCall(table, anteSeat));
 
                     // if we had a betting action readied, then send it now
                     if (this.checkPendingBetCommand()) {
@@ -1132,7 +1118,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private showdownAction(action: ShowdownAction): void {
 
-        this.isShowdownRequired = action.isShowdownRequired;
+        tableState.setShowdownRequired(action.isShowdownRequired);
 
     }  // showdown
 

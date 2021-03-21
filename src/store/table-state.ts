@@ -14,6 +14,7 @@ import { Card } from '@/app/cards/card';
 import { FacedownCard } from '@/app/cards/face-down-card';
 import { Hand } from '@/app/hands/hand';
 import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
+import { BetController } from '@/app/casino/tables/betting/bet-controller';
 
 
 const state = reactive({
@@ -40,8 +41,13 @@ const state = reactive({
 
     myCall: null as Bet,
     myMinRaise: null as Bet,
-    myMaxRaise: null as Bet
+    myMaxRaise: null as Bet,
 
+    betController: new BetController(),
+
+    currentBalance: null as number,
+
+    showdownRequired: false
 
 });
 
@@ -380,6 +386,22 @@ const clearBoard = (): void => {
 
 };
 
+const getBetController = computed((): BetController => state.betController);
+
+const getCurrentBalance = computed((): number => state.currentBalance);
+const setCurrentBalance = (balance: number) => {
+
+    state.currentBalance = balance;
+
+};
+
+const getShowdownRequired = computed((): boolean => state.showdownRequired);
+const setShowdownRequired = (isShowdownRequired: boolean) => {
+
+    state.showdownRequired = isShowdownRequired;
+
+};
+
 
 
 export const tableState = {
@@ -449,7 +471,16 @@ export const tableState = {
     clearMuckedCards,
 
     dealBoard,
-    clearBoard
+    clearBoard,
+
+    getBetController,
+
+    getCurrentBalance,
+    setCurrentBalance,
+
+    getShowdownRequired,
+    setShowdownRequired,
+
 
 };
 

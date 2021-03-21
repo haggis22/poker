@@ -1,42 +1,38 @@
 import { ChipStack } from "./chip-stack";
 import { Chip } from "./chip";
 
-export class ChipStacker {
-
-    private readonly DENOMINATIONS: Array<Chip> =
-        [
-            new Chip(50000, 'pink', 'white'),
-            new Chip(10000, 'black', 'white'),
-            new Chip(2500, 'green', 'white'),
-            new Chip(500, 'yellow', 'white'),
-            new Chip(100, 'blue', 'white'),
-            new Chip(50, 'darkred', 'white'),
-            new Chip(25, 'white', 'black')
-        ];
+const DENOMINATIONS: Array<Chip> =
+    [
+        new Chip(50000, 'pink', 'white'),
+        new Chip(10000, 'black', 'white'),
+        new Chip(2500, 'green', 'white'),
+        new Chip(500, 'yellow', 'white'),
+        new Chip(100, 'blue', 'white'),
+        new Chip(50, 'darkred', 'white'),
+        new Chip(25, 'white', 'black')
+    ];
 
 
-    public colorUp(amount: number): ChipStack[] {
+export function stackChips(amount: number): ChipStack[] {
 
-        let stacks: ChipStack[] = new Array<ChipStack>();
+    let stacks: ChipStack[] = new Array<ChipStack>();
 
-        for (let chip of this.DENOMINATIONS) {
+    for (let chip of DENOMINATIONS) {
 
-            if (amount >= chip.value) {
+        if (amount >= chip.value) {
 
-                let numChips: number = Math.floor(amount / chip.value);
+            let numChips: number = Math.floor(amount / chip.value);
 
-                stacks.push(new ChipStack(chip, numChips));
+            stacks.push(new ChipStack(chip, numChips));
 
-                amount = amount % chip.value;
+            amount = amount % chip.value;
 
-
-            }
 
         }
 
-        return stacks;
-
     }
 
+    return stacks;
 
 }
+

@@ -25,7 +25,7 @@ export class BetController {
 
 
 
-    private log(message: string): void {
+    public log(message: string): void {
 
         console.log('\x1b[31m%s\x1b[0m', `BetController ${message}`);
 
@@ -51,16 +51,6 @@ export class BetController {
     public clearBettorsToAct(status: BetStatus): void {
 
         status.seatIndexesRemainToAct.length = 0;
-
-    }
-
-
-    private clearRequiredBets(status: BetStatus): void {
-
-        for (let seatIndex in status.requiredBets)
-        {
-            delete status.requiredBets[seatIndex];
-        }
 
     }
 
@@ -145,7 +135,7 @@ export class BetController {
     }
 
 
-    private takeBet(status: BetStatus,
+    public takeBet(status: BetStatus,
                         seat: Seat,
                         betAmount: number,
                         betType: number,
@@ -538,7 +528,7 @@ export class BetController {
     }   // validateBet
 
 
-    private createPot(status: BetStatus): Pot {
+    public createPot(status: BetStatus): Pot {
 
         status.pots.push(new Pot(status.pots.length));
 
