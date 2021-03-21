@@ -15,7 +15,8 @@
                     <th>ID</th>
                     <th class="name">Name</th>
                     <th class="description">Desc</th>
-                    <th class="players">Seats</th>
+                    <th class="seats">Seats</th>
+                    <th class="players">Players</th>
                 </tr>
             </thead>
             <tbody>
@@ -91,13 +92,17 @@
     $font: "Times New Roman", serif;
 
     .table-tables {
+
         border: 2px solid black;
-        .name, .description
+
+        .name, 
+        .description,
+        .players
         {
             text-align: left;
         }
 
-        .players
+        .seats
         {
             text-align: center;
         }

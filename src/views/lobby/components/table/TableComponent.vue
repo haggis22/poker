@@ -4,7 +4,8 @@
         <td>{{ table.id }}</td>
         <td class="name"><router-link :to="{ name: 'Table' , params: {tableID: table.id}}" target="_blank">{{ table.name }}</router-link></td>
         <td class="description">{{ table.description }}</td>
-        <td class="players">{{ table.numPlayers }}/{{ table.numSeats }}</td>
+        <td class="seats">{{ table.players.length }}/{{ table.numSeats }}</td>
+        <td class="players">{{ playerNames }}</td>
     </tr>
 
 </template>
@@ -25,8 +26,18 @@
                 required: true
             },
 
+
+
         },
-        setup() {
+        setup(props) {
+
+            const playerNames = computed(() => props.table.players.join(", "));
+
+            return {
+
+                playerNames
+
+            };
 
         },
         components: {
@@ -41,12 +52,13 @@
 <style scoped lang="scss">
 
     .name,
-    .description
+    .description,
+    .players
     {
         text-align: left;
     }
 
-    .players
+    .seats
     {
         text-align: center;
     }
