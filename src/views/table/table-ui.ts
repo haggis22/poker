@@ -20,9 +20,7 @@ import { SetGameAction } from "../../app/actions/table/game/set-game-action";
 import { GameFactory } from "../../app/games/game-factory";
 import { WonPot } from "../../app/casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../../app/actions/table/game/hand-complete-action";
-import { IChipFormatter } from "../../app/casino/tables/chips/chip-formatter";
 import { Timer } from "../../app/timers/timer";
-import { BetController } from "../../app/casino/tables/betting/bet-controller";
 import { CurrentBalanceAction } from "../../app/actions/cashier/current-balance-action";
 import { UIPosition } from "../../app/ui/ui-position";
 
@@ -40,18 +38,9 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     public wonPots: WonPot[];
 
-    public isGatheringAntes: boolean;
-    public isGatheringBets: boolean;
-
-    public messages: string[];
-
-    // indicates which cards were used in calculating the winning hand for a given pot
-    private usedCards: Array<Card>;
-
     public dealerPositions: Map<number, UIPosition>;
     public playerPositions: Map<number, UIPosition>;
 
-    public winningHand: string | null;
 
 
 
@@ -63,18 +52,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             
         this.wonPots = [];
 
-        this.isGatheringAntes = this.isGatheringBets = false;
-
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
 
         this.clearLocalBets();
 
-        this.usedCards = new Array<Card>();
-
         this.setUpPositions();
-
-        this.winningHand = null;
 
     }
 
@@ -782,11 +765,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         // showdown is no longer required - clear the flags that were highlighting cards
         tableState.setShowdownRequired(false);
-        this.usedCards.length = 0;
 
+        tableState.clearUsedCards();
         tableState.clearMuckedCards();
-
-        this.winningHand = null;
+        tableState.setWinningHand(null);
 
     }  // handComplete
 
@@ -1073,12 +1055,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (pot.handEvaluation) {
 
-            this.winningHand = game?.handDescriber.describe(pot.handEvaluation);
-            handDescription = ` with ${game?.handDescriber.describe(pot.handEvaluation)}`;
+            let winningHand = game?.handDescriber.describe(pot.handEvaluation);
+            tableState.setWinningHand(winningHand);
+            handDescription = ` with ${winningHand}`;
 
         }
         else {
-            this.winningHand = null;
+            tableState.setWinningHand(null);
         }
 
         let message: string = seat.player
@@ -1125,31 +1108,20 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private potCardsUsedAction(action: PotCardsUsedAction): void {
 
-        this.usedCards.length = 0;
+        tableState.setUsedCards(action.cards);
 
-        for (let card of action.cards) {
-            this.usedCards.push(card);
-        }
-
-    }  // markUsedCards
-
-
-    public isCardUsed(card: Card | FacedownCard): boolean {
-
-        return this.usedCards && this.usedCards.find(usedCard => usedCard.equals(card)) != null;
-
-    }  // isCardUsed
+    }  // potCardsUsedAction
 
 
     private gatherBetsAction(action: GatherBetsAction): void {
 
-        this.isGatheringBets = true;
+        tableState.setGatheringBets(true);
 
     }  // gatherBets
 
     private gatherBetsCompleteAction(action: GatherBetsCompleteAction): void {
 
-        this.isGatheringBets = false;
+        tableState.setGatheringBets(false);
         tableState.clearActions();
 
     }  // gatherBetsComplete
@@ -1157,13 +1129,13 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private gatherAntesAction(action: GatherAntesAction): void {
 
-        this.isGatheringAntes  = true;
+        tableState.setGatheringAntes(true);
 
     }  // gatherAntes
 
     private gatherAntesCompleteAction(action: GatherAntesCompleteAction): void {
 
-        this.isGatheringAntes = false;
+        tableState.setGatheringAntes(false);
         tableState.clearActions();
 
     }  // gatherBetsComplete

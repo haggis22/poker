@@ -16,13 +16,11 @@
                 <dealer-box-component></dealer-box-component>
                 <bet-component v-for="bet in table.betStatus.bets"
                                :key="'bet-' + bet.seatIndex"
-                               :bet="bet"
-                               :ui="ui">
+                               :bet="bet">
                 </bet-component>
                 <bet-component v-for="ante in table.betStatus.antes"
                                :key="'ante-' + ante.seatIndex"
-                               :bet="ante"
-                               :ui="ui">
+                               :bet="ante">
                 </bet-component>
                 <pot-component v-for="pot in table.betStatus.pots"
                                :key="'pot-' + pot.index"
@@ -40,9 +38,7 @@
                 <board-component :board="table.board"
                                  :ui="ui">
                 </board-component>
-                <winning-hand-component v-if="ui.winningHand" 
-                                        :hand-description="ui.winningHand">
-                </winning-hand-component>
+                <winning-hand-component v-if="winningHand"></winning-hand-component>
             </div>
         </div><!-- table seats-6 -->
     </div>
@@ -52,7 +48,7 @@
 
     import './table.scss';
     import './table-seats-6.scss';
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { Table } from "@/app/casino/tables/table";
     import { TableUI } from '../../table-ui';
@@ -69,6 +65,7 @@
 
 
     const TableComponent = defineComponent({
+
         props: {
 
             ui: {
@@ -77,12 +74,20 @@
             }
 
         },
-        computed: {
+        setup(props) {
 
-            table: (): Table => tableState.getTable.value
+            const table = computed(() => tableState.getTable.value);
+
+            const winningHand = computed(() => tableState.getWinningHand.value);
+
+            return {
+
+                table,
+                winningHand
+
+            };
 
         },
-
         components: {
 
             SeatComponent,

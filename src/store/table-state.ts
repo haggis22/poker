@@ -47,7 +47,14 @@ const state = reactive({
 
     currentBalance: null as number,
 
-    showdownRequired: false
+    showdownRequired: false,
+    winningHand: null as string,
+
+    // indicates which cards were used in calculating the winning hand for a given pot
+    usedCards: [] as Card[],
+
+    gatheringAntes: false,
+    gatheringBets: false,
 
 });
 
@@ -402,6 +409,47 @@ const setShowdownRequired = (isShowdownRequired: boolean) => {
 
 };
 
+const getWinningHand = computed((): string => state.winningHand);
+const setWinningHand = (winner: string) => {
+
+    state.winningHand = winner;
+
+}
+
+const clearUsedCards = () => {
+
+    state.usedCards.length = 0;
+
+};
+
+const setUsedCards = (cards: Card[]): void => {
+
+    state.usedCards = [...cards];
+
+
+};
+
+const isCardUsed = (card: Card | FacedownCard) => {
+
+    // Has to be a face-up Card in order to be used
+    return card instanceof Card && state.usedCards.find(usedCard => usedCard.equals(card)) != null;
+
+};
+
+const getGatheringAntes = computed(() => state.gatheringAntes);
+const setGatheringAntes = (isGatheringAntes: boolean): void => {
+
+    state.gatheringAntes = isGatheringAntes;
+
+};
+
+const getGatheringBets = computed(() => state.gatheringBets);
+const setGatheringBets = (isGatheringBets: boolean): void => {
+
+    state.gatheringBets = isGatheringBets;
+
+};
+
 
 
 export const tableState = {
@@ -480,6 +528,18 @@ export const tableState = {
 
     getShowdownRequired,
     setShowdownRequired,
+
+    getWinningHand,
+    setWinningHand,
+
+    clearUsedCards,
+    setUsedCards,
+    isCardUsed,
+
+    getGatheringAntes,
+    setGatheringAntes,
+    getGatheringBets,
+    setGatheringBets
 
 
 };

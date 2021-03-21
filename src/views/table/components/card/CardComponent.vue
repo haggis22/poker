@@ -49,10 +49,6 @@
             isGhost: {
                 type: Boolean,
                 required: false
-            },
-            isUsed: {
-                type: Boolean,
-                required: false
             }
 
         },
@@ -63,7 +59,12 @@
             const isVisible = computed((): boolean => cardUI.top != null);
             const isFaceUp = computed((): boolean => props.card instanceof Card);
 
-            const top = computed((): number => cardUI.top - (tableState.getShowdownRequired.value && (props.isUsed ? 10 : 0)));
+            const isUsed = computed((): boolean => tableState.isCardUsed(props.card));
+
+            const top = computed((): number => {
+                return cardUI.top - (tableState.getShowdownRequired.value && (isUsed.value ? 10 : 0));
+
+            });
 
             const left = computed((): number => cardUI.left);
 
@@ -96,7 +97,7 @@
 
                     classes.push('showdown');
 
-                    if (props.isUsed) {
+                    if (isUsed.value) {
 
                         classes.push('used');
 

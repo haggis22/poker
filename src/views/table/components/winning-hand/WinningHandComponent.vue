@@ -1,6 +1,6 @@
 ﻿<template>
     <div :class="getClasses">
-        {{ handDescription }}
+        {{ winningHandDescription }}
     </div>
 </template>
 
@@ -8,62 +8,58 @@
 <script lang="ts">
 
 
-import './winning-hand.scss';
+    import './winning-hand.scss';
 
-import { defineComponent } from 'vue';
+    import { defineComponent, computed, ref, onMounted } from 'vue';
+    import { tableState } from '@/store/table-state';
 
     const WinningHandComponent = defineComponent ({
 
-    props: {
-        handDescription: {
-            type: String,
-            required: true
-        }
+        setup() {
 
-    },
-    data() {
+            const isAnnounced = ref(false);
+            const timer = ref(null as ReturnType<typeof setTimeout>);
 
-        let values = {
+            const winningHandDescription = computed(() => tableState.getWinningHand.value);
 
-            isAnnounced: false,
-            timer: null as ReturnType<typeof setTimeout>
+            const getClasses = computed((): string[] => {
 
-        };
+                let classes: string[] = ['winning-hand'];
 
-        return values;
+                if (isAnnounced.value) {
+                    classes.push('announced');
+                }
 
-    },
-    created() {
+                return classes;
 
-        // After only the briefest of pauses, we're going to have this bubble appear
-        this.timer = setTimeout(() => {
-
-            this.isAnnounced = true;
-
-        }, 10);
-
-    },
-    computed: {
-
-        getClasses: function () {
-
-            let classes: string[] = ['winning-hand'];
-
-            if (this.isAnnounced) {
-                classes.push('announced');
-            }
-
-            return classes;
-        }
-
-    },
-    methods: {
+            });
 
 
-    }
+            onMounted(() => {
 
-});
+                // After only the briefest of pauses, we're going to have this bubble appear
+                timer.value = setTimeout(() => {
 
-export default WinningHandComponent;
+                    isAnnounced.value = true;
+
+                }, 10);
+
+            });
+
+            return {
+
+                winningHandDescription,
+                getClasses,
+
+                isAnnounced,
+                timer
+
+            };
+
+        },
+
+    });
+
+    export default WinningHandComponent;
 
 </script>

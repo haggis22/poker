@@ -5,7 +5,6 @@
                         :card="card"
                         :index="index"
                         :is-showdown="ui.isShowdownRequired"
-                        :is-used="ui.isCardUsed(card)"
                         @card-created="cardCreated"></card-component>
     </div>
 </template>

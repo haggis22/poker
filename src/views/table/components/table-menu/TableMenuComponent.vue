@@ -59,7 +59,7 @@
             },
 
         },
-        setup(props) {
+        setup(props, context) {
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
@@ -82,7 +82,7 @@
                 // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
                 if (event.target instanceof HTMLInputElement) {
                     props.ui.sendCommand(new SetStatusCommand(tableState.getTableID.value, event.target.checked));
-                    // this.$emit('update:isSittingOut', event.target.checked);
+                    context.emit('update:isSittingOut', event.target.checked);
                 }
 
             };

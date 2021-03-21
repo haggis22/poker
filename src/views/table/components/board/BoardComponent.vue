@@ -4,7 +4,6 @@
                         :key="`card-${index}`"
                         :card="card"
                         :index="index"
-                        :is-used="ui.isCardUsed(card)"
                         @card-created="cardCreated"></card-component>
     </div>
 </template>

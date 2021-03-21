@@ -1,7 +1,6 @@
 ﻿<template>
     <div v-if="bet.totalBet > 0" :class="betClasses">
-        <chip-box-component :value="bet.totalBet"
-                            :chip-stacker="ui.chipStacker"></chip-box-component>
+        <chip-box-component :value="bet.totalBet"></chip-box-component>
         <div class="amount">{{ chipFormatter.format(bet.totalBet) }}</div>
     </div>
 </template>
@@ -11,100 +10,91 @@
 
 import './bet.scss';
 
-import { defineComponent, computed } from "vue";
+    import { defineComponent, computed, ref, onMounted } from "vue";
 
-import { Bet } from '@/app/casino/tables/betting/bet';
-import { TableUI } from '../../table-ui';
-import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
-import { tableState } from '@/store/table-state';
+    import { Bet } from '@/app/casino/tables/betting/bet';
+    import { TableUI } from '../../table-ui';
+    import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
+    import { tableState } from '@/store/table-state';
 
-const BetComponent = defineComponent ({
+    const BetComponent = defineComponent ({
 
-    props: {
-        bet: {
-            type: Bet,
-            required: true
+        props: {
+            bet: {
+                type: Bet,
+                required: true
+            }
         },
-        ui: {
-            type: TableUI,
-            required: true
-        }
-    },
-    setup() {
+        setup(props) {
 
-        const chipFormatter = computed(() => tableState.getChipFormatter.value);
+            const isAnnounced = ref(false);
+            const timer = ref(null as ReturnType<typeof setTimeout>);
+
+            const chipFormatter = computed(() => tableState.getChipFormatter.value);
+
+            const betClasses = computed(() => {
+
+                if (!props.bet) {
+                    return null;
+                }
+
+                let classes: string[] =
+                    [
+                        'chips-stage'
+                    ];
+
+                switch (props.bet.betType) {
+
+                    case Bet.TYPE.ANTE:
+                        classes.push('ante');
+                        classes.push(tableState.getGatheringAntes.value ? 'gathering' : `seat-${props.bet.seatIndex}`);
+                        break;
+
+                    case Bet.TYPE.BLIND:
+                    case Bet.TYPE.REGULAR:
+                        classes.push('bet');
+                        classes.push(tableState.getGatheringBets.value ? 'gathering' : `seat-${props.bet.seatIndex}`);
+                        break;
+                }
+
+                if (isAnnounced.value) {
+
+                    classes.push('announced');
+
+                }
+
+                return classes;
+
+            });
+
+            onMounted(() => {
+
+                // After only the briefest of pauses, we're going to have this bubble appear
+                timer.value = setTimeout(() => {
+
+                    isAnnounced.value = true;
+
+                }, 10);
+
+            });
 
 
-        return {
+            return {
 
-            chipFormatter
+                isAnnounced,
+                timer,
 
-        };
+                chipFormatter,
+                betClasses
 
-    },
-    components: {
-        'chip-box-component': ChipBoxComponent
-    },
-    data() {
+            };
 
-        let values =
-        {
-            isAnnounced: false,
-            timer: null as ReturnType<typeof setTimeout>
-        };
+        },
+        components: {
+            ChipBoxComponent
+        },
 
-        return values;
-
-    },
-    created() {
-
-        // After only the briefest of pauses, we're going to have this bubble appear
-        this.timer = setTimeout(() => {
-
-            this.isAnnounced = true;
-
-        }, 10);
-
-    },
-    computed: {
-
-        betClasses: function () {
-
-            if (!this.bet) {
-                return null;
-            }
-
-            let classes: string[] =
-                [
-                    'chips-stage'
-                ];
-
-            switch (this.bet.betType) {
-                case Bet.TYPE.ANTE:
-                    classes.push('ante');
-                    classes.push(this.ui.isGatheringAntes ? 'gathering' : `seat-${this.bet.seatIndex}`);
-                    break;
-
-                case Bet.TYPE.BLIND:
-                case Bet.TYPE.REGULAR:
-                    classes.push('bet');
-                    classes.push(this.ui.isGatheringBets ? 'gathering' : `seat-${this.bet.seatIndex}`);
-                    break;
-            }
-
-            if (this.isAnnounced) {
-
-                classes.push('announced');
-
-            }
-
-            return classes;
-
-        }
-
-    }
-
-});
+    });
 
     export default BetComponent;
 
