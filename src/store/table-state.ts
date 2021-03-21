@@ -276,6 +276,14 @@ const setPendingBetNumRaises = (numRaises: number): void => {
     state.pendingBetNumRaises = numRaises;
 };
 
+const clearPendingBetCommands = (): void => {
+
+    setPendingBetCommand(null);
+    setPendingBetNumRaises(null);
+
+};
+
+
 const getMyCall = computed(() => state.myCall);
 
 const getMyMinRaise = computed(() => state.myMinRaise);
@@ -300,6 +308,14 @@ const setMyMaxRaise = (raise: Bet): void => {
 
 };
 
+const clearRequiredBetValues = (): void => {
+
+    // null is different from 0 in that it indicates that the given option is not even available
+    setMyCall(null);
+    setMyMinRaise(null);
+    setMyMaxRaise(null);
+
+};
 
 
 const getBetStatus = computed(() => state.table?.betStatus);
@@ -409,15 +425,15 @@ export const tableState = {
     setPendingBetCommand,
     getPendingBetNumRaises,
     setPendingBetNumRaises,
+    clearPendingBetCommands,
 
     getMyCall, 
     setMyCall,
-
     getMyMinRaise,
     setMyMinRaise,
-
     getMyMaxRaise,
     setMyMaxRaise,
+    clearRequiredBetValues,
 
     getBetStatus,
     setBetStatus,

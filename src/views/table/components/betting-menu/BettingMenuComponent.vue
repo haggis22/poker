@@ -2,7 +2,7 @@
 
     <div class="betting-menu">
 
-        <div class="bet-actions" v-if="ui.remainsToAnte()">
+        <div class="bet-actions" v-if="remainsToAnte">
 
             <div class="buttons">
 
@@ -87,7 +87,9 @@ import './betting-menu.scss';
 
     import { tableState } from "@/store/table-state";
     import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
+    import { TableState } from '@/app/casino/tables/states/table-state';
     import { BetState } from '@/app/casino/tables/states/betting/bet-state';
+    import { BlindsAndAntesState } from '@/app/casino/tables/states/betting/blinds-and-antes-state';
 
     const TableMenuComponent = defineComponent({
 
@@ -138,14 +140,32 @@ import './betting-menu.scss';
 
             const chipFormatter = computed((): IChipFormatter => tableState.getChipFormatter.value);
 
+            const mySeatIndex = computed((): number => tableState.getMySeatIndex.value);
+
+            const currentTableState = computed((): TableState => tableState.getTable.value.state);
+
+            const betStatus = computed(() => tableState.getBetStatus.value);
+
+            const isAnteTime = computed(() => currentTableState.value instanceof BlindsAndAntesState);
+
+            const isBettingTime = computed(() => currentTableState.value instanceof BetState);
+
+            const remainsToAnte = computed((): boolean => {
+
+                return mySeatIndex.value != null
+                    && isAnteTime.value
+                    && myCall.value != null;
+                    // && (this.table.seats[tableState.getMySeatIndex.value].player.isSittingOut === null);
+
+            });
+
+
             const remainsToAct = computed((): boolean => {
 
-                let mySeatIndex: number = tableState.getMySeatIndex.value;
-
-                return mySeatIndex != null
-                    && tableState.getTable.value.state instanceof BetState
+                return mySeatIndex.value != null
+                    && isBettingTime.value
                     // either it's my turn right now, or it's coming up
-                    && (tableState.getBetStatus.value.seatIndex == mySeatIndex || tableState.getBetStatus.value.doesSeatRemainToAct(mySeatIndex));
+                    && (betStatus.value.seatIndex == mySeatIndex.value || betStatus.value.doesSeatRemainToAct(mySeatIndex.value));
 
 
             });
@@ -182,6 +202,12 @@ import './betting-menu.scss';
 
                 chipFormatter,
 
+                mySeatIndex,
+                currentTableState,
+                betStatus,
+                isBettingTime,
+
+                remainsToAnte,
                 remainsToAct
 
             };
@@ -212,7 +238,7 @@ import './betting-menu.scss';
 
             if (this.isFoldActivated) {
 
-                return this.ui.clearBetCommand();
+                return tableState.clearPendingBetCommands();
 
             }
 
@@ -224,7 +250,7 @@ import './betting-menu.scss';
 
             if (this.isAnteActivated) {
 
-                return this.ui.clearBetCommand();
+                return tableState.clearPendingBetCommands();
 
             }
 
@@ -236,7 +262,7 @@ import './betting-menu.scss';
 
             if (this.isCheckActivated) {
 
-                return this.ui.clearBetCommand();
+                return tableState.clearPendingBetCommands();
 
             }
 
@@ -248,7 +274,7 @@ import './betting-menu.scss';
 
             if (this.isCallActivated) {
 
-                return this.ui.clearBetCommand();
+                return tableState.clearPendingBetCommands();
 
             }
 
@@ -260,7 +286,7 @@ import './betting-menu.scss';
 
             if (this.isRaiseActivated) {
 
-                return this.ui.clearBetCommand();
+                return tableState.clearPendingBetCommands();
 
             }
 

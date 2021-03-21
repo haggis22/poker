@@ -487,14 +487,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
-    public remainsToAnte(): boolean {
-
-        return tableState.getMySeatIndex.value != null && this.getTable().state instanceof BlindsAndAntesState && tableState.getMyCall.value != null;
-        // && (this.table.seats[tableState.getMySeatIndex.value].player.isSittingOut === null);
-
-    }
-
-
     private playerSeatedAction(action: PlayerSeatedAction): void {
 
         const result = tableState.setPlayer(action.seatIndex, action.player);
@@ -592,21 +584,10 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
 
-    private clearRequiredBetValues(): void {
-
-        // null is different from 0 in that it indicates that the given option is not even available
-        tableState.setMyCall(null);
-        tableState.setMyMinRaise(null);
-        tableState.setMyMaxRaise(null);
-
-
-    }  // clearRequiredBetLimits
-
-
     private clearLocalBets(): void {
 
-        this.clearRequiredBetValues();
-        this.clearBetCommand();
+        tableState.clearRequiredBetValues();
+        tableState.clearPendingBetCommands();
 
     }
 
@@ -670,7 +651,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         }
         else {
 
-            this.clearRequiredBetValues();
+            tableState.clearRequiredBetValues();
 
         }
 
@@ -681,7 +662,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let seat: Seat = this.getMySeat();
 
-        this.clearRequiredBetValues();
+        tableState.clearRequiredBetValues();
 
         if (seat && seat.isInHand) {
 
@@ -719,7 +700,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             if (pendingBetNumRaises == null || action.betStatus.numRaises > pendingBetNumRaises) {
 
                 // TODO: Maybe leave in place if it is Call Any, or a raise more than what the action took it to
-                this.clearBetCommand();
+                tableState.clearPendingBetCommands();
 
             }
 
@@ -833,6 +814,8 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private betTurnAction(action: BetTurnAction): void {
 
+        tableState.setBetStatus(action.betStatus);
+
         // Remove any previous action for the current "to-act" player
         // Map.delete is safe to use, even if the key does not already exist
         tableState.clearAction(action.betStatus.seatIndex);
@@ -862,7 +845,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (myCall == null) {
 
-                this.clearBetCommand();
+                tableState.clearPendingBetCommands();
 
             }
 
@@ -874,21 +857,21 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
             if (myMinRaise == null) {
 
                 // they are not eligible to bet/raise, so clear their action
-                this.clearBetCommand();
+                tableState.clearPendingBetCommands();
 
             }
 
             // they are set to bet less than the allowed amount, so clear their action
             else if (pendingBetCommand.amount < myMinRaise.chipsAdded) {
 
-                this.clearBetCommand();
+                tableState.clearPendingBetCommands();
 
             }
 
             // they are set to bet more than the allowed amount, so clear their action
             else if (myMaxRaise && pendingBetCommand.amount > myMaxRaise.chipsAdded) {
 
-                this.clearBetCommand();
+                tableState.clearPendingBetCommands();
 
             }
 
@@ -929,8 +912,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         this.log(`It is ${anteSeat.getName()}'s turn to ante`);
 
         tableState.clearTimers();
-
-        this.clearRequiredBetValues();
+        tableState.clearRequiredBetValues();
 
         if (anteSeat) {
 
@@ -1212,13 +1194,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     }  // chat
 
 
-    public clearBetCommand(): void {
-
-        tableState.setPendingBetCommand(null);
-        tableState.setPendingBetNumRaises(null);
-
-    }
-
     public setBetCommand(betCommand: BetCommand | FoldCommand) {
 
         tableState.setPendingBetCommand(betCommand);
@@ -1243,7 +1218,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 if (table?.betStatus?.forcedBets?.seatIndex == tableState.getMySeatIndex.value) {
 
-                    this.clearBetCommand();
+                    tableState.clearPendingBetCommands();
 
                     if (pendingBetCommand instanceof AnteCommand) {
 
@@ -1261,7 +1236,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
                 if (table.betStatus && table.betStatus.seatIndex == tableState.getMySeatIndex.value) {
 
-                    this.clearBetCommand();
+                    tableState.clearPendingBetCommands();
 
                     this.broadcastCommand(pendingBetCommand);
                     return true;
