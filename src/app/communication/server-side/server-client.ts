@@ -82,7 +82,7 @@ export class ServerClient implements IServerClient {
 
             if (obj instanceof CashierCommand) {
 
-                return this.handleMessage(this.cashierManager.handleCommand(obj));
+                return this.handleMessage(this.cashierManager.handleCommand(obj, this));
 
             }
 

@@ -5,7 +5,7 @@
         <div v-if="user">
 
             <h2>Welcome, {{ user.name }}</h2>
-            <h4>Balance: </h4>
+            <h4>Balance: {{ chipFormatter.format(balance) }}</h4>
 
         </div>
 

@@ -8,8 +8,7 @@ import { Logger } from "../../app/logging/logger";
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { IChipFormatter } from "../../app/casino/tables/chips/chip-formatter";
 import { Action } from "../../app/actions/action";
-import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction } from "../../app/communication/serializable";
-
+import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction } from "../../app/communication/serializable";
 import { userState } from "@/store/user-state";
 import { lobbyState } from "@/store/lobby-state";
 
@@ -92,6 +91,12 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof CurrentBalanceAction) {
+
+            return this.currentBalanceAction(action);
+
+        }
+
 
     }  // handleMessage
 
@@ -107,20 +112,29 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         this.log(`Heared AuthenticatedAction for ${action.user.username}, sending SubscribeLobbyCommand`);
 
-        // store.commit(MutationTypes.USER_SUMMARY, action.user);
         userState.setUser(action.user);
 
+        // let me know when the tables update
         this.broadcastCommand(new SubscribeLobbyCommand());
+
+        // let me know when the user info updates (like current balance)
+        this.broadcastCommand(new SubscribeCashierCommand());
 
     }   // authenticated
 
 
     public listTablesAction(action: ListTablesAction): void {
 
-        // store.commit(MutationTypes.TABLE_SUMMARIES, action.tables)
         lobbyState.setTables(action.tables);
 
     }   // listTablesAction
+
+    public currentBalanceAction(action: CurrentBalanceAction): void {
+
+        userState.setBalance(action.balance);
+
+    }   // listTablesAction
+
 
 
 }

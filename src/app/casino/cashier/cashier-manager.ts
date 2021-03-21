@@ -5,6 +5,8 @@ import { CheckBalanceCommand, AddChipsCommand, User, Message, ErrorMessage, Acti
 import { TableController } from "../tables/table-controller";
 import { IServerClient } from "../../communication/server-side/i-server-client";
 import { CurrentBalanceAction } from "../../actions/cashier/current-balance-action";
+import { MessageHandler } from '../../messages/message-handler';
+import { SubscribeCashierCommand } from '../../commands/cashier/subscribe-cashier-command';
 
 export class CashierManager {
 
@@ -12,10 +14,22 @@ export class CashierManager {
     private userManager: UserManager;
     private lobbyManager: LobbyManager;
 
+    private messageQueue: Array<Message>;
+
+    // Key = userID
+    // value = list of IServerClients (or other MessageHandlers) that want updates for this user
+    private cashierSubscribers: Map<number, Set<MessageHandler>>;
+
+
 
     constructor(userManager: UserManager, lobbyManager: LobbyManager) {
+
         this.userManager = userManager;
         this.lobbyManager = lobbyManager;
+
+        this.messageQueue = new Array<Message>();
+        this.cashierSubscribers = new Map<number, Set<MessageHandler>>();
+
     }
 
     private log(msg: string): void {
@@ -25,7 +39,7 @@ export class CashierManager {
     }
     
 
-    public handleCommand(command: CashierCommand): Message {
+    public handleCommand(command: CashierCommand, serverClient: IServerClient): Message {
 
         this.log(`Heard ${command.constructor.name}: ${JSON.stringify(command)}`);
 
@@ -41,7 +55,79 @@ export class CashierManager {
 
         }
 
+        if (command instanceof SubscribeCashierCommand) {
+
+            return this.subscribeCashierCommand(command, serverClient);
+
+        }
+
     }
+
+
+    /// Registers a message handler for a particular user
+    private registerMessageHandler(userID: number, handler: MessageHandler): void {
+
+        if (!this.cashierSubscribers.has(userID)) {
+
+            this.cashierSubscribers.set(userID, new Set<MessageHandler>());
+
+        }
+
+        this.cashierSubscribers.get(userID).add(handler);
+
+    }   // registerMessageHandler
+
+
+
+    // Removes the given message handler for a particular user
+    private unregisterMessageHandler(userID: number, handler: MessageHandler): void {
+
+        let handlers: Set<MessageHandler> = this.cashierSubscribers.get(userID);
+
+        if (handlers) {
+
+            handlers.delete(handler);
+
+        }
+
+    }
+
+    private queueMessage(message: Message): void {
+
+        this.messageQueue.push(message);
+
+        this.pumpQueues();
+
+    }
+
+    private pumpQueues(): void {
+
+        while (this.messageQueue.length) {
+
+            this.broadcastMessage(this.messageQueue.shift());
+
+        }
+
+    }  // pumpQueues
+
+
+    // Broadcast the user message to all handlers for that particular user
+    private broadcastMessage(message: Message): void {
+
+        let handlers: Set<MessageHandler> = this.cashierSubscribers.get(message.userID);
+
+        if (handlers) {
+
+            for (let handler of handlers) {
+
+                handler.handleMessage(message);
+
+            }
+
+        }
+
+    }   // broadcastMessage
+
 
 
     public checkBalanceCommand(command: CheckBalanceCommand): Message {
@@ -81,6 +167,8 @@ export class CashierManager {
 
             user.balance -= command.amount;
 
+            this.broadcastBalanceUpdate(user.id);
+
             return tableController.addChips(command.userID, command.amount);
 
         }
@@ -88,6 +176,32 @@ export class CashierManager {
         return new ErrorMessage('Could not find table', command.userID);
 
     }  // addChipsCommand
+
+
+    private broadcastBalanceUpdate(userID: number): void {
+
+        let checkBalanceCommand: CheckBalanceCommand = new CheckBalanceCommand();
+        checkBalanceCommand.userID = userID;
+
+        let message = this.checkBalanceCommand(checkBalanceCommand);
+
+//        this.log(`There are ${this.cashierSubscribers.get(command.userID).size} handlers for user ${command.userID}`);
+//        this.log(`Result of checking balance: ${message}`);
+
+        this.queueMessage(message);
+
+    }
+
+
+    public subscribeCashierCommand(command: SubscribeCashierCommand, serverClient: IServerClient): Message {
+
+        this.registerMessageHandler(command.userID, serverClient);
+
+        this.broadcastBalanceUpdate(command.userID);
+
+        return null;
+
+    }  // subscribeCashierCommand
 
 
 }

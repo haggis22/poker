@@ -10,11 +10,18 @@ export { AuthenticateCommand } from "../commands/security/authenticate-command";
 export { LoginAction } from "../actions/security/login-action";
 export { AuthenticatedAction } from "../actions/security/authenticated-action";
 
-
 // LobbyActions
 export { JoinTableCommand } from "../commands/lobby/join-table-command";
 export { SubscribeLobbyCommand } from "../commands/lobby/subscribe-lobby-command";
 export { ListTablesAction } from "../actions/lobby/list-tables.action";
+
+// Cashier activity
+export { AddChipsAction } from "../actions/table/players/add-chips-action";
+export { AddChipsCommand } from "../commands/cashier/add-chips-command";
+export { CheckBalanceCommand } from "../commands/cashier/check-balance-command";
+export { SubscribeCashierCommand } from "../commands/cashier/subscribe-cashier-command";
+export { CurrentBalanceAction } from "../actions/cashier/current-balance-action";
+
 
 // Table communication
 
@@ -63,11 +70,7 @@ export { FacedownCard } from "../cards/face-down-card";
 
 
 export { StackUpdateAction } from "../actions/table/players/stack-update-action";
-export { AddChipsAction } from "../actions/table/players/add-chips-action";
-export { AddChipsCommand } from "../commands/cashier/add-chips-command";
 
-export { CheckBalanceCommand } from "../commands/cashier/check-balance-command";
-export { CurrentBalanceAction } from "../actions/cashier/current-balance-action";
 
 export { StartHandState } from "../casino/tables/states/start-hand-state";
 export { DealState } from "../casino/tables/states/dealing/deal-state";
