@@ -65,7 +65,6 @@ import './pot.scss';
 
             });
 
-
             onMounted(() => {
 
                 console.log(`Created WonPotComponent for pot index ${props.pot.index}, amount ${props.pot.amount}`);

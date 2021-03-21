@@ -17,7 +17,7 @@
 
     import './chip-box.scss';
 
-    import { defineComponent, computed, ref } from 'vue';
+    import { defineComponent, computed, ref, watch } from 'vue';
 
     import { Chip } from '@/app/casino/tables/chips/chip';
     import { stackChips } from '@/app/casino/tables/chips/chip-stacker';
@@ -27,6 +27,7 @@
     const ChipBoxComponent = defineComponent({
 
         props: {
+
             value: {
                 type: Number,
                 required: true
@@ -35,6 +36,7 @@
                 type: UIPosition,
                 required: false
             }
+
         },
         setup(props) {
 
@@ -68,16 +70,23 @@
 
             const releaseChip = (): void => {
 
-                lastChipReleased.value = (lastChipReleased == null) ? chips.value.length - 1 : (lastChipReleased.value - 1);
+                lastChipReleased.value = (lastChipReleased.value == null) ? chips.value.length - 1 : (lastChipReleased.value - 1);
 
-                if(lastChipReleased.value > 0) {
+                if (lastChipReleased.value > 0) {
 
                     setTimeout(() => { releaseChip(); }, 100);
 
                 };
 
-        }
+            };
 
+            watch(() => props.chipPosition, (newValue: UIPosition, oldValue: UIPosition) => {
+
+                if (newValue) {
+                    releaseChip();
+                }
+
+            });
 
             return {
 
@@ -92,24 +101,11 @@
             };
 
         },
-    watch: {
-
-        chipPosition: function (newValue, oldValue) {
-
-            if (newValue) {
-
-                this.releaseChip();
-
-            }
-
+        components: {
+            ChipComponent
         }
 
-    },
-    components: {
-        ChipComponent
-    }
-
-});
+    });
 
 export default ChipBoxComponent;
 
