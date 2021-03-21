@@ -20,14 +20,10 @@ const logger: Logger = new Logger();
 
 export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
-    public chipFormatter: IChipFormatter;
-
     private commandHandlers: CommandHandler[];
 
 
-    constructor(chipFormatter: IChipFormatter) {
-
-        this.chipFormatter = chipFormatter;
+    constructor() {
 
         this.commandHandlers = new Array<CommandHandler>();
 

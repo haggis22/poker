@@ -9,7 +9,7 @@
 
 <script lang="ts">
 
-    import { defineComponent } from "vue";
+    import { defineComponent, ref } from "vue";
 
     import { LobbyClient } from './lobby-client';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
@@ -17,24 +17,22 @@
     import { BrowserWebSocketWrapper } from '../../app/communication/client-side/browser-web-socket-wrapper';
 
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
+import { lobbyState } from '@/store/lobby-state';
 
 
     export default defineComponent({
 
         name: "Lobby",
+
         components: {
             LobbyComponent
         },
-        data() {
 
-            const values = {
-                client: null as LobbyClient
-            };
+        setup() {
 
-            return values;
+            const client = ref(null as LobbyClient);
 
-        },
-        created() {
+            lobbyState.setChipFormatter(new MoneyFormatter());
 
             const ws = new WebSocket('ws://localhost:3000');
 
@@ -42,20 +40,26 @@
 
                 console.log('Connection opened');
 
-                const client: LobbyClient = new LobbyClient(new MoneyFormatter());
+                const lobbyClient: LobbyClient = new LobbyClient();
                 const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
 
                 // Now join all the links in the chain
-                client.registerCommandHandler(gameClient);
-                gameClient.registerMessageHandler(client);
+                lobbyClient.registerCommandHandler(gameClient);
+                gameClient.registerMessageHandler(lobbyClient);
 
-                this.client = client;
+                client.value = lobbyClient;
 
-                client.authenticate();
+                lobbyClient.authenticate();
 
             });
 
-        }
+            return {
+
+                client
+
+            };
+
+        },
 
     });
 

@@ -2,7 +2,12 @@
 
     <div>
 
-        <h2 v-if="user">Welcome, {{ userName }}</h2>
+        <div v-if="user">
+
+            <h2>Welcome, {{ user.name }}</h2>
+            <h4>Balance: </h4>
+
+        </div>
 
         <table cellpadding="5" cellspacing="0" class="table-tables">
             <thead>
@@ -14,12 +19,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="table in tables" :key="table.id">
-                    <td>{{ table.id }}</td>
-                    <td class="name"><router-link :to="{ name: 'Table' , params: {tableID: table.id}}" target="_blank">{{ table.name }}</router-link></td>
-                    <td class="description">{{ table.description }}</td>
-                    <td class="players">{{ table.numPlayers }}/{{ table.numSeats }}</td>
-                </tr>
+                <table-component v-for="table in tables" 
+                                :table="table" 
+                                 :key="table.id">
+                </table-component>
             </tbody>
         </table>
 
@@ -29,24 +32,22 @@
 
 <script lang="ts">
 
-    import './lobby.scss';
-
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { LobbyClient } from '../../lobby-client';
+
+    import TableComponent from '../table/TableComponent.vue';
+
     import { TableSummary } from '@/app/casino/tables/table-summary';
     import { UserSummary } from '@/app/players/user-summary';
 
     import { userState } from "@/store/user-state";
     import { lobbyState } from "@/store/lobby-state";
+    import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 
 
 
     const LobbyComponent = defineComponent({
-
-        setup() {
-
-        },
 
         props: {
             client: {
@@ -54,43 +55,30 @@
                 required: true
             },
         },
-        data() {
+        setup() {
 
-            const values = {
+            const user = computed((): UserSummary => userState.getUser.value);
+            const tables = computed((): TableSummary[] => lobbyState.getTables.value);
+
+            const chipFormatter = computed((): IChipFormatter => lobbyState.getChipFormatter.value);
+            const balance = computed((): number => userState.getBalance.value);
+
+            return {
+
+                user,
+                tables,
+
+                chipFormatter,
+                balance
+
             };
 
-            return values;
-
         },
-        computed: {
+        components: {
+            TableComponent
+        }
 
-            user(): UserSummary {
-
-                return userState.getUser.value
-
-            },
-
-            userName(): string {
-
-                return this.user?.name;
-
-            },
-
-            tables(): Array<TableSummary> {
-
-                return lobbyState.getTables.value
-
-            }
-
-        },
-        methods: {
-
-        },
-
-    components: {
-    }
-
-});
+    });
 
     export default LobbyComponent;
 
@@ -98,12 +86,13 @@
 
 <style scoped lang="scss">
 
-    .table-tables
-    {
-        border: 2px solid black;
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;700&display=swap');
 
-        .name,
-        .description
+    $font: "Times New Roman", serif;
+
+    .table-tables {
+        border: 2px solid black;
+        .name, .description
         {
             text-align: left;
         }
