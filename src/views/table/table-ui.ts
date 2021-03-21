@@ -15,7 +15,6 @@ import { TableConnectedAction } from "../../app/actions/table/state/table-connec
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../app/commands/table/table-snapshot-command";
 import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction } from "../../app/communication/serializable";
-import { Game } from "../../app/games/game";
 import { SetGameAction } from "../../app/actions/table/game/set-game-action";
 import { GameFactory } from "../../app/games/game-factory";
 import { WonPot } from "../../app/casino/tables/betting/won-pot";
@@ -36,13 +35,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private commandHandlers: CommandHandler[];
 
-    public wonPots: WonPot[];
-
-    public dealerPositions: Map<number, UIPosition>;
-    public playerPositions: Map<number, UIPosition>;
-
-
-
 
 
 
@@ -50,8 +42,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.commandHandlers = new Array<CommandHandler>();
             
-        this.wonPots = [];
-
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
 
@@ -63,21 +53,26 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     private setUpPositions() {
 
-        this.dealerPositions = new Map<number, UIPosition>();
-        this.dealerPositions.set(0, new UIPosition(-60, 390));
-        this.dealerPositions.set(1, new UIPosition(250, 590));
-        this.dealerPositions.set(2, new UIPosition(560, 390));
-        this.dealerPositions.set(3, new UIPosition(560, -270));
-        this.dealerPositions.set(4, new UIPosition(250, -410));
-        this.dealerPositions.set(5, new UIPosition(-50, -250));
 
-        this.playerPositions = new Map<number, UIPosition>();
-        this.playerPositions.set(0, new UIPosition(180, -125));
-        this.playerPositions.set(1, new UIPosition(25, -185));
-        this.playerPositions.set(2, new UIPosition(-125, -105));
-        this.playerPositions.set(3, new UIPosition(-125, 195));
-        this.playerPositions.set(4, new UIPosition(25, 200));
-        this.playerPositions.set(5, new UIPosition(163, 185));
+        const dealerPositions = new Map<number, UIPosition>();
+        dealerPositions.set(0, new UIPosition(-60, 390));
+        dealerPositions.set(1, new UIPosition(250, 590));
+        dealerPositions.set(2, new UIPosition(560, 390));
+        dealerPositions.set(3, new UIPosition(560, -270));
+        dealerPositions.set(4, new UIPosition(250, -410));
+        dealerPositions.set(5, new UIPosition(-50, -250));
+
+        tableState.setDealerPositions(dealerPositions);
+
+        const playerPositions = new Map<number, UIPosition>();
+        playerPositions.set(0, new UIPosition(180, -125));
+        playerPositions.set(1, new UIPosition(25, -185));
+        playerPositions.set(2, new UIPosition(-125, -105));
+        playerPositions.set(3, new UIPosition(-125, 195));
+        playerPositions.set(4, new UIPosition(25, 200));
+        playerPositions.set(5, new UIPosition(163, 185));
+
+        tableState.setPlayerPositions(playerPositions);
 
     }
 
@@ -761,7 +756,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
     private handCompleteAction(action: HandCompleteAction): void {
 
         // If we have pots, then we can't have any WonPots - clear 'em
-        this.wonPots.length = 0;
+        tableState.clearWonPots();
 
         // showdown is no longer required - clear the flags that were highlighting cards
         tableState.setShowdownRequired(false);
@@ -1040,7 +1035,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         let pot: WonPot = action.pot;
 
-        this.wonPots.push(pot);
+        tableState.addWonPot(pot);
 
         let seat = this.findSeat(pot.seatIndex);
 

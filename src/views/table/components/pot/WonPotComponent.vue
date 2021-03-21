@@ -1,9 +1,7 @@
 ﻿<template>
 
     <div class="pot gathered" :class="potClasses">
-        <chip-box-component :value="pot.amount"
-                            :chip-stacker="ui.chipStacker"
-                            :chip-position="chipPosition"></chip-box-component>
+        <chip-box-component :value="pot.amount" :chip-position="chipPosition"></chip-box-component>
         <div class="amount">{{ chipFormatter.format(pot.amount) }}</div>
         <div class="name">{{ pot.getName() }}</div>
     </div>
@@ -15,7 +13,7 @@
 
 import './pot.scss';
 
-    import { defineComponent, computed } from 'vue';
+    import { defineComponent, computed, ref, onMounted } from 'vue';
 
     import { WonPot } from '@/app/casino/tables/betting/won-pot';
     import { UIPosition } from '@/app/ui/ui-position';
@@ -36,79 +34,77 @@ import './pot.scss';
                 required: true
             }
         },
-        setup() {
+        setup(props) {
+
+            const isPushed = ref(false);
+            const timer = ref(null as ReturnType<typeof setTimeout>);
+
+            // this will specify where the chips will eventually end up
+            const chipPosition = ref(null as UIPosition);
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
+            const playerPosition = computed(() => tableState.getPlayerPosition(props.pot.seatIndex));
+
+            const potClasses = computed(() => {
+
+                if (!props.pot) {
+                    return null;
+                }
+
+                let classes: string[] = [`pot-${props.pot.index}`];
+
+                if (isPushed.value) {
+
+                    classes.push('pushed');
+                    classes.push(`seat-${props.pot.seatIndex}`);
+
+                }
+
+                return classes;
+
+            });
+
+
+            onMounted(() => {
+
+                console.log(`Created WonPotComponent for pot index ${props.pot.index}, amount ${props.pot.amount}`);
+
+                // After only the briefest of pauses, we're going to start pushing this pot towards its winner
+                timer.value = setTimeout(() => {
+
+                    isPushed.value = true;
+
+                    // start the chips flying at the player
+                    setTimeout(() => {
+
+                        chipPosition.value = playerPosition.value;
+
+                    }, 1000);
+
+                }, 10);
+
+            });
+
             return {
+
+                isPushed,
+                timer,
+
+                potClasses,
+                chipPosition,
 
                 chipFormatter
 
             };
 
         },
-    components: {
-        'chip-box-component': ChipBoxComponent
-    },
-    data() {
+        components: {
+            ChipBoxComponent
+        },
 
-        let values =
-        {
-            isPushed: false,
-            timer: null as ReturnType<typeof setTimeout>,
+    });
 
-            // this will specify where the chips will eventually end up
-            playerPosition: this.ui.playerPositions.get(this.pot.seatIndex),
-            chipPosition: null as UIPosition
-        };
-
-        return values;
-
-    },
-    created() {
-
-        console.log(`Created WonPotComponent for pot index ${this.pot.index}, amount ${this.pot.amount}`);
-
-        // After only the briefest of pauses, we're going to start pushing this pot towards its winner
-        this.timer = setTimeout(() => {
-
-            this.isPushed = true;
-
-            // start the chips flying at the player
-            setTimeout(() => {
-
-                this.chipPosition = this.playerPosition;
-
-            }, 1000);
-
-        }, 10);
-
-    },
-    computed: {
-
-        potClasses: function () {
-
-            if (!this.pot) {
-                return null;
-            }
-
-            let classes: string[] = [`pot-${this.pot.index}`];
-
-            if (this.isPushed) {
-
-                classes.push('pushed');
-                classes.push(`seat-${this.pot.seatIndex}`);
-
-            }
-
-            return classes;
-
-        }
-
-    }
-
-});
-
-export default WonPotComponent;
+    export default WonPotComponent;
 
 </script>

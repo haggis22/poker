@@ -1,8 +1,7 @@
 ﻿<template>
 
     <div class="pot" :class="potClasses">
-        <chip-box-component :value="pot.amount"
-                            :chip-stacker="ui.chipStacker"></chip-box-component>
+        <chip-box-component :value="pot.amount"></chip-box-component>
         <div class="amount">{{ chipFormatter.format(pot.amount) }}</div>
         <div class="name">{{ pot.getName() }}</div>
     </div>
@@ -21,19 +20,15 @@ import './pot.scss';
 
     import { TableUI } from '../../table-ui';
     import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
-import { tableState } from '@/store/table-state';
+    import { tableState } from '@/store/table-state';
 
     const PotComponent = defineComponent({
 
-    props: {
-        pot: {
-            type: Pot,
-            required: true
-        },
-        ui: {
-            type: TableUI,
-            required: true
-        }
+        props: {
+            pot: {
+                type: Pot,
+                required: true
+            },
         },
         setup() {
 

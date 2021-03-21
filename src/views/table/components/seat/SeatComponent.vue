@@ -69,6 +69,7 @@
     import { Timer } from '@/app/timers/timer';
     import { FacedownCard } from '@/app/cards/face-down-card';
     import { Card } from '@/app/cards/card';
+    import { UIPosition } from '@/app/ui/ui-position';
 
     const SeatComponent = defineComponent({
 
@@ -91,7 +92,7 @@
 
             const seatIndex: number = props.seatIndex;
 
-            const dealerPosition = props.ui.dealerPositions.get(seatIndex);
+            const dealerPosition = computed((): UIPosition => tableState.getDealerPosition(seatIndex));
 
             const table = computed((): Table => tableState.getTable.value);
 

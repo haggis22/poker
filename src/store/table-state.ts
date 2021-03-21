@@ -15,6 +15,8 @@ import { FacedownCard } from '@/app/cards/face-down-card';
 import { Hand } from '@/app/hands/hand';
 import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 import { BetController } from '@/app/casino/tables/betting/bet-controller';
+import { WonPot } from '@/app/casino/tables/betting/won-pot';
+import { UIPosition } from '@/app/ui/ui-position';
 
 
 const state = reactive({
@@ -50,11 +52,18 @@ const state = reactive({
     showdownRequired: false,
     winningHand: null as string,
 
+    wonPots: [] as WonPot[],
+
+
     // indicates which cards were used in calculating the winning hand for a given pot
     usedCards: [] as Card[],
 
     gatheringAntes: false,
     gatheringBets: false,
+
+    dealerPositions: new Map<number, UIPosition>(),
+    playerPositions: new Map<number, UIPosition>(),
+
 
 });
 
@@ -450,6 +459,45 @@ const setGatheringBets = (isGatheringBets: boolean): void => {
 
 };
 
+const getWonPots = computed((): WonPot[] => state.wonPots);
+
+const clearWonPots = (): void => {
+
+    state.wonPots.length = 0;
+
+};
+
+const addWonPot = (pot: WonPot) => {
+
+    state.wonPots.push(pot);
+
+};
+
+
+const getDealerPosition = (seatIndex: number) => {
+
+    return state.dealerPositions.get(seatIndex);
+
+};
+
+const setDealerPositions = (positions: Map<number, UIPosition>) => {
+
+    state.dealerPositions = positions;
+
+};
+
+const getPlayerPosition = (seatIndex: number) => {
+
+    return state.playerPositions.get(seatIndex);
+
+};
+
+const setPlayerPositions = (positions: Map<number, UIPosition>) => {
+
+    state.playerPositions = positions;
+
+};
+
 
 
 export const tableState = {
@@ -539,7 +587,17 @@ export const tableState = {
     getGatheringAntes,
     setGatheringAntes,
     getGatheringBets,
-    setGatheringBets
+    setGatheringBets,
+
+    getWonPots,
+    clearWonPots,
+    addWonPot,
+
+    getDealerPosition,
+    setDealerPositions,
+
+    getPlayerPosition,
+    setPlayerPositions
 
 
 };

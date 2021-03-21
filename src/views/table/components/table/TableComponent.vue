@@ -27,7 +27,7 @@
                                :pot="pot"
                                :ui="ui">
                 </pot-component>
-                <won-pot-component v-for="pot in ui.wonPots"
+                <won-pot-component v-for="pot in wonPots"
                                    :key="`won-pot-${pot.index}-${pot.seatIndex}`"
                                    :pot="pot"
                                    :ui="ui">
@@ -78,11 +78,13 @@
 
             const table = computed(() => tableState.getTable.value);
 
+            const wonPots = computed(() => tableState.getWonPots.value);
             const winningHand = computed(() => tableState.getWinningHand.value);
 
             return {
 
                 table,
+                wonPots,
                 winningHand
 
             };
