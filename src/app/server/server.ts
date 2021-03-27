@@ -42,31 +42,36 @@ console.log(`Serving files from client path ${clientPath}`);
 
 app.use(express.static(clientPath));
 
-let userManager: UserManager = new UserManager();
-let lobbyManager: LobbyManager = new LobbyManager();
-let cashierManager: CashierManager = new CashierManager(userManager, lobbyManager);
+const userManager: UserManager = new UserManager();
+
+const lobbyManager: LobbyManager = new LobbyManager();
+
+const cashierManager: CashierManager = new CashierManager();
+
+cashierManager.lobbyManager = lobbyManager;
+cashierManager.userManager = userManager;
+
+lobbyManager.cashierManager = cashierManager;
+
+
 
 let clients: Set<IServerClient> = new Set<IServerClient>();
 
 
 // RoboClients will automatically connect themselves to the passed-in lobbyManager
 
-createRoboClient(2, 'moglesby');
-createRoboClient(2, 'ptunney');
-
-/*
 createRoboClient(1, 'pgrudowski');
 createRoboClient(1, 'jhoepken');
 createRoboClient(1, 'mgillmore');
 createRoboClient(1, 'benney');
-*/
 
-/*
+createRoboClient(2, 'moglesby');
+createRoboClient(2, 'ptunney');
+
 createRoboClient(3, 'pgrudowski');
 createRoboClient(3, 'jhoepken');
 createRoboClient(3, 'mgillmore');
 createRoboClient(3, 'benney');
-*/
 
 wss.on('connection', (socket: WebSocket) => {
 

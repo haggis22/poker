@@ -61,9 +61,9 @@ import { PotCardsUsedAction } from "../../actions/table/game/pots/pot-cards-used
 import { ShowdownAction } from "../../actions/table/game/showdown/showdown-action";
 import { InvalidBet } from "./betting/invalid-bet";
 import { InvalidFold } from "./betting/invalid-fold";
-import { TableObserver } from "./table-observer";
 import { IServerClient } from "../../communication/server-side/i-server-client";
 import { IButtonController } from "./buttons/i-button-controller";
+import { CashierManager } from '../cashier/cashier-manager';
 
 const logger: Logger = new Logger();
 
@@ -90,11 +90,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private readonly TIME_ALL_IN_FLIP_CARDS: number = 1500;
 
 
+    public cashierManager: CashierManager;
+    public lobbyManager: LobbyManager;
+
+
     private table: Table;
     private game: Game;
     private deck: Deck;
-
-    private copier: DeepCopier;
 
     private messageQueue: Array<Message | MessagePair>;
     private messageHandlers: MessageHandler[];
@@ -112,8 +114,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     // Value = number of chips to add on, when possible
     private chipsToAdd: Map<number, number>;
 
-    private tableObservers: Set<TableObserver>;
-
     private clients: IServerClient[];
 
 
@@ -123,8 +123,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.table = table;
         this.deck = deck;
-
-        this.copier = new DeepCopier();
 
         this.messageQueue = new Array<Message | MessagePair>();
         this.messageHandlers = new Array<MessageHandler>();
@@ -138,28 +136,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.standUpRequests = new Map<number, StandUpCommand>();
         this.chipsToAdd = new Map<number, number>();
 
-        this.tableObservers = new Set<TableObserver>();
-
         this.clients = new Array<IServerClient>();
 
     }
-
-
-    public addTableObserver(observer: TableObserver): void {
-
-        this.tableObservers.add(observer);
-
-    }
-
-    private notifyObservers(): void {
-
-        for (let observer of this.tableObservers) {
-
-            observer.notifyTableUpdated(this.table);
-
-        }
-
-    }  // notifyObservers
 
 
     addClient(client: IServerClient): void {
@@ -466,8 +445,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 seat.player = new Player(command.user.id, command.user.name);
                 this.queueAction(new PlayerSeatedAction(this.table.id, seat.player, seatIndex));
 
-                // Tell any watchers that the number of players has changed
-                this.notifyObservers();
+                // Tell the lobby that the number of players has changed
+                this.lobbyManager.notifyTableUpdated(this.table);
 
                 return await this.checkStartHand();
 
@@ -573,8 +552,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             this.queueAction(new SeatVacatedAction(this.table.id, seat.index));
 
-            // Tell any watchers that the number of players has changed
-            this.notifyObservers();
+            // Tell the lobby that the number of players has changed
+            this.lobbyManager.notifyTableUpdated(this.table);
 
         }
 

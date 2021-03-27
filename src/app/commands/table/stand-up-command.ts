@@ -2,6 +2,9 @@
 
 export class StandUpCommand extends TableCommand {
 
+    public tableID: number;
+
+
     constructor(tableID: number) {
 
         super(tableID);

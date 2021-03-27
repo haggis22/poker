@@ -11,8 +11,8 @@ import { SubscribeCashierCommand } from '../../commands/cashier/subscribe-cashie
 export class CashierManager {
 
 
-    private userManager: UserManager;
-    private lobbyManager: LobbyManager;
+    public userManager: UserManager;
+    public lobbyManager: LobbyManager;
 
     private messageQueue: Array<Message>;
 
@@ -22,10 +22,7 @@ export class CashierManager {
 
 
 
-    constructor(userManager: UserManager, lobbyManager: LobbyManager) {
-
-        this.userManager = userManager;
-        this.lobbyManager = lobbyManager;
+    constructor() {
 
         this.messageQueue = new Array<Message>();
         this.cashierSubscribers = new Map<number, Set<MessageHandler>>();

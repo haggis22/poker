@@ -23,13 +23,15 @@ import { MessageHandler } from '../../messages/message-handler';
 import { Message } from "../../messages/message";
 import { Action } from '../../actions/action';
 import { SubscribeLobbyCommand, ListTablesAction, TableSummary } from '../../communication/serializable';
-import { TableObserver } from '../tables/table-observer';
 import { BetController } from '../tables/betting/bet-controller';
 import { IButtonController } from '../tables/buttons/i-button-controller';
 import { NormalButtonController } from '../tables/buttons/normal-button-controller';
+import { CashierManager } from '../cashier/cashier-manager';
 
 
-export class LobbyManager implements MessageBroadcaster, TableObserver {
+export class LobbyManager implements MessageBroadcaster {
+
+    public cashierManager: CashierManager;
 
     private nextID: number;
 
@@ -169,7 +171,8 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(table, deck, betController, buttonController);
-        tableController.addTableObserver(this);
+        tableController.lobbyManager = this;
+        tableController.cashierManager = this.cashierManager;
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -210,7 +213,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(table, deck, betController, buttonController);
-        tableController.addTableObserver(this);
+        tableController.lobbyManager = this;
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -251,7 +254,7 @@ export class LobbyManager implements MessageBroadcaster, TableObserver {
         let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(table, deck, betController, buttonController);
-        tableController.addTableObserver(this);
+        tableController.lobbyManager = this;
 
         this.tableControllerMap.set(table.id, tableController);
         
