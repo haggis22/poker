@@ -48,6 +48,7 @@ import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBe
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
+import { SetStatusAckedAction } from "../../actions/table/players/set-status-acked-action";
 import { BettingCompleteAction } from "../../actions/table/betting/betting-complete-action";
 import { FacedownCard } from "../../cards/face-down-card";
 import { WonPot } from "./betting/won-pot";
@@ -584,6 +585,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             // if the player is not in action, then sitting in/out takes effect immediately
             if (!this.table.state.isHandInProgress() || !seat.isInHand) {
 
+                // Let the client know we received this request, even though we're processing it immediately
+                this.queueAction(new SetStatusAckedAction(this.table.id, command.userID), command.userID);
                 this.processSetStatusCommand(command, seat);
 
             }
@@ -591,6 +594,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 // Remember this command for between rounds
                 this.setStatusRequests.set(seat.index, command);
+
+                // Let the client know we received this request
+                this.queueAction(new SetStatusAckedAction(this.table.id, command.userID), command.userID);
+
 
             }
 

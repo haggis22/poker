@@ -14,14 +14,17 @@ import { Logger } from "../../app/logging/logger";
 import { TableConnectedAction } from "../../app/actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../app/commands/table/table-snapshot-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, SetStatusAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction } from "../../app/communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction } from "../../app/communication/serializable";
 import { SetGameAction } from "../../app/actions/table/game/set-game-action";
+import { SetStatusAction } from "@/app/actions/table/players/set-status-action";
+import { SetStatusAckedAction } from "@/app/actions/table/players/set-status-acked-action";
 import { GameFactory } from "../../app/games/game-factory";
 import { WonPot } from "../../app/casino/tables/betting/won-pot";
 import { HandCompleteAction } from "../../app/actions/table/game/hand-complete-action";
 import { Timer } from "../../app/timers/timer";
 import { CurrentBalanceAction } from "../../app/actions/cashier/current-balance-action";
 import { UIPosition } from "../../app/ui/ui-position";
+
 
 import { userState } from "@/store/user-state";
 import { tableState } from "@/store/table-state";
@@ -149,6 +152,12 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof SetStatusAction) {
 
             return this.setStatusAction(action);
+
+        }
+
+        if (action instanceof SetStatusAckedAction) {
+
+            return this.setStatusAckedAction(action);
 
         }
 
@@ -368,7 +377,7 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    public getMySeat(): Seat {
+    private getMySeat(): Seat {
 
         if (tableState.getMySeatIndex.value != null) {
 
@@ -498,7 +507,15 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
         tableState.setPlayerStatus(action.userID, action.isSittingOut);
 
-    }  // setStatus
+    }  // setStatusAction
+
+
+    private setStatusAckedAction(action: SetStatusAckedAction): void {
+
+        // turn off their pending request
+        tableState.setHasPendingStatusRequest(false);
+
+    }  // setStatusAckedAction
 
 
 

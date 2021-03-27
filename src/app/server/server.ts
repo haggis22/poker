@@ -71,9 +71,9 @@ createRoboClient(1, 'benney');
 createRoboClient(2, 'moglesby');
 createRoboClient(2, 'ptunney');
 
-createRoboClient(3, 'pgrudowski');
-createRoboClient(3, 'jhoepken');
-createRoboClient(3, 'mgillmore');
+// createRoboClient(3, 'pgrudowski');
+// createRoboClient(3, 'jhoepken');
+// createRoboClient(3, 'mgillmore');
 createRoboClient(3, 'benney');
 
 wss.on('connection', (socket: WebSocket) => {

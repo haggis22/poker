@@ -2,14 +2,20 @@
 
     <div class="table-menu">
 
-        <div class="sit-out">
+        <div class="sit-out" :class="{ 'disabled': hasPendingStatusRequest }">
 
             <label>
-                <input type="checkbox" value="true" :checked="isSittingOut" @change="setStatus" />
+                <input type="checkbox" 
+                        value="true" 
+                       :checked="isSittingOut" 
+                       :disabled="hasPendingStatusRequest"
+                       @change="setStatus"
+                       />
                 Sit out next hand
             </label>
 
         </div>
+
         <div>
             <button type="button" class="stand-up" @click.stop="standUp">Stand Up</button>
         </div>
@@ -52,11 +58,7 @@
             ui: {
                 type: TableUI,
                 required: true
-            },
-            isSittingOut: {
-                type: Boolean,
-                required: false
-            },
+            }
 
         },
         setup(props, context) {
@@ -66,6 +68,13 @@
             const numAddChips = ref('1000');
             const step = ref(100);
             const showAddChips = ref(false);
+
+            // initialize the local sitting out variable with what is on the server
+            let localSittingOut = tableState.getTable.value.seats[tableState.getMySeatIndex.value].player.isSittingOut;
+
+            const isSittingOut = ref(localSittingOut);
+
+            const hasPendingStatusRequest = computed((): boolean => tableState.getHasPendingStatusRequest.value);
 
             const currentBalance = computed((): number => tableState.getCurrentBalance.value);
 
@@ -81,6 +90,7 @@
 
                 // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
                 if (event.target instanceof HTMLInputElement) {
+                    tableState.setHasPendingStatusRequest(true);
                     props.ui.sendCommand(new SetStatusCommand(tableState.getTableID.value, event.target.checked));
                     context.emit('update:isSittingOut', event.target.checked);
                 }
@@ -150,7 +160,10 @@
                 standUp,
                 checkBalance,
                 buyIn,
-                cancelBuyIn
+                cancelBuyIn,
+
+                hasPendingStatusRequest,
+                isSittingOut
 
             };
 
@@ -161,3 +174,12 @@
     export default TableMenuComponent;
 
 </script>
+
+<style scoped lang="scss">
+
+    .sit-out.disabled
+    {
+        color: #888;
+    }
+
+</style>

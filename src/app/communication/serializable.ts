@@ -136,6 +136,7 @@ export { Player } from "../players/player";
 export { PlayerSeatedAction } from "../actions/table/players/player-seated-action";
 export { SeatVacatedAction } from "../actions/table/players/seat-vacated-action";
 export { SetStatusAction } from "../actions/table/players/set-status-action";
+export { SetStatusAckedAction } from "../actions/table/players/set-status-acked-action";
 
 export { IsInHandAction } from "../actions/table/players/is-in-hand-action";
 

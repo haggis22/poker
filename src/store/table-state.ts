@@ -64,6 +64,7 @@ const state = reactive({
     dealerPositions: new Map<number, UIPosition>(),
     playerPositions: new Map<number, UIPosition>(),
 
+    hasPendingStatusRequest: false
 
 });
 
@@ -498,6 +499,19 @@ const setPlayerPositions = (positions: Map<number, UIPosition>) => {
 
 };
 
+const getHasPendingStatusRequest = computed((): boolean => {
+
+    return state.hasPendingStatusRequest;
+
+});
+
+const setHasPendingStatusRequest = (newValue: boolean): void => {
+
+    state.hasPendingStatusRequest = newValue;
+
+};
+
+
 
 
 export const tableState = {
@@ -597,7 +611,10 @@ export const tableState = {
     setDealerPositions,
 
     getPlayerPosition,
-    setPlayerPositions
+    setPlayerPositions,
+
+    getHasPendingStatusRequest,
+    setHasPendingStatusRequest
 
 
 };

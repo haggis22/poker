@@ -6,11 +6,9 @@
             <table-component :ui="ui"></table-component>
             <chat-component :ui="ui"></chat-component>
             <log-component></log-component>
-            <table-menu-component v-if="ui.getMySeat()"
-                                  :ui="ui"
-                                  :is-sitting-out.sync="ui.isSittingOut">
+            <table-menu-component v-if="hasSeat" :ui="ui">
             </table-menu-component>
-            <betting-menu-component v-if="ui.getMySeat()" :ui="ui"></betting-menu-component>
+            <betting-menu-component v-if="hasSeat" :ui="ui"></betting-menu-component>
         </div>
         <div v-else>
             We have no table yet.
@@ -59,6 +57,8 @@
 
             const ws = new WebSocket('ws://localhost:3000');
 
+            const hasSeat = computed((): boolean => tableState.getMySeatIndex.value != null);
+
             ws.addEventListener('open', () => {
 
                 console.log('Connection opened');
@@ -87,7 +87,8 @@
 
                 ui,
 
-                table
+                table,
+                hasSeat
 
             };
 
