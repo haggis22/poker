@@ -90,8 +90,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private readonly TIME_ALL_IN_FLIP_CARDS: number = 1500;
 
 
-    public cashierManager: CashierManager;
-    public lobbyManager: LobbyManager;
+    private cashierManager: CashierManager;
+    private lobbyManager: LobbyManager;
 
 
     private table: Table;
@@ -119,7 +119,15 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
 
 
-    constructor(table: Table, deck: Deck, betController: BetController, buttonController: IButtonController) {
+    constructor(cashierManager: CashierManager,
+                    lobbyManager: LobbyManager,
+                    table: Table,
+                    deck: Deck,
+                    betController: BetController,
+                    buttonController: IButtonController) {
+
+        this.cashierManager = cashierManager;
+        this.lobbyManager = lobbyManager;
 
         this.table = table;
         this.deck = deck;
@@ -544,10 +552,17 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         let seat: Seat = this.findSeatByPlayer(command.userID);
 
-        if (seat) {
+        if (seat && seat.player) {
 
             // remove the player from the table
-            // TODO: return their stack of chips to them
+
+            if (seat.player.chips) {
+
+                // return their chips to the cashier
+                this.cashierManager.cashInChips(command.userID, seat.player.chips);
+
+            }
+
             seat.player = null;
 
             this.queueAction(new SeatVacatedAction(this.table.id, seat.index));

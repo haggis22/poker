@@ -175,6 +175,27 @@ export class CashierManager {
     }  // addChipsCommand
 
 
+    public cashInChips(userID: number, amount: number): Message {
+
+        if (amount <= 0) {
+
+            // Nothing to do here. Either a waste of time or someone trying to get sneaky
+            return new ErrorMessage('Cannot cash in a negative amount', userID);
+
+        }
+
+        let user: User = this.userManager.fetchUserByID(userID);
+
+        user.balance += amount;
+
+        this.broadcastBalanceUpdate(user.id);
+
+        // successfully added to a player not in the hand
+        return new Message('Success', userID);
+
+    }  // cashInChips
+
+
     private broadcastBalanceUpdate(userID: number): void {
 
         let checkBalanceCommand: CheckBalanceCommand = new CheckBalanceCommand();

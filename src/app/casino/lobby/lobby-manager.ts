@@ -51,8 +51,6 @@ export class LobbyManager implements MessageBroadcaster {
         this.messageQueue = new Array<Message>();
         this.lobbySubscribers = new Array<MessageHandler>();
 
-        this.setUp();
-
     }
 
 
@@ -130,7 +128,7 @@ export class LobbyManager implements MessageBroadcaster {
     }
 
 
-    private setUp(): void {
+    public setUp(): void {
 
         let cornDog: Table = this.createCornDog();
         this.log(`Created table ${cornDog.name} with ID ${ cornDog.id }`);
@@ -170,9 +168,7 @@ export class LobbyManager implements MessageBroadcaster {
         let betController: BetController = new BetController();
         let buttonController: IButtonController = new NormalButtonController();
 
-        let tableController: TableController = new TableController(table, deck, betController, buttonController);
-        tableController.lobbyManager = this;
-        tableController.cashierManager = this.cashierManager;
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, betController, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -212,8 +208,7 @@ export class LobbyManager implements MessageBroadcaster {
         let betController: BetController = new BetController();
         let buttonController: IButtonController = new NormalButtonController();
 
-        let tableController: TableController = new TableController(table, deck, betController, buttonController);
-        tableController.lobbyManager = this;
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, betController, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -253,8 +248,7 @@ export class LobbyManager implements MessageBroadcaster {
         let betController: BetController = new BetController();
         let buttonController: IButtonController = new NormalButtonController();
 
-        let tableController: TableController = new TableController(table, deck, betController, buttonController);
-        tableController.lobbyManager = this;
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, betController, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
         

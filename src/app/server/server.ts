@@ -53,6 +53,9 @@ cashierManager.userManager = userManager;
 
 lobbyManager.cashierManager = cashierManager;
 
+// Now that all the "services" are created, go ahead and create the tables
+lobbyManager.setUp();
+
 
 
 let clients: Set<IServerClient> = new Set<IServerClient>();
