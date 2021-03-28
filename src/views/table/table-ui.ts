@@ -43,8 +43,14 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     constructor() {
 
+        this.initialize();
+
+    }
+
+    public initialize(): void {
+
         this.commandHandlers = new Array<CommandHandler>();
-            
+
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
 
@@ -52,7 +58,8 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.setUpPositions();
 
-    }
+    }  // initialize
+
 
     private setUpPositions() {
 
@@ -321,6 +328,8 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         this.log(`Heard ${action.constructor.name}`);
 
     }
+
+
 
     registerCommandHandler(handler: CommandHandler) {
 

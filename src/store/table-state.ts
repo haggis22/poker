@@ -69,6 +69,55 @@ const state = reactive({
 });
 
 
+const initialize = () =>
+{
+    state.tableID = null;
+
+    state.chipFormatter = null;
+
+    state.table = null;
+    state.game = null;
+    state.messages.length = 0;
+
+    state.mySeatIndex = null;
+
+    state.seatActions.clear();
+    state.seatTimers.clear();
+
+    state.muckedCards.clear();
+
+    // fields specific to acting in advance
+    state.pendingBetCommand = null;
+    state.pendingBetNumRaises = null;
+
+    state.myCall = null;
+    state.myMinRaise = null;
+    state.myMaxRaise = null;
+
+    state.betController = new BetController();
+
+    state.currentBalance = null;
+
+    state.showdownRequired = false;
+    state.winningHand = null;
+
+    state.wonPots.length = 0;
+
+    state.usedCards.length = 0;
+
+    state.gatheringAntes = false;
+    state.gatheringBets = false;
+
+    state.dealerPositions.clear();
+    
+    state.playerPositions.clear();
+
+    state.hasPendingStatusRequest = false;
+
+
+};
+
+
 const getTableID = computed((): number => state.tableID);
 
 const setTableID = (tableID: number) => { state.tableID = tableID; };
@@ -515,6 +564,8 @@ const setHasPendingStatusRequest = (newValue: boolean): void => {
 
 
 export const tableState = {
+
+    initialize,
 
     getTableID,
     setTableID,

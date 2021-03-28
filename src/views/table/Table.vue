@@ -41,13 +41,12 @@
 
         name: "Table",
 
-        provide: {
-            tableState: tableState
-        },
-
         setup() {
 
             const route = useRoute();
+
+            // Clear anything that might already be in the window
+            tableState.initialize();
 
             tableState.setTableID(Number(route.params.tableID));
 
@@ -63,8 +62,9 @@
 
                 tableState.setChipFormatter(new MoneyFormatter());
 
-                //                let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
                 let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
+
+                tableUI.initialize();
 
                 // Now join all the links in the chain
                 tableUI.registerCommandHandler(gameClient);
