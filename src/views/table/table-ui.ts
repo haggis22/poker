@@ -32,7 +32,7 @@ import { tableState } from "@/store/table-state";
 
 const logger: Logger = new Logger();
 
-export class TableUI implements MessageHandler, CommandBroadcaster {
+class TableUI implements MessageHandler, CommandBroadcaster {
 
     private readonly TIME_PENDING_ACTION: number = 300;
 
