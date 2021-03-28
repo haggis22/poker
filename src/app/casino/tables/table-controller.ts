@@ -1591,6 +1591,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table.betStatus.seatIndex = seatIndexToAct;
 
         let millisToAct: number = this.table.rules.timeToAct * 1000;
+
+        if (this.table.seats[seatIndexToAct].player.userID === 1) {
+            millisToAct *= 10;
+        }
+
         let timesUp: number = Date.now() + millisToAct;
 
         this.queueAction(new BetTurnAction(this.table.id, this.table.betStatus, timesUp));

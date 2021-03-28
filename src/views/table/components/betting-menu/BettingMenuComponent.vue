@@ -45,18 +45,31 @@
                                       :amount="myMinRaise.totalBet"
                                       @button-click="toggleLimitRaise"></bet-button-component>
 
+                <bet-button-component v-if="isNoLimitRaiseAllowed && !isRaiseActivated"
+                                      :action="betDescription"
+                                      :is-activated="false"
+                                      @button-click="readyRaise"></bet-button-component>
+
+                <bet-button-component v-if="isNoLimitRaiseAllowed && isRaiseActivated"
+                                      :action="betDescription"
+                                      :is-activated="isRaiseActivated"
+                                      :amount="myMinRaise.totalBet"
+                                      @button-click="toggleNoLimitRaise"></bet-button-component>
+
             </div><!-- buttons -->
 
-            <div v-if="raiseDialogReady" class="raise-dialog">
+            <div v-if="showRaiseDialog" class="raise-dialog">
                 <div>
                     <span class="min-raise">{{ chipFormatter.format(minRaise) }}</span>
+                    <button type="button" @click.stop="stepDown">&#9664;</button>
                     <input type="range" v-model="raiseChips" :min="minRaise" :max="maxRaise" :step="step" />
+                    <button type="button" @click.stop="stepUp">&#9654;</button>
                     <span class="max-raise">{{ chipFormatter.format(maxRaise) }}</span>
                 </div>
                 <div class="buy-amount">{{ chipFormatter.format(raiseChips) }}</div>
                 <div>
-                    <button type="button" class="raise" @click.stop="raise">Raise</button>
                     <button type="button" class="cancel" @click.stop="cancelRaise">Cancel</button>
+                    <button type="button" class="raise" @click.stop="lockInRaise">Raise</button>
                 </div>
             </div>
 
@@ -90,6 +103,7 @@ import './betting-menu.scss';
     import { TableState } from '@/app/casino/tables/states/table-state';
     import { BetState } from '@/app/casino/tables/states/betting/bet-state';
     import { BlindsAndAntesState } from '@/app/casino/tables/states/betting/blinds-and-antes-state';
+import { CardSuit } from '@/app/cards/card-suit';
 
     const TableMenuComponent = defineComponent({
 
@@ -119,15 +133,15 @@ import './betting-menu.scss';
 
             const isLimitRaiseAllowed = computed((): boolean => myMinRaise.value && myMaxRaise.value && myMinRaise.value.chipsAdded === myMaxRaise.value.chipsAdded);
 
+            const isNoLimitRaiseAllowed = computed((): boolean => myMinRaise.value && myMaxRaise.value && myMaxRaise.value.chipsAdded > myMinRaise.value.chipsAdded);
+
             const isRaiseActivated = computed((): boolean => pendingBetCommand.value instanceof RaiseCommand);
 
             const betDescription = computed((): string => numRaises.value > 0 ? 'Raise To' : 'Bet');
 
-            const raiseChips = ref(1000);
+            const showRaiseDialog = ref(false);
+            const raiseChips = ref(null as number);
             const step = ref(25);
-            const showRaise = ref(false);
-
-            const raiseDialogReady = computed((): boolean => showRaise.value);
 
             const minRaise = computed((): number => myMinRaise.value ? myMinRaise.value.totalBet : 0);
 
@@ -226,6 +240,53 @@ import './betting-menu.scss';
 
             };
 
+            const toggleNoLimitRaise = (): void => {
+
+                if (isRaiseActivated.value) {
+
+                    return tableState.clearPendingBetCommands();
+
+                }
+
+                // tableUI.setBetCommand(new RaiseCommand(tableState.getTableID.value, tableState.getMyMinRaise.value.chipsAdded));
+
+            };
+
+            const readyRaise = (): void => {
+
+                raiseChips.value = myMinRaise.value.totalBet;
+                showRaiseDialog.value = true;
+
+            }
+
+            const stepDown = (): void => {
+
+                raiseChips.value -= step.value;
+
+            };
+
+            const stepUp = (): void => {
+
+                raiseChips.value += step.value;
+
+            };
+
+            const lockInRaise = (): void => {
+
+                showRaiseDialog.value = false;
+                const chipsAdded = tableState.getMyMinRaise.value.chipsAdded + (raiseChips.value - tableState.getMyMinRaise.value.totalBet);
+                tableUI.setBetCommand(new RaiseCommand(tableState.getTableID.value, chipsAdded));
+
+            }
+
+            const cancelRaise = (): void => {
+
+                tableState.clearPendingBetCommands();
+                showRaiseDialog.value = false;
+
+            }
+
+
 
             return {
 
@@ -249,10 +310,10 @@ import './betting-menu.scss';
                 isCallActivated,
 
                 isLimitRaiseAllowed,
+                isNoLimitRaiseAllowed,
                 isRaiseActivated,
 
                 betDescription,
-                raiseDialogReady,
 
                 minRaise,
                 maxRaise,
@@ -274,7 +335,18 @@ import './betting-menu.scss';
                 toggleAnte,
                 toggleCheck,
                 toggleCall,
-                toggleLimitRaise
+                toggleLimitRaise,
+                toggleNoLimitRaise,
+
+
+                showRaiseDialog,
+                readyRaise,
+                stepDown,
+                stepUp,
+                lockInRaise,
+                cancelRaise,
+
+
 
             };
 
@@ -292,3 +364,13 @@ import './betting-menu.scss';
 export default TableMenuComponent;
 
 </script>
+
+
+<style scoped lang="scss">
+
+    .raise-dialog
+    {
+        text-align: center;
+    }
+
+</style>
