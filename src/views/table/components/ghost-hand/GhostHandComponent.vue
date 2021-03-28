@@ -20,7 +20,6 @@
     import { UIPosition } from '@/app/ui/ui-position';
     import CardComponent from '../card/CardComponent.vue';
     import { CardUI } from '../../card-ui';
-    import { TableUI } from '../../table-ui';
 
     const GhostHandComponent = defineComponent({
 
@@ -31,10 +30,6 @@
         },
         dealerPosition: {
             type: UIPosition,
-            required: true
-        },
-        ui: {
-            type: TableUI,
             required: true
         }
 

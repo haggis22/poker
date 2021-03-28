@@ -1246,5 +1246,6 @@ export class TableUI implements MessageHandler, CommandBroadcaster {
 
     }  // isActionOn
 
-
 }
+
+export const tableUI = new TableUI();

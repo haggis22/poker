@@ -13,7 +13,6 @@ import './bet.scss';
     import { defineComponent, computed, ref, onMounted } from "vue";
 
     import { Bet } from '@/app/casino/tables/betting/bet';
-    import { TableUI } from '../../table-ui';
     import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
     import { tableState } from '@/store/table-state';
 

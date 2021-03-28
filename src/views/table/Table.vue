@@ -3,12 +3,12 @@
     <div>
         
         <div v-if="table != null">
-            <table-component :ui="ui"></table-component>
-            <chat-component :ui="ui"></chat-component>
+            <table-component></table-component>
+            <chat-component></chat-component>
             <log-component></log-component>
-            <table-menu-component v-if="hasSeat" :ui="ui">
+            <table-menu-component v-if="hasSeat">
             </table-menu-component>
-            <betting-menu-component v-if="hasSeat" :ui="ui"></betting-menu-component>
+            <betting-menu-component v-if="hasSeat"></betting-menu-component>
         </div>
         <div v-else>
             We have no table yet.
@@ -23,7 +23,7 @@
     import { useRoute } from 'vue-router';
 
     import { Table } from "@/app/casino/tables/table";
-    import { TableUI } from './table-ui';
+    import { tableUI } from './table-ui';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
     import { GameClient } from '../../app/communication/client-side/game-client';
     import { BrowserWebSocketWrapper } from '../../app/communication/client-side/browser-web-socket-wrapper';
@@ -51,8 +51,6 @@
 
             tableState.setTableID(Number(route.params.tableID));
 
-            const ui = ref(null as TableUI);
-
             const table = computed((): Table => tableState.getTable.value);
 
             const ws = new WebSocket('ws://localhost:3000');
@@ -65,27 +63,23 @@
 
                 tableState.setChipFormatter(new MoneyFormatter());
 
-                ui.value = new TableUI();
-
                 //                let tableWatcher: TableWatcher = new TableWatcher(this.tableID);
                 let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
 
                 // Now join all the links in the chain
-                ui.value.registerCommandHandler(gameClient);
-                gameClient.registerMessageHandler(ui.value);
+                tableUI.registerCommandHandler(gameClient);
+                gameClient.registerMessageHandler(tableUI);
 
                 /*
                                 tableWatcher.registerMessageHandler(ui);
                                 tableWatcher.registerCommandHandler(gameClient);
                 */
 
-                ui.value.authenticate();
+                tableUI.authenticate();
 
             });
 
             return {
-
-                ui,
 
                 table,
                 hasSeat

@@ -18,7 +18,6 @@ import './pot.scss';
     import { WonPot } from '@/app/casino/tables/betting/won-pot';
     import { UIPosition } from '@/app/ui/ui-position';
 
-    import { TableUI } from '../../table-ui';
     import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
     import { tableState } from '@/store/table-state';
 
@@ -27,10 +26,6 @@ import './pot.scss';
         props: {
             pot: {
                 type: WonPot,
-                required: true
-            },
-            ui: {
-                type: TableUI,
                 required: true
             }
         },

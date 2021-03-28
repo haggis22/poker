@@ -16,11 +16,11 @@
 <script lang="ts">
 
 
-import './chat.scss';
+    import './chat.scss';
 
     import { defineComponent } from 'vue';
 
-    import { TableUI } from '../../table-ui';
+    import { tableUI } from '../../table-ui';
     import { ChatCommand } from '@/app/commands/table/chat/chat-command';
 
     import { tableState } from "@/store/table-state";
@@ -37,37 +37,31 @@ import './chat.scss';
             };
 
         },
-        props: {
-        ui: {
-            type: TableUI,
-            required: true
-        }
-    },
-    data() {
+        data() {
 
-        let values =
-        {
-            message: null as string
-        };
+            let values =
+            {
+                message: null as string
+            };
 
-        return values;
+            return values;
 
-        },
+            },
 
-        computed: {
+            computed: {
 
-            getMessages: (): string[] => tableState.getMessages.value
+                getMessages: (): string[] => tableState.getMessages.value
 
-        },
+            },
 
-    methods: {
+        methods: {
 
 
         sendMessage() {
 
             if (this.message && this.message.length) {
 
-                this.ui.sendCommand(new ChatCommand(this.table.id, this.message));
+                tableUI.sendCommand(new ChatCommand(this.table.id, this.message));
                 this.message = '';
 
             }

@@ -82,7 +82,7 @@ import './betting-menu.scss';
     import { Bet } from '@/app/casino/tables/betting/bet';
 
 
-    import { TableUI } from '../../table-ui';
+    import { tableUI } from '../../table-ui';
     import BetButtonComponent from '../bet-button/BetButtonComponent.vue';
 
     import { tableState } from "@/store/table-state";
@@ -93,13 +93,6 @@ import './betting-menu.scss';
 
     const TableMenuComponent = defineComponent({
 
-        props: {
-            ui: {
-                type: TableUI,
-                required: true
-            }
-
-        },
         setup() {
 
             const pendingBetCommand = computed((): BetCommand | FoldCommand => tableState.getPendingBetCommand.value);
@@ -242,7 +235,7 @@ import './betting-menu.scss';
 
             }
 
-            this.ui.setBetCommand(new FoldCommand(tableState.getTableID.value));
+            tableUI.setBetCommand(new FoldCommand(tableState.getTableID.value));
 
         },
 
@@ -254,7 +247,7 @@ import './betting-menu.scss';
 
             }
 
-            this.ui.setBetCommand(new AnteCommand(tableState.getTableID.value));
+            tableUI.setBetCommand(new AnteCommand(tableState.getTableID.value));
 
         },
 
@@ -266,7 +259,7 @@ import './betting-menu.scss';
 
             }
 
-            this.ui.setBetCommand(new CheckCommand(tableState.getTableID.value));
+            tableUI.setBetCommand(new CheckCommand(tableState.getTableID.value));
 
         },
 
@@ -278,7 +271,7 @@ import './betting-menu.scss';
 
             }
 
-            this.ui.setBetCommand(new CallCommand(tableState.getTableID.value, tableState.getMyCall.value.chipsAdded));
+            tableUI.setBetCommand(new CallCommand(tableState.getTableID.value, tableState.getMyCall.value.chipsAdded));
 
         },
 
@@ -290,7 +283,7 @@ import './betting-menu.scss';
 
             }
 
-            this.ui.setBetCommand(new RaiseCommand(tableState.getTableID.value, tableState.getMyMinRaise.value.chipsAdded));
+            tableUI.setBetCommand(new RaiseCommand(tableState.getTableID.value, tableState.getMyMinRaise.value.chipsAdded));
 
         }
 

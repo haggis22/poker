@@ -18,7 +18,6 @@
     import { Board } from '@/app/casino/tables/boards/board';
     import { UIPosition } from '@/app/ui/ui-position';
     import { CardUI } from '../../card-ui';
-    import { TableUI } from '../../table-ui';
     import CardComponent from '../card/CardComponent.vue';
     import { tableState } from '@/store/table-state';
 
@@ -30,11 +29,8 @@
             board: {
                 type: Object as () => Board,
                 required: true
-            },
-            ui: {
-                type: TableUI,
-                required: true
             }
+
         },
         setup(props) {
 

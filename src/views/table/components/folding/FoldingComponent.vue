@@ -20,8 +20,6 @@ import './folding.scss';
     import { UIPosition } from '@/app/ui/ui-position';
     import CardComponent from '../card/CardComponent.vue';
     import { CardUI } from '../../card-ui';
-    import { TableUI } from '../../table-ui';
-
 
 
     const FoldingComponent = defineComponent({
@@ -34,26 +32,11 @@ import './folding.scss';
         dealerPosition: {
             type: UIPosition,
             required: true
-        },
-        ui: {
-            type: TableUI,
-            required: true
         }
 
     },
-    data() {
-
-        let values = {};
-
-        return values;
-
-    },
    components: {
-        'card-component': CardComponent
-    },
-    computed: {
-
-
+        CardComponent
     },
     methods: {
 

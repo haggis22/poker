@@ -62,9 +62,10 @@
     import FoldingComponent from '../folding/FoldingComponent.vue';
     import TimerComponent from '../timer/TimerComponent.vue';
     import GhostHandComponent from '../ghost-hand/GhostHandComponent.vue';
-    import { TableUI } from '../../table-ui';
 
+    import { tableUI } from '../../table-ui';
     import { tableState } from "@/store/table-state";
+
     import { Player } from '@/app/players/player';
     import { Timer } from '@/app/timers/timer';
     import { FacedownCard } from '@/app/cards/face-down-card';
@@ -82,11 +83,8 @@
             betStatus: {
                 type: BetStatus,
                 required: true
-            },
-            ui: {
-                type: TableUI,
-                required: true
             }
+
         },
         setup(props) {
 
@@ -106,7 +104,7 @@
 
                 let classes = ['seat', `seat-${seatIndex}`];
 
-                if (props.ui.isActionOn(seatIndex)) {
+                if (tableUI.isActionOn(seatIndex)) {
 
                     classes.push('action-on');
 
@@ -154,7 +152,7 @@
 
             const sit = () => {
 
-                props.ui.sendCommand(new RequestSeatCommand(table.value.id, seatIndex));
+                tableUI.sendCommand(new RequestSeatCommand(table.value.id, seatIndex));
 
             };
 

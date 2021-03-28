@@ -46,21 +46,13 @@
 
     import { defineComponent, computed, ref } from 'vue';
 
-    import { TableUI } from '../../table-ui';
+    import { tableUI } from '../../table-ui';
     import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
 
     import { tableState } from "@/store/table-state";
 
     const TableMenuComponent = defineComponent({
 
-        props: {
-
-            ui: {
-                type: TableUI,
-                required: true
-            }
-
-        },
         setup(props, context) {
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
@@ -91,21 +83,20 @@
                 // The actual local value hasn't changed yet, so use the checked flag of the input checkbox itself
                 if (event.target instanceof HTMLInputElement) {
                     tableState.setHasPendingStatusRequest(true);
-                    props.ui.sendCommand(new SetStatusCommand(tableState.getTableID.value, event.target.checked));
-                    context.emit('update:isSittingOut', event.target.checked);
+                    tableUI.sendCommand(new SetStatusCommand(tableState.getTableID.value, event.target.checked));
                 }
 
             };
 
             const standUp = (): void => {
 
-                props.ui.sendCommand(new StandUpCommand(tableState.getTableID.value));
+                tableUI.sendCommand(new StandUpCommand(tableState.getTableID.value));
 
             };
 
             const checkBalance = (): void => {
 
-                props.ui.checkBalance();
+                tableUI.checkBalance();
                 showAddChips.value = true;
 
             };
@@ -125,7 +116,7 @@
 
                     if (numChips <= currentBalance.value) {
 
-                        props.ui.sendCommand(new AddChipsCommand(tableState.getTableID.value, numChips));
+                        tableUI.sendCommand(new AddChipsCommand(tableState.getTableID.value, numChips));
                         showAddChips.value = false;
 
                     }

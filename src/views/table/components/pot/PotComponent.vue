@@ -18,7 +18,6 @@ import './pot.scss';
 
     import { Pot } from '@/app/casino/tables/betting/pot';
 
-    import { TableUI } from '../../table-ui';
     import ChipBoxComponent from '../chips/ChipBoxComponent.vue';
     import { tableState } from '@/store/table-state';
 

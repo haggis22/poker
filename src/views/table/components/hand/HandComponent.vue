@@ -4,7 +4,6 @@
                         :key="`hand-card-${index}`"
                         :card="card"
                         :index="index"
-                        :is-showdown="ui.isShowdownRequired"
                         @card-created="cardCreated"></card-component>
     </div>
 </template>
@@ -21,7 +20,6 @@ import './hand.scss';
 
     import CardComponent from '../card/CardComponent.vue';
     import { CardUI } from '../../card-ui';
-    import { TableUI } from '../../table-ui';
 
 
 
@@ -36,25 +34,10 @@ const HandComponent = defineComponent ({
             type: UIPosition,
             required: true
         },
-        ui: {
-            type: TableUI,
-            required: true
-        }
-
-    },
-    data() {
-
-        let values = {};
-
-        return values;
 
     },
    components: {
-        'card-component': CardComponent
-    },
-    computed: {
-
-
+        CardComponent
     },
     methods: {
 
