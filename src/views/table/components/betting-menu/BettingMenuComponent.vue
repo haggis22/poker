@@ -71,7 +71,7 @@
     
 import './betting-menu.scss';
 
-    import { defineComponent, computed } from "vue";
+    import { defineComponent, computed, ref } from "vue";
 
     import { AnteCommand } from '@/app/commands/table/betting/ante-command';
     import { BetCommand } from '@/app/commands/table/betting/bet-command';
@@ -123,9 +123,11 @@ import './betting-menu.scss';
 
             const betDescription = computed((): string => numRaises.value > 0 ? 'Raise To' : 'Bet');
 
-            let showRaise: boolean;
+            const raiseChips = ref(1000);
+            const step = ref(25);
+            const showRaise = ref(false);
 
-            const raiseDialogReady = computed((): boolean => showRaise);
+            const raiseDialogReady = computed((): boolean => showRaise.value);
 
             const minRaise = computed((): number => myMinRaise.value ? myMinRaise.value.totalBet : 0);
 
@@ -162,6 +164,68 @@ import './betting-menu.scss';
 
 
             });
+
+
+            const toggleFold = (): void => {
+
+                if (isFoldActivated.value) {
+
+                    return tableState.clearPendingBetCommands();
+
+                }
+
+                tableUI.setBetCommand(new FoldCommand(tableState.getTableID.value));
+
+            };
+
+            const toggleAnte = (): void => {
+
+                if (isAnteActivated.value) {
+
+                    return tableState.clearPendingBetCommands();
+
+                }
+
+                tableUI.setBetCommand(new AnteCommand(tableState.getTableID.value));
+
+            };
+
+            const toggleCheck = (): void => {
+
+                if (isCheckActivated.value) {
+
+                    return tableState.clearPendingBetCommands();
+
+                }
+
+                tableUI.setBetCommand(new CheckCommand(tableState.getTableID.value));
+
+            };
+
+            const toggleCall = (): void => {
+
+                if (isCallActivated.value) {
+
+                    return tableState.clearPendingBetCommands();
+
+                }
+
+                tableUI.setBetCommand(new CallCommand(tableState.getTableID.value, tableState.getMyCall.value.chipsAdded));
+
+            };
+
+            const toggleLimitRaise = (): void => {
+
+                if (isRaiseActivated.value) {
+
+                    return tableState.clearPendingBetCommands();
+
+                }
+
+                tableUI.setBetCommand(new RaiseCommand(tableState.getTableID.value, tableState.getMyMinRaise.value.chipsAdded));
+
+            };
+
 
             return {
 
@@ -201,7 +265,16 @@ import './betting-menu.scss';
                 isBettingTime,
 
                 remainsToAnte,
-                remainsToAct
+                remainsToAct,
+
+                raiseChips,
+                step,
+
+                toggleFold,
+                toggleAnte,
+                toggleCheck,
+                toggleCall,
+                toggleLimitRaise
 
             };
 
@@ -210,84 +283,9 @@ import './betting-menu.scss';
 
     components: {
 
-        'bet-button-component': BetButtonComponent
+        BetButtonComponent
 
     },
-    data() {
-
-        let values =
-        {
-            raiseChips: 1000,
-            step: 25,
-            showRaise: false
-        };
-
-        return values;
-
-    },
-    methods: {
-
-        toggleFold: function (): void {
-
-            if (this.isFoldActivated) {
-
-                return tableState.clearPendingBetCommands();
-
-            }
-
-            tableUI.setBetCommand(new FoldCommand(tableState.getTableID.value));
-
-        },
-
-        toggleAnte: function (): void {
-
-            if (this.isAnteActivated) {
-
-                return tableState.clearPendingBetCommands();
-
-            }
-
-            tableUI.setBetCommand(new AnteCommand(tableState.getTableID.value));
-
-        },
-
-        toggleCheck: function (): void {
-
-            if (this.isCheckActivated) {
-
-                return tableState.clearPendingBetCommands();
-
-            }
-
-            tableUI.setBetCommand(new CheckCommand(tableState.getTableID.value));
-
-        },
-
-        toggleCall: function (): void {
-
-            if (this.isCallActivated) {
-
-                return tableState.clearPendingBetCommands();
-
-            }
-
-            tableUI.setBetCommand(new CallCommand(tableState.getTableID.value, tableState.getMyCall.value.chipsAdded));
-
-        },
-
-        toggleLimitRaise: function (): void {
-
-            if (this.isRaiseActivated) {
-
-                return tableState.clearPendingBetCommands();
-
-            }
-
-            tableUI.setBetCommand(new RaiseCommand(tableState.getTableID.value, tableState.getMyMinRaise.value.chipsAdded));
-
-        }
-
-    }  // methods
 
 });
 

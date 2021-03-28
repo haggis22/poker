@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <div class="action-log">
+    <div class="action-log" ref="log">
 
         <div v-for="(message, index) in getMessages" 
              :key="`log-${index}`"
@@ -16,38 +16,49 @@
 
 import './log.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed, ref, onUpdated } from 'vue';
 
     import { tableState } from "@/store/table-state";
 
 
 const LogComponent = defineComponent({
 
-    computed: {
+    setup() {
 
-        getMessages: (): string[] => tableState.getMessages.value
+        const log = ref(null as HTMLElement);
 
-    },
+        const getMessages = computed((): string[] => tableState.getMessages.value);
 
-    methods: {
+        const scrollToEnd = (): void => {
 
+            if (log.value) {
 
-        scrollToEnd() {
+                const messages = log.value.getElementsByClassName('message');
 
-            const messages = this.$el.getElementsByClassName('message');
+                if (messages.length) {
 
-            if (messages.length) {
+                    messages[messages.length - 1].scrollIntoView();
 
-                messages[messages.length - 1].scrollIntoView();
+                }
 
             }
 
-
         }
-    },
-    updated() {
 
-        this.scrollToEnd();
+        onUpdated(() => {
+
+            scrollToEnd();
+
+        });
+
+
+        return {
+
+            log,
+
+            getMessages
+
+        };
 
     }
 

@@ -23,53 +23,53 @@ import './bet-button.scss';
 
     const BetButtonComponent = defineComponent({
 
-    props: {
+        props: {
 
-        action: {
-            type: String,
-            required: true
-        },
-        isActivated: {
-            type: Boolean,
-            required: true
-        },
-        amount: {
-            type: Number,
-            required: false
-        }
+            action: {
+                type: String,
+                required: true
+            },
+            isActivated: {
+                type: Boolean,
+                required: true
+            },
+            amount: {
+                type: Number,
+                required: false
+            }
 
         },
-        setup() {
+        setup(props) {
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
+            const lightClasses = computed((): string[] => {
+
+                let classes = ['light'];
+
+                if (props.isActivated) {
+
+                    classes.push('activated');
+
+                }
+
+                return classes;
+
+            });
+
+
             return {
 
-                chipFormatter
+                chipFormatter,
+
+                lightClasses
 
             };
 
 
         },
-    computed: {
 
-        lightClasses: function () {
-
-            let classes = [ 'light' ];
-
-            if (this.isActivated) {
-
-                classes.push('activated');
-
-            }
-
-            return classes;
-
-        },
-
-    }
-
-});
+    });
 
     export default BetButtonComponent;
 

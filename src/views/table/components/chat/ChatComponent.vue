@@ -18,7 +18,7 @@
 
     import './chat.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, ref, computed } from 'vue';
 
     import { tableUI } from '../../table-ui';
     import { ChatCommand } from '@/app/commands/table/chat/chat-command';
@@ -30,46 +30,32 @@
 
         setup() {
 
+
+            const tableID = computed((): number => tableState.getTableID.value);
+
+            const message = ref(null as string);
+
+            const sendMessage = (): void => {
+
+                if (message.value && message.value.length) {
+
+                    tableUI.sendCommand(new ChatCommand(tableID.value, message.value));
+                    message.value = '';
+
+                }
+
+            }
+
             return {
 
-                table: tableState.getTable.value
+                message,
+                sendMessage
 
             };
 
         },
-        data() {
 
-            let values =
-            {
-                message: null as string
-            };
-
-            return values;
-
-            },
-
-            computed: {
-
-                getMessages: (): string[] => tableState.getMessages.value
-
-            },
-
-        methods: {
-
-
-        sendMessage() {
-
-            if (this.message && this.message.length) {
-
-                tableUI.sendCommand(new ChatCommand(this.table.id, this.message));
-                this.message = '';
-
-            }
-
-        }
-    }
-
-});
+    });
 
 export default ChatComponent;
 

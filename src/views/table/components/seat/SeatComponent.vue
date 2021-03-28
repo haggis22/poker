@@ -28,17 +28,14 @@
             </div>
             <hand-component v-if="seat.hand"
                             :cards="seat.hand.cards"
-                            :ui="ui"
                             :dealer-position="dealerPosition"></hand-component>
 
             <folding-component v-if="muckedCards"
                                 :cards="muckedCards"
-                                :ui="ui"
                                 :dealer-position="dealerPosition"></folding-component>
 
             <ghost-hand-component v-if="muckedCards && isMySeat"
                                 :cards="muckedCards"
-                                :ui="ui"
                                 :dealer-position="dealerPosition"></ghost-hand-component>
 
         </div>

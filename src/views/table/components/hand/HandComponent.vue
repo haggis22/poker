@@ -23,45 +23,51 @@ import './hand.scss';
 
 
 
-const HandComponent = defineComponent ({
+    const HandComponent = defineComponent({
 
-    props: {
-        cards: {
-            type: Array,
-            required: true
+        props: {
+            cards: {
+                type: Array,
+                required: true
+            },
+            dealerPosition: {
+                type: UIPosition,
+                required: true
+            },
+
         },
-        dealerPosition: {
-            type: UIPosition,
-            required: true
+        setup(props) {
+
+            const cardCreated = (card: CardUI): void => {
+
+                console.log(`Starting dealing animation for ${card.index}`)
+                card.top = props.dealerPosition.top;
+                card.left = props.dealerPosition.left;
+                card.isFacedown = true;
+
+                // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+                setTimeout(() => {
+
+                    card.top = 5;
+                    card.left = 50 + (card.index * 50);
+                    card.isFacedown = false;
+
+                }, 10);
+
+            };
+
+            return {
+
+                cardCreated
+
+            };
+
+        },
+        components: {
+            CardComponent
         },
 
-    },
-   components: {
-        CardComponent
-    },
-    methods: {
-
-        cardCreated(card: CardUI) {
-
-            console.log(`Starting dealing animation for ${card.index}`)
-            card.top = this.dealerPosition.top;
-            card.left = this.dealerPosition.left;
-            card.isFacedown = true;
-
-            // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
-            setTimeout(() => {
-
-                card.top = 5;
-                card.left = 50 + (card.index * 50);
-                card.isFacedown = false;
-
-            }, 10);
-
-        }
-
-    }
-
-});
+    });
 
 export default HandComponent;
 

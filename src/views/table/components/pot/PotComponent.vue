@@ -14,7 +14,7 @@
 
 import './pot.scss';
 
-    import { defineComponent, computed } from 'vue';
+    import { defineComponent, computed, ref, onMounted } from 'vue';
 
     import { Pot } from '@/app/casino/tables/betting/pot';
 
@@ -29,66 +29,60 @@ import './pot.scss';
                 required: true
             },
         },
-        setup() {
+        setup(props) {
+
+            const isGathered = ref(false);
+            const timer = ref(null as ReturnType<typeof setTimeout>);
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
+            const potClasses = computed((): string[] => {
+
+                if (!props.pot) {
+                    return null;
+                }
+
+                let classes: string[] = [`pot-${props.pot.index}`];
+
+                if (isGathered.value) {
+
+                    classes.push('gathered');
+
+                }
+
+                return classes;
+
+            });
+
+            onMounted(() => {
+
+                // After only the briefest of pauses, we're going to have this pot appear
+                timer.value = setTimeout(() => {
+
+                    isGathered.value = true;
+
+                }, 10);
+
+
+            });
+
+
             return {
 
-                chipFormatter
+                chipFormatter,
+
+                potClasses
 
             };
 
         },
-    components: {
-        'chip-box-component': ChipBoxComponent
-    },
-    data() {
+        components: {
 
-        let values =
-        {
-            isGathered: false,
-            timer: null as ReturnType<typeof setTimeout>
-        };
-
-        return values;
-
-    },
-    created() {
-
-        console.log(`Created PotComponent for index ${this.pot.index}, amount ${this.pot.amount}`);
-
-        // After only the briefest of pauses, we're going to have this pot appear
-        this.timer = setTimeout(() => {
-
-            this.isGathered = true;
-
-        }, 10);
-
-    },
-    computed: {
-
-        potClasses: function () {
-
-            if (!this.pot) {
-                return null;
-            }
-
-            let classes: string[] = [`pot-${this.pot.index}`];
-
-            if (this.isGathered) {
-
-                classes.push('gathered');
-
-            }
-
-            return classes;
+            ChipBoxComponent
 
         }
 
-    }
-
-});
+    });
 
 export default PotComponent;
 

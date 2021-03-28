@@ -12,8 +12,7 @@
 
 <script lang="ts">
 
-
-import './folding.scss';
+    import './folding.scss';
 
     import { defineComponent } from 'vue';
 
@@ -34,41 +33,48 @@ import './folding.scss';
             required: true
         }
 
-    },
-   components: {
-        CardComponent
-    },
-    methods: {
+        },
+        setup(props) {
 
-        cardCreated(card: CardUI) {
+            const cardCreated = (card: CardUI): void => {
 
-            console.log(`Starting folding animation for ${card.index}`)
-            card.top = 5;
-            card.left = 50 + (card.index * 50);
-            card.isFacedown = false;
+                console.log(`Starting folding animation for ${card.index}`)
+                card.top = 5;
+                card.left = 50 + (card.index * 50);
+                card.isFacedown = false;
 
-            // After only the briefest of pauses, we're going to mark this card as "mucked", so it goes flying towards the dealer
-            setTimeout(() => {
-
-                card.top = this.dealerPosition.top;
-                card.left = this.dealerPosition.left;
-                card.isFacedown = true;
-
-                // After we have given the card time to reach the dealer, then zap it
+                // After only the briefest of pauses, we're going to mark this card as "mucked", so it goes flying towards the dealer
                 setTimeout(() => {
 
-                    card.top = card.left = null;
+                    card.top = props.dealerPosition.top;
+                    card.left = props.dealerPosition.left;
+                    card.isFacedown = true;
 
-                }, 300)
+                    // After we have given the card time to reach the dealer, then zap it
+                    setTimeout(() => {
 
-            }, 10);
+                        card.top = card.left = null;
 
+                    }, 300)
+
+                }, 10);
+
+            };
+
+            return {
+
+                cardCreated
+
+            }
+
+
+        },
+       components: {
+            CardComponent
         }
 
-    }
+    });
 
-});
-
-export default FoldingComponent;
+    export default FoldingComponent;
 
 </script>

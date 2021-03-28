@@ -23,46 +23,41 @@
 
     const GhostHandComponent = defineComponent({
 
-    props: {
-        cards: {
-            type: Array,
-            required: true
+        props: {
+            cards: {
+                type: Array,
+                required: true
+            },
+            dealerPosition: {
+                type: UIPosition,
+                required: true
+            }
+
         },
-        dealerPosition: {
-            type: UIPosition,
-            required: true
-        }
+        set() {
 
-    },
-    data() {
+            const cardCreated = (card: CardUI): void => {
 
-        let values = {};
+                console.log(`Showing ghost card for ${card.index}`)
+                card.top = 5;
+                card.left = 50 + (card.index * 50);
+                card.isFacedown = false;
 
-        return values;
+            };
 
-    },
-   components: {
-        'card-component': CardComponent
-    },
-    computed: {
+            return {
 
+                cardCreated
 
-    },
-    methods: {
+            }
 
-        cardCreated(card: CardUI) {
+        },
+        components: {
+            CardComponent
+        },
 
-            console.log(`Showing ghost card for ${card.index}`)
-            card.top = 5;
-            card.left = 50 + (card.index * 50);
-            card.isFacedown = false;
+    });
 
-        }
-
-    }
-
-});
-
-export default GhostHandComponent;
+    export default GhostHandComponent;
 
 </script>
