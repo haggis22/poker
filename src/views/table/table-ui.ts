@@ -14,7 +14,7 @@ import { Logger } from "../../app/logging/logger";
 import { TableConnectedAction } from "../../app/actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../app/commands/table/table-snapshot-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction } from "../../app/communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction, ClearTimerAction } from "../../app/communication/serializable";
 import { SetGameAction } from "../../app/actions/table/game/set-game-action";
 import { SetStatusAction } from "@/app/actions/table/players/set-status-action";
 import { SetStatusAckedAction } from "@/app/actions/table/players/set-status-acked-action";
@@ -232,6 +232,12 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof ClearBoardAction) {
 
             return this.clearBoardAction(action);
+
+        }
+
+        if (action instanceof ClearTimerAction) {
+
+            return this.clearTimerAction(action);
 
         }
 
@@ -777,6 +783,13 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         tableState.clearBoard();
 
     }
+
+    private clearTimerAction(action: ClearTimerAction): void {
+
+        tableState.clearTimer(action.seatIndex);
+
+    }
+
 
     
     private handCompleteAction(action: HandCompleteAction): void {

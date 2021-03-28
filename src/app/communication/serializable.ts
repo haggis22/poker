@@ -45,6 +45,7 @@ export { BetState } from "../casino/tables/states/betting/bet-state";
 export { BetAction } from "../actions/table/betting/bet-action";
 export { BetTurnAction } from "../actions/table/betting/bet-turn-action";
 export { BetReturnedAction } from "../actions/table/betting/bet-returned-action";
+export { ClearTimerAction } from "../actions/table/betting/clear-timer-action";
 
 
 export { BlindsAndAntesState } from "../casino/tables/states/betting/blinds-and-antes-state";
