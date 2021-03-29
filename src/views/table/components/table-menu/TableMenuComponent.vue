@@ -9,7 +9,7 @@
                 <label>
                     <input type="checkbox"
                            value="true"
-                           :checked="isSittingOut"
+                           :checked="localSittingOut"
                            :disabled="hasPendingStatusRequest"
                            @change="setStatus" />
                     Sit out next hand
@@ -63,7 +63,7 @@
 
     import './table-menu.scss';
 
-    import { defineComponent, computed, ref } from 'vue';
+    import { defineComponent, computed, ref, watch } from 'vue';
 
     import { tableUI } from '../../table-ui';
     import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
@@ -72,7 +72,7 @@
 
     const TableMenuComponent = defineComponent({
 
-        setup(props, context) {
+        setup() {
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
@@ -93,11 +93,14 @@
 
             };
 
+            const isSittingOut = computed((): boolean => tableState.getTable.value.seats[tableState.getMySeatIndex.value].player.isSittingOut);
 
             // initialize the local sitting out variable with what is on the server
-            let localSittingOut = tableState.getTable.value.seats[tableState.getMySeatIndex.value].player.isSittingOut;
+            const localSittingOut = ref(isSittingOut.value);
 
-            const isSittingOut = ref(localSittingOut);
+            watch(() => isSittingOut.value, (newValue) => {
+                localSittingOut.value = newValue;
+            });
 
             const hasPendingStatusRequest = computed((): boolean => tableState.getHasPendingStatusRequest.value);
 
@@ -183,7 +186,7 @@
                 cancelBuyIn,
 
                 hasPendingStatusRequest,
-                isSittingOut
+                localSittingOut
 
             };
 

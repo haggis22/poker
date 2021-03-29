@@ -6,8 +6,7 @@
             <table-component></table-component>
             <chat-component></chat-component>
             <log-component></log-component>
-            <table-menu-component v-if="hasSeat">
-            </table-menu-component>
+            <table-menu-component v-if="hasSeat"></table-menu-component>
             <betting-menu-component v-if="hasSeat"></betting-menu-component>
         </div>
         <div v-else>
