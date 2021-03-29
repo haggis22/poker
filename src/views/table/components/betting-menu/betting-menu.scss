@@ -9,17 +9,39 @@
     height: 100px;
 
     .bet-actions {
-
         width: 100%;
 
         .buttons {
-
             width: 100%;
             display: flex;
             flex-direction: row;
             justify-content: space-around;
         }
-
     }
 
+    .raise-dialog {
+        .min-raise,
+        .max-raise {
+            vertical-align: bottom;
+        }
+
+        .min-raise {
+            margin-right: 10px;
+        }
+
+        .max-raise {
+            margin-left: 10px;
+        }
+
+        .chips-slider {
+            vertical-align: middle;
+        }
+
+        .buttons {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+    }
 }

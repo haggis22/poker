@@ -65,14 +65,19 @@
                     <button type="button" 
                             @click.stop="stepDown"
                             :disabled="raiseChips === minRaise">&#9664;</button>
-                    <input type="range" v-model.number="raiseChips" :min="minRaise" :max="maxRaise" :step="step" />
+                    <input type="range" 
+                           class="chips-slider"
+                           v-model.number="raiseChips" 
+                           :min="minRaise" 
+                           :max="maxRaise" 
+                           :step="step" />
                     <button type="button" 
                             @click.stop="stepUp"
                             :disabled="raiseChips === maxRaise">&#9654;</button>
                     <span class="max-raise">{{ chipFormatter.format(maxRaise) }}</span>
                 </div>
                 <div class="buy-amount">{{ chipFormatter.format(raiseChips) }}</div>
-                <div>
+                <div class="buttons">
                     <button type="button" class="cancel" @click.stop="cancelRaise">Cancel</button>
                     <button type="button" class="raise" @click.stop="lockInRaise">Raise</button>
                 </div>
