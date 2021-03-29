@@ -21,7 +21,7 @@
 
         <div class="bet-actions" v-if="remainsToAct">
 
-            <div class="buttons">
+            <div v-if="!showRaiseDialog" class="buttons">
 
                 <bet-button-component v-if="isFoldAllowed"
                                       :action="'Fold'"
@@ -59,11 +59,16 @@
             </div><!-- buttons -->
 
             <div v-if="showRaiseDialog" class="raise-dialog">
+
                 <div>
                     <span class="min-raise">{{ chipFormatter.format(minRaise) }}</span>
-                    <button type="button" @click.stop="stepDown">&#9664;</button>
-                    <input type="range" v-model="raiseChips" :min="minRaise" :max="maxRaise" :step="step" />
-                    <button type="button" @click.stop="stepUp">&#9654;</button>
+                    <button type="button" 
+                            @click.stop="stepDown"
+                            :disabled="raiseChips === minRaise">&#9664;</button>
+                    <input type="range" v-model.number="raiseChips" :min="minRaise" :max="maxRaise" :step="step" />
+                    <button type="button" 
+                            @click.stop="stepUp"
+                            :disabled="raiseChips === maxRaise">&#9654;</button>
                     <span class="max-raise">{{ chipFormatter.format(maxRaise) }}</span>
                 </div>
                 <div class="buy-amount">{{ chipFormatter.format(raiseChips) }}</div>
@@ -107,7 +112,7 @@ import { CardSuit } from '@/app/cards/card-suit';
 
     const TableMenuComponent = defineComponent({
 
-        setup() {
+        setup(props, { emit }) {
 
             const pendingBetCommand = computed((): BetCommand | FoldCommand => tableState.getPendingBetCommand.value);
 
@@ -140,7 +145,16 @@ import { CardSuit } from '@/app/cards/card-suit';
             const betDescription = computed((): string => numRaises.value > 0 ? 'Raise To' : 'Bet');
 
             const showRaiseDialog = ref(false);
+
             const raiseChips = ref(null as number);
+
+            const raiseChipsModel = computed({
+
+                get: () => raiseChips.value,
+                set: (value) => emit('update:raiseChips', value)
+
+            });
+
             const step = ref(25);
 
             const minRaise = computed((): number => myMinRaise.value ? myMinRaise.value.totalBet : 0);
@@ -257,7 +271,7 @@ import { CardSuit } from '@/app/cards/card-suit';
                 raiseChips.value = myMinRaise.value.totalBet;
                 showRaiseDialog.value = true;
 
-            }
+            };
 
             const stepDown = (): void => {
 
@@ -285,8 +299,6 @@ import { CardSuit } from '@/app/cards/card-suit';
                 showRaiseDialog.value = false;
 
             }
-
-
 
             return {
 
@@ -329,6 +341,7 @@ import { CardSuit } from '@/app/cards/card-suit';
                 remainsToAct,
 
                 raiseChips,
+                raiseChipsModel,
                 step,
 
                 toggleFold,
@@ -345,8 +358,6 @@ import { CardSuit } from '@/app/cards/card-suit';
                 stepUp,
                 lockInRaise,
                 cancelRaise,
-
-
 
             };
 

@@ -146,8 +146,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let tableID = ++this.nextID;
 
-        // # seats, # seconds to act
-        let rules = new TableRules(6, 5, 5);
+        let rules = new TableRules(6, /* timeToAnte */ 5, /* timeToAct */ 10);
 
         let ante = 25;
 
@@ -186,8 +185,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let tableID = ++this.nextID;
 
-        // # seats, # seconds to act
-        let rules = new TableRules(/* numSeats */ 6, /* timeToAnte */ 5, /* timeToAct */ 5);
+        let rules = new TableRules(/* numSeats */ 6, /* timeToAnte */ 5, /* timeToAct */ 10);
 
         let ante = 0;
 
@@ -226,8 +224,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let tableID = ++this.nextID;
 
-        // # seats, # seconds to act
-        let rules = new TableRules(6, 5, 5);
+        let rules = new TableRules(6, /* timeToAnte */ 5, /* timeToAct */ 10);
 
         let ante = 0;
 

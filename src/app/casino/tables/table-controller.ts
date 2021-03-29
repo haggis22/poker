@@ -1592,9 +1592,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         let millisToAct: number = this.table.rules.timeToAct * 1000;
 
+/*
         if (this.table.seats[seatIndexToAct].player.userID === 1) {
-            millisToAct *= 10;
+            millisToAct *= 5;
         }
+*/
 
         let timesUp: number = Date.now() + millisToAct;
 
