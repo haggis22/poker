@@ -24,6 +24,7 @@ import { HandCompleteAction } from "../../app/actions/table/game/hand-complete-a
 import { Timer } from "../../app/timers/timer";
 import { CurrentBalanceAction } from "../../app/actions/cashier/current-balance-action";
 import { UIPosition } from "../../app/ui/ui-position";
+import { BettingCommand } from '@/app/commands/table/betting/betting-command';
 
 
 import { userState } from "@/store/user-state";
@@ -590,6 +591,8 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     private tableStateAction(action: TableStateAction): void {
 
+        this.log(`Heard TableState action ${action.state.constructor.name}`)
+
         tableState.setTableState(action.state);
 
         this.clearLocalBets();
@@ -663,14 +666,16 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat && seat.isInHand) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            tableState.setMyCall(tableState.getBetController.value.calculateCall(this.getTable(), seat));
+            const myCall = tableState.getBetController.value.calculateCall(this.getTable(), seat);
+
+            tableState.setMyCall(myCall);
 
             // no betting, only calling, with antes, so nothing to do for myMinRaise or myMaxRaise
 
             // If I am marked as "not sitting out" then ready my blinds & ante bet
             if (seat.player.isSittingOut === false) {
 
-                this.setBetCommand(new AnteCommand(this.getTable()!.id));
+                this.setBetCommand(new AnteCommand(this.getTable().id));
 
             }  
 
@@ -841,7 +846,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         tableState.setMyMinRaise(myMinRaise);
         tableState.setMyMaxRaise(myMaxRaise);
 
-        let pendingBetCommand: BetCommand | FoldCommand = tableState.getPendingBetCommand.value;
+        let pendingBetCommand: BettingCommand = tableState.getPendingBetCommand.value;
 
         if (pendingBetCommand instanceof CallCommand) {
 
@@ -1186,14 +1191,16 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     }  // chat
 
 
-    public setBetCommand(betCommand: BetCommand | FoldCommand) {
+    public setBetCommand(betCommand: BettingCommand) {
 
         tableState.setPendingBetCommand(betCommand);
+
+        let cmd = tableState.getPendingBetCommand.value;
 
         // Remember the level of action when this bet was set - if it goes up then we don't want to keep doing this action
         tableState.setPendingBetNumRaises(tableState.getBetStatus.value.numRaises);
 
-        setTimeout(() => { this.checkPendingBetCommand(); }, 50);
+        this.checkPendingBetCommand();
 
     }
 

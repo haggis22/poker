@@ -97,6 +97,7 @@ import './betting-menu.scss';
     import { defineComponent, computed, ref } from "vue";
 
     import { AnteCommand } from '@/app/commands/table/betting/ante-command';
+    import { BettingCommand } from '@/app/commands/table/betting/betting-command';
     import { BetCommand } from '@/app/commands/table/betting/bet-command';
     import { CheckCommand } from '@/app/commands/table/betting/check-command';
     import { CallCommand } from '@/app/commands/table/betting/call-command';
@@ -119,7 +120,7 @@ import { CardSuit } from '@/app/cards/card-suit';
 
         setup(props, { emit }) {
 
-            const pendingBetCommand = computed((): BetCommand | FoldCommand => tableState.getPendingBetCommand.value);
+            const pendingBetCommand = computed((): BettingCommand => tableState.getPendingBetCommand.value);
 
             const myCall = computed((): Bet => tableState.getMyCall.value);
             const myMinRaise = computed((): Bet => tableState.getMyMinRaise.value);

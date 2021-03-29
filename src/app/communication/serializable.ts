@@ -112,7 +112,6 @@ export { CallCommand } from "../commands/table/betting/call-command";
 export { CheckCommand } from "../commands/table/betting/check-command";
 export { RaiseCommand } from "../commands/table/betting/raise-command";
 export { AnteCommand } from "../commands/table/betting/ante-command";
-export { BlindCommand } from "../commands/table/betting/blind-command";
 
 export { ChatCommand } from "../commands/table/chat/chat-command";
 export { ChatAction } from "../actions/table/chat/chat-action";

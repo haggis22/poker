@@ -1,6 +1,6 @@
-﻿import { TableCommand } from "../table-command";
+﻿import { BettingCommand } from './betting-command';
 
-export class AnteCommand extends TableCommand {
+export class AnteCommand extends BettingCommand {
 
 
     constructor(tableID: number) {

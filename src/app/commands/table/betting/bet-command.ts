@@ -1,6 +1,6 @@
-﻿import { TableCommand } from "../table-command";
+﻿import { BettingCommand } from './betting-command';
 
-export class BetCommand extends TableCommand {
+export class BetCommand extends BettingCommand {
 
     public amount: number;
 

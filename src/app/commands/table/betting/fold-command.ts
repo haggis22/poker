@@ -1,6 +1,6 @@
-﻿import { TableCommand } from "../table-command";
+﻿import { BettingCommand } from './betting-command';
 
-export class FoldCommand extends TableCommand {
+export class FoldCommand extends BettingCommand {
 
 
     constructor(tableID: number) {

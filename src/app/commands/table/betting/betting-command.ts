@@ -1,6 +1,6 @@
 ﻿import { TableCommand } from "../table-command";
 
-export class BlindCommand extends TableCommand {
+export class BettingCommand extends TableCommand {
 
 
     constructor(tableID: number) {
@@ -12,7 +12,7 @@ export class BlindCommand extends TableCommand {
 
     public toString(): string {
 
-        return `[ BlindCommand, userID: ${this.userID} ]`;
+        return `[ BettingCommand, userID: ${this.userID} ]`;
 
     }
 

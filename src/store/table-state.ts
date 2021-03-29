@@ -6,6 +6,7 @@ import { Player } from '@/app/players/player';
 import { Seat } from '@/app/casino/tables/seat';
 import { Timer } from '@/app/timers/timer';
 import { TableState } from '@/app/casino/tables/states/table-state';
+import { AnteCommand } from '@/app/commands/table/betting/ante-command';
 import { BetCommand } from '@/app/commands/table/betting/bet-command';
 import { FoldCommand } from '@/app/commands/table/betting/fold-command';
 import { Bet } from '@/app/casino/tables/betting/bet';
@@ -17,6 +18,7 @@ import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 import { BetController } from '@/app/casino/tables/betting/bet-controller';
 import { WonPot } from '@/app/casino/tables/betting/won-pot';
 import { UIPosition } from '@/app/ui/ui-position';
+import { BettingCommand } from '@/app/commands/table/betting/betting-command';
 
 
 const state = reactive({
@@ -38,7 +40,7 @@ const state = reactive({
     muckedCards: new Map<number, Array<Card | FacedownCard>>(),
 
     // fields specific to acting in advance
-    pendingBetCommand: null as BetCommand | FoldCommand,
+    pendingBetCommand: null as BettingCommand,
     pendingBetNumRaises: null as number,
 
     myCall: null as Bet,
@@ -333,9 +335,9 @@ const clearTimers = (): void => {
 
 }
 
-const getPendingBetCommand = computed((): BetCommand | FoldCommand => state.pendingBetCommand);
+const getPendingBetCommand = computed((): BettingCommand => state.pendingBetCommand);
 
-const setPendingBetCommand = (command: BetCommand | FoldCommand): void => {
+const setPendingBetCommand = (command: BettingCommand): void => {
 
     state.pendingBetCommand = command;
 
