@@ -95,11 +95,10 @@
 
             const isSittingOut = computed((): boolean => tableState.getTable.value.seats[tableState.getMySeatIndex.value].player.isSittingOut);
 
-            // initialize the local sitting out variable with what is on the server
-            const localSittingOut = ref(isSittingOut.value);
+            const localSittingOut = computed((): boolean => tableState.getLocalSittingOut.value);
 
             watch(() => isSittingOut.value, (newValue) => {
-                localSittingOut.value = newValue;
+                tableState.setLocalSittingOut(newValue);
             });
 
             const hasPendingStatusRequest = computed((): boolean => tableState.getHasPendingStatusRequest.value);

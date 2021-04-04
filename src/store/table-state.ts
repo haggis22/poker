@@ -53,7 +53,6 @@ const state = reactive({
 
     wonPots: [] as WonPot[],
 
-
     // indicates which cards were used in calculating the winning hand for a given pot
     usedCards: [] as Card[],
 
@@ -63,6 +62,7 @@ const state = reactive({
     dealerPositions: new Map<number, UIPosition>(),
     playerPositions: new Map<number, UIPosition>(),
 
+    localSittingOut: undefined as boolean,
     hasPendingStatusRequest: false
 
 });
@@ -109,6 +109,7 @@ const initialize = () =>
     
     state.playerPositions.clear();
 
+    state.localSittingOut = undefined;
     state.hasPendingStatusRequest = false;
 
 
@@ -543,6 +544,20 @@ const setPlayerPositions = (positions: Map<number, UIPosition>) => {
 
 };
 
+
+const getLocalSittingOut = computed((): boolean => {
+
+    return state.localSittingOut;
+
+});
+
+const setLocalSittingOut = (newValue: boolean): void => {
+
+    state.localSittingOut = newValue;
+
+};
+
+
 const getHasPendingStatusRequest = computed((): boolean => {
 
     return state.hasPendingStatusRequest;
@@ -657,6 +672,8 @@ export const tableState = {
     getPlayerPosition,
     setPlayerPositions,
 
+    getLocalSittingOut,
+    setLocalSittingOut,
     getHasPendingStatusRequest,
     setHasPendingStatusRequest
 

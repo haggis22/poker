@@ -930,6 +930,8 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
                     tableState.setMyCall(betController.calculateCall(table, anteSeat));
 
+                    this.setBetCommand(new AnteCommand(tableState.getTableID.value))
+
                     // if we had a betting action readied, then send it now
                     if (this.checkPendingBetCommand()) {
 
