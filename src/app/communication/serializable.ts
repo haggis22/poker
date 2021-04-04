@@ -49,7 +49,6 @@ export { ClearTimerAction } from "../actions/table/betting/clear-timer-action";
 
 
 export { BlindsAndAntesState } from "../casino/tables/states/betting/blinds-and-antes-state";
-export { ForcedBets } from "../casino/tables/betting/forced-bets";
 export { AnteTurnAction } from "../actions/table/antes/ante-turn-action";
 
 export { UpdateBetsAction } from "../actions/table/betting/update-bets-action";

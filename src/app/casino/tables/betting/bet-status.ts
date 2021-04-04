@@ -1,8 +1,7 @@
 ﻿import { Pot } from "./pot";
-import { Ante } from "./ante";
-import { ForcedBets } from "./forced-bets";
-import { Blind } from './blind';
 import { Bet } from './bet';
+import { Ante } from './ante';
+import { Blind } from './blind';
 
 export class BetStatus {
 
@@ -12,20 +11,11 @@ export class BetStatus {
     public seatIndex: number;
     public seatIndexesRemainToAct: number[];
 
-    public forcedBets: ForcedBets;
-
     public currentBet: number;
     public lastLiveBet: number;
     public lastLiveRaise: number;
 
     public numRaises: number;
-
-    public bigBlindIndex: number;
-
-    // Tracks how much each seat will be forced to post for a blind
-    // Key = seat index
-    // Value = Array of Blind|Array objects
-    public requiredBets: { [key: number]: Blind | Array<Blind>; };
 
     // Tracks how much each seat has put in for an ante in this round
     // Key = seat index
@@ -39,6 +29,10 @@ export class BetStatus {
 
     public pots: Pot[];
 
+    public forcedBets: (Ante | Blind)[];
+
+
+
 
     constructor() {
 
@@ -46,12 +40,8 @@ export class BetStatus {
 
         this.pots = [];
 
-        this.requiredBets = {};
-
-        this.bets = {};
         this.antes = {};
-
-        this.bigBlindIndex = null;
+        this.bets = {};
 
         this.forcedBets = null;
 

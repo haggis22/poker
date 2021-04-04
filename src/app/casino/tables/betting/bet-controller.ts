@@ -41,7 +41,6 @@ class BetController {
 
         status.bettingRound = 0;
         status.pots.length = 0;
-        status.bigBlindIndex = null;
 
         this.clearBets(status);
 
@@ -216,7 +215,7 @@ class BetController {
 
             }
 
-            if (table.betStatus.forcedBets.seatIndex != seat.index) {
+            if (table.betStatus.seatIndex != seat.index) {
 
                 return new InvalidBet(seat.index, "It is not your turn to act");
 
@@ -230,7 +229,7 @@ class BetController {
 
             let betResults: Bet[] = new Array<Bet>();
 
-            for (let requiredBet of table.betStatus.forcedBets.bets) {
+            for (let requiredBet of table.betStatus.forcedBets) {
 
                 if (requiredBet instanceof Ante) {
 
@@ -293,11 +292,11 @@ class BetController {
         if (table.state instanceof BlindsAndAntesState) {
 
             // Make sure there is a forced bet, and it is on the given player's turn - otherwise, dump out
-            if (table.betStatus.forcedBets == null || table.betStatus.forcedBets.seatIndex !== seat.index) {
+            if (table.betStatus.forcedBets == null || table.betStatus.seatIndex !== seat.index) {
                 return null;
             }
 
-            let totalRequiredBet: number = table.betStatus.forcedBets.bets.reduce((total, bet) => total + bet.amount, 0);
+            let totalRequiredBet: number = table.betStatus.forcedBets.reduce((total, bet) => total + bet.amount, 0);
             let chipsRequired = Math.min(seat.player.chips, totalRequiredBet);
 
             let actionType: number = totalRequiredBet ? Bet.ACTION.CALL : Bet.ACTION.CHECK;

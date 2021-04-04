@@ -620,7 +620,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         let betStatus: BetStatus = this.table.betStatus;
 
-        let seat = this.findSeat(betStatus.forcedBets.seatIndex);
+        let seat = this.findSeat(betStatus.seatIndex);
 
         this.log(`It is ${seat.getName()}'s turn to ante, ante index: ${seat.index}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
 

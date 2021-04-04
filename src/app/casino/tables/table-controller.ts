@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ForcedBets, ClearTimerAction } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ClearTimerAction } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -745,8 +745,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             this.clearBetTimeout(bettorSeat.index);
 
+            // Give them credit for all the blinds they were supposed to pay 
+            this.buttonController.addPayments(this.table, bettorSeat.player.userID, this.table.betStatus.forcedBets);
+
             for (let anteBlind of anteResult) {
 
+                // When announcing the results use the actual bets so that if they put in less (or nothing) then it 
+                // announces *that* amount rather than what was originally required
                 this.queueAction(new BetAction(this.table.id, bettorSeat.index, anteBlind));
 
             }
@@ -1126,7 +1131,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // Reset blinds, buttons, etc - when we start up again then all will be new
         betController.resetOpenState(this.table.betStatus);
-        this.buttonController.resetOpenState();
+        this.buttonController.resetForOpenState();
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
     }
@@ -1324,16 +1329,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        let forcedBets: ForcedBets = this.buttonController.calculateForcedBets(this.table);
+        let forcedBetRequired: boolean = this.buttonController.calculateNextForcedBet(this.table);
 
         // Whether there is a forced bet or not we want to update everyone's version of the truth
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
-        if (forcedBets != null) {
+        if (forcedBetRequired) {
 
-            this.log(`There is a ForcedBet for seat ${forcedBets.seatIndex}: ${forcedBets.bets.join(" ")}`);
+            this.log(`There is a ForcedBet for seat ${this.table.betStatus.seatIndex}: ${this.table.betStatus.forcedBets.join(" ")}`);
 
-            let anteSeat: Seat = this.table.seats[forcedBets.seatIndex];
+            let anteSeat: Seat = this.table.seats[this.table.betStatus.seatIndex];
 
             let millisToAct: number = this.table.rules.timeToAnte * 1000;
             let timesUp: number = Date.now() + millisToAct;
@@ -1349,6 +1354,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             return this.queueAction(new AnteTurnAction(this.table.id, timesUp));
 
         }
+
+        this.buttonController.saveBlindPayments();
 
         // completeBetting will automatically look for bets that need returning if we don't have enough players
         return await this.completeBetting();
@@ -1674,7 +1681,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             case BetState.AFTER_BIG_BLIND:
                 {
-                    if (this.table.betStatus.bigBlindIndex === null) {
+                    let bigBlindIndex: number = this.buttonController.getBigBlindIndex();
+
+                    if (bigBlindIndex === null) {
 
                         // There is no Big Blind, so start with the player after the button
                         // The button will be the last player to act
@@ -1686,7 +1695,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // Start with the player *after* the big blind
                     // The big blind will be the last player to act and will get the option to raise
                     // The bet tracker is smart enough to roll the indexes off either end
-                    return betController.calculateSeatIndexesRemainToAct(this.table, this.table.betStatus.bigBlindIndex + 1, this.table.betStatus.bigBlindIndex, isSeatEligible);
+                    return betController.calculateSeatIndexesRemainToAct(this.table, bigBlindIndex + 1, bigBlindIndex, isSeatEligible);
 
                 }
 

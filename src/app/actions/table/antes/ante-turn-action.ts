@@ -1,5 +1,4 @@
 ﻿import { TableAction } from "../table-action";
-import { BetStatus} from "../../../casino/tables/betting/bet-status";
 
 export class AnteTurnAction extends TableAction {
 
@@ -13,6 +12,5 @@ export class AnteTurnAction extends TableAction {
         this.timesUp = timesUp;
 
     }
-
 
 }

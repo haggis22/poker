@@ -54,4 +54,37 @@ export class Table {
     }
 
 
+    public findNextActiveSeatIndex(startIndex: number): number {
+
+        if (startIndex >= this.seats.length) {
+            startIndex = 0;
+        }
+
+        let seatIndex: number = startIndex;
+
+        while (true) {
+
+            if (this.seats[seatIndex].isInHand) {
+
+                return seatIndex;
+
+            }
+
+            seatIndex++;
+
+            if (seatIndex >= this.seats.length) {
+                seatIndex = 0;
+            }
+
+            // We went all the way around and found nothing
+            if (seatIndex === startIndex) {
+                return null;
+            }
+
+        }
+
+    }
+
+
+
 }

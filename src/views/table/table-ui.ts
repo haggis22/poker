@@ -911,7 +911,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         const table: Table = this.getTable();
 
-        let anteSeatIndex: number = table.betStatus.forcedBets.seatIndex;
+        let anteSeatIndex: number = table.betStatus.seatIndex;
 
         // Remove any previous action for the current "to-act" player
         tableState.clearAction(anteSeatIndex);
@@ -1216,7 +1216,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (table?.state instanceof BlindsAndAntesState) {
 
-                if (table?.betStatus?.forcedBets?.seatIndex == tableState.getMySeatIndex.value) {
+                if (table?.betStatus.seatIndex == tableState.getMySeatIndex.value) {
 
                     tableState.clearPendingBetCommands();
 
@@ -1260,7 +1260,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (table.state instanceof BlindsAndAntesState) {
 
-                return table.betStatus.forcedBets && table.betStatus.forcedBets.seatIndex == seatIndex;
+                return table.betStatus.seatIndex == seatIndex;
 
             }
 

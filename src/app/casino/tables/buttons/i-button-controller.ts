@@ -1,16 +1,23 @@
 import { Table } from "../table";
-import { ForcedBets } from "../betting/forced-bets";
+import { Blind } from '../betting/blind';
+import { Ante } from '../betting/ante';
 
 export interface IButtonController {
 
-    resetOpenState(): void;
+    resetForOpenState(): void;
 
     resetHand(): void;
 
     // Returns true if the button was moved successfully
     moveButton(table: Table): boolean;
 
-    calculateForcedBets(table: Table): ForcedBets;
+    addPayments(table: Table, userID: number, forcedBets: (Ante | Blind)[]): void;
+
+    saveBlindPayments(): void;
+
+    calculateNextForcedBet(table: Table): boolean;
+
+    getBigBlindIndex(): number;
 
 
 }
