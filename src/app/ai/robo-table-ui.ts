@@ -22,7 +22,7 @@ import { GameFactory } from "../games/game-factory";
 import { WonPot } from "../casino/tables/betting/won-pot";
 import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 import { BetStatus } from "../casino/tables/betting/bet-status";
-import { BetController } from "../casino/tables/betting/bet-controller";
+import { betController } from "../casino/tables/betting/bet-controller";
 
 
 const TIME_TO_THINK = 1200;
@@ -41,8 +41,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     private table: Table;
     private game: Game;
 
-    private betController: BetController;
-
     private amISittingOut: boolean;
 
 
@@ -55,8 +53,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         this.commandHandlers = new Array<CommandHandler>();
 
         this.table = null;
-
-        this.betController = new BetController();
 
     }
 
@@ -544,8 +540,8 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
             if (seat.player.userID === this.user.id) {
 
-                let call: Bet = this.betController.calculateCall(this.table, seat);
-                let minimumRaise: Bet = this.betController.calculateMinimumRaise(this.table, seat, call);
+                let call: Bet = betController.calculateCall(this.table, seat);
+                let minimumRaise: Bet = betController.calculateMinimumRaise(this.table, seat, call);
 
                 if (betStatus.currentBet > 0) {
 
@@ -558,7 +554,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
                             // This represents a raise 
                             let betAmount: number = minimumRaise.chipsAdded;
 
-                            this.log(`Raise => tracker.currentBet = ${betStatus.currentBet}, betAmount = ${betAmount}, playerChips = ${seat.player.chips}, playerCurrentBet = ${this.betController.getCurrentBet(this.table.betStatus, seat.index)}`);
+                            this.log(`Raise => tracker.currentBet = ${betStatus.currentBet}, betAmount = ${betAmount}, playerChips = ${seat.player.chips}, playerCurrentBet = ${betController.getCurrentBet(this.table.betStatus, seat.index)}`);
 
                             return this.broadcastCommand(new RaiseCommand(this.table.id, betAmount));
 

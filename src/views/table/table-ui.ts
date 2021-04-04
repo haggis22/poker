@@ -29,6 +29,7 @@ import { BettingCommand } from '@/app/commands/table/betting/betting-command';
 
 import { userState } from "@/store/user-state";
 import { tableState } from "@/store/table-state";
+import { betController } from '@/app/casino/tables/betting/bet-controller';
 
 
 const logger: Logger = new Logger();
@@ -641,11 +642,11 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            let myCall: Bet = tableState.getBetController.value.calculateCall(this.getTable(), seat);
+            let myCall: Bet = betController.calculateCall(this.getTable(), seat);
 
             tableState.setMyCall(myCall);
-            tableState.setMyMinRaise(tableState.getBetController.value.calculateMinimumRaise(this.getTable(), seat, myCall));
-            tableState.setMyMaxRaise(tableState.getBetController.value.calculateMaximumRaise(this.getTable(), seat, myCall));
+            tableState.setMyMinRaise(betController.calculateMinimumRaise(this.getTable(), seat, myCall));
+            tableState.setMyMaxRaise(betController.calculateMaximumRaise(this.getTable(), seat, myCall));
 
         }
         else {
@@ -666,7 +667,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat && seat.isInHand) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            const myCall = tableState.getBetController.value.calculateCall(this.getTable(), seat);
+            const myCall = betController.calculateCall(this.getTable(), seat);
 
             tableState.setMyCall(myCall);
 
@@ -836,9 +837,9 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         let table: Table = tableState.getTable.value;
 
-        let myCall: Bet = tableState.getBetController.value.calculateCall(table, mySeat);
-        let myMinRaise: Bet = tableState.getBetController.value.calculateMinimumRaise(table, mySeat, myCall);
-        let myMaxRaise: Bet = tableState.getBetController.value.calculateMaximumRaise(table, mySeat, myCall);
+        let myCall: Bet = betController.calculateCall(table, mySeat);
+        let myMinRaise: Bet = betController.calculateMinimumRaise(table, mySeat, myCall);
+        let myMaxRaise: Bet = betController.calculateMaximumRaise(table, mySeat, myCall);
 
         tableState.setMyCall(myCall);
 
@@ -927,7 +928,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
                 if (anteSeatIndex == tableState.getMySeatIndex.value) {
 
-                    tableState.setMyCall(tableState.getBetController.value.calculateCall(table, anteSeat));
+                    tableState.setMyCall(betController.calculateCall(table, anteSeat));
 
                     // if we had a betting action readied, then send it now
                     if (this.checkPendingBetCommand()) {

@@ -57,7 +57,7 @@ import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-act
 import { DealBoardAction } from "../../actions/table/game/dealing/deal-board-action";
 import { ClearBoardAction } from "../../actions/table/game/dealing/clear-board-action";
 import { LobbyManager } from "../lobby/lobby-manager";
-import { BetController } from "./betting/bet-controller";
+import { betController } from "./betting/bet-controller";
 import { PotCardsUsedAction } from "../../actions/table/game/pots/pot-cards-used-action";
 import { ShowdownAction } from "../../actions/table/game/showdown/showdown-action";
 import { InvalidBet } from "./betting/invalid-bet";
@@ -106,7 +106,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private betTimerMap: Map<number, ReturnType<typeof setTimeout>>;
 
     private buttonController: IButtonController;
-    private betController: BetController;
 
     private setStatusRequests: Map<number, SetStatusCommand>;
     private standUpRequests: Map<number, StandUpCommand>;
@@ -124,7 +123,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     lobbyManager: LobbyManager,
                     table: Table,
                     deck: Deck,
-                    betController: BetController,
                     buttonController: IButtonController) {
 
         this.cashierManager = cashierManager;
@@ -138,7 +136,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.betTimerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
-        this.betController = betController;
         this.buttonController = buttonController;
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();
@@ -495,7 +492,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (this.table.state instanceof BlindsAndAntesState) {
 
-                let fold: Fold | InvalidFold = this.betController.fold(this.table, seat);
+                let fold: Fold | InvalidFold = betController.fold(this.table, seat);
 
                 if (fold instanceof Fold) {
 
@@ -508,7 +505,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             else if (this.table.state instanceof BetState) {
 
-                let fold: Fold | InvalidFold = this.betController.fold(this.table, seat);
+                let fold: Fold | InvalidFold = betController.fold(this.table, seat);
 
                 if (fold instanceof Fold) {
 
@@ -736,7 +733,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        let anteResult: InvalidBet | Bet[] = this.betController.validateBlindsAndAnte(this.table, bettorSeat);
+        let anteResult: InvalidBet | Bet[] = betController.validateBlindsAndAnte(this.table, bettorSeat);
 
         if (anteResult instanceof InvalidBet) {
 
@@ -795,7 +792,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             let bettorSeat: Seat =  this.table.seats.find(seat => seat.player && seat.player.userID == command.userID);
 
-            let betResult: InvalidBet | Bet = this.betController.validateBet(this.table, bettorSeat, command.amount);
+            let betResult: InvalidBet | Bet = betController.validateBet(this.table, bettorSeat, command.amount);
 
             if (betResult instanceof Bet) {
 
@@ -811,7 +808,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // Start with the player *after* this bettor
                     // Stop with the player *before* this bettor
                     // The bet tracker is smart enough to roll the indexes off either end
-                    this.betController.calculateSeatIndexesRemainToAct(this.table, bettorSeat.index + 1, bettorSeat.index - 1, this.isSeatEligibleToBet);
+                    betController.calculateSeatIndexesRemainToAct(this.table, bettorSeat.index + 1, bettorSeat.index - 1, this.isSeatEligibleToBet);
 
                 }
 
@@ -879,7 +876,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             let folderSeat: Seat = this.table.seats.find(seat => seat.isInHand && seat.player && seat.player.userID == command.userID);
 
-            let fold: Fold | InvalidFold = this.betController.fold(this.table, folderSeat);
+            let fold: Fold | InvalidFold = betController.fold(this.table, folderSeat);
 
             if (fold instanceof Fold) {
 
@@ -896,7 +893,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             let folderSeat: Seat = this.table.seats.find(seat => seat.isInHand && seat.player && seat.player.userID == command.userID);
 
-            let fold: Fold | InvalidFold = this.betController.fold(this.table, folderSeat);
+            let fold: Fold | InvalidFold = betController.fold(this.table, folderSeat);
 
             if (fold instanceof Fold) {
 
@@ -1128,7 +1125,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private resetOpenState(): void {
 
         // Reset blinds, buttons, etc - when we start up again then all will be new
-        this.betController.resetOpenState(this.table.betStatus);
+        betController.resetOpenState(this.table.betStatus);
         this.buttonController.resetOpenState();
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
@@ -1136,7 +1133,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private resetBets(): void {
 
-        this.betController.resetHand(this.table.betStatus);
+        betController.resetHand(this.table.betStatus);
         this.buttonController.resetHand();
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
@@ -1403,7 +1400,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.log('In makeYourBets');
 
-        this.betController.increaseBettingRound(this.table.betStatus);
+        betController.increaseBettingRound(this.table.betStatus);
         this.calculateInitialBettingOrder(betState.firstToBet, this.isSeatEligibleToBet);
 
         return await this.validateBettorOrMoveOn();
@@ -1422,7 +1419,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        let seatIndexToAct: number = this.betController.getNextBettorIndex(this.table.betStatus);
+        let seatIndexToAct: number = betController.getNextBettorIndex(this.table.betStatus);
 
         if (seatIndexToAct === undefined) {
 
@@ -1485,7 +1482,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 this.log('Gather antes');
                 this.queueAction(new GatherAntesAction(this.table.id));
 
-                this.betController.gatherAntes(this.table.betStatus, this.getSeatIndexesStillInHand());
+                betController.gatherAntes(this.table.betStatus, this.getSeatIndexesStillInHand());
 
                 // give it a minute before clearing out all the actions
                 await this.wait(this.TIME_GATHERING_BETS);
@@ -1513,12 +1510,12 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             if (this.table.betStatus.hasBets()) {
 
                 // look for uncalled bets (or pieces of bets of bets that were not fully called)
-                await this.returnBets(this.betController.checkBetsToReturn(this.table.betStatus));
+                await this.returnBets(betController.checkBetsToReturn(this.table.betStatus));
 
                 this.log('Gather bets');
                 this.queueAction(new GatherBetsAction(this.table.id));
 
-                this.betController.gatherBets(this.table.betStatus, this.getSeatIndexesStillInHand());
+                betController.gatherBets(this.table.betStatus, this.getSeatIndexesStillInHand());
 
                 // give it a minute before clearing out all the actions
                 await this.wait(this.TIME_GATHERING_BETS);
@@ -1608,7 +1605,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             let checkerSeat = this.table.seats[this.table.betStatus.seatIndex];
 
             // try to check
-            let check: InvalidBet | Bet = this.betController.validateBet(this.table, checkerSeat, 0);
+            let check: InvalidBet | Bet = betController.validateBet(this.table, checkerSeat, 0);
 
             if (check instanceof Bet) {
 
@@ -1617,7 +1614,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             }
 
-            let fold: Fold = this.betController.fold(this.table, checkerSeat);
+            let fold: Fold = betController.fold(this.table, checkerSeat);
 
             if (fold instanceof Fold) {
 
@@ -1652,7 +1649,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private calculateInitialBettingOrder(firstBetRule: number, isSeatEligible: (seat: Seat) => boolean): void {
 
-        this.betController.clearBettorsToAct(this.table.betStatus);
+        betController.clearBettorsToAct(this.table.betStatus);
 
         // First count how many players CAN act this round - if only 1 (or 0) then there's nothing to do
         // This is not the same as blowing through rounds because we're down to just one player because everyone else folded.
@@ -1672,7 +1669,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // Start with the player *after* the button
                     // The button will be the last player to act
                     // The bet tracker is smart enough to roll the indexes off either end
-                    return this.betController.calculateSeatIndexesRemainToAct(this.table, this.table.buttonIndex + 1, this.table.buttonIndex, isSeatEligible);
+                    return betController.calculateSeatIndexesRemainToAct(this.table, this.table.buttonIndex + 1, this.table.buttonIndex, isSeatEligible);
                 }
 
             case BetState.AFTER_BIG_BLIND:
@@ -1682,14 +1679,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                         // There is no Big Blind, so start with the player after the button
                         // The button will be the last player to act
                         // The bet tracker is smart enough to roll the indexes off either end
-                        return this.betController.calculateSeatIndexesRemainToAct(this.table, this.table.buttonIndex + 1, this.table.buttonIndex, isSeatEligible);
+                        return betController.calculateSeatIndexesRemainToAct(this.table, this.table.buttonIndex + 1, this.table.buttonIndex, isSeatEligible);
 
                     }
 
                     // Start with the player *after* the big blind
                     // The big blind will be the last player to act and will get the option to raise
                     // The bet tracker is smart enough to roll the indexes off either end
-                    return this.betController.calculateSeatIndexesRemainToAct(this.table, this.table.betStatus.bigBlindIndex + 1, this.table.betStatus.bigBlindIndex, isSeatEligible);
+                    return betController.calculateSeatIndexesRemainToAct(this.table, this.table.betStatus.bigBlindIndex + 1, this.table.betStatus.bigBlindIndex, isSeatEligible);
 
                 }
 
@@ -1700,7 +1697,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // Start with the player with the best hand
                     // Stop with the player *before* the current leader
                     // The bet tracker is smart enough to roll the indexes off either end
-                    return this.betController.calculateSeatIndexesRemainToAct(this.table, handWinners[0].seatIndex, handWinners[0].seatIndex - 1, isSeatEligible);
+                    return betController.calculateSeatIndexesRemainToAct(this.table, handWinners[0].seatIndex, handWinners[0].seatIndex - 1, isSeatEligible);
                 }
         
         }

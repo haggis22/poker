@@ -11,10 +11,9 @@ import { Blind } from "./blind";
 import { Ante } from "./ante";
 import { InvalidBet } from "./invalid-bet";
 import { InvalidFold } from "./invalid-fold";
-import { IButtonController } from "../buttons/i-button-controller";
 
 
-export class BetController {
+class BetController {
 
 
 
@@ -806,3 +805,6 @@ export class BetController {
 
 
 }
+
+export const betController = new BetController();
+

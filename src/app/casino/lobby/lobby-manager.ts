@@ -23,7 +23,6 @@ import { MessageHandler } from '../../messages/message-handler';
 import { Message } from "../../messages/message";
 import { Action } from '../../actions/action';
 import { SubscribeLobbyCommand, ListTablesAction, TableSummary } from '../../communication/serializable';
-import { BetController } from '../tables/betting/bet-controller';
 import { IButtonController } from '../tables/buttons/i-button-controller';
 import { NormalButtonController } from '../tables/buttons/normal-button-controller';
 import { CashierManager } from '../cashier/cashier-manager';
@@ -164,10 +163,9 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let betController: BetController = new BetController();
         let buttonController: IButtonController = new NormalButtonController();
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, betController, buttonController);
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -203,10 +201,9 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let betController: BetController = new BetController();
         let buttonController: IButtonController = new NormalButtonController();
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, betController, buttonController);
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -242,10 +239,9 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let betController: BetController = new BetController();
         let buttonController: IButtonController = new NormalButtonController();
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, betController, buttonController);
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
         

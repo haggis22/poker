@@ -15,7 +15,6 @@ import { Card } from '@/app/cards/card';
 import { FacedownCard } from '@/app/cards/face-down-card';
 import { Hand } from '@/app/hands/hand';
 import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
-import { BetController } from '@/app/casino/tables/betting/bet-controller';
 import { WonPot } from '@/app/casino/tables/betting/won-pot';
 import { UIPosition } from '@/app/ui/ui-position';
 import { BettingCommand } from '@/app/commands/table/betting/betting-command';
@@ -46,8 +45,6 @@ const state = reactive({
     myCall: null as Bet,
     myMinRaise: null as Bet,
     myMaxRaise: null as Bet,
-
-    betController: new BetController(),
 
     currentBalance: null as number,
 
@@ -95,8 +92,6 @@ const initialize = () =>
     state.myCall = null;
     state.myMinRaise = null;
     state.myMaxRaise = null;
-
-    state.betController = new BetController();
 
     state.currentBalance = null;
 
@@ -454,8 +449,6 @@ const clearBoard = (): void => {
 
 };
 
-const getBetController = computed((): BetController => state.betController);
-
 const getCurrentBalance = computed((): number => state.currentBalance);
 const setCurrentBalance = (balance: number) => {
 
@@ -635,8 +628,6 @@ export const tableState = {
 
     dealBoard,
     clearBoard,
-
-    getBetController,
 
     getCurrentBalance,
     setCurrentBalance,
