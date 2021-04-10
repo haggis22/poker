@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "nodemon dist-server/server/server",
+    "test-button": "node dist-server/casino/tables/buttons/test/test-button",
     "build-server": "gulp",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

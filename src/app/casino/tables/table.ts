@@ -54,7 +54,8 @@ export class Table {
     }
 
 
-    public findNextActiveSeatIndex(startIndex: number): number {
+    // Finds the next seat that meets the given criteria
+    public findNextSeat(startIndex: number, seatCriteria: (seat: Seat) => boolean): number {
 
         if (startIndex >= this.seats.length) {
             startIndex = 0;
@@ -64,7 +65,7 @@ export class Table {
 
         while (true) {
 
-            if (this.seats[seatIndex].isInHand) {
+            if (seatCriteria(this.seats[seatIndex])) {
 
                 return seatIndex;
 
@@ -84,6 +85,21 @@ export class Table {
         }
 
     }
+
+
+    public findNextActiveSeatIndex(startIndex: number): number {
+
+        return this.findNextSeat(startIndex, (seat) => seat.isInHand);
+
+    }
+
+    public findNextAvailableSeatIndex(startIndex: number): number {
+
+        return this.findNextSeat(startIndex, (seat) => seat.isAvailableForHand());
+
+    }
+
+
 
 
 

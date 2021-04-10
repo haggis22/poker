@@ -65,6 +65,7 @@ import { InvalidFold } from "./betting/invalid-fold";
 import { IServerClient } from "../../communication/server-side/i-server-client";
 import { IButtonController } from "./buttons/i-button-controller";
 import { CashierManager } from '../cashier/cashier-manager';
+import { BlindTracker } from './buttons/blind-tracker';
 
 const logger: Logger = new Logger();
 
@@ -106,6 +107,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private betTimerMap: Map<number, ReturnType<typeof setTimeout>>;
 
     private buttonController: IButtonController;
+    private blindTracker: BlindTracker;
 
     private setStatusRequests: Map<number, SetStatusCommand>;
     private standUpRequests: Map<number, StandUpCommand>;
@@ -137,6 +139,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.betTimerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
         this.buttonController = buttonController;
+        this.blindTracker = new BlindTracker(table.stakes);
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();
         this.standUpRequests = new Map<number, StandUpCommand>();
@@ -746,7 +749,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             this.clearBetTimeout(bettorSeat.index);
 
             // Give them credit for all the blinds they were supposed to pay 
-            this.buttonController.addPayments(this.table, bettorSeat.player.userID, this.table.betStatus.forcedBets);
+            this.blindTracker.addPayments(this.table, bettorSeat.player.userID, this.table.betStatus.forcedBets);
 
             for (let anteBlind of anteResult) {
 
@@ -1131,15 +1134,15 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // Reset blinds, buttons, etc - when we start up again then all will be new
         betController.resetOpenState(this.table.betStatus);
-        this.buttonController.resetForOpenState();
+        this.blindTracker.resetForOpenState(this.table);
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
     }
 
-    private resetBets(): void {
+    private resetBetsForNewHand(): void {
 
         betController.resetHand(this.table.betStatus);
-        this.buttonController.resetHand();
+        this.blindTracker.resetHand(this.table);
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
     }
@@ -1149,25 +1152,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.deck.shuffle();
 
-        this.resetBets();
+        this.resetBetsForNewHand();
 
         for (let seat of this.table.seats) {
 
             // Remove any cards they might have
             seat.clearHand();
 
-            if (seat.player) {
-
-                // if they're not explicitly sitting out, then we will treat them as in so that we can check them for antes/blinds/cards to deal/etc
-                seat.isInHand = !seat.player.isSittingOut && seat.player.chips > 0;
-
-            }
-
-            this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
-
         }
 
-        let buttonSuccess: boolean = this.buttonController.moveButton(this.table);
+        let buttonSuccess: boolean = this.buttonController.moveButton(this.table, this.blindTracker);
 
         if (buttonSuccess) {
 
@@ -1329,7 +1323,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        let forcedBetRequired: boolean = this.buttonController.calculateNextForcedBet(this.table);
+        let forcedBetRequired: boolean = this.buttonController.calculateNextForcedBet(this.table, this.blindTracker);
+
+        if (!forcedBetRequired) {
+
+            process.exit(0);
+
+        }
 
         // Whether there is a forced bet or not we want to update everyone's version of the truth
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
@@ -1355,7 +1355,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        this.buttonController.saveBlindPayments();
+        this.blindTracker.saveBlindPayments();
 
         // completeBetting will automatically look for bets that need returning if we don't have enough players
         return await this.completeBetting();
@@ -1681,7 +1681,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             case BetState.AFTER_BIG_BLIND:
                 {
-                    let bigBlindIndex: number = this.buttonController.getBigBlindIndex();
+                    let bigBlindIndex: number = this.blindTracker.bigBlindIndex;
 
                     if (bigBlindIndex === null) {
 
@@ -1932,7 +1932,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         }
 
         // clear all betting action
-        this.resetBets();
+        this.resetBetsForNewHand();
 
         await this.wait(this.TIME_POST_SHOWDOWN);
 
@@ -1988,7 +1988,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table.board.reset();
         this.queueAction(new ClearBoardAction(this.table.id));
 
-        this.resetBets();
+        this.resetBetsForNewHand();
 
         return await this.goToNextState();
 

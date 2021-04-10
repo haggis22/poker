@@ -6,38 +6,13 @@ import { Blind } from "../betting/blind";
 import { Stakes } from '../betting/stakes';
 import { RoundPayments } from './round-payments';
 import { request } from 'express';
+import { BlindTracker } from './blind-tracker';
 
 export class NormalButtonController implements IButtonController {
 
 
-    private ante: number;
-    private blinds: Blind[];
+    constructor() {
 
-    private roundPayments: RoundPayments[];
-
-    private currentRoundPayments: RoundPayments;
-
-    private buttonIndex: number;
-
-    // Key = index of blind
-    // Value = seatIndex that needs to pay the blind
-    private blindSeatIndexes: Map<number, number>;
-
-    private blindsNeedingPaying: Blind[];
-
-
-
-    constructor(stakes: Stakes) {
-
-        this.ante = stakes.ante;
-        this.blinds = stakes.blinds;
-
-        this.roundPayments = [];
-
-        this.buttonIndex = null;
-        this.blindSeatIndexes = new Map<number, number>();
-
-        this.resetForOpenState();
 
 
     }
@@ -50,99 +25,94 @@ export class NormalButtonController implements IButtonController {
     }
 
 
-    public resetForOpenState(): void {
 
-        this.resetHand();
+    public moveButton(table: Table, blindTracker: BlindTracker): boolean {
 
-    }
+        const numPlayersAvailable: number = table.seats.filter(seat => seat.isAvailableForHand()).length;
 
-    public resetHand(): void {
+        this.log(`In moveButton for table ${table.id}, numPlayersAvailable: ${numPlayersAvailable}`);
 
-        this.currentRoundPayments = null;
-
-        const blinds: Blind[] = [];
-
-        for (let b = this.blinds.length - 1; b >= 0; b--) {
-
-            blinds.push(this.blinds[b]);
-
-        }
-
-        this.blindsNeedingPaying = blinds;
-
-    }
-
-    public moveButton(table: Table): boolean {
-
-        this.log(`In moveButton for table ${table.id}`)
-
-        const numPlayersInHand: number = table.seats.filter(seat => seat.isInHand).length;
-
-        if (numPlayersInHand < 2) {
+        if (numPlayersAvailable < 2) {
 
             // We don't have enough players, so can't set the button
-            this.log(`In moveButton for table ${table.id} - not enough players, so returning null`);
-            return null;
+            this.log(`In moveButton for table ${table.id} - not enough players, so returning false`);
+
+            // Clear the table's button index, along with the one here.
+            // If there is still a player sitting alone then they should be considered the active player
+            // and will get the button if someone else sits down
+            table.buttonIndex = blindTracker.buttonIndex = null;
+            return false;
 
         }
 
-        if (this.blinds.length) {
+        if (blindTracker.blinds.length) {
 
-            this.buttonIndex = this.determineLastPayorOfBlinds(table);
+            blindTracker.buttonIndex = this.determineLastPayorOfBlinds(table, blindTracker);
 
         }
         else {
 
-            this.buttonIndex = this.buttonIndex == null
+            let buttonIndex: number = blindTracker.buttonIndex == null
+                // We have not previously picked a button, so 
                 // randomly pick one of the active seats to have the button
                 ? Math.floor(Math.random() * table.seats.length)
-                // just move it to the next spot
-                : (this.buttonIndex + 1);
+                // otherwise, just move it to the next spot
+                : (blindTracker.buttonIndex + 1);
+
+            // In either case the button might have landed off the edge or on a non-playing seat. 
+            // Keep it moving along until it's a playing seat
+            let foundButton = false;
+
+            while (!foundButton) {
+
+                if (buttonIndex >= table.seats.length) {
+
+                    buttonIndex = 0;
+
+                }
+
+                if (table.seats[buttonIndex].isAvailableForHand()) {
+                    foundButton = true;
+                }
+                else {
+                    buttonIndex++;
+                }
+
+            }
+
+            blindTracker.buttonIndex = buttonIndex;
 
         }
 
-        // the button might have landed off the edge or on a non-playing seat. Keep it moving along until it's a playing seat
-        let foundButton = false;
 
-        while (!foundButton) {
-
-            if (this.buttonIndex >= table.seats.length) {
-
-                this.buttonIndex = 0;
-
-            }
-
-            if (table.seats[this.buttonIndex].isInHand) {
-                foundButton = true;
-            }
-            else {
-                this.buttonIndex++;
-            }
-
-        }
-
-        table.buttonIndex = this.buttonIndex;
-        this.log(`In moveButton for table ${table.id} - setting button to ${this.buttonIndex}`);
+        table.buttonIndex = blindTracker.buttonIndex;
+        this.log(`In moveButton for table ${table.id} - setting button to ${blindTracker.buttonIndex}`);
 
         return true;
 
     }
 
 
-    private determineLastPayorOfBlinds(table: Table): number {
+    private determineLastPayorOfBlinds(table: Table, blindTracker: BlindTracker): number {
 
-        const playingSeats: Seat[] = table.seats.filter(seat => seat.isInHand);
+        for (let pr = 0; pr < blindTracker.roundPayments.length; pr++) {
+            console.log(`RP ${pr}: ${blindTracker.roundPayments[pr]}`);
+        }
 
-        debugger;
+        // Only active players can be eligible to get the button
+
+        this.log(`blindTracker has ${blindTracker.activePlayers.size} active players`);
+
+        const playingSeats: Seat[] = table.seats.filter(seat => seat.player && blindTracker.activePlayers.has(seat.player.userID));
 
         const paidMap: RoundPayments = new RoundPayments();
 
         // Count backwards from the most recent payment to the earliest
-        for (let rp = this.roundPayments.length - 1; rp >= 0; rp--) {
+        for (let rp = blindTracker.roundPayments.length - 1; rp >= 0; rp--) {
 
             const finishedPlayers: { userID: number; smallestBlindIndex: number }[] = [];
 
-            for (let [userID, payments] of this.roundPayments[rp].payments) {
+            for (let [userID, payments] of blindTracker.roundPayments[rp].payments) {
 
                 let hasPlayerPaidAllBlinds: boolean = false;
                 let smallestBlindIndex: number = Number.MAX_VALUE;
@@ -156,7 +126,7 @@ export class NormalButtonController implements IButtonController {
                     }
 
                     // This player has paid blinds in all the positions
-                    if (paidMap.payments.get(userID).size == this.blinds.length) {
+                    if (paidMap.payments.get(userID).size == blindTracker.blinds.length) {
 
                         hasPlayerPaidAllBlinds = true;
 
@@ -192,8 +162,9 @@ export class NormalButtonController implements IButtonController {
 
                 const paidPlayerSeat: Seat = table.seats.find(seat => seat.player && seat.player.userID == finishedPlayers[0].userID);
 
-                if (paidPlayerSeat) {
+                console.log(`paidPlayerSeat = ${paidPlayerSeat}`);
 
+                if (paidPlayerSeat) {
                     return paidPlayerSeat.index;
 
                 }
@@ -207,9 +178,11 @@ export class NormalButtonController implements IButtonController {
         // Just pick someone and then make it look as if they've paid up
 
         // Clear all tracked payments thus far
-        this.roundPayments.length = 0;
+        blindTracker.roundPayments.length = 0;
 
         let playingSeatIndex: number = Math.floor(Math.random() * playingSeats.length);
+
+        this.log(`We are randomly assigning the dealer to be seat ${playingSeats[playingSeatIndex].index} - ${playingSeats[playingSeatIndex].getName()}`);
 
         if (playingSeats.length == 2) {
 
@@ -219,11 +192,11 @@ export class NormalButtonController implements IButtonController {
             // SB  BB        <== Round payment 0
             // BB  SB        <== Round payment 1
             // So seat 1 will be the last one to have paid both, with the BB most recently
-            for (let i = 0; i < this.blinds.length; i++) {
+            for (let i = 0; i < blindTracker.blinds.length; i++) {
 
                 const rp: RoundPayments = new RoundPayments();
 
-                for (let j = 0; j < this.blinds.length; j++) {
+                for (let j = 0; j < blindTracker.blinds.length; j++) {
 
                     let blindSeatIndex = playingSeatIndex + i + j;
 
@@ -238,12 +211,12 @@ export class NormalButtonController implements IButtonController {
                     }
 
                     // Mark this player as having paid this blind
-                    rp.addPayment(playingSeats[blindSeatIndex].player.userID, this.blinds[j].index);
+                    rp.addPayment(playingSeats[blindSeatIndex].player.userID, blindTracker.blinds[j].index);
 
                 }
 
                 // add this round of blinds
-                this.roundPayments.push(rp);
+                blindTracker.roundPayments.push(rp);
 
             }
 
@@ -251,18 +224,17 @@ export class NormalButtonController implements IButtonController {
         }
         else {
 
-
             // Say we have 4 players, and we have randomly picked Seat #4 to be the button
             // After we have set up some fake blind payments then we want it to look like:
             // 1   2   3   4
             // BB          SB           <== Round payment 1
             //         SB  BB           <== Round payment 2
             // So seat 4 will be the last one to have paid both
-            for (let i = 0; i < this.blinds.length; i++) {
+            for (let i = 0; i < blindTracker.blinds.length; i++) {
 
                 const rp: RoundPayments = new RoundPayments();
 
-                for (let j = 0; j < this.blinds.length; j++) {
+                for (let j = 0; j < blindTracker.blinds.length; j++) {
 
                     let blindSeatIndex = playingSeatIndex - i + j;
 
@@ -277,143 +249,146 @@ export class NormalButtonController implements IButtonController {
                     }
 
                     // Mark this player as having paid this blind
-                    rp.addPayment(playingSeats[blindSeatIndex].player.userID, this.blinds[j].index);
+                    rp.addPayment(playingSeats[blindSeatIndex].player.userID, blindTracker.blinds[j].index);
 
                 }
 
                 // add this round of blinds
-                this.roundPayments.push(rp);
+                blindTracker.roundPayments.push(rp);
 
             }
 
         }   // more than 2 players
 
-        debugger;
-
         // now that it's set up properly we can call this method again and it will (SHOULD) get a 
         // valid result this time
-        return this.determineLastPayorOfBlinds(table);
+        return this.determineLastPayorOfBlinds(table, blindTracker);
 
     }   // determineLastPayorOfBlinds
 
 
-    public addPayments(table: Table, userID: number, forcedBets: (Ante | Blind)[]) {
 
-        if (!this.currentRoundPayments) {
-            this.currentRoundPayments = new RoundPayments();
+
+
+    public calculateNextForcedBet(table: Table, blindTracker: BlindTracker): boolean {
+
+        if (blindTracker.buttonIndex == null) {
+            throw new Error("Cannot determine forced bets if buttonIndex is null");
         }
 
-        for (let bet of forcedBets) {
+        const availableSeats: Seat[] = table.seats.filter(seat => seat.isAvailableForHand());
 
-            if (bet instanceof Blind) {
+        console.log(`In calculateNextForcedBet, there are ${availableSeats.length} available seats`);
 
-                if (this.blindsNeedingPaying.length
-                    && this.blindsNeedingPaying[0].index == bet.index
-                    && this.blindSeatIndexes.has(bet.index)
-                    && table.seats[this.blindSeatIndexes.get(bet.index)].player?.userID === userID) {
+        if (availableSeats.length < 2) {
 
-                    // This is who is supposed to pay the X blind, so cross it off the list
-                    this.blindsNeedingPaying.shift();
+            // Not enough players for a hand
+            return false;
 
-                }
+        }
 
-                // Mark each blind index that they paid this round
-                this.currentRoundPayments.addPayment(userID, bet.index);
+        const forcedBets: (Ante | Blind)[] = [];
+
+        let requiredBlind: Blind = null;
+
+        // Counting backwards from the big blind on down, find the next blind that still needs to be paid
+        for (let bi: number = blindTracker.blinds.length - 1; bi >= 0; bi--) {
+
+            if (!blindTracker.paidBlinds.has(bi)) {
+
+                requiredBlind = blindTracker.blinds[bi];
+                break;
 
             }
 
         }
 
-    }
+        if (requiredBlind) {
 
-    public saveBlindPayments(): void {
+            let blindSeat: Seat = null;
 
-        debugger;
-        this.roundPayments.push(this.currentRoundPayments);
-        this.currentRoundPayments = null;
+            if (availableSeats.length == 2) {
 
-    }
+                if (blindTracker.paidBlinds.size == 0) {
 
+                    // No blinds have been paid at all, so we need to find who should pay the Biggest Blind first
+                    // There are 2 players, so the big blind should be the player that is NOT the button
+                    blindSeat = availableSeats.find(s => s.index != table.buttonIndex);
 
-
-    public calculateNextForcedBet(table: Table): boolean {
-
-        if (this.buttonIndex == null) {
-            throw new Error("Cannot determine forced bets if buttonIndex is null");
-        }
-
-        const forcedBets: (Ante | Blind)[] = [];
-
-        if (this.blindsNeedingPaying.length) {
-
-            let requiredBlind: Blind = this.blindsNeedingPaying[0];
-            let requiredBlindIndex: number = requiredBlind.index;
-
-            let seatIndex: number = null;
-
-            if (!this.blindSeatIndexes.has(requiredBlindIndex)) {
-
-                // Figure out who should pay the blind.  
-                // Usually it would go D -> SB -> BB, but heads up the dealer is also the small blind
-
-                const playingSeats: Seat[] = table.seats.filter(seat => seat.isInHand);
-
-                if (playingSeats.length == 2) {
-
-                    if (requiredBlindIndex == 0) {
-
-                        // it's the small blind, so set it to be the button
-                        seatIndex = this.buttonIndex;
-
-                    }
-                    else {
-
-                        // it must be the big blind, so it's whatever player is NOT the button
-                        seatIndex = table.findNextActiveSeatIndex(this.buttonIndex + 1);
-
-                    }
+                    // Move the big blind to the appropriate seat
+                    blindTracker.bigBlindIndex = blindSeat.index;
 
                 }
-                else {
+                else if (blindTracker.paidBlinds.size < availableSeats.length) {
 
-                    // More than 2 players, so do the usual DE -> SB -> BB
-
-                    seatIndex = this.buttonIndex;
-
-                    // Set the BB 2 seats past the button
-                    // Set the SB 1 seat past the button
-                    for (let b = 0; b < (requiredBlindIndex + 1); b++) {
-
-                        seatIndex = table.findNextActiveSeatIndex(seatIndex + 1);
-
-                    }
+                    // we must be on the small blind here, so give it to the button
+                    blindSeat = availableSeats.find(s => s.index == table.buttonIndex);
 
                 }
 
             }
             else {
 
-                // Find the next player AFTER the most recent payee
-                seatIndex = table.findNextActiveSeatIndex(this.blindSeatIndexes.get(requiredBlindIndex) + 1);
+                // More than 2 available seats
+
+
+                if (blindTracker.paidBlinds.size == 0) {
+
+                    // We haven't paid any blinds at all, so work on the Big Blind
+
+                    let bigBlindIndex: number = blindTracker.bigBlindIndex;
+
+                    if (bigBlindIndex == null) {
+
+                        bigBlindIndex = table.buttonIndex;
+
+                        // we have not yet assigned the big blind, so put the X number of seats down from the button (where X is the number of blinds)
+                        for (let b = 0; b < blindTracker.blinds.length; b++) {
+
+                            // This will move the marker exactly 1 available seat down the line
+                            bigBlindIndex = table.findNextAvailableSeatIndex(bigBlindIndex + 1);
+
+                        }
+
+                    }
+                    else {
+
+                        // Move the big blind one seat down
+                         bigBlindIndex = table.findNextAvailableSeatIndex(bigBlindIndex + 1);
+
+                    }
+
+                    // No blinds have been paid at all, so we need to find who should pay the Biggest Blind first
+                    // There are 2 players, so the big blind should be the player that is NOT the button
+                    blindSeat = availableSeats.find(s => s.index == bigBlindIndex);
+
+                    blindTracker.bigBlindIndex = bigBlindIndex;
+
+                }
 
             }
 
-            this.blindSeatIndexes.set(requiredBlindIndex, seatIndex);
 
-            forcedBets.push(new Blind(requiredBlindIndex, this.blinds[requiredBlindIndex].type, this.blinds[requiredBlindIndex].name, this.blinds[requiredBlindIndex].amount, this.blinds[requiredBlindIndex].isLiveBet));
-            if (this.ante > 0) {
+            if (blindSeat != null) {
 
-                forcedBets.push(new Ante(this.ante));
+                forcedBets.push(requiredBlind);
+
+                if (blindTracker.ante > 0) {
+
+                    forcedBets.push(new Ante(blindTracker.ante));
+
+                }
+
+                table.betStatus.seatIndex = blindSeat.index;
+                table.betStatus.forcedBets = forcedBets;
+                return true;
 
             }
-
-            table.betStatus.seatIndex = seatIndex;
-            table.betStatus.forcedBets = forcedBets;
-            return true;
 
         }  // if blinds are still required
 
-        if (this.ante > 0) {
+
+        if (blindTracker.ante > 0) {
 
         }
 
@@ -421,19 +396,5 @@ export class NormalButtonController implements IButtonController {
         return false;
 
     }  // calculateForcedBets
-
-
-    public getBigBlindIndex(): number {
-
-        if (this.blinds.length && this.blindSeatIndexes && this.blindSeatIndexes.has(this.blinds.length - 1)) {
-
-            return this.blindSeatIndexes.get(this.blinds.length - 1);
-
-        }
-
-        return null;
-
-    }
-
 
 }

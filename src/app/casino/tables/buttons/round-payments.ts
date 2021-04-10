@@ -24,4 +24,11 @@ export class RoundPayments {
     }
 
 
+    public toString(): string {
+
+        return `[ RoundPayment: ${Array.from(this.payments.keys()).map(seatIndex => `(${seatIndex} => ${Array.from(this.payments.get(seatIndex)).join(',')})`).join(', ')} ]`;
+
+    }
+
+
 }

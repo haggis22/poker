@@ -35,6 +35,12 @@ export class Seat {
 
     }
 
+    public toString(): string {
+
+        return `[Seat ${this.index}: ${this.player ? this.player.name : 'Empty'}]`;
+
+    }
+
     public deal(card: Card | FacedownCard): void {
 
         if (!this.hand) {
@@ -65,6 +71,13 @@ export class Seat {
     public isAllIn(): boolean {
 
         return this.isInHand && this.player && this.player.chips === 0;
+
+    }
+
+
+    public isAvailableForHand(): boolean {
+
+        return this.player && !this.player.isSittingOut && this.player.chips > 0;
 
     }
 

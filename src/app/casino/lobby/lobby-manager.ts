@@ -152,8 +152,8 @@ export class LobbyManager implements MessageBroadcaster {
         // Both of the regular blinds are live bets (they could towards the current round of betting)
         let blinds: Blind[] =
             [
-                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 50, true),
-                new Blind(1, Blind.TYPE_BIG, 'the big blind', 100, true)
+                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 50, true, true),
+                new Blind(1, Blind.TYPE_BIG, 'the big blind', 100, true, true)
             ];
 
         let bets: number[] = [100, 100, 200, 200];
@@ -163,7 +163,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let buttonController: IButtonController = new NormalButtonController(stakes);
+        let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
@@ -190,8 +190,8 @@ export class LobbyManager implements MessageBroadcaster {
         // Both of the regular blinds are live bets (they could towards the current round of betting)
         let blinds: Blind[] =
             [
-                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 25, true),
-                new Blind(1, Blind.TYPE_BIG, 'the big blind', 50, true)
+                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 25, true, true),
+                new Blind(1, Blind.TYPE_BIG, 'the big blind', 50, true, true)
             ];
 
         let bets: number[] = [50, 50, 50, 50];
@@ -201,7 +201,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let buttonController: IButtonController = new NormalButtonController(stakes);
+        let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
@@ -228,8 +228,8 @@ export class LobbyManager implements MessageBroadcaster {
         // Both of the regular blinds are live bets (they could towards the current round of betting)
         let blinds: Blind[] =
             [
-                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 50, true),
-                new Blind(1, Blind.TYPE_BIG, 'the big blind', 100, true)
+                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 50, true, true),
+                new Blind(1, Blind.TYPE_BIG, 'the big blind', 100, true, true)
             ];
 
         let bets: number[] = [100, 100, 200, 200];
@@ -239,7 +239,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let buttonController: IButtonController = new NormalButtonController(stakes);
+        let buttonController: IButtonController = new NormalButtonController();
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
