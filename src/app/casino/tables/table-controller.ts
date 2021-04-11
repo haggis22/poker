@@ -1161,16 +1161,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
-        let buttonSuccess: boolean = this.buttonController.moveButton(this.table, this.blindTracker);
-
-        if (buttonSuccess) {
-
-            this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
-            await this.wait(this.TIME_SET_BUTTON);
-            return await this.goToNextState();
-
-        }
-
         return await this.goToOpenState();
 
     }   // startHand
@@ -1325,12 +1315,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         let forcedBetRequired: boolean = this.buttonController.calculateNextForcedBet(this.table, this.blindTracker);
 
-        if (!forcedBetRequired) {
-
-            process.exit(0);
-
-        }
-
         // Whether there is a forced bet or not we want to update everyone's version of the truth
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
@@ -1356,6 +1340,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         }
 
         this.blindTracker.saveBlindPayments();
+
+        // The forced bets will have updated the button position, so let's send the clients the new button position
+        this.queueAction(new MoveButtonAction(this.table.id, this.table.buttonIndex));
+        await this.wait(this.TIME_SET_BUTTON);
 
         // completeBetting will automatically look for bets that need returning if we don't have enough players
         return await this.completeBetting();

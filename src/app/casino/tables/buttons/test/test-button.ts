@@ -4,7 +4,7 @@ import { Blind } from '../../betting/blind';
 import { TableRules } from '../../table-rules';
 import { Player } from '../../../../players/player';
 import { IButtonController } from '../i-button-controller';
-import { NormalButtonController } from '../normal-button-controller';
+import { DeadButtonController } from '../dead-button-controller';
 import { BlindTracker } from '../blind-tracker';
 
 
@@ -51,7 +51,7 @@ function setup(): Harness {
     table.seats[4].player = new Player(8, 'Billy');
     table.seats[4].player.chips = 1000;
 
-    return new Harness(table, new BlindTracker(stakes), new NormalButtonController());
+    return new Harness(table, new BlindTracker(stakes), new DeadButtonController());
 
 }
 
@@ -75,7 +75,26 @@ function setInHand(table: Table, activeSeatIndexes: number[]) {
 }
 
 
-function testButton() {
+function testHeadsUp() {
+
+    const harness: Harness = setup();
+
+    const { table, blindTracker, buttonController } = harness;
+
+    blindTracker.resetForOpenState(table);
+
+    // Set it so that only Danny & Paul are not sitting out
+    setInHand(harness.table, [0, 1]);
+
+    let handNum = 0;
+
+    runHand(++handNum, harness);
+    runHand(++handNum, harness);
+    runHand(++handNum, harness);
+
+}
+
+function testAddThird() {
 
     const harness: Harness = setup();
 
@@ -99,6 +118,7 @@ function testButton() {
 }
 
 
+
 function runHand(handNum: number, harness: Harness) {
 
     console.log(`Hand #${handNum}`);
@@ -106,8 +126,6 @@ function runHand(handNum: number, harness: Harness) {
     const { table, blindTracker, buttonController } = harness;
 
     blindTracker.resetHand(table);
-
-    buttonController.moveButton(table, blindTracker);
 
     console.log(`Dealer: ${table.seats[table.buttonIndex]}`);
 
@@ -127,5 +145,10 @@ function runHand(handNum: number, harness: Harness) {
 }
 
 
-testButton();
+if (process.argv.includes('dp')) {
+    testHeadsUp();
+}
 
+if (process.argv.includes('dpj')) {
+    testAddThird();
+}
