@@ -203,12 +203,6 @@ class BetController {
 
         if (table.state instanceof BlindsAndAntesState) {
 
-            if (!seat.isInHand) {
-
-                return new InvalidBet(seat.index, 'You are not in the hand');
-
-            }
-
             if (!table.betStatus.forcedBets) {
 
                 return new InvalidBet(seat.index, 'There is no ante/blind to pay');

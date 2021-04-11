@@ -91,7 +91,7 @@ export class BlindTracker {
             this.currentRoundPayments = new RoundPayments();
         }
 
-        this.log(`In addPayments for User ${userID}, forcedBets: ${forcedBets.join(" ") }`)
+        debugger;
 
         // We're taking payment for this player, so they must be active
         this.activePlayers.add(userID);
@@ -114,6 +114,17 @@ export class BlindTracker {
 
                 // Mark each blind index that they paid this round
                 this.currentRoundPayments.addPayment(userID, bet.index);
+
+            }
+            else if (bet instanceof Ante) {
+
+                // Mark this user as having paid their ante this round
+                this.paidAntes.add(userID);
+
+                let seat: Seat = table.seats.find(s => s.player && s.player.userID == userID);
+                if (seat) {
+                    this.log(`${seat} pays ${bet}`);
+                }
 
             }
 

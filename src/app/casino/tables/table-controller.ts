@@ -749,7 +749,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             this.clearBetTimeout(bettorSeat.index);
 
             // Give them credit for all the blinds they were supposed to pay 
-            this.blindTracker.addPayments(this.table, bettorSeat.player.userID, this.table.betStatus.forcedBets);
+            this.blindTracker.addPayments(this.table, command.userID, this.table.betStatus.forcedBets);
 
             for (let anteBlind of anteResult) {
 
@@ -998,7 +998,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (seat.player) {
 
-
                 if (this.chipsToAdd.has(seat.player.userID)) {
 
                     let numChips: number = this.chipsToAdd.get(seat.player.userID);
@@ -1018,7 +1017,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     this.chipsToAdd.delete(seat.player.userID);
 
                 }   // they have chips waiting to add
-
 
                 let setStatusCommand: SetStatusCommand = this.setStatusRequests.get(seat.index);
 
@@ -1158,6 +1156,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             // Remove any cards they might have
             seat.clearHand();
+
+        }
+
+        const numAvailableSeats: number = this.table.seats.filter(s => s.isAvailableForHand()).length;
+
+        if (numAvailableSeats > 1) {
+
+            return await this.goToNextState();
 
         }
 
@@ -1346,6 +1352,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         await this.wait(this.TIME_SET_BUTTON);
 
         // completeBetting will automatically look for bets that need returning if we don't have enough players
+
         return await this.completeBetting();
 
     }   // checkForcedBets
@@ -1485,7 +1492,20 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
                 this.queueAction(new GatherAntesCompleteAction(this.table.id));
 
-                if (this.table.seats.filter(seat => seat.isInHand).length < 2) {
+                let numPlayers: number = 0;
+
+                for (let seat of this.table.seats) {
+
+                    seat.isInHand = seat.player && this.blindTracker.activePlayers.has(seat.player.userID);
+                    this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
+
+                    if (seat.isInHand) {
+                        numPlayers++;
+                    }
+
+                }
+
+                if (numPlayers < 2) {
 
                     // We don't have enough players, so go back to the open state
                     this.log(`In BlindsAndAntesState in completeBetting and we don't have enough players - going to OpenState`);

@@ -624,21 +624,11 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`It is ${seat.getName()}'s turn to ante, ante index: ${seat.index}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
 
-        if (seat.isInHand && seat.player) {
+        if (seat.player && seat.player.userID === this.user.id) {
 
-            if (seat.player.userID === this.user.id) {
+            return this.broadcastCommand(new AnteCommand(this.table.id));
 
-                return this.broadcastCommand(new AnteCommand(this.table.id));
-
-            }  // if it's my turn
-
-        }   // seat has a player
-        else {
-
-            this.log(`${seat.getName()} is MIA`);
-            return;
-
-        }
+        }  // if it's my turn
 
     }  // anteTurn
 
