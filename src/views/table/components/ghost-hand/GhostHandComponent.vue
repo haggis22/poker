@@ -34,7 +34,7 @@
             }
 
         },
-        set() {
+        setup() {
 
             const cardCreated = (card: CardUI): void => {
 
