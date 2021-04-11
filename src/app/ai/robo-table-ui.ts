@@ -536,12 +536,12 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`It is ${seat.getName()}'s turn to act`);
 
-        if (seat.isInHand && seat.player) {
+        if (seat.isInHand && seat.player && seat.player.userID === action.betStatus.actionOnUserID) {
 
             if (seat.player.userID === this.user.id) {
 
-                let call: Bet = betController.calculateCall(this.table, seat);
-                let minimumRaise: Bet = betController.calculateMinimumRaise(this.table, seat, call);
+                let call: Bet = betController.calculateCall(this.table, seat, this.user.id);
+                let minimumRaise: Bet = betController.calculateMinimumRaise(this.table, seat, this.user.id, call);
 
                 if (betStatus.currentBet > 0) {
 
@@ -624,7 +624,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`It is ${seat.getName()}'s turn to ante, ante index: ${seat.index}, seat.isInHand: ${seat.isInHand}, seat.hasPlayer: ${(seat.player != null)}`);
 
-        if (seat.player && seat.player.userID === this.user.id) {
+        if (seat.player && seat.player.userID === this.user.id && betStatus.actionOnUserID === this.user.id) {
 
             return this.broadcastCommand(new AnteCommand(this.table.id));
 

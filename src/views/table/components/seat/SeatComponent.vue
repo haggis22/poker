@@ -101,7 +101,7 @@
 
                 let classes = ['seat', `seat-${seatIndex}`];
 
-                if (tableUI.isActionOn(seatIndex)) {
+                if (player.value && tableUI.isActionOn(seatIndex, player.value.userID)) {
 
                     classes.push('action-on');
 

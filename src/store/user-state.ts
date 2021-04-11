@@ -17,6 +17,9 @@ const setUser = (user: UserSummary): void => {
     state.user = user;
 };
 
+const getUserID = computed((): number => state.user ? state.user.id : null);
+
+
 const getBalance = computed((): number => state.balance);
 
 const setBalance = (balance: number): void => {
@@ -28,6 +31,8 @@ export const userState = {
 
     getUser,
     setUser,
+
+    getUserID,
 
     getBalance,
     setBalance

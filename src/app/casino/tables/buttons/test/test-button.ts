@@ -131,12 +131,12 @@ function runHand(handNum: number, harness: Harness) {
 
     while (buttonController.calculateNextForcedBet(table, blindTracker)) {
 
-        console.log(`betStatus.seatIndex = ${table.betStatus.seatIndex}`);
+        console.log(`betStatus.seatIndex = ${table.betStatus.seatIndex}, betStatus.actionOnUserID = ${table.betStatus.actionOnUserID}`);
 
         console.log(`Action on ${table.seats[table.betStatus.seatIndex]}: ${table.betStatus.forcedBets.join(' ')}`);
 
         // Action-On player pays all their forced bets
-        blindTracker.addPayments(table, table.seats[table.betStatus.seatIndex].player.userID, table.betStatus.forcedBets);
+        blindTracker.addPayments(table, table.betStatus.actionOnUserID, table.betStatus.forcedBets);
 
     }
 

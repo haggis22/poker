@@ -90,6 +90,7 @@ export class DeadButtonController implements IButtonController {
                 }
 
                 table.betStatus.seatIndex = blindTracker.bigBlindIndex;
+                table.betStatus.actionOnUserID = table.seats[blindTracker.bigBlindIndex].player.userID;
                 table.betStatus.forcedBets = forcedBets;
                 return true;
 
@@ -135,6 +136,7 @@ export class DeadButtonController implements IButtonController {
 
                     // Assign the small blind to the button
                     table.betStatus.seatIndex = blindTracker.buttonIndex;
+                    table.betStatus.actionOnUserID = table.seats[blindTracker.buttonIndex].player.userID;
                     table.betStatus.forcedBets = forcedBets;
                     return true;
 
@@ -167,6 +169,7 @@ export class DeadButtonController implements IButtonController {
 
                     // Assign the small blind to its seat index
                     table.betStatus.seatIndex = smallBlindIndex;
+                    table.betStatus.actionOnUserID = table.seats[smallBlindIndex].player.userID;
                     table.betStatus.forcedBets = forcedBets;
                     return true;
 
@@ -206,6 +209,7 @@ export class DeadButtonController implements IButtonController {
 
                 // Assign the ante to its seat index
                 table.betStatus.seatIndex = anteSeatIndex;
+                table.betStatus.actionOnUserID = table.seats[anteSeatIndex].player.userID;
                 table.betStatus.forcedBets = forcedBets;
                 return true;
 

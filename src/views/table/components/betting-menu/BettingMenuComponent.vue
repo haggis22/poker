@@ -115,6 +115,7 @@ import './betting-menu.scss';
     import { BetState } from '@/app/casino/tables/states/betting/bet-state';
     import { BlindsAndAntesState } from '@/app/casino/tables/states/betting/blinds-and-antes-state';
 import { CardSuit } from '@/app/cards/card-suit';
+import { userState } from '@/store/user-state';
 
     const TableMenuComponent = defineComponent({
 
@@ -171,6 +172,8 @@ import { CardSuit } from '@/app/cards/card-suit';
 
             const mySeatIndex = computed((): number => tableState.getMySeatIndex.value);
 
+            const myUserID = computed((): number => userState.getUserID.value);
+
             const currentTableState = computed((): TableState => tableState.getTable.value.state);
 
             const betStatus = computed(() => tableState.getBetStatus.value);
@@ -191,10 +194,9 @@ import { CardSuit } from '@/app/cards/card-suit';
 
             const remainsToAct = computed((): boolean => {
 
-                return mySeatIndex.value != null
-                    && isBettingTime.value
+                return isBettingTime.value
                     // either it's my turn right now, or it's coming up
-                    && (betStatus.value.seatIndex == mySeatIndex.value || betStatus.value.doesSeatRemainToAct(mySeatIndex.value));
+                    && (betStatus.value.isActionOn(mySeatIndex.value, myUserID.value) || betStatus.value.doesSeatRemainToAct(mySeatIndex.value, myUserID.value));
 
 
             });

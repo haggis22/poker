@@ -2,14 +2,21 @@
 import { Bet } from './bet';
 import { Ante } from './ante';
 import { Blind } from './blind';
+import { RemainingActor } from './remaining-actor';
 
 export class BetStatus {
 
 
     public bettingRound: number;
 
+    // Indicates which seat needs to act
     public seatIndex: number;
-    public seatIndexesRemainToAct: number[];
+
+    // Indicates which user needs to act
+    public actionOnUserID: number;
+
+
+    public remainingActors: RemainingActor[];
 
     public currentBet: number;
     public lastLiveBet: number;
@@ -36,7 +43,7 @@ export class BetStatus {
 
     constructor() {
 
-        this.seatIndexesRemainToAct = [];
+        this.remainingActors = [];
 
         this.pots = [];
 
@@ -49,14 +56,21 @@ export class BetStatus {
 
     public toString(): string {
 
-        return `[ BetStatus, seatIndex: ${this.seatIndex}, currentBet: ${this.currentBet}, lastLiveBet: ${this.lastLiveBet}, lastLiveRaise: {$this.lastLiveRaise} ]`;
+        return `[ BetStatus, seatIndex: ${this.seatIndex}, actionOnUserID: ${this.actionOnUserID}, currentBet: ${ this.currentBet }, lastLiveBet: ${ this.lastLiveBet }, lastLiveRaise: { $this.lastLiveRaise } ]`;
+
+    }
+
+    public isActionOn(seatIndex: number, userID: number): boolean {
+
+        return seatIndex != null && userID != null && this.seatIndex === seatIndex && this.actionOnUserID === userID;
 
     }
 
 
-    public doesSeatRemainToAct(seatIndex: number): boolean {
 
-        return this.seatIndexesRemainToAct.includes(seatIndex);
+    public doesSeatRemainToAct(seatIndex: number, userID: number): boolean {
+
+        return (seatIndex != null && userID != null && this.remainingActors.find(ra => ra.seatIndex === seatIndex && ra.userID === userID) != null);
 
     }
 

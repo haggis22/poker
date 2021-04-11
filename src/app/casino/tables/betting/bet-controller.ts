@@ -11,6 +11,7 @@ import { Blind } from "./blind";
 import { Ante } from "./ante";
 import { InvalidBet } from "./invalid-bet";
 import { InvalidFold } from "./invalid-fold";
+import { RemainingActor } from './remaining-actor';
 
 
 class BetController {
@@ -48,7 +49,7 @@ class BetController {
 
     public clearBettorsToAct(status: BetStatus): void {
 
-        status.seatIndexesRemainToAct.length = 0;
+        status.remainingActors.length = 0;
 
     }
 
@@ -63,7 +64,7 @@ class BetController {
         }
 
         status.currentBet = status.lastLiveBet = status.lastLiveRaise = status.numRaises = 0;
-        status.seatIndex = null;
+        status.seatIndex = status.actionOnUserID = null;
 
     }   // clearBets
 
@@ -75,25 +76,19 @@ class BetController {
     }  // increaseBettingRound
 
 
-    public getNextBettorIndex(status: BetStatus): number {
+    public getNextBettor(status: BetStatus): RemainingActor {
 
-        return status.seatIndexesRemainToAct.shift();
+        return status.remainingActors.shift();
 
-    }   // getNextBetterIndex
+    }   // getNextBettor
 
 
 
-    public fold(table:Table, seat: Seat): InvalidFold | Fold {
+    public fold(table:Table, seat: Seat, userID: number): InvalidFold | Fold {
 
         if (!seat) {
 
             return new InvalidFold("Invalid seat");
-
-        }
-
-        if (!seat.isInHand) {
-
-            return new InvalidFold("You do not have a hand");
 
         }
 
@@ -103,9 +98,18 @@ class BetController {
 
         }
 
-        if (table.betStatus.seatIndex != seat.index) {
+        if (!seat.player
+            || seat.player.userID !== userID
+            || table.betStatus.seatIndex != seat.index
+            || table.betStatus.actionOnUserID != userID) {
 
             return new InvalidFold("It is not your turn to act");
+
+        }
+
+        if (!seat.isInHand) {
+
+            return new InvalidFold("You do not have a hand");
 
         }
 
@@ -199,7 +203,13 @@ class BetController {
     }
 
 
-    public validateBlindsAndAnte(table: Table, seat: Seat): InvalidBet | Bet[] {
+    public validateBlindsAndAnte(table: Table, seat: Seat, userID: number): InvalidBet | Bet[] {
+
+        if (!seat) {
+
+            return new InvalidBet(seat.index, 'Invalid seat');
+
+        }
 
         if (table.state instanceof BlindsAndAntesState) {
 
@@ -209,7 +219,10 @@ class BetController {
 
             }
 
-            if (table.betStatus.seatIndex != seat.index) {
+            if (!seat.player
+                || seat.player.userID != userID
+                || table.betStatus.seatIndex != seat.index
+                || table.betStatus.actionOnUserID != userID) {
 
                 return new InvalidBet(seat.index, "It is not your turn to act");
 
@@ -274,7 +287,7 @@ class BetController {
 
 
 
-    public calculateCall(table: Table, seat: Seat): Bet {
+    public calculateCall(table: Table, seat: Seat, userID: number): Bet {
 
         // If they don't have a seat, or chips then they can't call
         if (!seat || !seat.player || seat.player.chips === 0) {
@@ -286,21 +299,25 @@ class BetController {
         if (table.state instanceof BlindsAndAntesState) {
 
             // Make sure there is a forced bet, and it is on the given player's turn - otherwise, dump out
-            if (table.betStatus.forcedBets == null || table.betStatus.seatIndex !== seat.index) {
-                return null;
+            if (table.betStatus.forcedBets != null
+                && table.betStatus.seatIndex === seat.index
+                && seat.player.userID === userID
+                && table.betStatus.actionOnUserID === userID) {
+
+                let totalRequiredBet: number = table.betStatus.forcedBets.reduce((total, bet) => total + bet.amount, 0);
+                let chipsRequired = Math.min(seat.player.chips, totalRequiredBet);
+
+                let actionType: number = totalRequiredBet ? Bet.ACTION.CALL : Bet.ACTION.CHECK;
+
+                return new Bet(seat.index, /* totalBet */ chipsRequired, /* chipsAdded */ chipsRequired, Bet.TYPE.ANTE, actionType);
+
             }
-
-            let totalRequiredBet: number = table.betStatus.forcedBets.reduce((total, bet) => total + bet.amount, 0);
-            let chipsRequired = Math.min(seat.player.chips, totalRequiredBet);
-
-            let actionType: number = totalRequiredBet ? Bet.ACTION.CALL : Bet.ACTION.CHECK;
-
-            return new Bet(seat.index, /* totalBet */ chipsRequired, /* chipsAdded */ chipsRequired, Bet.TYPE.ANTE, actionType);
 
         }
         else if (table.state instanceof BetState) {
 
-            if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
+            // We can calculate a future call if the player's action is now or upcoming, as long as the seat matches the player trying to make the call
+            if (table.betStatus.isActionOn(seat.index, seat.player.userID) || table.betStatus.doesSeatRemainToAct(seat.index, seat.player.userID)) {
 
                 let myCurrentBet: number = this.getCurrentBet(table.betStatus, seat.index);
                 let chipsRequired: number = Math.min(seat.player.chips, table.betStatus.currentBet - myCurrentBet);
@@ -317,7 +334,7 @@ class BetController {
     }  // calculateCall
 
 
-    public calculateMinimumLiveRaise(table: Table, seat: Seat, call?: Bet): Bet {
+    public calculateMinimumLiveRaise(table: Table, seat: Seat, userID: number, call?: Bet): Bet {
 
         // If they don't have chips then they can't call, much less raise
         if (!seat || !seat.player || seat.player.chips === 0) {
@@ -331,10 +348,10 @@ class BetController {
 
         if (table.state instanceof BetState) {
 
-            if (table.betStatus.seatIndex == seat.index || table.betStatus.doesSeatRemainToAct(seat.index)) {
+            if (table.betStatus.isActionOn(seat.index, seat.player.userID) || table.betStatus.doesSeatRemainToAct(seat.index, seat.player.userID)) {
 
                 if (call === undefined) {
-                    call = this.calculateCall(table, seat);
+                    call = this.calculateCall(table, seat, userID);
                 }
 
                 // If they can't call, then they can't raise
@@ -372,9 +389,9 @@ class BetController {
     }
 
 
-    public calculateMinimumRaise(table: Table, seat: Seat, call: Bet): Bet {
+    public calculateMinimumRaise(table: Table, seat: Seat, userID: number, call: Bet): Bet {
 
-        let minimumLiveRaise: Bet = this.calculateMinimumLiveRaise(table, seat, call);
+        let minimumLiveRaise: Bet = this.calculateMinimumLiveRaise(table, seat, userID, call);
 
         // If the player only has enough chips to call (or less), then minimumLiveRaise will be null
         // If the player has more chips than are required to call, then minimumLiveRaise will reflect the amount
@@ -397,9 +414,9 @@ class BetController {
     }  // calculateMinimumRaise
 
 
-    public calculateMaximumRaise(table: Table, seat: Seat, call: Bet): Bet {
+    public calculateMaximumRaise(table: Table, seat: Seat, userID: number, call: Bet): Bet {
 
-        let minRaise: Bet = this.calculateMinimumRaise(table, seat, call);
+        let minRaise: Bet = this.calculateMinimumRaise(table, seat, userID, call);
         if (minRaise === null) {
             return null;
         }
@@ -417,7 +434,7 @@ class BetController {
     }  // calculateMaximumRaise
 
 
-    public validateBet(table: Table, seat: Seat, amount: number): Bet | InvalidBet {
+    public validateBet(table: Table, seat: Seat, userID: number, amount: number): Bet | InvalidBet {
 
         if (table.state instanceof BetState) {
 
@@ -427,7 +444,10 @@ class BetController {
 
             }
 
-            if (table.betStatus.seatIndex != seat.index) {
+            if (table.betStatus.seatIndex != seat.index
+                || table.betStatus.actionOnUserID != userID
+                || !seat.player
+                || seat.player.userID !== userID) {
 
                 return new InvalidBet(seat.index, "It is not your turn to act");
 
@@ -448,7 +468,7 @@ class BetController {
 
             }
 
-            let call: Bet = this.calculateCall(table, seat);
+            let call: Bet = this.calculateCall(table, seat, userID);
             this.log(`   amountToCall: ${call}`);
 
             // amountToCall will take the fact that the player does not have enough chips into account and will allow a "call for less"
@@ -469,7 +489,7 @@ class BetController {
 
             }
 
-            let minimumBet: Bet = this.calculateMinimumRaise(table, seat, call);
+            let minimumBet: Bet = this.calculateMinimumRaise(table, seat, userID, call);
 
             if (minimumBet === null) {
 
@@ -478,8 +498,8 @@ class BetController {
 
             }
 
-            let minimumLiveRaise: Bet = this.calculateMinimumLiveRaise(table, seat, call);
-            let maximumBet: Bet = this.calculateMaximumRaise(table, seat, call);
+            let minimumLiveRaise: Bet = this.calculateMinimumLiveRaise(table, seat, userID, call);
+            let maximumBet: Bet = this.calculateMaximumRaise(table, seat, userID, call);
 
             // If we've made it here, then the player must be betting/raising, so first make sure it is not too much
             // We know maximumBet will not be null if the minBet is not null
@@ -743,10 +763,10 @@ class BetController {
     }   // killPots
 
 
-    public calculateSeatIndexesRemainToAct(table: Table, possibleStartingIndex: number, lastPossibleIndex: number, seatIsEligibile: (seat: Seat) => boolean): void {
+    public calculateRemainingActors(table: Table, possibleStartingIndex: number, lastPossibleIndex: number, seatIsEligibile: (seat: Seat) => boolean): void {
 
         // Go through the rest of the players at the table and see whether or not they need to take an action
-        let seatsToAct = [];
+        let seatsToAct: RemainingActor[] = [];
 
         if (table.seats.length) {
 
@@ -761,13 +781,13 @@ class BetController {
             let done: boolean = false;
             let ix: number = possibleStartingIndex;
 
-            console.log(`BETTRACKER: calculateSeatIndexesRemainToAct possibleStartingIndex: ${possibleStartingIndex}, lastPossibleIndex: ${lastPossibleIndex}, numSeats: ${table.seats.length}`);
+            console.log(`BETTRACKER: calculateRemainingActors possibleStartingIndex: ${possibleStartingIndex}, lastPossibleIndex: ${lastPossibleIndex}, numSeats: ${table.seats.length}`);
 
             while (!done) {
 
                 if (seatIsEligibile(table.seats[ix])) {
 
-                    seatsToAct.push(ix);
+                    seatsToAct.push(new RemainingActor(ix, table.seats[ix].player.userID));
 
                 }
 
@@ -786,15 +806,15 @@ class BetController {
 
             }  // !done
 
-            console.log(`BETTRACKER: calculateSeatIndexesRemainToAct seatsToAct: [ ${seatsToAct.join("  ")} ]`);
+            console.log(`BETTRACKER: calculateRemainingActors seatsToAct: [ ${seatsToAct.join("  ")} ]`);
 
 
         }   // seats.length > 0
 
 
-        table.betStatus.seatIndexesRemainToAct = [...seatsToAct];
+        table.betStatus.remainingActors = [...seatsToAct];
 
-    }  // calculateSeatIndexesRemainToAct
+    }  // calculateRemainingActors
 
 
 }

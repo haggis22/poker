@@ -637,16 +637,17 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     private betState(): void {
 
-        let seat: Seat = this.getMySeat();
+        const seat: Seat = this.getMySeat();
+        const myUserID: number = userState.getUserID.value;
 
-        if (seat) {
+        if (seat && myUserID != null) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            let myCall: Bet = betController.calculateCall(this.getTable(), seat);
+            let myCall: Bet = betController.calculateCall(this.getTable(), seat, myUserID);
 
             tableState.setMyCall(myCall);
-            tableState.setMyMinRaise(betController.calculateMinimumRaise(this.getTable(), seat, myCall));
-            tableState.setMyMaxRaise(betController.calculateMaximumRaise(this.getTable(), seat, myCall));
+            tableState.setMyMinRaise(betController.calculateMinimumRaise(this.getTable(), seat, myUserID, myCall));
+            tableState.setMyMaxRaise(betController.calculateMaximumRaise(this.getTable(), seat, myUserID, myCall));
 
         }
         else {
@@ -660,14 +661,15 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     private anteState(): void {
 
-        let seat: Seat = this.getMySeat();
+        const seat: Seat = this.getMySeat();
+        const myUserID: number = userState.getUserID.value;
 
         tableState.clearRequiredBetValues();
 
         if (seat && seat.isInHand) {
 
             // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            const myCall = betController.calculateCall(this.getTable(), seat);
+            const myCall = betController.calculateCall(this.getTable(), seat, myUserID);
 
             tableState.setMyCall(myCall);
 
@@ -692,8 +694,8 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         let table: Table = this.getTable();
 
-        this.log(`Seats To Act: [ ${action.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
-        this.log(`Table Seats To Act: [ ${table.betStatus.seatIndexesRemainToAct.join(" ")} ]`);
+        this.log(`Seats To Act: [ ${action.betStatus.remainingActors.join(" ")} ]`);
+        this.log(`Table Seats To Act: [ ${table.betStatus.remainingActors.join(" ")} ]`);
 
         let pendingBetNumRaises: number = tableState.getPendingBetNumRaises.value;
 
@@ -829,17 +831,26 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         tableState.clearAction(action.betStatus.seatIndex);
 
         let seat = this.findSeat(action.betStatus.seatIndex);
+
+        if (!seat.player || seat.player.userID != action.betStatus.actionOnUserID) {
+
+            // There a different player in the seat than expected - dump out
+            return;
+
+        }
+
         this.log(`It is ${seat.getName()}'s turn to act`);
 
         tableState.clearTimers();
 
-        let mySeat: Seat = this.getMySeat();
+        const mySeat: Seat = this.getMySeat();
+        const myUserID: number = userState.getUserID.value;
 
-        let table: Table = tableState.getTable.value;
+        const table: Table = tableState.getTable.value;
 
-        let myCall: Bet = betController.calculateCall(table, mySeat);
-        let myMinRaise: Bet = betController.calculateMinimumRaise(table, mySeat, myCall);
-        let myMaxRaise: Bet = betController.calculateMaximumRaise(table, mySeat, myCall);
+        let myCall: Bet = betController.calculateCall(table, mySeat, myUserID);
+        let myMinRaise: Bet = betController.calculateMinimumRaise(table, mySeat, myUserID, myCall);
+        let myMaxRaise: Bet = betController.calculateMaximumRaise(table, mySeat, myUserID, myCall);
 
         tableState.setMyCall(myCall);
 
@@ -887,7 +898,8 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         if (action.timesUp > Date.now()) {
 
-            if (action.betStatus.seatIndex === tableState.getMySeatIndex.value) {
+            if (action.betStatus.seatIndex === tableState.getMySeatIndex.value
+                && action.betStatus.actionOnUserID === userState.getUserID.value) {
 
                 // if we had a betting action readied, then send it now
                 if (this.checkPendingBetCommand()) {
@@ -926,9 +938,10 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (action.timesUp > Date.now()) {
 
-                if (anteSeatIndex == tableState.getMySeatIndex.value) {
+                if (table.betStatus.seatIndex === tableState.getMySeatIndex.value
+                    && table.betStatus.actionOnUserID === userState.getUserID.value) {
 
-                    tableState.setMyCall(betController.calculateCall(table, anteSeat));
+                    tableState.setMyCall(betController.calculateCall(table, anteSeat, userState.getUserID.value));
 
                     this.setBetCommand(new AnteCommand(tableState.getTableID.value))
 
@@ -1218,7 +1231,8 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (table?.state instanceof BlindsAndAntesState) {
 
-                if (table?.betStatus.seatIndex == tableState.getMySeatIndex.value) {
+                if (table?.betStatus.seatIndex === tableState.getMySeatIndex.value
+                    && table.betStatus.actionOnUserID === userState.getUserID.value) {
 
                     tableState.clearPendingBetCommands();
 
@@ -1236,7 +1250,9 @@ class TableUI implements MessageHandler, CommandBroadcaster {
             // TODO: Validate first against local BetController and only send if valid?
             else if (this.getTable().state instanceof BetState) {
 
-                if (table.betStatus && table.betStatus.seatIndex == tableState.getMySeatIndex.value) {
+                if (table.betStatus
+                    && table.betStatus.seatIndex === tableState.getMySeatIndex.value
+                    && table.betStatus.actionOnUserID === userState.getUserID.value) {
 
                     tableState.clearPendingBetCommands();
 
@@ -1254,7 +1270,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     }   // checkPendingBetCommand
 
 
-    public isActionOn(seatIndex: number): boolean {
+    public isActionOn(seatIndex: number, userID: number): boolean {
 
         const table: Table = this.getTable();
 
@@ -1262,13 +1278,17 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
             if (table.state instanceof BlindsAndAntesState) {
 
-                return table.betStatus.seatIndex == seatIndex;
+                return table.betStatus.seatIndex === seatIndex
+                    && table.seats[seatIndex].player
+                    && table.seats[seatIndex].player.userID === userID;
 
             }
 
             else if (table.state instanceof BetState) {
 
-                return table.betStatus.seatIndex == seatIndex;
+                return table.betStatus.seatIndex === seatIndex
+                    && table.seats[seatIndex].player
+                    && table.seats[seatIndex].player.userID === userID;
 
             }
 
