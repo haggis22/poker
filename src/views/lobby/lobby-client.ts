@@ -101,13 +101,6 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
     }  // handleMessage
 
 
-    public authenticate(): void {
-
-        this.broadcastCommand(new AuthenticateCommand());
-
-    }   // authenticate
-
-
     public authenticated(action: AuthenticatedAction): void {
 
         this.log(`Heared AuthenticatedAction for ${action.user.username}, sending SubscribeLobbyCommand`);

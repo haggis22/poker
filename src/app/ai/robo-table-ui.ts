@@ -228,12 +228,6 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
-    public authenticate(): void {
-
-        this.broadcastCommand(new AuthenticateCommand());
-
-    }   // authenticate
-
 
     private authenticatedAction(action: AuthenticatedAction): void {
 

@@ -6,20 +6,24 @@ import { Message } from "../../messages/message";
 import { ActionMessage } from "../../messages/action-message";
 import { ISocketWrapper } from "../i-socket-wrapper";
 
+import { TokenManager } from "./token-manager";
+import { AuthenticateCommand } from '../../commands/security/authenticate-command';
+
+
 export class GameClient implements MessageBroadcaster, CommandHandler {
 
     private socket: ISocketWrapper;
-    private authToken: string;
+    private tokenManager: TokenManager;
 
     private messageHandlers: MessageHandler[];
 
 
-    constructor(socket: ISocketWrapper, authToken: string) {
+    constructor(socket: ISocketWrapper, tokenManager: TokenManager) {
 
         this.socket = socket;
         this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
 
-        this.authToken = authToken;
+        this.tokenManager = tokenManager;
 
         this.messageHandlers = new Array<MessageHandler>();
 
@@ -80,7 +84,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
         this.log(`Sending ${command.constructor.name}`);
 
         // Stamp every outgoing message with the saved authorization token
-        command.authToken = this.authToken;
+        command.authToken = this.tokenManager.getToken();
 
         this.socket.send(command);
 
@@ -92,5 +96,12 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
         console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
 
     }
+
+    public authenticate(): void {
+
+        this.handleCommand(new AuthenticateCommand());
+
+    }   // authenticate
+
 
 }

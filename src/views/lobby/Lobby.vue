@@ -18,6 +18,7 @@
 
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
 import { lobbyState } from '@/store/lobby-state';
+import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
 
 
     export default defineComponent({
@@ -41,7 +42,7 @@ import { lobbyState } from '@/store/lobby-state';
                 console.log('Connection opened');
 
                 const lobbyClient: LobbyClient = new LobbyClient();
-                const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
+                const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new CookieTokenManager());
 
                 // Now join all the links in the chain
                 lobbyClient.registerCommandHandler(gameClient);
@@ -49,7 +50,7 @@ import { lobbyState } from '@/store/lobby-state';
 
                 client.value = lobbyClient;
 
-                lobbyClient.authenticate();
+                gameClient.authenticate();
 
             });
 

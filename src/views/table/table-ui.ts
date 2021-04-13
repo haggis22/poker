@@ -14,7 +14,7 @@ import { Logger } from "../../app/logging/logger";
 import { TableConnectedAction } from "../../app/actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../app/commands/table/table-snapshot-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction, ClearTimerAction } from "../../app/communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction, ClearTimerAction, AuthenticationFailedAction } from "../../app/communication/serializable";
 import { SetGameAction } from "../../app/actions/table/game/set-game-action";
 import { SetStatusAction } from "@/app/actions/table/players/set-status-action";
 import { SetStatusAckedAction } from "@/app/actions/table/players/set-status-acked-action";
@@ -30,6 +30,7 @@ import { BettingCommand } from '@/app/commands/table/betting/betting-command';
 import { userState } from "@/store/user-state";
 import { tableState } from "@/store/table-state";
 import { betController } from '@/app/casino/tables/betting/bet-controller';
+import { messageState } from '@/store/message-state';
 
 
 const logger: Logger = new Logger();
@@ -109,6 +110,12 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof AuthenticatedAction) {
 
             return this.authenticatedAction(action);
+
+        }
+
+        if (action instanceof AuthenticationFailedAction) {
+
+            return this.authenticationFailedAction(action);
 
         }
 
@@ -451,13 +458,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     }   // setGamebe
 
 
-    public authenticate(): void {
-
-        this.broadcastCommand(new AuthenticateCommand());
-
-    }   // authenticate
-
-
     public authenticatedAction(action: AuthenticatedAction): void {
 
         let tableID: number = tableState.getTableID.value;
@@ -467,7 +467,16 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.broadcastCommand(new JoinTableCommand(tableID));
 
-    }   // authenticated
+    }   // authenticatedAction
+
+
+    public authenticationFailedAction(action: AuthenticationFailedAction): void {
+
+        this.log(`Heard AuthenticationFailedAction`);
+
+        messageState.addMessage(`Authentication Failed: ${action.message}`);
+
+    }   // authenticationFailedAction
 
 
 

@@ -4,6 +4,7 @@ import { LoginCommand, Message, ActionMessage, LoginAction, AuthenticatedAction 
 import { IServerClient } from "../communication/server-side/i-server-client";
 import { AuthenticateCommand } from "../commands/security/authenticate-command";
 import { UserSummary } from "./user-summary";
+import { AuthenticationFailedAction } from '../actions/security/authentication-failed-action';
 
 export class UserManager {
 
@@ -55,7 +56,7 @@ export class UserManager {
             let user: UserSummary = this.authenticate(command.authToken);
             this.log(`Authentication for ${command.authToken} successful? ${(user != null)}`);
 
-            return user ? new ActionMessage(new AuthenticatedAction(user)) : new Message('Login failed');
+            return user ? new ActionMessage(new AuthenticatedAction(user)) : new ActionMessage(new AuthenticationFailedAction("Invalid token"));
 
         }
 

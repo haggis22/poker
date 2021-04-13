@@ -34,6 +34,7 @@
     import ChatComponent from './components/chat/ChatComponent.vue';
 
     import { tableState } from "@/store/table-state";
+import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
 
 
     export default defineComponent({
@@ -61,7 +62,7 @@
 
                 tableState.setChipFormatter(new MoneyFormatter());
 
-                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), 'dshell');
+                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new CookieTokenManager());
 
                 tableUI.initialize();
 
@@ -74,7 +75,7 @@
                                 tableWatcher.registerCommandHandler(gameClient);
                 */
 
-                tableUI.authenticate();
+                gameClient.authenticate();
 
             });
 

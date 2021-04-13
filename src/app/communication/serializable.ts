@@ -9,6 +9,7 @@ export { LoginCommand } from "../commands/security/login-command";
 export { AuthenticateCommand } from "../commands/security/authenticate-command";
 export { LoginAction } from "../actions/security/login-action";
 export { AuthenticatedAction } from "../actions/security/authenticated-action";
+export { AuthenticationFailedAction } from "../actions/security/authentication-failed-action";
 
 // LobbyActions
 export { JoinTableCommand } from "../commands/lobby/join-table-command";
