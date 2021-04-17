@@ -6,7 +6,7 @@ import { ActionMessage } from "../../app/messages/action-message";
 import { Command } from "../../app/commands/command";
 import { Logger } from "../../app/logging/logger";
 import { Action } from "../../app/actions/action";
-import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction, LoginCommand, LoginFailedAction } from "../../app/communication/serializable";
+import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction, LoginCommand, LoginFailedAction, LogoutCommand, LogoutAction } from "../../app/communication/serializable";
 import { userState } from "@/store/user-state";
 import { lobbyState } from "@/store/lobby-state";
 
@@ -89,6 +89,12 @@ class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof LogoutAction) {
+
+            return this.logoutAction(action);
+
+        }
+
         if (action instanceof ListTablesAction) {
 
             return this.listTablesAction(action);
@@ -132,6 +138,17 @@ class LobbyClient implements MessageHandler, CommandBroadcaster {
     }   // loginFailedAction
 
 
+    public logoutAction(action: LogoutAction): void {
+
+        this.log(`Heard LogoutAction`);
+
+        userState.logOut();
+
+        // TODO: unsubscribe from table updates?
+
+    }   // loginFailedAction
+
+
 
     public listTablesAction(action: ListTablesAction): void {
 
@@ -149,6 +166,13 @@ class LobbyClient implements MessageHandler, CommandBroadcaster {
     public logIn(username: string, password: string): void {
 
         this.broadcastCommand(new LoginCommand(username, password));
+
+    }   // logIn
+
+
+    public logOut(): void {
+
+        this.broadcastCommand(new LogoutCommand());
 
     }   // logIn
 

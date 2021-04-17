@@ -6,19 +6,22 @@ import { Message } from "../../messages/message";
 import { ActionMessage } from "../../messages/action-message";
 import { ISocketWrapper } from "../i-socket-wrapper";
 
-import { TokenManager } from "./token-manager";
+import { AuthenticationManager } from "../authentication-manager";
 import { AuthenticateCommand } from '../../commands/security/authenticate-command';
+import { Action } from '../../actions/action';
+import { AuthenticatedAction } from '../../actions/security/authenticated-action';
+import { LogoutAction } from '../../actions/security/logout-action';
 
 
 export class GameClient implements MessageBroadcaster, CommandHandler {
 
     private socket: ISocketWrapper;
-    private tokenManager: TokenManager;
+    private tokenManager: AuthenticationManager;
 
     private messageHandlers: MessageHandler[];
 
 
-    constructor(socket: ISocketWrapper, tokenManager: TokenManager) {
+    constructor(socket: ISocketWrapper, tokenManager: AuthenticationManager) {
 
         this.socket = socket;
         this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
@@ -40,9 +43,19 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
             if (msgObj instanceof ActionMessage) {
 
+                const action: Action = msgObj.action;
 
-                // this.log(`received action ${msgObj.action.constructor.name}`);
+                if (action instanceof AuthenticatedAction) {
 
+                    this.authenticatedAction(action);
+
+                }
+
+                if (action instanceof LogoutAction) {
+
+                    this.logoutAction(action);
+
+                }
 
             }
 
@@ -103,5 +116,17 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
     }   // authenticate
 
+
+    private authenticatedAction(action: AuthenticatedAction): void {
+
+        this.tokenManager.saveToken(action.authToken);
+
+    }
+
+    private logoutAction(action: LogoutAction): void {
+
+        this.tokenManager.clearToken();
+
+    }
 
 }

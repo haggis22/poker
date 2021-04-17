@@ -36,7 +36,7 @@
     import { lobbyState } from "@/store/lobby-state";
     import { userState } from "@/store/user-state";
     import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
-
+    import { lobbyClient } from '../../lobby-client';
 
 
     const LobbyComponent = defineComponent({
@@ -50,7 +50,7 @@
 
             const logOut = (): void => {
 
-                userState.logOut();
+                lobbyClient.logOut();
 
             };
 

@@ -1,5 +1,4 @@
 ﻿import { SecurityAction } from "./security-action";
-import { UserSummary } from "../../players/user-summary";
 
 export class LoginFailedAction extends SecurityAction {
 

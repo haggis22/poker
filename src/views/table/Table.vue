@@ -38,7 +38,7 @@
     import MessagePopupComponent from '../components/message-popup/MessagePopupComponent.vue';
 
     import { tableState } from "@/store/table-state";
-    import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
+    import { ClientAuthenticationManager } from '@/app/communication/client-side/client-authentication-manager';
 
 
     export default defineComponent({
@@ -66,8 +66,7 @@
 
                 tableState.setChipFormatter(new MoneyFormatter());
 
-                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new CookieTokenManager());
-                // let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new FakeTokenManager('haha'));
+                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new ClientAuthenticationManager());
 
                 tableUI.initialize();
 

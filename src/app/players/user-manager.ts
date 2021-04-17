@@ -1,6 +1,6 @@
 ﻿import { User } from "./user";
 import { SecurityCommand } from "../commands/security/security-command";
-import { LoginCommand, Message, ActionMessage, AuthenticatedAction } from "../communication/serializable";
+import { LoginCommand, Message, ActionMessage, AuthenticatedAction, LogoutCommand, LogoutAction } from "../communication/serializable";
 import { AuthenticateCommand } from "../commands/security/authenticate-command";
 import { UserSummary } from "./user-summary";
 import { AuthenticationFailedAction } from '../actions/security/authentication-failed-action';
@@ -50,6 +50,15 @@ export class UserManager {
             return user ? new ActionMessage(new AuthenticatedAction(user, user.username)) : new ActionMessage(new LoginFailedAction('Incorrect username or password'));
 
         }
+
+        if (command instanceof LogoutCommand) {
+
+            // For now, just use the username as the auth token
+            // TODO: Kill the user's session
+            return new ActionMessage(new LogoutAction());
+
+        }
+
 
         if (command instanceof AuthenticateCommand) {
 

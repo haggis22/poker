@@ -21,7 +21,7 @@ import { GameClient } from '../communication/client-side/game-client';
 import { FakeSocket } from '../communication/fake/fake-socket';
 import { FakeSocketWrapper } from '../communication/fake/fake-socket-wrapper';
 import { ServerWebSocketWrapper } from '../communication/server-side/server-web-socket-wrapper';
-import { FakeTokenManager } from '../communication/client-side/fake-token-manager';
+import { NPCAuthenticationManager } from '../communication/fake/npc-authentication-manager';
 
 const app = express();
 
@@ -100,7 +100,7 @@ function createRoboClient(tableID: number, authToken: string): void {
     // Client Side
     let ui: RoboTableUI = new RoboTableUI(tableID, new MoneyFormatter());
     let tableWatcher: TableWatcher = new TableWatcher(tableID);
-    let gameClient: GameClient = new GameClient(new FakeSocketWrapper(clientSocketSide), new FakeTokenManager(authToken));
+    let gameClient: GameClient = new GameClient(new FakeSocketWrapper(clientSocketSide), new NPCAuthenticationManager(authToken));
 
     // Now join all the links in the chain
     ui.registerCommandHandler(tableWatcher);

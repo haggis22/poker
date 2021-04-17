@@ -6,8 +6,10 @@ export { ActionMessage } from "../messages/action-message";
 
 // Security Actions
 export { LoginCommand } from "../commands/security/login-command";
+export { LogoutCommand } from "../commands/security/logout-command";
 export { AuthenticateCommand } from "../commands/security/authenticate-command";
 export { LoginFailedAction } from "../actions/security/login-failed-action";
+export { LogoutAction } from "../actions/security/logout-action";
 export { AuthenticatedAction } from "../actions/security/authenticated-action";
 export { AuthenticationFailedAction } from "../actions/security/authentication-failed-action";
 

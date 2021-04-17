@@ -25,7 +25,7 @@
     import LoginComponent from './components/login/LoginComponent.vue';
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
     import { lobbyState } from '@/store/lobby-state';
-    import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
+    import { ClientAuthenticationManager } from '@/app/communication/client-side/client-authentication-manager';
     import { userState } from '@/store/user-state';
 
 
@@ -51,7 +51,7 @@
 
                 console.log('Connection opened');
 
-                const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new CookieTokenManager());
+                const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new ClientAuthenticationManager());
 
                 // Now join all the links in the chain
                 lobbyClient.registerCommandHandler(gameClient);

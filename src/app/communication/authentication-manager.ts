@@ -1,9 +1,11 @@
-export interface TokenManager {
+export interface AuthenticationManager {
 
 
     getToken(): string;
 
     saveToken(authToken: string): void;
+
+    clearToken(): void;
 
 }
 
