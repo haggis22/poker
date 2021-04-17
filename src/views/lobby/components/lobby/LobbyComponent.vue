@@ -2,13 +2,6 @@
 
     <div>
 
-        <div v-if="user">
-
-            <h2>Welcome, {{ user.name }}</h2>
-            <h4>Balance: {{ chipFormatter.format(balance) }}</h4>
-
-        </div>
-
         <table cellpadding="5" cellspacing="0" class="table-tables">
             <thead>
                 <tr>
@@ -35,14 +28,10 @@
 
     import { defineComponent, computed } from 'vue';
 
-    import { LobbyClient } from '../../lobby-client';
-
     import TableComponent from '../table/TableComponent.vue';
 
     import { TableSummary } from '@/app/casino/tables/table-summary';
-    import { UserSummary } from '@/app/players/user-summary';
 
-    import { userState } from "@/store/user-state";
     import { lobbyState } from "@/store/lobby-state";
     import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 
@@ -50,27 +39,16 @@
 
     const LobbyComponent = defineComponent({
 
-        props: {
-            client: {
-                type: LobbyClient,
-                required: true
-            },
-        },
         setup() {
 
-            const user = computed((): UserSummary => userState.getUser.value);
             const tables = computed((): TableSummary[] => lobbyState.getTables.value);
 
             const chipFormatter = computed((): IChipFormatter => lobbyState.getChipFormatter.value);
-            const balance = computed((): number => userState.getBalance.value);
 
             return {
 
-                user,
                 tables,
-
                 chipFormatter,
-                balance
 
             };
 

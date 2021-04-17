@@ -1,24 +1,32 @@
 <template>
 
-    <div>
-        <lobby-component v-if="client" 
-                            :client="client"></lobby-component>
+    <div class="page-lobby">
+
+        <banner-component></banner-component>
+
+        <login-component v-if="!isAuthenticated"></login-component>
+
+        <lobby-component v-if="isAuthenticated"></lobby-component>
+
     </div>
 
 </template>
 
 <script lang="ts">
 
-    import { defineComponent, ref } from "vue";
+    import { defineComponent, computed } from "vue";
 
-    import { LobbyClient } from './lobby-client';
+    import { lobbyClient } from './lobby-client';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
     import { GameClient } from '../../app/communication/client-side/game-client';
     import { BrowserWebSocketWrapper } from '../../app/communication/client-side/browser-web-socket-wrapper';
 
+    import BannerComponent from './components/banner/BannerComponent.vue';
+    import LoginComponent from './components/login/LoginComponent.vue';
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
-import { lobbyState } from '@/store/lobby-state';
-import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
+    import { lobbyState } from '@/store/lobby-state';
+    import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
+    import { userState } from '@/store/user-state';
 
 
     export default defineComponent({
@@ -26,12 +34,14 @@ import { CookieTokenManager } from '@/app/communication/client-side/cookie-token
         name: "Lobby",
 
         components: {
+            BannerComponent,
+            LoginComponent,
             LobbyComponent
         },
 
         setup() {
 
-            const client = ref(null as LobbyClient);
+            const isAuthenticated = computed((): boolean => userState.isAuthenticated.value);
 
             lobbyState.setChipFormatter(new MoneyFormatter());
 
@@ -41,14 +51,11 @@ import { CookieTokenManager } from '@/app/communication/client-side/cookie-token
 
                 console.log('Connection opened');
 
-                const lobbyClient: LobbyClient = new LobbyClient();
                 const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new CookieTokenManager());
 
                 // Now join all the links in the chain
                 lobbyClient.registerCommandHandler(gameClient);
                 gameClient.registerMessageHandler(lobbyClient);
-
-                client.value = lobbyClient;
 
                 gameClient.authenticate();
 
@@ -56,7 +63,7 @@ import { CookieTokenManager } from '@/app/communication/client-side/cookie-token
 
             return {
 
-                client
+                isAuthenticated
 
             };
 
@@ -65,3 +72,13 @@ import { CookieTokenManager } from '@/app/communication/client-side/cookie-token
     });
 
 </script>
+
+<style scoped lang="scss">
+
+    .page-lobby
+    {
+        display: flex;
+        flex-direction: column;
+    }
+
+</style>

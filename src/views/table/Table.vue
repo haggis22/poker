@@ -1,6 +1,8 @@
 <template>
 
     <div>
+
+        <message-popup-component></message-popup-component>
         
         <div v-if="table != null">
             <table-component></table-component>
@@ -33,8 +35,10 @@
     import BettingMenuComponent from './components/betting-menu/BettingMenuComponent.vue';
     import ChatComponent from './components/chat/ChatComponent.vue';
 
+    import MessagePopupComponent from '../components/message-popup/MessagePopupComponent.vue';
+
     import { tableState } from "@/store/table-state";
-import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
+    import { CookieTokenManager } from '@/app/communication/client-side/cookie-token-manager';
 
 
     export default defineComponent({
@@ -63,6 +67,7 @@ import { CookieTokenManager } from '@/app/communication/client-side/cookie-token
                 tableState.setChipFormatter(new MoneyFormatter());
 
                 let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new CookieTokenManager());
+                // let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new FakeTokenManager('haha'));
 
                 tableUI.initialize();
 
@@ -94,7 +99,9 @@ import { CookieTokenManager } from '@/app/communication/client-side/cookie-token
             LogComponent,
             TableMenuComponent,
             BettingMenuComponent,
-            ChatComponent
+            ChatComponent,
+
+            MessagePopupComponent
 
         },
 

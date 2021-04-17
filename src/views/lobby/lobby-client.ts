@@ -5,10 +5,8 @@ import { Message } from "../../app/messages/message";
 import { ActionMessage } from "../../app/messages/action-message";
 import { Command } from "../../app/commands/command";
 import { Logger } from "../../app/logging/logger";
-import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
-import { IChipFormatter } from "../../app/casino/tables/chips/chip-formatter";
 import { Action } from "../../app/actions/action";
-import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction } from "../../app/communication/serializable";
+import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction, LoginCommand, LoginFailedAction } from "../../app/communication/serializable";
 import { userState } from "@/store/user-state";
 import { lobbyState } from "@/store/lobby-state";
 
@@ -17,7 +15,7 @@ const logger: Logger = new Logger();
 
 
 
-export class LobbyClient implements MessageHandler, CommandBroadcaster {
+class LobbyClient implements MessageHandler, CommandBroadcaster {
 
     private commandHandlers: CommandHandler[];
 
@@ -81,7 +79,13 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         if (action instanceof AuthenticatedAction) {
 
-            return this.authenticated(action);
+            return this.authenticatedAction(action);
+
+        }
+
+        if (action instanceof LoginFailedAction) {
+
+            return this.loginFailedAction(action);
 
         }
 
@@ -101,11 +105,11 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
     }  // handleMessage
 
 
-    public authenticated(action: AuthenticatedAction): void {
+    public authenticatedAction(action: AuthenticatedAction): void {
 
-        this.log(`Heared AuthenticatedAction for ${action.user.username}, sending SubscribeLobbyCommand`);
+        this.log(`Heard AuthenticatedAction for ${action.user.username}, sending SubscribeLobbyCommand`);
 
-        userState.setUser(action.user);
+        userState.setAuthenticated(action.user, action.authToken);
 
         // let me know when the tables update
         this.broadcastCommand(new SubscribeLobbyCommand());
@@ -113,7 +117,20 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
         // let me know when the user info updates (like current balance)
         this.broadcastCommand(new SubscribeCashierCommand());
 
-    }   // authenticated
+    }   // authenticatedAction
+
+
+    public loginFailedAction(action: LoginFailedAction): void {
+
+        this.log(`Heard LoginFailedAction`);
+
+        userState.setLoginErrorMessage(action.message);
+        userState.logOut();
+
+        // TODO: unsubscribe from table updates?
+
+    }   // loginFailedAction
+
 
 
     public listTablesAction(action: ListTablesAction): void {
@@ -129,5 +146,14 @@ export class LobbyClient implements MessageHandler, CommandBroadcaster {
     }   // listTablesAction
 
 
+    public logIn(username: string, password: string): void {
+
+        this.broadcastCommand(new LoginCommand(username, password));
+
+    }   // logIn
+
 
 }
+
+
+export const lobbyClient = new LobbyClient();

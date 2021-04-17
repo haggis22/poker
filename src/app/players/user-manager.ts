@@ -1,10 +1,10 @@
 ﻿import { User } from "./user";
 import { SecurityCommand } from "../commands/security/security-command";
-import { LoginCommand, Message, ActionMessage, LoginAction, AuthenticatedAction } from "../communication/serializable";
-import { IServerClient } from "../communication/server-side/i-server-client";
+import { LoginCommand, Message, ActionMessage, AuthenticatedAction } from "../communication/serializable";
 import { AuthenticateCommand } from "../commands/security/authenticate-command";
 import { UserSummary } from "./user-summary";
 import { AuthenticationFailedAction } from '../actions/security/authentication-failed-action';
+import { LoginFailedAction } from '../actions/security/login-failed-action';
 
 export class UserManager {
 
@@ -47,7 +47,7 @@ export class UserManager {
             this.log(`Login for ${command.username} successful? ${(user != null)}`);
 
             // For now, just use the username as the auth token
-            return user ? new ActionMessage(new LoginAction(user, user.username)) : new Message('Login failed');
+            return user ? new ActionMessage(new AuthenticatedAction(user, user.username)) : new ActionMessage(new LoginFailedAction('Incorrect username or password'));
 
         }
 
@@ -56,7 +56,8 @@ export class UserManager {
             let user: UserSummary = this.authenticate(command.authToken);
             this.log(`Authentication for ${command.authToken} successful? ${(user != null)}`);
 
-            return user ? new ActionMessage(new AuthenticatedAction(user)) : new ActionMessage(new AuthenticationFailedAction("Invalid token"));
+            // For now, just use the username as the auth token
+            return user ? new ActionMessage(new AuthenticatedAction(user, user.username)) : new ActionMessage(new AuthenticationFailedAction("Invalid token"));
 
         }
 
