@@ -9,7 +9,6 @@ import { Action } from "../../app/actions/action";
 import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction, LoginCommand, LoginFailedAction, LogoutCommand, LogoutAction, AuthenticationFailedAction } from "../../app/communication/serializable";
 import { userState } from "@/store/user-state";
 import { lobbyState } from "@/store/lobby-state";
-import router from '@/router';
 
 
 const logger: Logger = new Logger();
@@ -121,11 +120,6 @@ class CasinoClient implements MessageHandler, CommandBroadcaster {
         // let me know when the user info updates (like current balance)
         this.broadcastCommand(new SubscribeCashierCommand());
 
-        if (router.currentRoute.value.name == 'Login') {
-            router.push({ name: 'Lobby' });
-        }
-
-
     }   // authenticatedAction
 
 
@@ -134,6 +128,7 @@ class CasinoClient implements MessageHandler, CommandBroadcaster {
         this.log(`Heard LoginFailedAction`);
 
         userState.setLoginErrorMessage(action.message);
+
         userState.clearAuthentication();
 
         // TODO: unsubscribe from table updates?
@@ -146,8 +141,6 @@ class CasinoClient implements MessageHandler, CommandBroadcaster {
         this.log(`Heard LogoutAction`);
 
         userState.clearAuthentication();
-
-        router.push({ name: 'Login' });
 
         // TODO: unsubscribe from table updates?
 
@@ -185,7 +178,6 @@ class CasinoClient implements MessageHandler, CommandBroadcaster {
     public authenticationFailedAction(action: AuthenticationFailedAction): void {
 
         userState.clearAuthentication();
-        router.push({ name: 'Login' });
 
     }
 

@@ -3,16 +3,15 @@ import { reactive, computed } from "vue";
 import { UserSummary } from '@/app/players/user-summary';
 import { GameClient } from '@/app/communication/client-side/game-client';
 import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
-import { RouteLocationRaw } from 'vue-router';
+
+const STORAGE_KEY_NAME: string = 'session-token';
 
 
 const state = reactive({
 
     gameClient: null as GameClient,
 
-    token: null as string,
-
-    isAuthenticated: null as boolean,
+    token: localStorage.getItem(STORAGE_KEY_NAME),
 
     user: null as UserSummary,
 
@@ -20,6 +19,8 @@ const state = reactive({
     balance: null as number,
 
     loginErrorMessage: null as string,
+
+    isConnected: false
 
 });
 
@@ -32,27 +33,46 @@ const setGameClient = (client: GameClient): void => {
 
 }
 
-const isAuthenticated = computed((): boolean => state.isAuthenticated);
-
 const setAuthentication = (user: UserSummary, authToken: string): void => {
 
-    state.user = user;
-    state.token = authToken;
-    state.isAuthenticated = true;
+    setUser(user);
+    setToken(authToken);
 
-}
+};
 
 const clearAuthentication = (): void => {
 
-    state.user = null;
-    state.token = null;
-    state.isAuthenticated = false;
+    setUser(null);
+    setToken(null);
 
 }
 
 const getToken = computed((): string => state.token);
 
+const setToken = (authToken: string) => {
+
+    if (authToken != null) {
+
+        localStorage.setItem(STORAGE_KEY_NAME, authToken);
+
+    }
+    else {
+
+        localStorage.removeItem(STORAGE_KEY_NAME);
+
+    }
+
+    state.token = authToken;
+
+};
+
 const getUser = computed((): UserSummary => state.user);
+
+const setUser = (user: UserSummary): void => {
+
+    state.user = user;
+
+}
 
 const getUserID = computed((): number => state.user ? state.user.id : null);
 
@@ -79,6 +99,13 @@ const setLoginErrorMessage = (message: string): void => {
 
 };
 
+const isConnected = computed((): boolean => state.isConnected);
+
+const setConnected = (isConnected: boolean): void => {
+
+    state.isConnected = isConnected;
+
+}
 
 
 export const userState = {
@@ -86,9 +113,8 @@ export const userState = {
     getGameClient,
     setGameClient,
 
-    isAuthenticated,
-
     getToken,
+
     getUser,
     getUserID,
 
@@ -102,5 +128,8 @@ export const userState = {
 
     getLoginErrorMessage,
     setLoginErrorMessage,
+
+    isConnected,
+    setConnected
 
 };

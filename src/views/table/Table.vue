@@ -20,7 +20,7 @@
 
 <script lang="ts">
 
-    import { defineComponent, computed, reactive, ref } from "vue";
+    import { defineComponent, computed, reactive, ref, watch, onMounted, onUnmounted } from "vue";
     import { useRoute } from 'vue-router';
 
     import { Table } from "@/app/casino/tables/table";
@@ -45,6 +45,8 @@
 
         name: "Table",
 
+        
+
         setup() {
 
             const route = useRoute();
@@ -63,14 +65,46 @@
 
             const hasSeat = computed((): boolean => tableState.getMySeatIndex.value != null);
 
-            const isAuthenticated = computed((): boolean => userState.isAuthenticated.value);
+            onMounted(() => {
 
-            // Now join all the links in the chain
-            tableUI.registerCommandHandler(gameClient.value);
-            gameClient.value.registerMessageHandler(tableUI);
+                // Now join all the links in the chain
+                tableUI.registerCommandHandler(gameClient.value);
+                gameClient.value.registerMessageHandler(tableUI);
 
-            tableUI.sendCommand(new JoinTableCommand(tableState.getTableID.value));
+                const isConnected = computed((): boolean => userState.isConnected.value);
 
+                if (isConnected.value) {
+
+                    tableUI.sendCommand(new JoinTableCommand(tableState.getTableID.value));
+
+                }
+                else {
+
+                    // otherwise, wait until the connection has happened and then pounce
+                    watch(() => isConnected.value,
+
+                        (isConnected) => {
+
+                            if (isConnected) {
+
+                                tableUI.sendCommand(new JoinTableCommand(tableState.getTableID.value));
+
+                            }
+
+                        });
+
+                }
+
+            });
+
+            onUnmounted(() => {
+
+                // Disconnecting cables
+                // Now join all the links in the chain
+                tableUI.unregisterCommandHandler(gameClient.value);
+                gameClient.value.unregisterMessageHandler(tableUI);
+
+            })
 
             return {
 

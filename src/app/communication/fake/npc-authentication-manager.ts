@@ -15,18 +15,5 @@ export class NPCAuthenticationManager implements AuthenticationManager {
 
     }
 
-
-    public saveToken(token: string): void {
-
-        // Nothing to do here - it's all FAKE!
-
-    }
-
-    public clearToken(): void {
-
-        // Nothing to do here - it's all FAKE!
-
-    }
-
 }
 

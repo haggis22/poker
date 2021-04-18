@@ -2,7 +2,7 @@
 
     <div class="page-lobby">
 
-        <lobby-component v-if="isAuthenticated"></lobby-component>
+        <lobby-component></lobby-component>
 
     </div>
 
@@ -10,7 +10,7 @@
 
 <script lang="ts">
 
-    import { defineComponent, computed } from "vue";
+    import { defineComponent, computed, watch } from "vue";
 
     import { lobbyClient } from './lobby-client';
     import { GameClient } from '../../app/communication/client-side/game-client';
@@ -33,19 +33,37 @@ import { SubscribeLobbyCommand } from '@/app/communication/serializable';
 
             const gameClient = computed((): GameClient => userState.getGameClient.value);
 
-            const isAuthenticated = computed((): boolean => userState.isAuthenticated.value);
-
             // Now join all the links in the chain
             lobbyClient.registerCommandHandler(gameClient.value);
             gameClient.value.registerMessageHandler(lobbyClient);
 
-            // let me know when the tables update
-            lobbyClient.broadcastCommand(new SubscribeLobbyCommand());
+            const isConnected = computed((): boolean => userState.isConnected.value);
 
+            if (isConnected.value) {
+
+                // let me know when the tables update
+                lobbyClient.broadcastCommand(new SubscribeLobbyCommand());
+
+            }
+            else {
+
+                // otherwise, wait until the connection has happened and then pounce
+                watch(() => isConnected.value,
+
+                    (isConnected) => {
+
+                        if (isConnected) {
+
+                            // let me know when the tables update
+                            lobbyClient.broadcastCommand(new SubscribeLobbyCommand());
+
+                        }
+
+                    });
+
+            }
 
             return {
-
-                isAuthenticated
 
             };
 

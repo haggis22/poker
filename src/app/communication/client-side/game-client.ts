@@ -12,6 +12,7 @@ import { Action } from '../../actions/action';
 import { AuthenticatedAction } from '../../actions/security/authenticated-action';
 import { LogoutAction } from '../../actions/security/logout-action';
 import { AuthenticationFailedAction } from '../../actions/security/authentication-failed-action';
+import { LoginFailedAction } from '@/app/actions/security/login-failed-action';
 
 
 export class GameClient implements MessageBroadcaster, CommandHandler {
@@ -42,6 +43,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
             // this.log('Yes, it is a Message');
 
+/*
             if (msgObj instanceof ActionMessage) {
 
                 const action: Action = msgObj.action;
@@ -52,20 +54,26 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
                 }
 
-                if (action instanceof AuthenticationFailedAction) {
+                else if (action instanceof AuthenticationFailedAction) {
 
                     this.authenticationFailedAction(action);
 
                 }
 
+                else if (action instanceof LoginFailedAction) {
 
-                if (action instanceof LogoutAction) {
+                    this.loginFailedAction(action);
+
+                }
+
+                else if (action instanceof LogoutAction) {
 
                     this.logoutAction(action);
 
                 }
 
             }
+*/
 
             // Pass the message along
             for (let handler of this.messageHandlers) {
@@ -95,6 +103,8 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
     unregisterMessageHandler(handler: MessageHandler) {
 
+        // TODO: identifier the handlers by an ID - when they have Proxy objects they're never equal to the original object
+        // and thus don't get unregistered
         this.messageHandlers = this.messageHandlers.filter(mh => mh !== handler);
 
     }
@@ -124,24 +134,5 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
     }   // authenticate
 
-
-    public authenticatedAction(action: AuthenticatedAction): void {
-
-        this.tokenManager.saveToken(action.authToken);
-
-    }
-
-    public authenticationFailedAction(action: AuthenticationFailedAction): void {
-
-        this.tokenManager.clearToken();
-
-    }
-
-
-    public logoutAction(action: LogoutAction): void {
-
-        this.tokenManager.clearToken();
-
-    }
 
 }

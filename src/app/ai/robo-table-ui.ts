@@ -19,7 +19,6 @@ import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandS
 import { Game } from "../games/game";
 import { SetGameAction } from "../actions/table/game/set-game-action";
 import { GameFactory } from "../games/game-factory";
-import { WonPot } from "../casino/tables/betting/won-pot";
 import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 import { BetStatus } from "../casino/tables/betting/bet-status";
 import { betController } from "../casino/tables/betting/bet-controller";

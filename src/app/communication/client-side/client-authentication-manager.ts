@@ -1,34 +1,19 @@
 import { AuthenticationManager } from "../authentication-manager";
+import { userState } from '@/store/user-state';
 
 export class ClientAuthenticationManager implements AuthenticationManager {
 
-    private static readonly STORAGE_KEY_NAME = 'session-token';
 
     constructor() {
-
 
     }
 
 
     public getToken(): string {
 
-        return localStorage.getItem(ClientAuthenticationManager.STORAGE_KEY_NAME);
+        return userState.getToken.value;
 
     }
-
-    public saveToken(authToken: string): void {
-
-        localStorage.setItem(ClientAuthenticationManager.STORAGE_KEY_NAME, authToken);
-
-    }
-
-    public clearToken(): void {
-
-        localStorage.removeItem(ClientAuthenticationManager.STORAGE_KEY_NAME);
-
-    }
-
-
 
 }
 

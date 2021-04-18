@@ -4,12 +4,13 @@
 
         <banner-component></banner-component>
 
-        <router-view v-if="isAuthenticated
-                            || showLogin"></router-view>
+        <router-view></router-view>
     </div>
+
 </template>
+
 <script lang="ts">
-    import { defineComponent, computed } from "vue";
+    import { defineComponent, computed, watch, onUnmounted } from "vue";
 
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
 
@@ -28,31 +29,65 @@
         },
         setup() {
 
-            const isAuthenticated = computed((): boolean => userState.isAuthenticated.value);
+            if (!userState.getGameClient.value) {
 
-            const showLogin = computed((): boolean => isAuthenticated.value === false && router.currentRoute.value.name == 'Login');
+                userState.setConnected(false);
+
+                const ws = new WebSocket('ws://localhost:3000');
+
+                const gameClient = new GameClient(new BrowserWebSocketWrapper(ws), new ClientAuthenticationManager());
+
+                // Now join all the links in the chain
+                casinoClient.registerCommandHandler(gameClient);
+                gameClient.registerMessageHandler(casinoClient);
+
+                userState.setGameClient(gameClient);
+
+                ws.addEventListener('open', () => {
+
+                    userState.setConnected(true);
+
+                    // Only try to authenticate if we have a token
+                    if (userState.getToken.value != null) {
+
+                        console.log('Connection opened, trying authentication');
+                        gameClient.authenticate();
+
+                    }
+
+                });
+
+            }
+            else {
+
+                console.log('GameClient already exists, so leaving it alone');
+
+            }
+
+            watch(() => userState.getToken.value,
+
+                (newValue) => {
+
+                    if (!newValue) {
+
+                        router.push({ name: 'Login' });
+
+                    }
+
+                });
+
+            onUnmounted(() => {
+
+
+            });
+
+
+            // const showLogin = computed((): boolean => isAuthenticated.value === false && router.currentRoute.value.name == 'Login');
 
             userState.setChipFormatter(new MoneyFormatter());
 
-            const ws = new WebSocket('ws://localhost:3000');
-
-            const gameClient = new GameClient(new BrowserWebSocketWrapper(ws), new ClientAuthenticationManager());
-
-            // Now join all the links in the chain
-            casinoClient.registerCommandHandler(gameClient);
-            gameClient.registerMessageHandler(casinoClient);
-
-            userState.setGameClient(gameClient);
-
-            ws.addEventListener('open', () => {
-
-                console.log('Connection opened, trying authentication');
-                gameClient.authenticate();
-
-            });
             return {
-                isAuthenticated,
-                showLogin
+              //  showLogin
             };
         },
     });
