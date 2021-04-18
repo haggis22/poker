@@ -32,7 +32,7 @@ export class DeadButtonController implements IButtonController {
         }
 
         const availableSeats: Seat[] = table.seats.filter(seat => seat.isAvailableForHand());
-        const activeSeats: Seat[] = availableSeats.filter(seat => seat.player && blindTracker.activePlayers.has(seat.player.userID));
+        const activeSeats: Seat[] = availableSeats.filter(seat => seat.isAvailableForHand() && blindTracker.activePlayers.has(seat.player.userID));
 
         console.log(`In calculateNextForcedBet, there are ${availableSeats.length} available seats and ${activeSeats.length} active seats`);
 
