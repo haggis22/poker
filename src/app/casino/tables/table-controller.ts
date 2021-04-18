@@ -163,14 +163,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     addClient(client: IServerClient): void {
 
-        this.clients.set(client.id, client);
+        if (client.isAlive) {
+            this.clients.set(client.id, client);
 
-        // Set this manager to listen to commands from this new client
-        client.registerCommandHandler(this);
+            // Set this manager to listen to commands from this new client
+            client.registerCommandHandler(this);
 
-        this.log(`Connected client for userID ${client.userID}`);
+            this.log(`Connected client for userID ${client.userID}`);
 
-        client.handleMessage(new ActionMessage(new TableConnectedAction(this.table.id)));
+            client.handleMessage(new ActionMessage(new TableConnectedAction(this.table.id)));
+        }
 
     }
 
@@ -218,6 +220,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private broadcastMessage(message: Message | MessagePair): void {
 
         for (let client of this.clients.values()) {
+
+            if (!client.isAlive) {
+                this.clients.delete(client.id);
+                continue;
+            }
 
             if (message instanceof MessagePair) {
 

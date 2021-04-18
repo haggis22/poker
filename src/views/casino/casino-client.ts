@@ -19,6 +19,7 @@ const logger: Logger = new Logger();
 class CasinoClient implements MessageHandler, CommandBroadcaster {
 
     public id: string;
+    public isAlive: boolean;
 
     // A map of CommandHandlers
     // Key = CommandHandler.id, so that the same handler will not be added more than once
@@ -29,6 +30,7 @@ class CasinoClient implements MessageHandler, CommandBroadcaster {
     constructor() {
 
         this.id = uuidv4();
+        this.isAlive = true;
 
         this.commandHandlers = new Map<string, CommandHandler>();
 

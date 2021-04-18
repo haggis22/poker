@@ -93,6 +93,12 @@ export class LobbyManager implements MessageBroadcaster {
 
     }
 
+    public unregisterServerClient(serverClient: IServerClient): void {
+
+        this.unregisterMessageHandler(serverClient);
+
+    }
+
 
     private pumpQueues(): void {
 
@@ -109,7 +115,12 @@ export class LobbyManager implements MessageBroadcaster {
 
         for (let handler of this.lobbySubscribers.values()) {
 
-            handler.handleMessage(message);
+            if (handler.isAlive) {
+                handler.handleMessage(message);
+            }
+            else {
+                this.unregisterMessageHandler(handler);
+            }
 
         }
 
@@ -289,10 +300,15 @@ export class LobbyManager implements MessageBroadcaster {
 
     subscribe(client: IServerClient): void {
 
-        this.registerMessageHandler(client);
+        if (client.isAlive) {
 
-        // only send the summaries to this new client, not EVERYBODY!!!
-        client.handleMessage(new ActionMessage(new ListTablesAction(this.getTablesStatus())));
+            this.registerMessageHandler(client);
+
+            // only send the summaries to this new client, not EVERYBODY!!!
+            client.handleMessage(new ActionMessage(new ListTablesAction(this.getTablesStatus())));
+
+        }
+
 
     }  // subscribe
 

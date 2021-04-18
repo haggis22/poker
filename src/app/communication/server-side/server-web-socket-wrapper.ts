@@ -16,21 +16,35 @@ export class ServerWebSocketWrapper implements ISocketWrapper {
 
     }
 
-    public addEventListener(method: 'message', callback: (obj: any) => void) {
+    public addEventListener(method: 'message' | 'close', callback: (obj: any) => void) {
 
-        this.socket.addEventListener(method, (event: any) => {
+        if (method === 'message') {
 
-            if (typeof event.data === 'string') {
+            this.socket.addEventListener(method, (event: any) => {
 
-                let o: any = this.serializer.deserialize(event.data);
-                if (o) {
-                    callback(o);
+                if (typeof event.data === 'string') {
+
+                    let o: any = this.serializer.deserialize(event.data);
+                    if (o) {
+                        callback(o);
+                    }
                 }
-            }
 
-        });
+            });
+
+        }
+        else if (method === 'close') {
+
+            this.socket.addEventListener(method, (event: any) => {
+
+                callback(event);
+
+            });
+
+        }
 
     }
+
 
     public send(o: any): void {
 

@@ -32,6 +32,7 @@ const logger: Logger = new Logger();
 export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     public id: string;
+    public isAlive: boolean;
 
     private user: UserSummary;
 
@@ -53,6 +54,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     constructor(tableID: number, chipFormatter: IChipFormatter) {
 
         this.id = uuidv4();
+        this.isAlive = true;
 
         this.tableID = tableID;
         this.chipFormatter = chipFormatter;

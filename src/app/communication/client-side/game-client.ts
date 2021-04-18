@@ -83,7 +83,12 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
             for (let handler of this.messageHandlers.values()) {
 
                 // this.log(`Passed message to ${handler.constructor.name}`);
-                handler.handleMessage(msgObj);
+                if (handler.isAlive) {
+                    handler.handleMessage(msgObj);
+                }
+                else {
+                    this.unregisterMessageHandler(handler);
+                }
 
             }
 

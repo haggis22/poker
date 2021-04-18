@@ -39,6 +39,7 @@ const logger: Logger = new Logger();
 class TableUI implements MessageHandler, CommandBroadcaster {
 
     public id: string;
+    public isAlive: boolean;
 
     private readonly TIME_PENDING_ACTION: number = 300;
 
@@ -53,6 +54,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     constructor() {
 
         this.id = uuidv4();
+        this.isAlive = true;
 
         this.initialize();
 

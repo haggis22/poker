@@ -17,15 +17,15 @@ export class CashierManager {
     private messageQueue: Array<Message>;
 
     // Key = userID
-    // value = list of IServerClients (or other MessageHandlers) that want updates for this user
-    private cashierSubscribers: Map<number, Set<MessageHandler>>;
+    // value = Map of IServerClients (or other MessageHandlers) that want updates for this user
+    private cashierSubscribers: Map<number, Map<string, MessageHandler>>;
 
 
 
     constructor() {
 
         this.messageQueue = new Array<Message>();
-        this.cashierSubscribers = new Map<number, Set<MessageHandler>>();
+        this.cashierSubscribers = new Map<number, Map<string, MessageHandler>>();
 
     }
 
@@ -66,11 +66,11 @@ export class CashierManager {
 
         if (!this.cashierSubscribers.has(userID)) {
 
-            this.cashierSubscribers.set(userID, new Set<MessageHandler>());
+            this.cashierSubscribers.set(userID, new Map<string, MessageHandler>());
 
         }
 
-        this.cashierSubscribers.get(userID).add(handler);
+        this.cashierSubscribers.get(userID).set(handler.id, handler);
 
     }   // registerMessageHandler
 
@@ -79,11 +79,11 @@ export class CashierManager {
     // Removes the given message handler for a particular user
     private unregisterMessageHandler(userID: number, handler: MessageHandler): void {
 
-        let handlers: Set<MessageHandler> = this.cashierSubscribers.get(userID);
+        let handlers: Map<string, MessageHandler> = this.cashierSubscribers.get(userID);
 
         if (handlers) {
 
-            handlers.delete(handler);
+            handlers.delete(handler.id);
 
         }
 
@@ -111,13 +111,18 @@ export class CashierManager {
     // Broadcast the user message to all handlers for that particular user
     private broadcastMessage(message: Message): void {
 
-        let handlers: Set<MessageHandler> = this.cashierSubscribers.get(message.userID);
+        let handlers: Map<string, MessageHandler> = this.cashierSubscribers.get(message.userID);
 
         if (handlers) {
 
-            for (let handler of handlers) {
+            for (let handler of handlers.values()) {
 
-                handler.handleMessage(message);
+                if (handler.isAlive) {
+                    handler.handleMessage(message);
+                }
+                else {
+                    handlers.delete(handler.id);
+                }
 
             }
 

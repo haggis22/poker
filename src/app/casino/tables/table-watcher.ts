@@ -38,6 +38,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class TableWatcher implements CommandHandler, MessageHandler, CommandBroadcaster {
 
     public id: string;
+    public isAlive: boolean;
 
     private tableID: number;
     private table: Table;
@@ -59,6 +60,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
     constructor(tableID: number) {
 
         this.id = uuidv4();
+        this.isAlive = true;
 
         this.tableID = tableID;
         this.table = null;
@@ -149,7 +151,14 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
         for (let handler of this.messageHandlers.values()) {
 
-            handler.handleMessage(message);
+            if (handler.isAlive) {
+
+                handler.handleMessage(message);
+
+            }
+            else {
+                this.unregisterMessageHandler(handler);
+            }
 
         }
 

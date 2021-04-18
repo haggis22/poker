@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class ServerClient implements IServerClient {
 
     public id: string;
+    public isAlive: boolean;
 
     private socket: ISocketWrapper;
 
@@ -35,9 +36,13 @@ export class ServerClient implements IServerClient {
     constructor(socket: ISocketWrapper, userManager: UserManager, lobbyManager: LobbyManager, cashierManager: CashierManager) {
 
         this.id = uuidv4();
+        this.isAlive = true;
 
         this.socket = socket;
         this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
+
+        // If the socket gets closed, then mark myself as dead. People will eventually stop talking to me
+        this.socket.addEventListener('close', () => { this.cleanUpClosedConnection(); });
 
         this.userManager = userManager;
         this.lobbyManager = lobbyManager;
@@ -50,6 +55,14 @@ export class ServerClient implements IServerClient {
     private log(msg: string): void {
 
         console.log('\x1b[33m%s\x1b[0m', `ServerClient ${this.id}: ${msg}`);
+
+    }
+
+
+    private cleanUpClosedConnection() {
+
+        this.log('WebSocket closed - marking myself dead');
+        this.isAlive = false;
 
     }
 
@@ -99,7 +112,6 @@ export class ServerClient implements IServerClient {
                 return this.lobbyManager.handleCommand(obj, this);
 
             }
-
 
             // Pass the message along
             for (let handler of this.commandHandlers.values()) {
