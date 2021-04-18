@@ -8,29 +8,33 @@ import { ISocketWrapper } from "../i-socket-wrapper";
 
 import { AuthenticationManager } from "../authentication-manager";
 import { AuthenticateCommand } from '../../commands/security/authenticate-command';
-import { Action } from '../../actions/action';
-import { AuthenticatedAction } from '../../actions/security/authenticated-action';
-import { LogoutAction } from '../../actions/security/logout-action';
-import { AuthenticationFailedAction } from '../../actions/security/authentication-failed-action';
-import { LoginFailedAction } from '@/app/actions/security/login-failed-action';
+
+import { v4 as uuidv4 } from 'uuid';
 
 
 export class GameClient implements MessageBroadcaster, CommandHandler {
 
+    public id: string;
+
     public socket: ISocketWrapper;
     public tokenManager: AuthenticationManager;
 
-    public messageHandlers: MessageHandler[];
+    // A map of MessageHandlers
+    // Key = MessageHandler.id, so that the same handler will not be added more than once
+    // Value = MessageHandler object
+    public messageHandlers: Map<string, MessageHandler>;
 
 
     constructor(socket: ISocketWrapper, tokenManager: AuthenticationManager) {
+
+        this.id = uuidv4();
 
         this.socket = socket;
         this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
 
         this.tokenManager = tokenManager;
 
-        this.messageHandlers = new Array<MessageHandler>();
+        this.messageHandlers = new Map<string, MessageHandler>();
 
     }
 
@@ -76,7 +80,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 */
 
             // Pass the message along
-            for (let handler of this.messageHandlers) {
+            for (let handler of this.messageHandlers.values()) {
 
                 // this.log(`Passed message to ${handler.constructor.name}`);
                 handler.handleMessage(msgObj);
@@ -97,15 +101,13 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
 
     registerMessageHandler(handler: MessageHandler) {
 
-        this.messageHandlers.push(handler);
+        this.messageHandlers.set(handler.id, handler);
 
     }
 
     unregisterMessageHandler(handler: MessageHandler) {
 
-        // TODO: identifier the handlers by an ID - when they have Proxy objects they're never equal to the original object
-        // and thus don't get unregistered
-        this.messageHandlers = this.messageHandlers.filter(mh => mh !== handler);
+        this.messageHandlers.delete(handler.id);
 
     }
 

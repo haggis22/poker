@@ -22,6 +22,7 @@ import { GameFactory } from "../games/game-factory";
 import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 import { BetStatus } from "../casino/tables/betting/bet-status";
 import { betController } from "../casino/tables/betting/bet-controller";
+import { v4 as uuidv4 } from 'uuid';
 
 
 const TIME_TO_THINK = 1200;
@@ -30,9 +31,14 @@ const logger: Logger = new Logger();
 
 export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
+    public id: string;
+
     private user: UserSummary;
 
-    private commandHandlers: CommandHandler[];
+    // A map of CommandHandlers
+    // Key = CommandHandler.id, so that the same handler will not be added more than once
+    // Value = CommandHandler object
+    private commandHandlers: Map<string, CommandHandler>;
 
     private chipFormatter: IChipFormatter;
 
@@ -46,10 +52,12 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     constructor(tableID: number, chipFormatter: IChipFormatter) {
 
+        this.id = uuidv4();
+
         this.tableID = tableID;
         this.chipFormatter = chipFormatter;
 
-        this.commandHandlers = new Array<CommandHandler>();
+        this.commandHandlers = new Map<string, CommandHandler>();
 
         this.table = null;
 
@@ -205,13 +213,13 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
     registerCommandHandler(handler: CommandHandler) {
 
-        this.commandHandlers.push(handler);
+        this.commandHandlers.set(handler.id, handler);
 
     }
 
     unregisterCommandHandler(handler: CommandHandler) {
 
-        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+        this.commandHandlers.delete(handler.id);
 
     }
 
@@ -219,7 +227,7 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`Sent ${command.constructor.name}`);
 
-        for (let handler of this.commandHandlers) {
+        for (let handler of this.commandHandlers.values()) {
 
             handler.handleCommand(command);
 

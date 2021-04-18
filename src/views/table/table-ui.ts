@@ -31,20 +31,28 @@ import { userState } from "@/store/user-state";
 import { tableState } from "@/store/table-state";
 import { betController } from '@/app/casino/tables/betting/bet-controller';
 import { messageState } from '@/store/message-state';
+import { v4 as uuidv4 } from 'uuid';
 
 
 const logger: Logger = new Logger();
 
 class TableUI implements MessageHandler, CommandBroadcaster {
 
+    public id: string;
+
     private readonly TIME_PENDING_ACTION: number = 300;
 
-    private commandHandlers: CommandHandler[];
+    // A map of CommandHandlers
+    // Key = CommandHandler.id, so that the same handler will not be added more than once
+    // Value = CommandHandler object
+    private commandHandlers: Map<string, CommandHandler>;
 
 
 
 
     constructor() {
+
+        this.id = uuidv4();
 
         this.initialize();
 
@@ -52,7 +60,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     public initialize(): void {
 
-        this.commandHandlers = new Array<CommandHandler>();
+        this.commandHandlers = new Map<string, CommandHandler>();
 
         // We need to set these values (even to null) so that they are reactive.
         // If we leave them `undefined` then Vue does not define a setter for it
@@ -348,13 +356,13 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     registerCommandHandler(handler: CommandHandler) {
 
-        this.commandHandlers.push(handler);
+        this.commandHandlers.set(handler.id, handler);
 
     }
 
     unregisterCommandHandler(handler: CommandHandler) {
 
-        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+        this.commandHandlers.delete(handler.id);
 
     }
 
@@ -372,7 +380,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`Sent ${command.constructor.name}`);
 
-        for (let handler of this.commandHandlers) {
+        for (let handler of this.commandHandlers.values()) {
 
             handler.handleCommand(command);
 

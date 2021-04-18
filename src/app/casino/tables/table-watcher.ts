@@ -30,30 +30,41 @@ import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { Game } from "../../games/game";
 import { GameFactory } from "../../games/game-factory";
 import { ClearHandAction } from "../../actions/table/game/dealing/clear-hand-action";
+import { v4 as uuidv4 } from 'uuid';
 
 
 // const logger: Logger = new Logger();
 
 export class TableWatcher implements CommandHandler, MessageHandler, CommandBroadcaster {
 
+    public id: string;
 
     private tableID: number;
     private table: Table;
     private game: Game;
 
-    private commandHandlers: CommandHandler[];
-    private messageHandlers: MessageHandler[];
+    // A map of CommandHandlers
+    // Key = CommandHandler.id, so that the same handler will not be added more than once
+    // Value = CommandHandler object
+    private commandHandlers: Map<string, CommandHandler>;
+
+    // A map of MessageHandlers
+    // Key = MessageHandler.id, so that the same handler will not be added more than once
+    // Value = MessageHandler object
+    private messageHandlers: Map<string, MessageHandler>;
 
     private messageQueue: Message[];
 
 
     constructor(tableID: number) {
 
+        this.id = uuidv4();
+
         this.tableID = tableID;
         this.table = null;
 
-        this.commandHandlers = new Array<CommandHandler>();
-        this.messageHandlers = new Array<MessageHandler>();
+        this.commandHandlers = new Map<string, CommandHandler>();
+        this.messageHandlers = new Map<string, MessageHandler>();
 
         this.messageQueue = new Array<Message>();
 
@@ -62,26 +73,26 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     public registerMessageHandler(handler: MessageHandler): void {
 
-        this.messageHandlers.push(handler);
+        this.messageHandlers.set(handler.id, handler);
 
     }   // registerMessageHandler
 
 
     public unregisterMessageHandler(handler: MessageHandler): void {
 
-        this.messageHandlers = this.messageHandlers.filter(o => o != handler);
+        this.messageHandlers.delete(handler.id);
 
     }  // unregisterMessageHandler
 
     public registerCommandHandler(handler: CommandHandler): void {
 
-        this.commandHandlers.push(handler);
+        this.commandHandlers.set(handler.id, handler);
 
     }  // registerCommandHandler
 
     public unregisterCommandHandler(handler: CommandHandler): void {
 
-        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+        this.commandHandlers.delete(handler.id);
 
     }  // unregisterCommandHandler
 
@@ -136,7 +147,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private broadcastMessage(message: Message): void {
 
-        for (let handler of this.messageHandlers) {
+        for (let handler of this.messageHandlers.values()) {
 
             handler.handleMessage(message);
 
@@ -147,7 +158,7 @@ export class TableWatcher implements CommandHandler, MessageHandler, CommandBroa
 
     private broadcastCommand(command: Command): void {
 
-        for (let handler of this.commandHandlers) {
+        for (let handler of this.commandHandlers.values()) {
 
             handler.handleCommand(command);
 

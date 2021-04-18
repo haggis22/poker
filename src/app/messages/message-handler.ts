@@ -2,6 +2,8 @@
 
 export interface MessageHandler {
 
+    id: string;
+
     handleMessage(message: Message): void;
 
 }

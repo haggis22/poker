@@ -37,7 +37,11 @@ export class LobbyManager implements MessageBroadcaster {
     private tableControllerMap: Map<number, TableController>;
 
     private messageQueue: Array<Message>;
-    private lobbySubscribers: MessageHandler[];
+
+    // A map of MessageHandlers
+    // Key = MessageHandler.id, so that the same handler will not be added more than once
+    // Value = MessageHandler object
+    private lobbySubscribers: Map<string, MessageHandler>;
 
 
 
@@ -48,7 +52,7 @@ export class LobbyManager implements MessageBroadcaster {
         this.tableControllerMap = new Map<number, TableController>();
 
         this.messageQueue = new Array<Message>();
-        this.lobbySubscribers = new Array<MessageHandler>();
+        this.lobbySubscribers = new Map<string, MessageHandler>();
 
     }
 
@@ -78,14 +82,14 @@ export class LobbyManager implements MessageBroadcaster {
 
     public registerMessageHandler(handler: MessageHandler): void {
 
-        this.lobbySubscribers.push(handler);
+        this.lobbySubscribers.set(handler.id, handler);
 
     }   // registerMessageHandler
 
 
     public unregisterMessageHandler(handler: MessageHandler): void {
 
-        this.lobbySubscribers = this.lobbySubscribers.filter(o => o != handler);
+        this.lobbySubscribers.delete(handler.id);
 
     }
 
@@ -103,7 +107,7 @@ export class LobbyManager implements MessageBroadcaster {
 
     private broadcastMessage(message: Message): void {
 
-        for (let handler of this.lobbySubscribers) {
+        for (let handler of this.lobbySubscribers.values()) {
 
             handler.handleMessage(message);
 

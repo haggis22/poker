@@ -12,9 +12,12 @@ import { ISocketWrapper } from '../i-socket-wrapper';
 import { CashierManager } from "../../casino/cashier/cashier-manager";
 import { CashierCommand } from "../../commands/cashier/cashier-command";
 import { ErrorMessage } from "../../messages/error-message";
+import { v4 as uuidv4 } from 'uuid';
 
 
 export class ServerClient implements IServerClient {
+
+    public id: string;
 
     private socket: ISocketWrapper;
 
@@ -24,9 +27,14 @@ export class ServerClient implements IServerClient {
 
     public userID: number;
 
-    private commandHandlers: CommandHandler[];
+    // A map of CommandHandlers
+    // Key = CommandHandler.id, so that the same handler will not be added more than once
+    // Value = CommandHandler object
+    private commandHandlers: Map<string, CommandHandler>;
 
     constructor(socket: ISocketWrapper, userManager: UserManager, lobbyManager: LobbyManager, cashierManager: CashierManager) {
+
+        this.id = uuidv4();
 
         this.socket = socket;
         this.socket.addEventListener('message', (obj: any) => { this.receive(obj); });
@@ -35,13 +43,13 @@ export class ServerClient implements IServerClient {
         this.lobbyManager = lobbyManager;
         this.cashierManager = cashierManager;
 
-        this.commandHandlers = new Array<CommandHandler>();
+        this.commandHandlers = new Map<string, CommandHandler>();
 
     }
 
     private log(msg: string): void {
 
-        console.log('\x1b[33m%s\x1b[0m', `ServerClient ${msg}`);
+        console.log('\x1b[33m%s\x1b[0m', `ServerClient ${this.id}: ${msg}`);
 
     }
 
@@ -94,7 +102,7 @@ export class ServerClient implements IServerClient {
 
 
             // Pass the message along
-            for (let handler of this.commandHandlers) {
+            for (let handler of this.commandHandlers.values()) {
 
                 handler.handleCommand(obj);
 
@@ -109,13 +117,13 @@ export class ServerClient implements IServerClient {
 
     registerCommandHandler(handler: CommandHandler) {
 
-        this.commandHandlers.push(handler);
+        this.commandHandlers.set(handler.id, handler);
 
     }
 
     unregisterCommandHandler(handler: CommandHandler) {
 
-        this.commandHandlers = this.commandHandlers.filter(ch => ch !== handler);
+        this.commandHandlers.delete(handler.id);
 
     }
 

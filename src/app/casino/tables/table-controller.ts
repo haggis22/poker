@@ -67,6 +67,7 @@ import { IButtonController } from "./buttons/i-button-controller";
 import { CashierManager } from '../cashier/cashier-manager';
 import { BlindTracker } from './buttons/blind-tracker';
 import { RemainingActor } from './betting/remaining-actor';
+import { v4 as uuidv4 } from 'uuid';
 
 const logger: Logger = new Logger();
 
@@ -102,7 +103,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private deck: Deck;
 
     private messageQueue: Array<Message | MessagePair>;
-    private messageHandlers: MessageHandler[];
+
+    // A map of MessageHandlers
+    // Key = MessageHandler.id, so that the same handler will not be added more than once
+    // Value = MessageHandler object
+    private messageHandlers: Map<string, MessageHandler>;
 
     // Track betTimers per seat
     private betTimerMap: Map<number, ReturnType<typeof setTimeout>>;
@@ -117,9 +122,12 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     // Value = number of chips to add on, when possible
     private chipsToAdd: Map<number, number>;
 
-    private clients: IServerClient[];
+    // A map of Server Clients
+    // Key = IServerClient.id, so that the same server client will not be added more than once
+    // Value = IServerClient object
+    private clients: Map<string, IServerClient>;
 
-
+    public id: string;
 
 
     constructor(cashierManager: CashierManager,
@@ -128,6 +136,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     deck: Deck,
                     buttonController: IButtonController) {
 
+        this.id = uuidv4();
+
         this.cashierManager = cashierManager;
         this.lobbyManager = lobbyManager;
 
@@ -135,7 +145,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.deck = deck;
 
         this.messageQueue = new Array<Message | MessagePair>();
-        this.messageHandlers = new Array<MessageHandler>();
+        this.messageHandlers = new Map<string, MessageHandler>();
 
         this.betTimerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
@@ -146,14 +156,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.standUpRequests = new Map<number, StandUpCommand>();
         this.chipsToAdd = new Map<number, number>();
 
-        this.clients = new Array<IServerClient>();
+        this.clients = new Map<string, IServerClient>();
 
     }
 
 
     addClient(client: IServerClient): void {
 
-        this.clients.push(client);
+        this.clients.set(client.id, client);
 
         // Set this manager to listen to commands from this new client
         client.registerCommandHandler(this);
@@ -166,7 +176,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     removeClient(client: IServerClient): void {
 
-        this.clients = this.clients.filter(c => c !== client);
+        this.clients.delete(client.id);
 
     }
 
@@ -182,14 +192,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     public registerMessageHandler(handler: MessageHandler): void {
 
-        this.messageHandlers.push(handler);
+        this.messageHandlers.set(handler.id, handler);
 
     }   // registerMessageHandler
 
 
     public unregisterMessageHandler(handler: MessageHandler): void {
 
-        this.messageHandlers = this.messageHandlers.filter(o => o != handler);
+        this.messageHandlers.delete(handler.id);
 
     }
 
@@ -207,7 +217,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private broadcastMessage(message: Message | MessagePair): void {
 
-        for (let client of this.clients) {
+        for (let client of this.clients.values()) {
 
             if (message instanceof MessagePair) {
 
@@ -409,7 +419,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private log(message: string): void {
 
-        console.log('\x1b[31m%s\x1b[0m', `TableController Table ${this.table.id}: ${message}`);
+        console.log('\x1b[31m%s\x1b[0m', `TableController ${this.id}, Table ${this.table.id}: ${message}`);
 
     }
 

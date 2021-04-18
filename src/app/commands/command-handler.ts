@@ -2,6 +2,8 @@
 
 export interface CommandHandler {
 
+    id: string;
+
     handleCommand(command: Command) : void
 
 }
