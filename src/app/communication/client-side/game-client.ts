@@ -11,14 +11,15 @@ import { AuthenticateCommand } from '../../commands/security/authenticate-comman
 import { Action } from '../../actions/action';
 import { AuthenticatedAction } from '../../actions/security/authenticated-action';
 import { LogoutAction } from '../../actions/security/logout-action';
+import { AuthenticationFailedAction } from '../../actions/security/authentication-failed-action';
 
 
 export class GameClient implements MessageBroadcaster, CommandHandler {
 
-    private socket: ISocketWrapper;
-    private tokenManager: AuthenticationManager;
+    public socket: ISocketWrapper;
+    public tokenManager: AuthenticationManager;
 
-    private messageHandlers: MessageHandler[];
+    public messageHandlers: MessageHandler[];
 
 
     constructor(socket: ISocketWrapper, tokenManager: AuthenticationManager) {
@@ -50,6 +51,13 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
                     this.authenticatedAction(action);
 
                 }
+
+                if (action instanceof AuthenticationFailedAction) {
+
+                    this.authenticationFailedAction(action);
+
+                }
+
 
                 if (action instanceof LogoutAction) {
 
@@ -104,7 +112,7 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
     }  // handleCommand
 
 
-    private log(msg: string): void {
+    public log(msg: string): void {
 
         console.log('\x1b[36m%s\x1b[0m', `GameClient ${msg}`);
 
@@ -117,13 +125,20 @@ export class GameClient implements MessageBroadcaster, CommandHandler {
     }   // authenticate
 
 
-    private authenticatedAction(action: AuthenticatedAction): void {
+    public authenticatedAction(action: AuthenticatedAction): void {
 
         this.tokenManager.saveToken(action.authToken);
 
     }
 
-    private logoutAction(action: LogoutAction): void {
+    public authenticationFailedAction(action: AuthenticationFailedAction): void {
+
+        this.tokenManager.clearToken();
+
+    }
+
+
+    public logoutAction(action: LogoutAction): void {
 
         this.tokenManager.clearToken();
 

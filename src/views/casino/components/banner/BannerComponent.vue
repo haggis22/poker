@@ -33,10 +33,10 @@
 
     import { UserSummary } from '@/app/players/user-summary';
 
-    import { lobbyState } from "@/store/lobby-state";
     import { userState } from "@/store/user-state";
     import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
-    import { lobbyClient } from '../../lobby-client';
+
+    import { casinoClient } from '../../casino-client';
 
 
     const LobbyComponent = defineComponent({
@@ -45,12 +45,13 @@
 
             const user = computed((): UserSummary => userState.getUser.value);
 
-            const chipFormatter = computed((): IChipFormatter => lobbyState.getChipFormatter.value);
+            const chipFormatter = computed((): IChipFormatter => userState.getChipFormatter.value);
+
             const balance = computed((): number => userState.getBalance.value);
 
             const logOut = (): void => {
 
-                lobbyClient.logOut();
+                casinoClient.logOut();
 
             };
 

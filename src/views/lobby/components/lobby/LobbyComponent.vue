@@ -33,7 +33,6 @@
     import { TableSummary } from '@/app/casino/tables/table-summary';
 
     import { lobbyState } from "@/store/lobby-state";
-    import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 
 
 
@@ -43,12 +42,9 @@
 
             const tables = computed((): TableSummary[] => lobbyState.getTables.value);
 
-            const chipFormatter = computed((): IChipFormatter => lobbyState.getChipFormatter.value);
-
             return {
 
                 tables,
-                chipFormatter,
 
             };
 

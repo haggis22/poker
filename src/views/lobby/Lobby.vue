@@ -2,10 +2,6 @@
 
     <div class="page-lobby">
 
-        <banner-component></banner-component>
-
-        <login-component v-if="!isAuthenticated"></login-component>
-
         <lobby-component v-if="isAuthenticated"></lobby-component>
 
     </div>
@@ -17,16 +13,12 @@
     import { defineComponent, computed } from "vue";
 
     import { lobbyClient } from './lobby-client';
-    import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
     import { GameClient } from '../../app/communication/client-side/game-client';
-    import { BrowserWebSocketWrapper } from '../../app/communication/client-side/browser-web-socket-wrapper';
 
-    import BannerComponent from './components/banner/BannerComponent.vue';
-    import LoginComponent from './components/login/LoginComponent.vue';
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
     import { lobbyState } from '@/store/lobby-state';
-    import { ClientAuthenticationManager } from '@/app/communication/client-side/client-authentication-manager';
     import { userState } from '@/store/user-state';
+import { SubscribeLobbyCommand } from '@/app/communication/serializable';
 
 
     export default defineComponent({
@@ -34,32 +26,22 @@
         name: "Lobby",
 
         components: {
-            BannerComponent,
-            LoginComponent,
             LobbyComponent
         },
 
         setup() {
 
+            const gameClient = computed((): GameClient => userState.getGameClient.value);
+
             const isAuthenticated = computed((): boolean => userState.isAuthenticated.value);
 
-            lobbyState.setChipFormatter(new MoneyFormatter());
+            // Now join all the links in the chain
+            lobbyClient.registerCommandHandler(gameClient.value);
+            gameClient.value.registerMessageHandler(lobbyClient);
 
-            const ws = new WebSocket('ws://localhost:3000');
+            // let me know when the tables update
+            lobbyClient.broadcastCommand(new SubscribeLobbyCommand());
 
-            ws.addEventListener('open', () => {
-
-                console.log('Connection opened');
-
-                const gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new ClientAuthenticationManager());
-
-                // Now join all the links in the chain
-                lobbyClient.registerCommandHandler(gameClient);
-                gameClient.registerMessageHandler(lobbyClient);
-
-                gameClient.authenticate();
-
-            });
 
             return {
 

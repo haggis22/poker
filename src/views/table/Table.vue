@@ -27,7 +27,6 @@
     import { tableUI } from './table-ui';
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
     import { GameClient } from '../../app/communication/client-side/game-client';
-    import { BrowserWebSocketWrapper } from '../../app/communication/client-side/browser-web-socket-wrapper';
 
     import TableComponent from './components/table/TableComponent.vue';
     import LogComponent from './components/log/LogComponent.vue';
@@ -38,7 +37,8 @@
     import MessagePopupComponent from '../components/message-popup/MessagePopupComponent.vue';
 
     import { tableState } from "@/store/table-state";
-    import { ClientAuthenticationManager } from '@/app/communication/client-side/client-authentication-manager';
+    import { userState } from '@/store/user-state';
+    import { JoinTableCommand } from '@/app/communication/serializable';
 
 
     export default defineComponent({
@@ -53,35 +53,24 @@
             tableState.initialize();
 
             tableState.setTableID(Number(route.params.tableID));
+            tableState.setChipFormatter(new MoneyFormatter());
+
+            tableUI.initialize();
+
+            const gameClient = computed((): GameClient => userState.getGameClient.value);
 
             const table = computed((): Table => tableState.getTable.value);
 
-            const ws = new WebSocket('ws://localhost:3000');
-
             const hasSeat = computed((): boolean => tableState.getMySeatIndex.value != null);
 
-            ws.addEventListener('open', () => {
+            const isAuthenticated = computed((): boolean => userState.isAuthenticated.value);
 
-                console.log('Connection opened');
+            // Now join all the links in the chain
+            tableUI.registerCommandHandler(gameClient.value);
+            gameClient.value.registerMessageHandler(tableUI);
 
-                tableState.setChipFormatter(new MoneyFormatter());
+            tableUI.sendCommand(new JoinTableCommand(tableState.getTableID.value));
 
-                let gameClient: GameClient = new GameClient(new BrowserWebSocketWrapper(ws), new ClientAuthenticationManager());
-
-                tableUI.initialize();
-
-                // Now join all the links in the chain
-                tableUI.registerCommandHandler(gameClient);
-                gameClient.registerMessageHandler(tableUI);
-
-                /*
-                                tableWatcher.registerMessageHandler(ui);
-                                tableWatcher.registerCommandHandler(gameClient);
-                */
-
-                gameClient.authenticate();
-
-            });
 
             return {
 

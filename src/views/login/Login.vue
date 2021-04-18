@@ -36,15 +36,15 @@
 
     import { defineComponent, computed, ref } from 'vue';
 
-    import { lobbyClient } from '../../lobby-client';
+    import { casinoClient } from '../casino/casino-client';
     import { userState } from '@/store/user-state';
 
+    export default defineComponent({
 
-
-    const LoginComponent = defineComponent({
-
+        name: "Login",
+        components: {
+        },
         setup() {
-
             const username = ref(null as string);
             const password = ref(null as string);
 
@@ -52,13 +52,13 @@
 
             const logIn = (): void => {
 
-                lobbyClient.logIn(username.value, password.value);
+                casinoClient.logIn(username.value, password.value);
 
             };
 
             return {
 
-                username, 
+                username,
                 password,
 
                 loginErrorMessage,
@@ -68,13 +68,7 @@
             };
 
         },
-        components: {
-            
-        }
-
     });
-
-    export default LoginComponent;
 
 </script>
 

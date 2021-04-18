@@ -460,12 +460,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     public authenticatedAction(action: AuthenticatedAction): void {
 
-        let tableID: number = tableState.getTableID.value;
-
-        this.log(`Heard AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${tableID}`);
-        userState.setAuthenticated(action.user, action.authToken);
-
-        this.broadcastCommand(new JoinTableCommand(tableID));
+        // this.log(`Heard AuthenticatedAction for ${action.user.username}, sending JoinTableCommand for ${tableID}`);
 
     }   // authenticatedAction
 
