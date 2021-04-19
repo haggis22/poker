@@ -1526,30 +1526,30 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
                 this.queueAction(new GatherAntesCompleteAction(this.table.id));
 
-                let numPlayers: number = 0;
-
-                for (let seat of this.table.seats) {
-
-                    seat.isInHand = seat.player && this.blindTracker.activePlayers.has(seat.player.userID);
-                    this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
-
-                    if (seat.isInHand) {
-                        numPlayers++;
-                    }
-
-                }
-
-                if (numPlayers < 2) {
-
-                    // We don't have enough players, so go back to the open state
-                    this.log(`In BlindsAndAntesState in completeBetting and we don't have enough players - going to OpenState`);
-                    return this.goToOpenState();
-
-                }
-
             }
             else {
                 this.log('No antes to gather');
+            }
+
+            let numPlayers: number = 0;
+
+            for (let seat of this.table.seats) {
+
+                seat.isInHand = seat.player && this.blindTracker.activePlayers.has(seat.player.userID);
+                this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
+
+                if (seat.isInHand) {
+                    numPlayers++;
+                }
+
+            }
+
+            if (numPlayers < 2) {
+
+                // We don't have enough players, so go back to the open state
+                this.log(`In BlindsAndAntesState in completeBetting and we don't have enough players - going to OpenState`);
+                return this.goToOpenState();
+
             }
 
         }
