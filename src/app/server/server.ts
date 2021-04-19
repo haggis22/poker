@@ -64,20 +64,21 @@ let clients: Set<IServerClient> = new Set<IServerClient>();
 
 // RoboClients will automatically connect themselves to the passed-in lobbyManager
 
-/*
 createRoboClient(1, 'pgrudowski');
 createRoboClient(1, 'jhoepken');
 createRoboClient(1, 'mgillmore');
 createRoboClient(1, 'benney');
+/*
+
 
 createRoboClient(2, 'moglesby');
 createRoboClient(2, 'ptunney');
+*/
 
 createRoboClient(3, 'pgrudowski');
 createRoboClient(3, 'jhoepken');
 createRoboClient(3, 'mgillmore');
 createRoboClient(3, 'benney');
-*/
 
 wss.on('connection', (socket: WebSocket) => {
 

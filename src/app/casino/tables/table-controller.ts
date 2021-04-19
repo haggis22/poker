@@ -160,10 +160,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     }
 
+    getTableID(): number {
+
+        return this.table.id;
+
+    }
 
     addClient(client: IServerClient): void {
 
         if (client.isAlive) {
+
             this.clients.set(client.id, client);
 
             // Set this manager to listen to commands from this new client

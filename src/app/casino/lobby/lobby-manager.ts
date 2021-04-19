@@ -34,7 +34,14 @@ export class LobbyManager implements MessageBroadcaster {
 
     private nextID: number;
 
+    // Key = tableID
+    // Value = TableController for that table
     private tableControllerMap: Map<number, TableController>;
+
+    // Key = id of the IServerClient
+    // Value = TableController that is currently serving that client
+    private tableControllerByClientMap: Map<string, TableController>;
+
 
     private messageQueue: Array<Message>;
 
@@ -50,6 +57,8 @@ export class LobbyManager implements MessageBroadcaster {
         this.nextID = 0;
 
         this.tableControllerMap = new Map<number, TableController>();
+
+        this.tableControllerByClientMap = new Map<string, TableController>();
 
         this.messageQueue = new Array<Message>();
         this.lobbySubscribers = new Map<string, MessageHandler>();
@@ -285,6 +294,20 @@ export class LobbyManager implements MessageBroadcaster {
 
     private addTableClient(tableID: number, client: IServerClient): void {
 
+        const existingTableController: TableController = this.tableControllerByClientMap.get(client.id);
+        if (existingTableController) {
+
+            if (existingTableController.getTableID() === tableID)
+            {
+                // already connected - nothing to do
+                return;
+            }
+
+            this.log(`Existing TableController for this client for a different table - disconnecting it`);
+            existingTableController.removeClient(client);
+
+        }
+
         const tableController: TableController = this.getTableController(tableID);
 
         this.log(`In addTableClient, found tableController for ${tableID} ? ${(tableController != null)}`);
@@ -292,6 +315,7 @@ export class LobbyManager implements MessageBroadcaster {
         if (tableController != null) {
 
             tableController.addClient(client);
+            this.tableControllerByClientMap.set(client.id, tableController);
 
         }
 
