@@ -17,17 +17,21 @@ export class FakeSocketWrapper implements ISocketWrapper {
     }
 
 
-    public addEventListener(method: 'message', callback: (obj: any) => void) {
+    public addEventListener(method: 'message' | 'close', callback: (obj: any) => void) {
 
-        this.socket.addEventListener(method, (msg: string) => {
+        if (method === 'message') {
 
-            let o: any = this.serializer.deserialize(msg);
+            this.socket.addEventListener(method, (msg: string) => {
 
-            if (o) {
-                callback(o);
-            }
+                let o: any = this.serializer.deserialize(msg);
 
-        });
+                if (o) {
+                    callback(o);
+                }
+
+            });
+
+        }
 
     }
 

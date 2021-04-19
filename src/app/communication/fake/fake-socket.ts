@@ -25,9 +25,13 @@
 
     }
 
-    public addEventListener(method: 'message', cb: (msg: string) => void) {
+    public addEventListener(method: 'message' | 'close', cb: (msg: string) => void) {
 
-        this.messageListeners.push(cb);
+        if (method === 'message') {
+
+            this.messageListeners.push(cb);
+
+        }
 
     }
 
