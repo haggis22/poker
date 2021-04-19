@@ -151,7 +151,7 @@ export class LobbyManager implements MessageBroadcaster {
         this.log(`Created table ${kershner.name} with ID ${kershner.id}`);
 
         let cornDogNL: Table = this.createCornDogNL();
-        this.log(`Created table {cornDogNL.name} with ID ${cornDogNL.id}`);
+        this.log(`Created table ${cornDogNL.name} with ID ${cornDogNL.id}`);
 
     }  // setUp
 
