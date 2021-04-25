@@ -68,6 +68,7 @@ import { CashierManager } from '../cashier/cashier-manager';
 import { BlindTracker } from './buttons/blind-tracker';
 import { RemainingActor } from './betting/remaining-actor';
 import { v4 as uuidv4 } from 'uuid';
+import { Serializer } from '@/app/communication/serializer';
 
 const logger: Logger = new Logger();
 
@@ -101,6 +102,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private table: Table;
     private game: Game;
     private deck: Deck;
+
+    private copier: DeepCopier;
 
     private messageQueue: Array<Message | MessagePair>;
 
@@ -143,6 +146,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.table = table;
         this.deck = deck;
+
+        this.copier = new DeepCopier();
 
         this.messageQueue = new Array<Message | MessagePair>();
         this.messageHandlers = new Map<string, MessageHandler>();
@@ -379,49 +384,32 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private createTableSnapshot(userID: number): Table {
 
-        let table: Table = new Table(this.table.id, this.table.name, this.table.description, this.table.stakes, this.table.rules);
+        const table: Table = this.copier.copy(this.table);
 
-        table.betStatus = this.table.betStatus;
-        table.buttonIndex = this.table.buttonIndex;
-        table.board = this.table.board;
+        // If anyone has face-up cards that is NOT this player, then turn their cards over
+        for (let seat of table.seats) {
 
-        for (let s = 0; s < this.table.seats.length; s++) {
+            if (seat.hand) {
 
-            table.seats[s].player = this.table.seats[s].player;
+                seat.hand.cards = seat.hand.cards.map(card => {
 
-            let hand:Hand = null;
-
-            if (this.table.seats[s].hand != null) {
-
-                hand = new Hand();
-
-                for (let card of this.table.seats[s].hand.cards) {
-
-                    // On the server, these should *always* be Card and not FacedownCard
                     if (card instanceof Card) {
 
-                        if (card.isFaceUp || this.table.seats[s].player.userID == userID) {
-                            hand.cards.push(card);
-                        }
-                        else {
-                            // they get a card with no value, face-down
-                            hand.cards.push(new FacedownCard());
+                        // If this card is face up (or is mine), then keep it intact. Otherwise, it will 
+                        // turn into a FacedownCard
+                        if (card.isFaceUp || seat.player && seat.player.userID === userID) {
+
+                            return card;
+
                         }
 
                     }
-                    else {
 
-                        // shouldn't actually ever get here
-                        hand.cards.push(new FacedownCard());
+                    return new FacedownCard();
 
-                    }
+                });
 
-
-                }
-
-            }  // if the seat has a hand
-
-            table.seats[s].hand = hand;
+            }
 
         }
 

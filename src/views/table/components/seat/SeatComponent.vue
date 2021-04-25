@@ -133,6 +133,8 @@
 
             const amISitting = computed((): boolean => tableState.getMySeatIndex.value != null);
 
+            const isAllIn = computed((): boolean => seat.value && seat.value.isAllIn());
+
             const chipsClasses = computed((): string[] => {
 
                 let classes = ['chips'];
