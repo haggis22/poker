@@ -31,7 +31,7 @@ function setup(): Harness {
             new Blind(1, Blind.TYPE_BIG, "big blind", 100, true, true)
         ];
 
-    const stakes: Stakes = new Stakes(0, blinds, [25, 50], Stakes.NO_LIMIT, 4);
+    const stakes: Stakes = new Stakes(0, blinds, [25, 50], Stakes.NO_LIMIT, 4, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
     const rules: TableRules = new TableRules(6, 10, 10);
 
     const table: Table = new Table(1, 'Test', 'Test', stakes, rules);

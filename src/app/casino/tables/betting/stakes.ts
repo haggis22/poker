@@ -8,16 +8,22 @@ export class Stakes {
     public ante: number;
     public blinds: Blind[];
     public bets: number[];
-    public limit: number;
+    public limitVsNoLimit: number;
     public maxRaises: number;
 
+    public minBuyIn: number;
+    public maxBuyIn: number;
 
-    constructor(ante: number, blinds: Blind[], bets: number[], limit: number, maxRaises: number) {
+
+    constructor(ante: number, blinds: Blind[], bets: number[], limitVsNoLimit: number, maxRaises: number, minBuyIn: number, maxBuyIn: number) {
         this.ante = ante;
         this.blinds = [...blinds];
         this.bets = [...bets];
-        this.limit = limit;
+        this.limitVsNoLimit = limitVsNoLimit;
         this.maxRaises = maxRaises;
+
+        this.minBuyIn = minBuyIn;
+        this.maxBuyIn = maxBuyIn;
     }
 
 }

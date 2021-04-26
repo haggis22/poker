@@ -26,6 +26,7 @@ import { SubscribeLobbyCommand, ListTablesAction, TableSummary } from '../../com
 import { IButtonController } from '../tables/buttons/i-button-controller';
 import { DeadButtonController } from '../tables/buttons/dead-button-controller';
 import { CashierManager } from '../cashier/cashier-manager';
+import { MoneyFormatter } from '../tables/chips/money-formatter';
 
 
 export class LobbyManager implements MessageBroadcaster {
@@ -183,13 +184,13 @@ export class LobbyManager implements MessageBroadcaster {
         let bets: number[] = [100, 100, 200, 200];
         let maxRaises: number = 4;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises);
+        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
 
         let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController();
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -221,13 +222,13 @@ export class LobbyManager implements MessageBroadcaster {
         let bets: number[] = [50, 50, 50, 50];
         let maxRaises: number = null;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.NO_LIMIT, maxRaises);
+        let stakes = new Stakes(ante, blinds, bets, Stakes.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
 
         let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController();
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -259,13 +260,13 @@ export class LobbyManager implements MessageBroadcaster {
         let bets: number[] = [100, 100, 200, 200];
         let maxRaises: number = 4;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises);
+        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
 
         let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController();
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
 
         this.tableControllerMap.set(table.id, tableController);
         

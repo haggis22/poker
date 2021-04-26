@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ClearTimerAction } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ClearTimerAction, Stakes } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -69,6 +69,7 @@ import { BlindTracker } from './buttons/blind-tracker';
 import { RemainingActor } from './betting/remaining-actor';
 import { v4 as uuidv4 } from 'uuid';
 import { Serializer } from '@/app/communication/serializer';
+import { IChipFormatter } from './chips/chip-formatter';
 
 const logger: Logger = new Logger();
 
@@ -102,6 +103,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private table: Table;
     private game: Game;
     private deck: Deck;
+    private chipFormatter: IChipFormatter;
 
     private copier: DeepCopier;
 
@@ -137,7 +139,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     lobbyManager: LobbyManager,
                     table: Table,
                     deck: Deck,
-                    buttonController: IButtonController) {
+                    buttonController: IButtonController,
+                    chipFormatter: IChipFormatter) {
 
         this.id = uuidv4();
 
@@ -146,6 +149,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.table = table;
         this.deck = deck;
+
+        this.chipFormatter = chipFormatter;
 
         this.copier = new DeepCopier();
 
@@ -2037,7 +2042,39 @@ export class TableController implements CommandHandler, MessageBroadcaster {
      }
 
 
+    public isPlayerInHand(userID: number): boolean {
 
+        let seat: Seat = this.findSeatByPlayer(userID);
+
+        return seat && seat.isInHand;
+
+    }
+
+    public getPlayerChips(userID: number): number {
+
+        let seat: Seat = this.findSeatByPlayer(userID);
+
+        if (seat) {
+
+            return seat.player.chips;
+        }
+
+        return null;
+
+    }
+
+
+    public getStakes(): Stakes {
+
+        return this.table.stakes;
+
+    }
+
+    public getChipFormatter(): IChipFormatter {
+
+        return this.chipFormatter;
+
+    }
 
 
 

@@ -1,7 +1,7 @@
 import { UserManager } from "../../players/user-manager";
 import { LobbyManager } from "../lobby/lobby-manager";
 import { CashierCommand } from "../../commands/cashier/cashier-command";
-import { CheckBalanceCommand, AddChipsCommand, User, Message, ErrorMessage, ActionMessage } from "../../communication/serializable";
+import { CheckBalanceCommand, AddChipsCommand, User, Message, ErrorMessage, ActionMessage, Stakes } from "../../communication/serializable";
 import { TableController } from "../tables/table-controller";
 import { IServerClient } from "../../communication/server-side/i-server-client";
 import { CurrentBalanceAction } from "../../actions/cashier/current-balance-action";
@@ -167,11 +167,50 @@ export class CashierManager {
 
             }
 
-            user.balance -= command.amount;
+            if (tableController.isPlayerInHand(command.userID)) {
 
-            this.broadcastBalanceUpdate(user.id);
+                return new ErrorMessage('You cannot add chips while in a hand', command.userID);
 
-            return tableController.addChips(command.userID, command.amount);
+            }
+
+            const stakes: Stakes = tableController.getStakes();
+
+            if (stakes) {
+
+                const playerExistingChips: number = tableController.getPlayerChips(command.userID);
+
+                if (playerExistingChips == null) {
+
+                    return new ErrorMessage('You are not at the table', command.userID);
+
+                }
+
+                const minChipsToBeAdded: number = stakes.minBuyIn - playerExistingChips;
+
+                if (command.amount < minChipsToBeAdded) {
+
+                    return new ErrorMessage(`You must add at least ${tableController.getChipFormatter().format(minChipsToBeAdded)} in chips`, command.userID);
+
+                }
+
+                const maxChipsCanBeAdded: number = stakes.maxBuyIn - playerExistingChips;
+
+                if (maxChipsCanBeAdded <= 0) {
+
+                    return new ErrorMessage('You cannot add any chips', command.userID);
+                }
+
+                // Reduce their chip buy to the table max, if necessary
+                const chipsToAdd: number = Math.min(maxChipsCanBeAdded, command.amount);
+
+                user.balance -= chipsToAdd;
+
+                this.broadcastBalanceUpdate(user.id);
+
+                return tableController.addChips(command.userID, chipsToAdd);
+
+            }
+
 
         }
 

@@ -421,7 +421,7 @@ class BetController {
             return null;
         }
 
-        if (table.stakes.limit === Stakes.LIMIT) {
+        if (table.stakes.limitVsNoLimit === Stakes.LIMIT) {
             return minRaise;
         }
 

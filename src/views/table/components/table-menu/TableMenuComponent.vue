@@ -21,7 +21,12 @@
                 <button type="button" class="stand-up" @click.stop="standUp">Stand Up</button>
             </div>
             <div>
-                <button type="button" class="add-chips" @click.stop="checkBalance">Add Chips</button>
+                <button type="button" 
+                        class="add-chips" 
+                        @click.stop="checkBalance"
+                        :disabled="isInHand"
+                        :title="isInHand ? 'You cannot add chips during a hand' : ''"
+                        >Add Chips</button>
             </div>
 
         </div>
@@ -66,9 +71,10 @@
     import { defineComponent, computed, ref, watch } from 'vue';
 
     import { tableUI } from '../../table-ui';
-    import { SetStatusCommand, StandUpCommand, AddChipsCommand } from '@/app/communication/serializable';
+    import { SetStatusCommand, StandUpCommand, AddChipsCommand, Table } from '@/app/communication/serializable';
 
     import { tableState } from "@/store/table-state";
+    import { userState } from "@/store/user-state";
 
     const TableMenuComponent = defineComponent({
 
@@ -102,6 +108,24 @@
             });
 
             const hasPendingStatusRequest = computed((): boolean => tableState.getHasPendingStatusRequest.value);
+
+            const mySeatIndex = computed((): number => tableState.getMySeatIndex.value);
+
+            const userID = computed((): number => userState.getUserID.value);
+
+            const isInHand = computed((): boolean => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table && mySeatIndex.value != null) {
+
+                    return table.seats[mySeatIndex.value].isInHand;
+
+                }
+
+                return false;
+
+            });
 
             const currentBalance = computed((): number => tableState.getCurrentBalance.value);
 
@@ -185,7 +209,9 @@
                 cancelBuyIn,
 
                 hasPendingStatusRequest,
-                localSittingOut
+                localSittingOut,
+
+                isInHand
 
             };
 
