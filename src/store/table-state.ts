@@ -571,8 +571,6 @@ const setHasPendingStatusRequest = (newValue: boolean): void => {
 };
 
 
-
-
 export const tableState = {
 
     initialize,
@@ -675,8 +673,7 @@ export const tableState = {
     getLocalSittingOut,
     setLocalSittingOut,
     getHasPendingStatusRequest,
-    setHasPendingStatusRequest
-
+    setHasPendingStatusRequest,
 
 };
 

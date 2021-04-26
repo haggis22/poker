@@ -86,4 +86,12 @@ export class BetStatus {
 
     }
 
+    public getCurrentTotalPot(): number {
+
+        return this.pots.reduce((total, pot) => total + pot.amount, 0)
+            + Object.values(this.bets).reduce((total, bet) => total + bet.totalBet, 0)
+            + Object.values(this.antes).reduce((total, ante) => total + ante.totalBet, 0);
+
+    }
+
 }

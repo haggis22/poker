@@ -62,21 +62,31 @@
 
                 <div>
                     <span class="min-raise">{{ chipFormatter.format(minRaise) }}</span>
-                    <button type="button" 
+                    <button type="button"
                             @click.stop="stepDown"
-                            :disabled="raiseChips === minRaise">&#9664;</button>
-                    <input type="range" 
+                            :disabled="raiseChips === minRaise">
+                        &#x2039;
+                    </button>
+                    <input type="range"
                            class="chips-slider"
-                           v-model.number="raiseChips" 
-                           :min="minRaise" 
-                           :max="maxRaise" 
+                           v-model.number="raiseChips"
+                           :min="minRaise"
+                           :max="maxRaise"
                            :step="step" />
-                    <button type="button" 
+                    <button type="button"
                             @click.stop="stepUp"
-                            :disabled="raiseChips === maxRaise">&#9654;</button>
+                            :disabled="raiseChips === maxRaise">
+                        &#x203a;
+                    </button>
                     <span class="max-raise">{{ chipFormatter.format(maxRaise) }}</span>
                 </div>
-                <div class="buy-amount">{{ chipFormatter.format(raiseChips) }}</div>
+                <div class="raise-amount">{{ chipFormatter.format(raiseChips) }}</div>
+                <div class="buttons">
+                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raiseThirdPotAmount)">1/3</button>
+                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raiseHalfPotAmount)">1/2</button>
+                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raisePotAmount)">Pot</button>
+                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(allInAmount)">All</button>
+                </div>
                 <div class="buttons">
                     <button type="button" class="cancel" @click.stop="cancelRaise">Cancel</button>
                     <button type="button" class="raise" @click.stop="lockInRaise">Raise</button>
@@ -114,12 +124,12 @@ import './betting-menu.scss';
     import { TableState } from '@/app/casino/tables/states/table-state';
     import { BetState } from '@/app/casino/tables/states/betting/bet-state';
     import { BlindsAndAntesState } from '@/app/casino/tables/states/betting/blinds-and-antes-state';
-import { CardSuit } from '@/app/cards/card-suit';
-import { userState } from '@/store/user-state';
+    import { userState } from '@/store/user-state';
+import { Table } from '@/app/casino/tables/table';
 
     const TableMenuComponent = defineComponent({
 
-        setup(props, { emit }) {
+        setup() {
 
             const pendingBetCommand = computed((): BettingCommand => tableState.getPendingBetCommand.value);
 
@@ -154,13 +164,6 @@ import { userState } from '@/store/user-state';
             const showRaiseDialog = ref(false);
 
             const raiseChips = ref(null as number);
-
-            const raiseChipsModel = computed({
-
-                get: () => raiseChips.value,
-                set: (value) => emit('update:raiseChips', value)
-
-            });
 
             const step = ref(25);
 
@@ -301,6 +304,110 @@ import { userState } from '@/store/user-state';
 
             }
 
+            const goAllIn = (): void => {
+
+
+
+            }
+
+            const currentTotalPot = computed((): number => tableState.getTable.value.betStatus.getCurrentTotalPot());
+
+
+            // Calculates the TotalBet for a given raise
+            const raisePotAmount = computed((): number => {
+
+                // This is how much is already in the pot...
+                let potRaiseAmount = tableState.getTable.value.betStatus.getCurrentTotalPot();
+
+                if (myCall.value != null) {
+
+                    // This will be how much is in there once I call...
+                    potRaiseAmount += myCall.value.chipsAdded;
+
+                }
+
+                // Add this raise amount on TOP of what the existing bet already is
+                potRaiseAmount += tableState.getTable.value.betStatus.currentBet;
+
+                return Math.round(potRaiseAmount);
+
+            });
+
+            const raiseHalfPotAmount = computed((): number => {
+
+                // This is how much is already in the pot...
+                let potRaiseAmount = tableState.getTable.value.betStatus.getCurrentTotalPot();
+
+                if (myCall.value != null) {
+
+                    // This will be how much is in there once I call...
+                    potRaiseAmount += myCall.value.chipsAdded;
+
+                }
+
+                // Add this raise amount on TOP of what the existing bet already is
+                return Math.round((potRaiseAmount / 2) + tableState.getTable.value.betStatus.currentBet);
+
+            });
+
+            const raiseThirdPotAmount = computed((): number => {
+
+                // This is how much is already in the pot...
+                let potRaiseAmount = tableState.getTable.value.betStatus.getCurrentTotalPot();
+
+                if (myCall.value != null) {
+
+                    // This will be how much is in there once I call...
+                    potRaiseAmount += myCall.value.chipsAdded;
+
+                }
+
+                // Add this raise amount on TOP of what the existing bet already is
+                return Math.round((potRaiseAmount / 3) + tableState.getTable.value.betStatus.currentBet);
+
+            });
+
+
+            const myChips = computed((): number => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table && mySeatIndex.value != null) {
+
+                    return table.seats[mySeatIndex.value].player.chips;
+
+                }
+
+                return null;
+
+            });
+
+
+            const allInAmount = computed((): number => {
+
+                let potRaiseAmount: number = tableState.getTable.value.betStatus.currentBet;
+
+                if (myCall.value != null) {
+
+                    // Reduce my bet by what I would have to put in to call it flat
+                    potRaiseAmount -= myCall.value.chipsAdded;
+
+                }
+
+                if (myChips.value != null) {
+                    potRaiseAmount += myChips.value;
+                }
+
+                return potRaiseAmount;
+
+            });
+
+            const setRaiseChips = (amount: number) => {
+
+                raiseChips.value = amount;
+
+            }
+
             const cancelRaise = (): void => {
 
                 tableState.clearPendingBetCommands();
@@ -349,7 +456,6 @@ import { userState } from '@/store/user-state';
                 remainsToAct,
 
                 raiseChips,
-                raiseChipsModel,
                 step,
 
                 toggleFold,
@@ -364,8 +470,16 @@ import { userState } from '@/store/user-state';
                 readyRaise,
                 stepDown,
                 stepUp,
+                setRaiseChips,
+                raisePotAmount,
+                raiseHalfPotAmount,
+                raiseThirdPotAmount,
+                allInAmount,
                 lockInRaise,
                 cancelRaise,
+
+                currentTotalPot,
+
 
             };
 
@@ -390,6 +504,29 @@ export default TableMenuComponent;
     .raise-dialog
     {
         text-align: center;
+
+        .buttons
+        {
+            button
+            {
+                font-weight: bold;
+
+                &.raise
+                {
+                    color: white;
+                    background-color: green;
+                }
+
+                &.cancel {
+                    color: white;
+                    background-color: red;
+                }
+
+            }
+
+        }
+
     }
+
 
 </style>
