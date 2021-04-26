@@ -35,20 +35,30 @@
             <div>
                 <span class="min-buy-in">{{ chipFormatter.format(minBuyIn) }}</span>
                 <button type="button"
-                        @click.stop="stepDown"
+                        @click.stop="stepDown(bigStep)"
                         :disabled="numAddChips === minBuyIn">
-                    &#9664;
+                    &#x00ab;
                 </button>
-                <input type="range" 
-                        class="chips-slider"
-                        v-model.number="numAddChips" 
-                       :min="minBuyIn" 
-                       :max="maxBuyIn" 
+                <button type="button"
+                        @click.stop="stepDown(smallStep)"
+                        :disabled="numAddChips === minBuyIn">
+                    &#x2039;
+                </button>
+                <input type="range"
+                       class="chips-slider"
+                       v-model.number="numAddChips"
+                       :min="minBuyIn"
+                       :max="maxBuyIn"
                        :step="step" />
                 <button type="button"
-                        @click.stop="stepUp"
+                        @click.stop="stepUp(smallStep)"
                         :disabled="numAddChips === maxBuyIn">
-                    &#9654;
+                    &#x203a;
+                </button>
+                <button type="button"
+                        @click.stop="stepUp(bigStep)"
+                        :disabled="numAddChips === maxBuyIn">
+                    &#x00bb;
                 </button>
                 <span class="max-buy-in">{{ chipFormatter.format(maxBuyIn) }}</span>
             </div>
@@ -83,19 +93,20 @@
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
             const numAddChips = ref(1000);
-            const step = ref(100);
+            const smallStep = ref(100);
+            const bigStep = ref(200);
 
             const showAddChips = ref(false);
 
-            const stepDown = (): void => {
+            const stepDown = (value: number): void => {
 
-                numAddChips.value -= step.value;
+                numAddChips.value -= value;
 
             };
 
-            const stepUp = (): void => {
+            const stepUp = (value: number): void => {
 
-                numAddChips.value += step.value;
+                numAddChips.value += value;
 
             };
 
@@ -284,7 +295,10 @@
                 showAddChips,
                 showAddChipsDialog,
                 addChipsTitle,
-                step,
+
+                smallStep,
+                bigStep,
+
                 stepDown,
                 stepUp,
 
