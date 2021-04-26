@@ -2,7 +2,7 @@
 
     <div class="table-menu">
 
-        <div v-if="!showAddChips" class="table-actions">
+        <div v-if="!showAddChipsDialog" class="table-actions">
 
             <div class="sit-out" :class="{ 'disabled': hasPendingStatusRequest }">
 
@@ -24,14 +24,14 @@
                 <button type="button" 
                         class="add-chips" 
                         @click.stop="checkBalance"
-                        :disabled="isInHand"
-                        :title="isInHand ? 'You cannot add chips during a hand' : ''"
+                        :disabled="isInHand || maxBuyIn == 0"
+                        :title="addChipsTitle"
                         >Add Chips</button>
             </div>
 
         </div>
 
-        <div v-if="showAddChips" class="add-chips-dialog">
+        <div v-if="showAddChipsDialog" class="add-chips-dialog">
             <div>
                 <span class="min-buy-in">{{ chipFormatter.format(minBuyIn) }}</span>
                 <button type="button"
@@ -127,11 +127,99 @@
 
             });
 
+            const myChips = computed((): number => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table && mySeatIndex.value != null) {
+
+                    return table.seats[mySeatIndex.value].player.chips;
+
+                }
+
+                return null;
+
+            });
+
             const currentBalance = computed((): number => tableState.getCurrentBalance.value);
 
-            const minBuyIn = computed((): number => showAddChips.value ? 0 : null);
+            const showAddChipsDialog = computed((): boolean => {
 
-            const maxBuyIn = computed((): number => currentBalance.value);
+                return showAddChips.value && !isInHand.value;
+
+            });
+
+            const addChipsTitle = computed((): string => {
+
+                if (currentBalance.value === 0) {
+
+                    return 'You have no money to add';
+                }
+
+                if (isOverMaxBuyIn.value) {
+                    return 'You already at the max buy-in for the table';
+                }
+
+                if (isInHand.value) {
+                    return 'You cannot add chips during a hand';
+                };
+
+                return null;
+
+            });
+
+
+            const minBuyIn = computed((): number => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table) {
+
+                    if (myChips.value != null && myChips.value < table.stakes.minBuyIn) {
+
+                        return table.stakes.minBuyIn - myChips.value;
+
+                    }
+
+                }
+
+                return 0;
+
+            });
+
+            const isOverMaxBuyIn = computed((): boolean => {
+
+                const table: Table = tableState.getTable.value;
+
+                return table && myChips.value != null && myChips.value >= table.stakes.maxBuyIn;
+
+            });
+
+            const maxBuyIn = computed((): number => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table) {
+
+                    if (isOverMaxBuyIn.value) {
+
+                        return 0;
+
+                    }
+
+                    // They can't buy in for more than the table cap.  If they have less than that,
+                    // then the most they can buy in for is to 1) get them to the cap or 2) how much they have in the bank
+                    if (myChips.value != null) {
+                       
+                        return Math.min(table.stakes.maxBuyIn - myChips.value, currentBalance.value);
+
+                    }
+
+                }
+
+                return 0;
+
+            });
 
             const setStatus = (event: Event): void => {
 
@@ -194,6 +282,8 @@
 
                 numAddChips,
                 showAddChips,
+                showAddChipsDialog,
+                addChipsTitle,
                 step,
                 stepDown,
                 stepUp,
@@ -211,7 +301,7 @@
                 hasPendingStatusRequest,
                 localSittingOut,
 
-                isInHand
+                isInHand,
 
             };
 

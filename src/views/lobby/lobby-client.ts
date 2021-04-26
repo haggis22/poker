@@ -6,8 +6,7 @@ import { ActionMessage } from "../../app/messages/action-message";
 import { Command } from "../../app/commands/command";
 import { Logger } from "../../app/logging/logger";
 import { Action } from "../../app/actions/action";
-import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction, LoginCommand, LoginFailedAction, LogoutCommand, LogoutAction } from "../../app/communication/serializable";
-import { userState } from "@/store/user-state";
+import { AuthenticatedAction, ListTablesAction, LogoutAction } from "../../app/communication/serializable";
 import { lobbyState } from "@/store/lobby-state";
 import { v4 as uuidv4 } from 'uuid';
 

@@ -164,6 +164,7 @@ class CasinoClient implements MessageHandler, CommandBroadcaster {
 
     }   // listTablesAction
 
+
     public currentBalanceAction(action: CurrentBalanceAction): void {
 
         userState.setBalance(action.balance);
