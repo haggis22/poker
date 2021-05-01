@@ -12,6 +12,9 @@ export class Seat {
     // set to true by the TableController whenever a hand is started and the player is not sitting out
     public isInHand: boolean;
 
+    public muckedCards: Array<Card | FacedownCard>;
+
+
 
     constructor(index: number) {
 
@@ -20,6 +23,8 @@ export class Seat {
         this.player = null;
         this.hand = null;
         this.isInHand = false;
+
+        this.muckedCards = [];
 
     }
 

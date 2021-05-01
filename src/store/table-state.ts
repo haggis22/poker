@@ -34,10 +34,6 @@ const state = reactive({
     seatActions: new Map<number, string>(),
     seatTimers: new Map<number, Timer>(),
 
-    // Key = seatIndex
-    // Value = array of cards that have been mucked
-    muckedCards: new Map<number, Array<Card | FacedownCard>>(),
-
     // fields specific to acting in advance
     pendingBetCommand: null as BettingCommand,
     pendingBetNumRaises: null as number,
@@ -82,8 +78,6 @@ const initialize = () =>
 
     state.seatActions.clear();
     state.seatTimers.clear();
-
-    state.muckedCards.clear();
 
     // fields specific to acting in advance
     state.pendingBetCommand = null;
@@ -420,19 +414,20 @@ const clearHand = (seatIndex: number): (Card | FacedownCard)[] => {
 
 };
 
-const getMuckedCards = computed(() => state.muckedCards);
-
 const setMuckedCards = (seatIndex: number, cards: (Card | FacedownCard)[]): void => {
 
-    state.muckedCards.set(seatIndex, [...cards]);
+    state.table.seats[seatIndex].muckedCards = [ ...cards ];
 
 };
 
 const clearMuckedCards = (): void => {
 
-    state.muckedCards.clear();
+    for (const seat of state.table.seats) {
+        seat.muckedCards.length = 0;
+    }
 
 };
+
 
 const dealBoard = (cards: Card[]): void => {
 
@@ -635,7 +630,6 @@ export const tableState = {
     setHand,   // used for flipping cards over
     clearHand,  // used for folding
 
-    getMuckedCards,
     setMuckedCards,
     clearMuckedCards,
 
@@ -674,6 +668,7 @@ export const tableState = {
     setLocalSittingOut,
     getHasPendingStatusRequest,
     setHasPendingStatusRequest,
+
 
 };
 

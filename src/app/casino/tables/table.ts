@@ -7,6 +7,8 @@ import { TableRules } from "./table-rules";
 import { BetStatus } from "./betting/bet-status";
 import { Stakes } from "./betting/stakes";
 import { Game } from "../../games/game";
+import { Card } from '@/app/cards/card';
+import { FacedownCard } from '@/app/cards/face-down-card';
 
 
 export class Table {

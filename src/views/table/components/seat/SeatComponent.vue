@@ -157,7 +157,7 @@
 
             const muckedCards = computed((): (Card | FacedownCard)[] => {
 
-                return tableState.getMuckedCards.value.get(seatIndex);
+                return seat.value ? seat.value.muckedCards : null;
 
             });
 

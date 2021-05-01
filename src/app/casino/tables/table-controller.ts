@@ -415,6 +415,16 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 });
 
             }
+            else {
+
+                if (!seat.player || seat.player.userID !== userID) {
+
+                    // if the player is gone, or it is not the player requesting the snapshot, then clear the folded hold cards.
+                    seat.muckedCards.length = 0;
+
+                }
+
+            }
 
         }
 
@@ -867,8 +877,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         // We want each player to remember their own mucked cards, but we don't want anyone *else* to know what they were (unless they were all face-up)
 
-        // Take away their cards
+        // Take away their cards - here on the server this will always be an array of Card
         let muckedCards: Array<Card | FacedownCard> = folderSeat.clearHand();
+
+        folderSeat.muckedCards = muckedCards;
+
         let publicMuckedCards: Array<FacedownCard> = muckedCards.map(card => new FacedownCard());
 
         // This will tell watchers that the given seat is no longer in the hand
@@ -1406,6 +1419,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private clearHand(seat: Seat): void {
 
         seat.clearHand();
+
+        // This should only be called between hands, and not just for a regular fold, so we can clear out their mucked cards as well
+        seat.muckedCards.length == 0;
+
         this.queueAction(new IsInHandAction(this.table.id, seat.index, false));
 
     }  // clearHand
