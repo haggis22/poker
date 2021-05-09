@@ -128,10 +128,9 @@
                         return table.stakes.blinds[table.stakes.blinds.length - 1].amount * 10;
                     }
 
-                    return 
                 }
 
-                return 0;
+                return minBuyIn.value;
 
             })
 
@@ -149,7 +148,17 @@
 
             };
 
-            const isSittingOut = computed((): boolean => tableState.getTable.value.seats[tableState.getMySeatIndex.value].player.isSittingOut);
+            const isSittingOut = computed((): boolean => {
+
+                if (mySeatIndex.value != null && tableState.getTable.value.seats[mySeatIndex.value].player) {
+
+                    return tableState.getTable.value.seats[mySeatIndex.value].player.isSittingOut;
+
+                }
+
+                return false;
+                
+            });
 
             const localSittingOut = computed((): boolean => tableState.getLocalSittingOut.value);
 
