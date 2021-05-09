@@ -35,12 +35,7 @@
             <div>
                 <span class="min-buy-in">{{ chipFormatter.format(minBuyIn) }}</span>
                 <button type="button"
-                        @click.stop="stepDown(bigStep)"
-                        :disabled="numAddChips === minBuyIn">
-                    &#x00ab;
-                </button>
-                <button type="button"
-                        @click.stop="stepDown(smallStep)"
+                        @click.stop="stepDown(step)"
                         :disabled="numAddChips === minBuyIn">
                     &#x2039;
                 </button>
@@ -51,14 +46,9 @@
                        :max="maxBuyIn"
                        :step="step" />
                 <button type="button"
-                        @click.stop="stepUp(smallStep)"
+                        @click.stop="stepUp(step)"
                         :disabled="numAddChips === maxBuyIn">
                     &#x203a;
-                </button>
-                <button type="button"
-                        @click.stop="stepUp(bigStep)"
-                        :disabled="numAddChips === maxBuyIn">
-                    &#x00bb;
                 </button>
                 <span class="max-buy-in">{{ chipFormatter.format(maxBuyIn) }}</span>
             </div>
@@ -92,9 +82,58 @@
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
-            const numAddChips = ref(1000);
-            const smallStep = ref(100);
-            const bigStep = ref(200);
+            const mySeatIndex = computed((): number => tableState.getMySeatIndex.value);
+
+            const myChips = computed((): number => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table && mySeatIndex.value != null) {
+
+                    return table.seats[mySeatIndex.value].player.chips;
+
+                }
+
+                return null;
+
+            });
+
+            const minBuyIn = computed((): number => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table) {
+
+                    if (myChips.value != null && myChips.value < table.stakes.minBuyIn) {
+
+                        return table.stakes.minBuyIn - myChips.value;
+
+                    }
+
+                }
+
+                return 0;
+
+            });
+
+            const numAddChips = ref(minBuyIn.value);
+
+            const step = computed((): number => {
+
+                const table: Table = tableState.getTable.value;
+
+                if (table) {
+
+                    if (table.stakes.blinds.length) {
+                        return table.stakes.blinds[table.stakes.blinds.length - 1].amount * 10;
+                    }
+
+                    return 
+                }
+
+                return 0;
+
+            })
 
             const showAddChips = ref(false);
 
@@ -120,7 +159,6 @@
 
             const hasPendingStatusRequest = computed((): boolean => tableState.getHasPendingStatusRequest.value);
 
-            const mySeatIndex = computed((): number => tableState.getMySeatIndex.value);
 
             const userID = computed((): number => userState.getUserID.value);
 
@@ -135,20 +173,6 @@
                 }
 
                 return false;
-
-            });
-
-            const myChips = computed((): number => {
-
-                const table: Table = tableState.getTable.value;
-
-                if (table && mySeatIndex.value != null) {
-
-                    return table.seats[mySeatIndex.value].player.chips;
-
-                }
-
-                return null;
 
             });
 
@@ -180,23 +204,6 @@
             });
 
 
-            const minBuyIn = computed((): number => {
-
-                const table: Table = tableState.getTable.value;
-
-                if (table) {
-
-                    if (myChips.value != null && myChips.value < table.stakes.minBuyIn) {
-
-                        return table.stakes.minBuyIn - myChips.value;
-
-                    }
-
-                }
-
-                return 0;
-
-            });
 
             const isOverMaxBuyIn = computed((): boolean => {
 
@@ -296,8 +303,7 @@
                 showAddChipsDialog,
                 addChipsTitle,
 
-                smallStep,
-                bigStep,
+                step,
 
                 stepDown,
                 stepUp,
