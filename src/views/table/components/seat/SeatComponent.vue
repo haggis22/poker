@@ -30,7 +30,7 @@
                             :cards="seat.hand.cards"
                             :dealer-position="dealerPosition"></hand-component>
 
-            <folding-component v-if="muckedCards"
+            <folding-component v-if="hasMuckedCards"
                                 :cards="muckedCards"
                                 :dealer-position="dealerPosition"></folding-component>
 
@@ -161,6 +161,8 @@
 
             });
 
+            const hasMuckedCards = computed((): boolean => muckedCards.value != null && muckedCards.value.length > 0);
+
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
             return {
@@ -174,7 +176,9 @@
                 chipsClasses,
                 getAction,
                 getTimer,
+
                 muckedCards,
+                hasMuckedCards,
 
                 isMySeat,
                 amISitting,

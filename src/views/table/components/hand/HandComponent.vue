@@ -40,19 +40,29 @@ import './hand.scss';
 
             const cardCreated = (card: CardUI): void => {
 
-                console.log(`Starting dealing animation for ${card.index}`)
-                card.top = props.dealerPosition.top;
-                card.left = props.dealerPosition.left;
-                card.isFacedown = true;
+                if (card.isDealing) {
 
-                // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
-                setTimeout(() => {
+                    console.log(`Starting dealing animation for ${card.index}`)
+                    card.top = props.dealerPosition.top;
+                    card.left = props.dealerPosition.left;
+                    card.isFacedown = true;
 
-                    card.top = 5;
-                    card.left = 50 + (card.index * 50);
-                    card.isFacedown = false;
+                    // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+                    setTimeout(() => {
 
-                }, 10);
+                        card.top = calculateFinalTop(card);
+                        card.left = calculateFinalLeft(card);
+                        card.isFacedown = false;
+
+                    }, 10);
+
+                }
+                else {
+
+                    card.top = calculateFinalTop(card);
+                    card.left = calculateFinalLeft(card);
+
+                }
 
             };
 
@@ -69,6 +79,19 @@ import './hand.scss';
 
     });
 
-export default HandComponent;
+    function calculateFinalTop(card: CardUI): number {
+
+        return 5;
+
+    }
+
+    function calculateFinalLeft(card: CardUI): number {
+
+        return 50 + (card.index * 50);
+
+    }
+
+
+    export default HandComponent;
 
 </script>

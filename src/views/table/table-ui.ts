@@ -760,6 +760,9 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     private dealCardAction(action: DealCardAction): void {
 
+        // Mark this card as being dealt so that we can show the animation, but only when the card is *first* dealt
+        action.card.isDealing = true;
+
         tableState.dealCard(action.seatIndex, action.card);
 
         let seat = this.findSeat(action.seatIndex);
@@ -789,6 +792,12 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     }
 
     private dealBoardAction(action: DealBoardAction): void {
+
+        for (let card of action.cards) {
+
+            card.isDealing = true;
+
+        }
 
         tableState.dealBoard(action.cards);
 

@@ -8,6 +8,7 @@ export class Card
     public value: CardValue;
     public suit: CardSuit;
     public isFaceUp: boolean;
+    public isDealing: boolean;
 
     public constructor(value: CardValue, suit: CardSuit, isFaceUp: boolean)
     {
@@ -16,6 +17,7 @@ export class Card
         this.isFaceUp = isFaceUp;
 
         this.sortValue = 0;
+        this.isDealing = false;
     }
 
     public toString(): string {

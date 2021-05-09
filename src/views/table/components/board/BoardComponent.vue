@@ -52,25 +52,37 @@
 
             const cardCreated = (card: CardUI): void => {
 
-                console.log(`Starting animation for ${card.index}`)
-                card.top = dealerPosition.top;
-                card.left = dealerPosition.left;
-                card.isFacedown = true;
+                if (card.isDealing) {
 
-                // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
-                switch (card.index) {
+                    console.log(`Starting animation for ${card.index}`)
+                    card.top = dealerPosition.top;
+                    card.left = dealerPosition.left;
+                    card.isFacedown = true;
 
-                    case 0:
-                    case 1:
-                    case 2:
-                        setTimeout(() => { animateFlop(card) }, 100);
-                        break;
+                    // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
+                    switch (card.index) {
 
-                    default:
-                        setTimeout(() => { animateOthers(card) }, 100);
-                        break;
+                        case 0:
+                        case 1:
+                        case 2:
+                            setTimeout(() => { animateFlop(card) }, 100);
+                            break;
 
-                }  // switch
+                        default:
+                            setTimeout(() => { animateOthers(card) }, 100);
+                            break;
+
+                    }  // switch
+
+                }
+                else {
+
+                    // no animation - just put the card in place
+                    card.top = calculateFinalTop(card);
+                    card.left = calculateFinalLeft(card);
+
+                }
+
 
             };
 
@@ -90,9 +102,23 @@
 
     });
 
+
+    function calculateFinalTop(card: CardUI): number {
+
+        return 12;
+
+    }
+
+    function calculateFinalLeft(card: CardUI): number {
+
+        return 25 + (card.index * 60);
+
+    }
+
+
     function animateFlop(card: CardUI): void {
 
-        card.top = 12;
+        card.top = calculateFinalTop(card);
         card.left = 10;
 
         setTimeout(() => {
@@ -101,7 +127,7 @@
 
             setTimeout(() => {
 
-                card.left = 25 + (card.index * 60);
+                card.left = calculateFinalLeft(card);
 
             }, 300);
 
@@ -113,8 +139,8 @@
 
     function animateOthers(card: CardUI): void {
 
-        card.top = 12;
-        card.left = 25 + (card.index * 60);
+        card.top = calculateFinalTop(card);
+        card.left = calculateFinalLeft(card);
 
         setTimeout(() => {
 

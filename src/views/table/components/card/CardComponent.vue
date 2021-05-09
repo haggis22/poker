@@ -54,7 +54,7 @@
         },
         setup(props, context) {
 
-            const cardUI = reactive(new CardUI(props.index));
+            const cardUI = reactive(new CardUI(props.index, props.card.isDealing));
 
             const isVisible = computed((): boolean => cardUI.top != null);
             const isFaceUp = computed((): boolean => props.card instanceof Card);

@@ -415,16 +415,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                 });
 
             }
-            else {
 
-                if (!seat.player || seat.player.userID !== userID) {
+            if (!seat.player || seat.player.userID !== userID) {
 
-                    // if the player is gone, or it is not the player requesting the snapshot, then clear the folded hold cards.
-                    seat.muckedCards.length = 0;
-
-                }
+                // if the player is gone, or it is not the player requesting the snapshot, then clear the folded hold cards.
+                seat.muckedCards.length = 0;
 
             }
+
 
         }
 
