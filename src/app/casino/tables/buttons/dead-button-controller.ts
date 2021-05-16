@@ -198,9 +198,16 @@ export class DeadButtonController implements IButtonController {
             if (blindTracker.ante > 0) {
 
                 // Find the next available player after the Big Blind that has not already anted
-                const anteSeatIndex: number = table.findNextSeat(blindTracker.bigBlindIndex + 1, (seat) => (seat.player
-                                                                                                                && blindTracker.activePlayers.has(seat.player.userID)
-                                                                                                                && !blindTracker.paidAntes.has(seat.player.userID)));
+
+                // There are different rules, depending on whether or not there are blinds.  
+                // 1. If there are blinds, then the player must already be actively part of the game in order to ante
+                // 2. If there are no blinds, then anyone can ante and join the game immediately
+                const seatEligibility: (seat: Seat) => boolean = blindTracker.blinds.length
+                    // there are blinds
+                    ? (seat) => (seat.player && blindTracker.activePlayers.has(seat.player.userID) && !blindTracker.paidAntes.has(seat.player.userID))
+                    : (seat) => (seat.player && !blindTracker.paidAntes.has(seat.player.userID));
+
+                const anteSeatIndex: number = table.findNextSeat(blindTracker.bigBlindIndex + 1, seatEligibility);
 
                 if (anteSeatIndex == null) {
 

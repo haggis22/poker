@@ -1193,14 +1193,37 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.resetBetsForNewHand();
 
+        let numAvailableSeats: number = 0;
+
+        // Create a set of UserIDs that are available for the hand. If there are any active players
+        // that are not available for this hand, then take them out of the 
+        const availableUsers: Set<number> = new Set<number>();
+
         for (let seat of this.table.seats) {
 
             // Remove any cards they might have
             seat.clearHand();
 
+            if (seat.isAvailableForHand()) {
+
+                numAvailableSeats++;
+                availableUsers.add(seat.player.userID);
+
+            }
+
         }
 
-        const numAvailableSeats: number = this.table.seats.filter(s => s.isAvailableForHand()).length;
+
+        for (let userID of this.blindTracker.activePlayers.values()) {
+
+            if (!availableUsers.has(userID)) {
+
+                // They're not available for this hand, so kick 'em out
+                this.blindTracker.activePlayers.delete(userID);
+
+            }
+
+        }
 
         if (numAvailableSeats > 1) {
 
