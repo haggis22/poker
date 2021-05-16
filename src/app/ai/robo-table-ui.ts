@@ -260,7 +260,9 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
         this.table = action.table;
 
         // request a seat at the table - the null parameter means any seat will do
-        this.broadcastCommand(new RequestSeatCommand(this.table.id, null));
+        // Mark always wants to sit in seat 3
+        const requestedSeatID: number = this.user.id == 7 ? 3 : null;
+        this.broadcastCommand(new RequestSeatCommand(this.table.id, requestedSeatID));
 
     }  // tableSnapshotAction
 

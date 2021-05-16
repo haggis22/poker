@@ -222,6 +222,7 @@ export class DeadButtonController implements IButtonController {
             }
             else {
 
+                /*
                 // Credit everyone that remains as being in...
                 for (let seat of availableSeats) {
 
@@ -232,6 +233,7 @@ export class DeadButtonController implements IButtonController {
                     }
 
                 }
+                */
 
                 // we're all paid up, so move on to the next step!
                 blindTracker.currentStep = BlindTracker.STEP_DONE;
@@ -317,15 +319,14 @@ export class DeadButtonController implements IButtonController {
 
     private determineLastPayorOfBlinds(table: Table, blindTracker: BlindTracker): number {
 
+/*
         for (let pr = 0; pr < blindTracker.roundPayments.length; pr++) {
             console.log(`RP ${pr}: ${blindTracker.roundPayments[pr]}`);
         }
-
+*/
         // Only active players can be eligible to get the button
 
         this.log(`blindTracker has ${blindTracker.activePlayers.size} active players`);
-
-        const activeSeats: Seat[] = table.seats.filter(seat => seat.player && blindTracker.activePlayers.has(seat.player.userID));
 
         const paidMap: RoundPayments = new RoundPayments();
 
@@ -402,6 +403,47 @@ export class DeadButtonController implements IButtonController {
 
             let buttonSeat: Seat = table.seats[buttonIndex];
             this.log(`We are assigning the dealer to be seat ${buttonSeat.index} - ${buttonSeat.getName()}`);
+
+            if (blindTracker.roundPayments.length === 0) {
+
+                // Make up some fake blind payments that would result in the current button/blind situation so that the next hand(s) can proceed as you would expect
+                // If we don't do this then the button will just stay in the same place until the blinds all get paid - we would rather that it starts moving normally immediately.
+
+                let bbSeatIndex: number = blindTracker.bigBlindIndex;
+
+                // Go back the number of rounds that we have active players
+                for (let r = 0; r < blindTracker.activePlayers.size; r++) {
+
+                    // This sets the Big Blind index for this previous round of betting
+                    bbSeatIndex = table.findPreviousAvailableSeatIndex(bbSeatIndex - 1);
+
+                    const rp: RoundPayments = new RoundPayments();
+
+                    for (let blindIndex = 0; blindIndex < blindTracker.blinds.length; blindIndex++) {
+
+                        // We are going to assign the blinds in increasing order (small blind, then big blind, etc)
+                        // We need to jump back the number of spaces according to how many blinds there are.  
+                        // If there are 2 blinds then,
+                        // For the small blind (blind index = 0) we want to go back 1 space
+                        // For the big blind (blind index = 1) we want to go back 0 spaces
+                        let blindSeatIndex: number = bbSeatIndex;
+
+                        for (let bi = 0; bi < (blindTracker.blinds.length - 1) - blindIndex; bi++) {
+
+                            blindSeatIndex = table.findPreviousAvailableSeatIndex(blindSeatIndex - 1);
+
+                        }
+
+                        rp.addPayment(table.seats[blindSeatIndex].player.userID, blindIndex);
+
+                    }   // for each blind
+
+                    // we're going backwards in time, so put the fake round payments at the front of the queue each time
+                    blindTracker.roundPayments.unshift(rp);
+
+                }
+
+            }
 
             return buttonIndex;
 

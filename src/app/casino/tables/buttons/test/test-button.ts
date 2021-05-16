@@ -139,7 +139,6 @@ function testInBetween() {
     let handNum = 0;
 
     runHand(++handNum, harness);
-    runHand(++handNum, harness);
 
     // Add Joe into the mix
     setInHand(table, [0, 1, 2, 3]);

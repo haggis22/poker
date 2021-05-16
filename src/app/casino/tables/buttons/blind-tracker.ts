@@ -91,8 +91,6 @@ export class BlindTracker {
             this.currentRoundPayments = new RoundPayments();
         }
 
-        debugger;
-
         // We're taking payment for this player, so they must be active
         this.activePlayers.add(userID);
 
