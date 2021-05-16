@@ -59,6 +59,8 @@ export { GatherBetsAction } from "../actions/table/betting/gather-bets-action";
 export { GatherBetsCompleteAction } from "../actions/table/betting/gather-bets-complete-action";
 export { GatherAntesAction } from "../actions/table/betting/gather-antes-action";
 export { GatherAntesCompleteAction } from "../actions/table/betting/gather-antes-complete-action";
+export { ClearBettingActionsAction } from "../actions/table/betting/clear-betting-actions-action";
+export { BettingActionAction } from "../actions/table/betting/betting-action-action";
 
 export { MoveButtonAction } from "../actions/table/game/move-button-action";
 

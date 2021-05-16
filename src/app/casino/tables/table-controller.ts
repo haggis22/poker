@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ClearTimerAction, Stakes } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ClearTimerAction, Stakes, ClearBettingActionsAction, BettingActionAction, Blind } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -776,14 +776,21 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             // Give them credit for all the blinds they were supposed to pay 
             this.blindTracker.addPayments(this.table, command.userID, this.table.betStatus.forcedBets);
 
+            let hasBlind: boolean = false;
+
             for (let anteBlind of anteResult) {
 
                 // When announcing the results use the actual bets so that if they put in less (or nothing) then it 
                 // announces *that* amount rather than what was originally required
                 this.queueAction(new BetAction(this.table.id, bettorSeat.index, anteBlind));
 
+                if (anteBlind.betType == Bet.TYPE.BLIND) {
+                    hasBlind = true;
+                }
+
             }
 
+            this.setBettingAction(bettorSeat.index, hasBlind ? Bet.ACTION_TEXT.BLIND : Bet.ACTION_TEXT.ANTE);
             this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
             this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
@@ -831,6 +838,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 this.clearBetTimeout(bettorSeat.index);
 
+                this.setBettingAction(bettorSeat.index, betResult.getActionString());
                 this.queueAction(new BetAction(this.table.id, bettorSeat.index, betResult));
                 this.queueAction(new StackUpdateAction(this.table.id, bettorSeat.player.userID, bettorSeat.player.chips));
 
@@ -881,6 +889,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         folderSeat.muckedCards = muckedCards;
 
         let publicMuckedCards: Array<FacedownCard> = muckedCards.map(card => new FacedownCard());
+
+        this.setBettingAction(folderSeat.index, Bet.ACTION_TEXT.FOLD);
 
         // This will tell watchers that the given seat is no longer in the hand
 
@@ -1374,6 +1384,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             }, millisToAct));
 
+            // Clear any previous action for the ante-er
+            this.setBettingAction(anteSeat.index, null);
+
             // We found a forced bet, so ship it out and we're done
             return this.queueAction(new AnteTurnAction(this.table.id, timesUp));
 
@@ -1587,6 +1600,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
+        this.clearBettingActions();
+
         // See if we maybe want to do something special once players are all-in
         await this.checkAllIn();
 
@@ -1594,6 +1609,29 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         return await this.goToNextState();
 
     }  // completeBetting
+
+
+    private clearBettingActions(): void {
+
+        for (let seat of this.table.seats) {
+
+            seat.action = null;
+
+        }
+
+        this.queueAction(new ClearBettingActionsAction(this.table.id));
+
+    }
+
+
+    private setBettingAction(seatIndex: number, action: string): void {
+
+        this.table.seats[seatIndex].action = action;
+        this.queueAction(new BettingActionAction(this.table.id, seatIndex, action));
+
+    }
+
+
 
 
     private async checkAllIn(): Promise<void> {
@@ -1655,6 +1693,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         let timesUp: number = Date.now() + millisToAct;
 
+        // Clear any previous action for this bettor
+        this.setBettingAction(actor.seatIndex, null);
+
+        // tell everyone it's his turn
         this.queueAction(new BetTurnAction(this.table.id, this.table.betStatus, timesUp));
 
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
@@ -1667,6 +1709,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (check instanceof Bet) {
 
+                this.setBettingAction(checkerSeat.index, Bet.ACTION_TEXT.CHECK);
                 this.queueAction(new BetAction(this.table.id, checkerSeat.index, check));
                 return await this.advanceBetTurn();
 

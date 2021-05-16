@@ -19,6 +19,17 @@
             RETURNED: 4
         };
 
+    public static readonly ACTION_TEXT: any =
+        {
+            ANTE: 'Ante',
+            BLIND: 'Blind',
+            CHECK: 'Check',
+            BET: 'Bet',
+            CALL: 'Call',
+            RAISE: 'Raise',
+            FOLD: 'Fold'
+        };
+
     public seatIndex: number;
     public totalBet: number;
     public chipsAdded: number;
@@ -48,6 +59,28 @@
     public toString(): string {
 
         return JSON.stringify(this);
+
+    }
+
+    public getActionString(): string {
+
+        switch (this.actionType) {
+
+            case Bet.ACTION.CHECK:
+                return Bet.ACTION_TEXT.CHECK;
+
+            case Bet.ACTION.OPEN:
+                return Bet.ACTION_TEXT.BET;
+
+            case Bet.ACTION.CALL:
+                return Bet.ACTION_TEXT.CALL;
+
+            case Bet.ACTION.RAISE:
+                return Bet.ACTION_TEXT.RAISE;
+
+        }
+
+        return null;
 
     }
 

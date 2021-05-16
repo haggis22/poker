@@ -14,6 +14,9 @@ export class Seat {
 
     public muckedCards: Array<Card | FacedownCard>;
 
+    public action: string;
+
+
 
 
     constructor(index: number) {
@@ -25,6 +28,8 @@ export class Seat {
         this.isInHand = false;
 
         this.muckedCards = [];
+
+        this.action = null;
 
     }
 

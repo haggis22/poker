@@ -14,7 +14,7 @@ import { Logger } from "../../app/logging/logger";
 import { TableConnectedAction } from "../../app/actions/table/state/table-connected-action";
 import { AuthenticateCommand } from "../../app/commands/security/authenticate-command";
 import { TableSnapshotCommand } from "../../app/commands/table/table-snapshot-command";
-import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction, ClearTimerAction, AuthenticationFailedAction } from "../../app/communication/serializable";
+import { AddChipsAction, Player, StackUpdateAction, TableStateAction, StartHandState, BetAction, GatherBetsAction, GatherAntesAction, UpdateBetsAction, MoveButtonAction, Seat, DealCardAction, BetTurnAction, AnteTurnAction, BetCommand, FoldCommand, Bet, FoldAction, FlipCardsAction, WinPotAction, BetReturnedAction, DeclareHandAction, BettingCompleteAction, Card, AnteCommand, IsInHandAction, DealBoardAction, JoinTableCommand, LoginCommand, BetState, BlindsAndAntesState, GatherBetsCompleteAction, GatherAntesCompleteAction, SetStatusCommand, PotCardsUsedAction, ShowdownAction, FacedownCard, ChatAction, AuthenticatedAction, CheckBalanceCommand, TableAction, RaiseCommand, CallCommand, ClearBoardAction, ClearHandAction, ClearTimerAction, AuthenticationFailedAction, ClearBettingActionsAction } from "../../app/communication/serializable";
 import { SetGameAction } from "../../app/actions/table/game/set-game-action";
 import { SetStatusAction } from "@/app/actions/table/players/set-status-action";
 import { SetStatusAckedAction } from "@/app/actions/table/players/set-status-acked-action";
@@ -32,6 +32,7 @@ import { tableState } from "@/store/table-state";
 import { betController } from '@/app/casino/tables/betting/bet-controller';
 import { messageState } from '@/store/message-state';
 import { v4 as uuidv4 } from 'uuid';
+import { BettingActionAction } from '@/app/actions/table/betting/betting-action-action';
 
 
 const logger: Logger = new Logger();
@@ -230,6 +231,18 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (action instanceof GatherAntesCompleteAction) {
 
             return this.gatherAntesCompleteAction(action);
+
+        }
+
+        if (action instanceof ClearBettingActionsAction) {
+
+            return this.clearBettingActionsAction(action);
+
+        }
+
+        if (action instanceof BettingActionAction) {
+
+            return this.bettingActionAction(action);
 
         }
 
@@ -849,10 +862,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         tableState.setBetStatus(action.betStatus);
 
-        // Remove any previous action for the current "to-act" player
-        // Map.delete is safe to use, even if the key does not already exist
-        tableState.clearAction(action.betStatus.seatIndex);
-
         let seat = this.findSeat(action.betStatus.seatIndex);
 
         if (!seat.player || seat.player.userID != action.betStatus.actionOnUserID) {
@@ -948,9 +957,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         let anteSeatIndex: number = table.betStatus.seatIndex;
 
-        // Remove any previous action for the current "to-act" player
-        tableState.clearAction(anteSeatIndex);
-
         let anteSeat: Seat = this.findSeat(anteSeatIndex);
         this.log(`It is ${anteSeat.getName()}'s turn to ante`);
 
@@ -1013,13 +1019,11 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (action.bet.betType == Bet.TYPE.ANTE) {
 
             message = `${seat.getName()} antes ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
-            tableState.setAction(seat.index, 'ANTE');
 
         }
         else if (action.bet.betType == Bet.TYPE.BLIND) {
 
             message = `${seat.getName()} blinds ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
-            tableState.setAction(seat.index, 'BLIND');
 
         }
         else if (action.bet.betType == Bet.TYPE.REGULAR) {
@@ -1028,22 +1032,18 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
                 case Bet.ACTION.CHECK:
                     message = `${seat.getName()} checks`;
-                    tableState.setAction(seat.index, 'CHECK');
                     break;
 
                 case Bet.ACTION.OPEN:
                     message = `${seat.getName()} bets ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
-                    tableState.setAction(seat.index, 'BET');
                     break;
 
                 case Bet.ACTION.CALL:
                     message = `${seat.getName()} calls ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
-                    tableState.setAction(seat.index, 'CALL');
                     break;
 
                 case Bet.ACTION.RAISE:
                     message = `${seat.getName()} raises to ${tableState.getChipFormatter.value.format(action.bet.totalBet)}`;
-                    tableState.setAction(seat.index, 'RAISE');
                     break;
 
             }  // switch
@@ -1070,8 +1070,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         tableState.addMessage(message);
         this.log(message);
-
-        tableState.setAction(seat.index, 'FOLD');
 
     }  // fold
 
@@ -1200,7 +1198,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     private gatherBetsCompleteAction(action: GatherBetsCompleteAction): void {
 
         tableState.setGatheringBets(false);
-        tableState.clearActions();
 
     }  // gatherBetsComplete
 
@@ -1214,9 +1211,23 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     private gatherAntesCompleteAction(action: GatherAntesCompleteAction): void {
 
         tableState.setGatheringAntes(false);
-        tableState.clearActions();
 
     }  // gatherBetsComplete
+
+
+    private clearBettingActionsAction(action: ClearBettingActionsAction): void {
+
+        tableState.clearActions();
+
+    }
+
+    private bettingActionAction(action: BettingActionAction): void {
+
+        console.log(`HEARD ${action.action} for seat ${action.seatIndex}`);
+
+        tableState.setAction(action.seatIndex, action.action);
+
+    }
 
 
 

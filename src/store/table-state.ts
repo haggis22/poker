@@ -31,7 +31,6 @@ const state = reactive({
 
     mySeatIndex: null as number,
 
-    seatActions: new Map<number, string>(),
     seatTimers: new Map<number, Timer>(),
 
     // fields specific to acting in advance
@@ -76,7 +75,6 @@ const initialize = () =>
 
     state.mySeatIndex = null;
 
-    state.seatActions.clear();
     state.seatTimers.clear();
 
     // fields specific to acting in advance
@@ -234,23 +232,24 @@ const setIsInHand = (seatIndex: number, isInHand: boolean): boolean => {
 }  // setIsInHand
 
 
-const getActions = computed((): Map<number, string> => state.seatActions);
-
 const setAction = (seatIndex: number, action: string): void => {
 
-    state.seatActions.set(seatIndex, action);
+    let seat: Seat = state.table.seats[seatIndex];
+
+    if (seat) {
+        seat.action = action;
+    }
 
 };
 
-const clearAction = (seatIndex: number): void => {
-
-    state.seatActions.delete(seatIndex);
-
-}
 
 const clearActions = (): void => {
 
-    state.seatActions.clear();
+    for (let seat of state.table.seats) {
+
+        seat.action = null;
+
+    }
 
 }
 
@@ -597,9 +596,7 @@ export const tableState = {
     setPlayerStatus,
     setPlayerChips,
 
-    getActions,
     setAction,
-    clearAction,
     clearActions,
 
     getTimers,
