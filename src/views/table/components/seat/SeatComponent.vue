@@ -127,7 +127,7 @@
 
             const getAction = computed((): string => seat.value.action);
 
-            const getTimer = computed((): Timer => tableState.getTimers.value.get(seatIndex));
+            const getTimer = computed((): Timer => seat.value.timer);
 
             const isMySeat = computed((): boolean => tableState.getMySeatIndex.value == seatIndex);
 

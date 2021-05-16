@@ -31,7 +31,7 @@ const state = reactive({
 
     mySeatIndex: null as number,
 
-    seatTimers: new Map<number, Timer>(),
+    seatTimers: new Map<number, ReturnType<typeof setTimeout>>(),
 
     // fields specific to acting in advance
     pendingBetCommand: null as BettingCommand,
@@ -253,8 +253,6 @@ const clearActions = (): void => {
 
 }
 
-const getTimers = computed((): Map<number, Timer> => state.seatTimers);
-
 
 const startTimer = (seatIndex: number, timer: Timer): void => {
 
@@ -262,14 +260,28 @@ const startTimer = (seatIndex: number, timer: Timer): void => {
 
     const reactiveTimer = reactive(timer);
 
-    reactiveTimer.timer = setTimeout(() => { stepDownTimer(reactiveTimer); }, Timer.STEP_TIME);
-    state.seatTimers.set(seatIndex, reactiveTimer);
+    let timerID: ReturnType<typeof setTimeout> = setTimeout(() => { stepDownTimer(seatIndex, reactiveTimer); }, Timer.STEP_TIME);
 
+    // Remember the timerID in the map so that we can stop it later
+    state.seatTimers.set(seatIndex, timerID);
+
+    const seat: Seat = state.table.seats[seatIndex];
+    if (seat) {
+
+        seat.timer = reactiveTimer;
+
+    }
 };
 
-function stepDownTimer(timer: Timer): void {
+function stepDownTimer(seatIndex: number, timer: Timer): void {
 
-    clearTimeout(timer.timer);
+    const oldTimerID: ReturnType<typeof setTimeout> = state.seatTimers.get(seatIndex);
+
+    if (oldTimerID != null) {
+
+        clearTimeout(oldTimerID);
+
+    }
 
     if (timer.totalTime > 0) {
 
@@ -277,10 +289,11 @@ function stepDownTimer(timer: Timer): void {
 
         if (timeRemaining > 0) {
 
-            timer.percentRemaining = 100 * (timeRemaining / timer.totalTime)
-            timer.timer = setTimeout(() => {
-                stepDownTimer(timer);
-            }, Timer.STEP_TIME);
+            timer.percentRemaining = 100 * (timeRemaining / timer.totalTime);
+
+            const newTimerID: ReturnType<typeof setTimeout> = setTimeout(() => { stepDownTimer(seatIndex, timer); }, Timer.STEP_TIME);
+
+            state.seatTimers.set(seatIndex, newTimerID);
 
         }
         else {
@@ -297,30 +310,32 @@ function stepDownTimer(timer: Timer): void {
 
 const clearTimer = (seatIndex: number): void => {
 
+    let timerID: ReturnType<typeof setTimeout> = state.seatTimers.get(seatIndex);
 
-    let timer: Timer = getTimers.value.get(seatIndex);
-    if (timer) {
+    if (timerID) {
 
-        clearTimeout(timer.timer);
+        clearTimeout(timerID);
 
     }
 
+    // This doesn't throw an error, even if the seatIndex is not in the map
     state.seatTimers.delete(seatIndex);
+
+    const seat: Seat = state.table.seats[seatIndex];
+    if (seat) {
+
+        seat.timer = null;
+
+    }
 
 }
 
 const clearTimers = (): void => {
 
     // Stop any seat timer that is already running
-    for (let [seatIndex, timer] of getTimers.value) {
-
-        if (timer) {
-            clearTimer(seatIndex);
-        }
-
+    for (const seatIndex of state.seatTimers.keys()) {
+        clearTimer(seatIndex);
     }
-
-    state.seatTimers.clear();
 
 }
 
@@ -599,7 +614,6 @@ export const tableState = {
     setAction,
     clearActions,
 
-    getTimers,
     startTimer,
     clearTimer,
     clearTimers,

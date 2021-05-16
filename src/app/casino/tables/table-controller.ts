@@ -68,8 +68,8 @@ import { CashierManager } from '../cashier/cashier-manager';
 import { BlindTracker } from './buttons/blind-tracker';
 import { RemainingActor } from './betting/remaining-actor';
 import { v4 as uuidv4 } from 'uuid';
-import { Serializer } from '@/app/communication/serializer';
 import { IChipFormatter } from './chips/chip-formatter';
+import { Timer } from '../../timers/timer';
 
 const logger: Logger = new Logger();
 
@@ -745,6 +745,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         clearTimeout(this.betTimerMap.get(seatIndex));
         this.betTimerMap.delete(seatIndex);
 
+        // Remove the timer data from the seat
+        this.table.seats[seatIndex].timer = null;
+
     }
 
 
@@ -1377,6 +1380,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             let millisToAct: number = this.table.rules.timeToAnte * 1000;
             let timesUp: number = Date.now() + millisToAct;
 
+            anteSeat.timer = new Timer(timesUp);
+
             // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending an Ante command
             this.betTimerMap.set(anteSeat.index, setTimeout(async () => {
 
@@ -1690,8 +1695,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             millisToAct *= 5;
         }
 */
+        let actorSeat = this.table.seats[actor.seatIndex];
 
         let timesUp: number = Date.now() + millisToAct;
+
+        actorSeat.timer = new Timer(timesUp);
 
         // Clear any previous action for this bettor
         this.setBettingAction(actor.seatIndex, null);
@@ -1702,28 +1710,26 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // This is a countdown for the user to act, so we actually want to use a timer here because it can be interrupted by the user sending a command
         this.betTimerMap.set(actor.seatIndex, setTimeout(async () => {
 
-            let checkerSeat = this.table.seats[actor.seatIndex];
-
             // try to check
-            let check: InvalidBet | Bet = betController.validateBet(this.table, checkerSeat, actor.userID, 0);
+            let check: InvalidBet | Bet = betController.validateBet(this.table, actorSeat, actor.userID, 0);
 
             if (check instanceof Bet) {
 
-                this.setBettingAction(checkerSeat.index, Bet.ACTION_TEXT.CHECK);
-                this.queueAction(new BetAction(this.table.id, checkerSeat.index, check));
+                this.setBettingAction(actorSeat.index, Bet.ACTION_TEXT.CHECK);
+                this.queueAction(new BetAction(this.table.id, actorSeat.index, check));
                 return await this.advanceBetTurn();
 
             }
 
-            let fold: Fold = betController.fold(this.table, checkerSeat, actor.userID);
+            let fold: Fold = betController.fold(this.table, actorSeat, actor.userID);
 
             if (fold instanceof Fold) {
 
-                return await this.foldPlayer(checkerSeat, fold);
+                return await this.foldPlayer(actorSeat, fold);
 
             }
 
-            this.log(`TableController could not check or fold ${checkerSeat.getSeatName()}`);
+            this.log(`TableController could not check or fold ${actorSeat.getSeatName()}`);
 
         }, millisToAct));
 

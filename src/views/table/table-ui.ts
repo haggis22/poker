@@ -461,6 +461,18 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         tableState.setMySeatIndex(mySeat ? mySeat.index : null);
 
+        // if there any timers already set then get them started counting
+        for (const seat of action.table.seats) {
+
+            if (seat.timer) {
+
+                tableState.startTimer(seat.index, seat.timer);
+
+            }
+
+        }
+
+
     }  // tableSnapshotAction
 
 

@@ -2,8 +2,6 @@
 
     public static readonly STEP_TIME: number = 50;
 
-    public timer: ReturnType<typeof setTimeout>;
-
     public startTime: number;
     public expireTime: number;
     public totalTime: number;

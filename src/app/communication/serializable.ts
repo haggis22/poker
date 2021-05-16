@@ -1,5 +1,4 @@
-﻿
-export { Command } from "../commands/command";
+﻿export { Command } from "../commands/command";
 export { Message } from "../messages/message";
 export { ErrorMessage } from "../messages/error-message";
 export { ActionMessage } from "../messages/action-message";
@@ -49,6 +48,7 @@ export { BetAction } from "../actions/table/betting/bet-action";
 export { BetTurnAction } from "../actions/table/betting/bet-turn-action";
 export { BetReturnedAction } from "../actions/table/betting/bet-returned-action";
 export { ClearTimerAction } from "../actions/table/betting/clear-timer-action";
+export { Timer } from '../timers/timer';
 
 
 export { BlindsAndAntesState } from "../casino/tables/states/betting/blinds-and-antes-state";

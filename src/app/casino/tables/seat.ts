@@ -2,6 +2,7 @@
 import { Player } from "../../players/player";
 import { Card } from "../../cards/card";
 import { FacedownCard } from "../../cards/face-down-card";
+import { Timer } from '../../timers/timer';
 
 export class Seat {
 
@@ -15,7 +16,7 @@ export class Seat {
     public muckedCards: Array<Card | FacedownCard>;
 
     public action: string;
-
+    public timer: Timer;
 
 
 
@@ -30,6 +31,7 @@ export class Seat {
         this.muckedCards = [];
 
         this.action = null;
+        this.timer = null;
 
     }
 
