@@ -7,11 +7,16 @@ import { Stakes } from '../betting/stakes';
 import { RoundPayments } from './round-payments';
 import { request } from 'express';
 import { BlindTracker } from './blind-tracker';
+import { IBlindAssigner } from './i-blind-assigner';
 
 export class DeadButtonController implements IButtonController {
 
+    private blindAssigner: IBlindAssigner;
 
-    constructor() {
+    constructor(blindAssigner: IBlindAssigner) {
+
+        this.blindAssigner = blindAssigner;
+
     }
 
 
@@ -75,8 +80,8 @@ export class DeadButtonController implements IButtonController {
 
                 // No blinds have been paid at all, so we need to find who should pay the Biggest Blind first
                 blindTracker.bigBlindIndex = blindTracker.bigBlindIndex == null
-                    // We haven't set the big blind position, so just assign it randomly to any available seat
-                    ? availableSeats[Math.floor(Math.random() * availableSeats.length)].index
+                    // We haven't set the big blind position, so pick one
+                    ? this.blindAssigner.assignBigBlind(availableSeats)
                     // We previously had a big blind position, so move it to the next available player
                     : table.findNextAvailableSeatIndex(blindTracker.bigBlindIndex + 1);
 
@@ -270,9 +275,8 @@ export class DeadButtonController implements IButtonController {
         else {
 
             let buttonIndex: number = blindTracker.buttonIndex == null
-                // We have not previously picked a button, so 
-                // randomly pick one of the active seats to have the button
-                ? Math.floor(Math.random() * availableSeats.length)
+                // We have not previously picked a button, so pick one of the active seats to have the button
+                ? this.blindAssigner.assignButton(availableSeats)
                 // otherwise, just move it to the next spot
                 : (blindTracker.buttonIndex + 1);
 

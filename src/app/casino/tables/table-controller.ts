@@ -81,9 +81,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private readonly TIME_DEAL_CARD: number = 100;
     private readonly TIME_DEAL_BOARD: number = 300;
 
-    private readonly TIME_ANTE = 100;
+    private readonly TIME_ANTE = 2000;
     private readonly TIME_BET = 100;
-    private readonly TIME_LAST_BET_MADE = 500;
+    private readonly TIME_LAST_BET_MADE = 2500;
     private readonly TIME_RETURN_BET = 500;
     private readonly TIME_GATHERING_BETS: number = 1250;
 
@@ -292,7 +292,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         if (message instanceof ActionMessage) {
 
-            this.log(`Queueing ${message.action.constructor.name}`);
+            // this.log(`Queueing ${message.action.constructor.name}`);
 
         }
         else if (message instanceof MessagePair) {
@@ -300,7 +300,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             let publicMessage: string = message.publicMessage && message.publicMessage instanceof ActionMessage ? message.publicMessage.action.constructor.name : '[No public message]';
             let privateMessage: string = message.privateMessage && message.privateMessage instanceof ActionMessage ? message.privateMessage.action.constructor.name : '[No private message]';
 
-            this.log(`Queueing public: ${publicMessage}, private: ${privateMessage} `);
+            // this.log(`Queueing public: ${publicMessage}, private: ${privateMessage} `);
 
         }
 

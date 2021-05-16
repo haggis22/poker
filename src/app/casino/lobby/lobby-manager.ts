@@ -27,6 +27,7 @@ import { IButtonController } from '../tables/buttons/i-button-controller';
 import { DeadButtonController } from '../tables/buttons/dead-button-controller';
 import { CashierManager } from '../cashier/cashier-manager';
 import { MoneyFormatter } from '../tables/chips/money-formatter';
+import { RandomBlindAssigner } from '../tables/buttons/random-blind-assigner';
 
 
 export class LobbyManager implements MessageBroadcaster {
@@ -188,7 +189,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let buttonController: IButtonController = new DeadButtonController();
+        let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
 
@@ -226,7 +227,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let buttonController: IButtonController = new DeadButtonController();
+        let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
 
@@ -264,7 +265,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
         let deck: Deck = new Deck();
-        let buttonController: IButtonController = new DeadButtonController();
+        let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
 

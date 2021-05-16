@@ -25,7 +25,7 @@ import { betController } from "../casino/tables/betting/bet-controller";
 import { v4 as uuidv4 } from 'uuid';
 
 
-const TIME_TO_THINK = 3200;
+const TIME_TO_THINK = 1200;
 
 const logger: Logger = new Logger();
 

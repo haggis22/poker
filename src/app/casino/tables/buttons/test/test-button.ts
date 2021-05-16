@@ -6,6 +6,9 @@ import { Player } from '../../../../players/player';
 import { IButtonController } from '../i-button-controller';
 import { DeadButtonController } from '../dead-button-controller';
 import { BlindTracker } from '../blind-tracker';
+import { RandomBlindAssigner } from '../random-blind-assigner';
+import { IBlindAssigner } from '../i-blind-assigner';
+import { ExplicitBlindAssigner } from '../explicit-blind-assigner';
 
 
 class Harness
@@ -23,7 +26,7 @@ class Harness
 
 
 
-function setup(): Harness {
+function setup(blindAssigner: IBlindAssigner): Harness {
 
     const blinds: Blind[] =
         [
@@ -51,7 +54,7 @@ function setup(): Harness {
     table.seats[4].player = new Player(8, 'Billy');
     table.seats[4].player.chips = 1000;
 
-    return new Harness(table, new BlindTracker(stakes), new DeadButtonController());
+    return new Harness(table, new BlindTracker(stakes), new DeadButtonController(blindAssigner));
 
 }
 
@@ -77,7 +80,7 @@ function setInHand(table: Table, activeSeatIndexes: number[]) {
 
 function testHeadsUp() {
 
-    const harness: Harness = setup();
+    const harness: Harness = setup(new RandomBlindAssigner());
 
     const { table, blindTracker, buttonController } = harness;
 
@@ -96,7 +99,7 @@ function testHeadsUp() {
 
 function testAddThird() {
 
-    const harness: Harness = setup();
+    const harness: Harness = setup(new RandomBlindAssigner());
 
     const { table, blindTracker, buttonController } = harness;
 
@@ -109,9 +112,39 @@ function testAddThird() {
 
     runHand(++handNum, harness);
 
+
+    runHand(++handNum, harness);
+
     // Add Joe into the mix
     setInHand(table, [0, 1, 2]);
 
+    runHand(++handNum, harness);
+    runHand(++handNum, harness);
+    runHand(++handNum, harness);
+
+}
+
+
+function testInBetween() {
+
+    const harness: Harness = setup(new ExplicitBlindAssigner(0, 3));
+
+    const { table, blindTracker, buttonController } = harness;
+
+    blindTracker.resetForOpenState(table);
+
+    // Set it so that only Danny & Paul are not sitting out
+    setInHand(harness.table, [0, 1, 3]);
+
+    let handNum = 0;
+
+    runHand(++handNum, harness);
+    runHand(++handNum, harness);
+
+    // Add Joe into the mix
+    setInHand(table, [0, 1, 2, 3]);
+
+    runHand(++handNum, harness);
     runHand(++handNum, harness);
     runHand(++handNum, harness);
 
@@ -152,3 +185,8 @@ if (process.argv.includes('dp')) {
 if (process.argv.includes('dpj')) {
     testAddThird();
 }
+
+if (process.argv.includes('hole')) {
+    testInBetween();
+}
+
