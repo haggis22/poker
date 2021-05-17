@@ -141,7 +141,12 @@ export class BlindTracker {
 
     public saveBlindPayments(): void {
 
-        this.roundPayments.push(this.currentRoundPayments);
+        if (this.currentRoundPayments != null) {
+
+            this.roundPayments.push(this.currentRoundPayments);
+
+        }
+
         this.currentRoundPayments = null;
 
     }
