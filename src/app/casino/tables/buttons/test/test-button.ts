@@ -168,7 +168,7 @@ function runHand(handNum: number, harness: Harness) {
         console.log(`Action on ${table.seats[table.betStatus.seatIndex]}: ${table.betStatus.forcedBets.join(' ')}`);
 
         // Action-On player pays all their forced bets
-        blindTracker.addPayments(table, table.betStatus.actionOnUserID, table.betStatus.forcedBets);
+        blindTracker.addPayments(table, table.betStatus.seatIndex, table.betStatus.actionOnUserID, table.betStatus.forcedBets);
 
     }
 

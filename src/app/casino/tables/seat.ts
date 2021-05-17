@@ -86,12 +86,4 @@ export class Seat {
 
     }
 
-
-    public isAvailableForHand(): boolean {
-
-        return this.player && !this.player.isSittingOut && this.player.chips > 0;
-
-    }
-
-
 }

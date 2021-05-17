@@ -17,8 +17,15 @@ export class BlindTracker {
     public currentStep: number;
 
 
+    // For both activePlayers and availablePlayers:
+    // Key = seatIndex
+    // Value = userID
+
     // This is the set of userIDs that are paid up and eligible to get the button
-    public activePlayers: Set<number>;
+    private activePlayers: Map<number, number>;
+
+    // This is the set of players that have chips and could play, if we let them
+    private availablePlayers: Map<number, number>;
 
     public ante: number;
     public blinds: Blind[];
@@ -41,7 +48,8 @@ export class BlindTracker {
 
     constructor(stakes: Stakes) {
 
-        this.activePlayers = new Set<number>();
+        this.activePlayers = new Map<number, number>();
+        this.availablePlayers = new Map<number, number>();
 
         this.ante = stakes.ante;
         this.blinds = stakes.blinds;
@@ -68,6 +76,7 @@ export class BlindTracker {
     public resetForOpenState(table: Table): void {
 
         this.activePlayers.clear();
+        this.availablePlayers.clear();
 
     }
 
@@ -85,14 +94,14 @@ export class BlindTracker {
     }
 
 
-    public addPayments(table: Table, userID: number, forcedBets: (Ante | Blind)[]) {
+    public addPayments(table: Table, seatIndex: number, userID: number, forcedBets: (Ante | Blind)[]) {
 
         if (!this.currentRoundPayments) {
             this.currentRoundPayments = new RoundPayments();
         }
 
         // We're taking payment for this player, so they must be active
-        this.activePlayers.add(userID);
+        this.addActivePlayer(seatIndex, userID);
 
         for (let bet of forcedBets) {
 
@@ -152,27 +161,110 @@ export class BlindTracker {
     }
 
 
+    public getNumAvailablePlayers(): number {
+
+        return this.availablePlayers.size;
+
+    }
+
+
+    private addActivePlayer(seatIndex: number, userID: number): void {
+
+        // Remove anywhere else where that same user might be sitting
+        for (let [activeSeatIndex, activeUserID] of this.activePlayers) {
+
+            if (activeUserID === userID && activeSeatIndex !== seatIndex) {
+                this.activePlayers.delete(activeSeatIndex);
+            }
+
+        }
+
+        // This will kick out anyone else that might have been in this seat
+        this.activePlayers.set(seatIndex, userID);
+
+    }
+
+    public removeActivePlayer(userID: number): void {
+
+        for (let [activeSeatIndex, activeUserID] of this.activePlayers) {
+
+            if (activeUserID === userID) {
+                this.activePlayers.delete(activeSeatIndex);
+            }
+
+        }
+
+    }
+
+    public isSeatAvailable(seat: Seat): boolean {
+
+        return seat && seat.player && this.availablePlayers.get(seat.index) === seat.player.userID;
+
+    }
+
+
+    public isSeatActive(seat: Seat): boolean {
+
+        return seat && seat.player && this.activePlayers.get(seat.index) === seat.player.userID;
+
+    }
+
+    public getNumActivePlayers(): number {
+
+        return this.activePlayers.size;
+
+    }
+
+
+    private isAvailableForHand(seat: Seat): boolean {
+
+        return seat.player && !seat.player.isSittingOut && seat.player.chips > 0;
+
+    }
+
+
     /// This will see if we have NO active players - if that's the case then we will add everyone that is not sitting out
     private checkActivePlayers(table: Table): void {
 
-        // If NONE of the players are active, then mark everyone that is in the hand as active
-        let needsActivePlayers: boolean = this.activePlayers.size === 0;
+        this.availablePlayers.clear();
 
         for (let seat of table.seats) {
 
-            if (seat.player) {
+            if (this.isAvailableForHand(seat)) {
 
-                if (needsActivePlayers && seat.isAvailableForHand()) {
-                    this.activePlayers.add(seat.player.userID);
+                this.availablePlayers.set(seat.index, seat.player.userID);
+
+            }
+
+        }
+
+        // Only keep active players that are available, and in their same seat
+        for (let [activeSeatIndex, activeUserID] of this.activePlayers) {
+
+            if (this.availablePlayers.get(activeSeatIndex) !== activeUserID) {
+
+                this.activePlayers.delete(activeSeatIndex);
+
+            }
+
+        }
+
+        // If NONE of the players are active, then mark everyone that is in the hand as active
+        if (this.activePlayers.size === 0) {
+
+            for (let seat of table.seats) {
+
+                if (this.isAvailableForHand(seat)) {
+
+                    this.addActivePlayer(seat.index, seat.player.userID);
+
                 }
 
             }
 
         }
 
-
     }
-
 
 
 }

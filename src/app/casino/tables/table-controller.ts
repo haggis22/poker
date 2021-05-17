@@ -777,7 +777,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             this.clearBetTimeout(bettorSeat.index);
 
             // Give them credit for all the blinds they were supposed to pay 
-            this.blindTracker.addPayments(this.table, command.userID, this.table.betStatus.forcedBets);
+            this.blindTracker.addPayments(this.table, bettorSeat.index, command.userID, this.table.betStatus.forcedBets);
 
             let hasBlind: boolean = false;
 
@@ -1181,7 +1181,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     private resetBetsForNewHand(): void {
 
         betController.resetHand(this.table.betStatus);
+
+        // This will freeze the available and active players for this particular hand so that no-one can join after this point
         this.blindTracker.resetHand(this.table);
+
         this.queueAction(new UpdateBetsAction(this.table.id, this.table.betStatus));
 
     }
@@ -1193,37 +1196,14 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         this.resetBetsForNewHand();
 
-        let numAvailableSeats: number = 0;
-
-        // Create a set of UserIDs that are available for the hand. If there are any active players
-        // that are not available for this hand, then take them out of the 
-        const availableUsers: Set<number> = new Set<number>();
-
         for (let seat of this.table.seats) {
 
             // Remove any cards they might have
             seat.clearHand();
 
-            if (seat.isAvailableForHand()) {
-
-                numAvailableSeats++;
-                availableUsers.add(seat.player.userID);
-
-            }
-
         }
 
-
-        for (let userID of this.blindTracker.activePlayers.values()) {
-
-            if (!availableUsers.has(userID)) {
-
-                // They're not available for this hand, so kick 'em out
-                this.blindTracker.activePlayers.delete(userID);
-
-            }
-
-        }
+        const numAvailableSeats: number = this.blindTracker.getNumAvailablePlayers();
 
         if (numAvailableSeats > 1) {
 
@@ -1442,7 +1422,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // they didn't pay the ante, so they're OUT
         if (anteSeat.player) {
 
-            this.blindTracker.activePlayers.delete(anteSeat.player.userID);
+            this.blindTracker.removeActivePlayer(anteSeat.player.userID);
             this.markSittingOut(anteSeat, true);
 
         }
@@ -1584,7 +1564,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             for (let seat of this.table.seats) {
 
-                seat.isInHand = seat.player && this.blindTracker.activePlayers.has(seat.player.userID);
+                seat.isInHand = this.blindTracker.isSeatActive(seat);
                 this.queueAction(new IsInHandAction(this.table.id, seat.index, seat.isInHand));
 
                 if (seat.isInHand) {

@@ -36,8 +36,20 @@ export class DeadButtonController implements IButtonController {
 
         }
 
-        const availableSeats: Seat[] = table.seats.filter(seat => seat.isAvailableForHand());
-        const activeSeats: Seat[] = availableSeats.filter(seat => seat.isAvailableForHand() && blindTracker.activePlayers.has(seat.player.userID));
+        const availableSeats: Seat[] = [];
+        const activeSeats: Seat[] = [];
+
+        for (let seat of table.seats) {
+
+            if (blindTracker.isSeatAvailable(seat)) {
+                availableSeats.push(seat);
+            }
+
+            if (blindTracker.isSeatActive(seat)) {
+                activeSeats.push(seat);
+            }
+
+        }
 
         console.log(`In calculateNextForcedBet, there are ${availableSeats.length} available seats and ${activeSeats.length} active seats`);
 
@@ -83,7 +95,7 @@ export class DeadButtonController implements IButtonController {
                     // We haven't set the big blind position, so pick one
                     ? this.blindAssigner.assignBigBlind(availableSeats)
                     // We previously had a big blind position, so move it to the next available player
-                    : table.findNextAvailableSeatIndex(blindTracker.bigBlindIndex + 1);
+                    : this.findNextAvailableSeatIndex(table, blindTracker, blindTracker.bigBlindIndex + 1);
 
                 // Push the big blind onto the array of forced bets
                 forcedBets.push(blindTracker.blinds[blindTracker.blinds.length - 1]);
@@ -150,7 +162,7 @@ export class DeadButtonController implements IButtonController {
                 // We have more than 2 players, so the small blind will be the player before the big blind
                 // For the Big Blind it can be any available player - that is how players join the game, after all.
                 // For the Small Blind it *must* be a player already in the game
-                let smallBlindIndex: number = table.findPreviousSeat(blindTracker.bigBlindIndex - 1, (seat) => seat.player && blindTracker.activePlayers.has(seat.player.userID));
+                let smallBlindIndex: number = table.findPreviousSeat(blindTracker.bigBlindIndex - 1, (seat) => blindTracker.isSeatActive(seat));
 
                 if (smallBlindIndex === blindTracker.buttonIndex) {
 
@@ -192,8 +204,7 @@ export class DeadButtonController implements IButtonController {
             if (blindTracker.blinds.length) {
 
                 // Find the next available player after the Big Blind that is not active and is available to player (not sitting out, has chips, etc)
-                const seatEligibility: (seat: Seat) => boolean = (seat: Seat) =>
-                    (seat.player && !blindTracker.activePlayers.has(seat.player.userID) && seat.isAvailableForHand());
+                const seatEligibility: (seat: Seat) => boolean = (seat: Seat) => (!blindTracker.isSeatActive(seat) && blindTracker.isSeatAvailable(seat));
 
                 const blindSeatIndex: number = table.findNextSeat(blindTracker.bigBlindIndex + 1, seatEligibility);
 
@@ -242,7 +253,7 @@ export class DeadButtonController implements IButtonController {
                 // 2. If there are no blinds, then anyone can ante and join the game immediately
                 const seatEligibility: (seat: Seat) => boolean = blindTracker.blinds.length
                     // there are blinds
-                    ? (seat) => (seat.player && blindTracker.activePlayers.has(seat.player.userID) && !blindTracker.paidAntes.has(seat.player.userID))
+                    ? (seat) => (blindTracker.isSeatActive(seat) && !blindTracker.paidAntes.has(seat.player.userID))
                     : (seat) => (seat.player && !blindTracker.paidAntes.has(seat.player.userID));
 
                 const anteSeatIndex: number = table.findNextSeat(blindTracker.bigBlindIndex + 1, seatEligibility);
@@ -306,7 +317,7 @@ export class DeadButtonController implements IButtonController {
         if (blindTracker.blinds.length) {
 
             // When there are blinds then the button can only be held by a player that has established themselves as being in the rotation
-            let activeSeats: Seat[] = availableSeats.filter(seat => seat.player && blindTracker.activePlayers.has(seat.player.userID));
+            let activeSeats: Seat[] = availableSeats.filter(seat => blindTracker.isSeatActive(seat));
 
             if (activeSeats.length === 2) {
 
@@ -341,7 +352,7 @@ export class DeadButtonController implements IButtonController {
 
                 }
 
-                if (table.seats[buttonIndex].isAvailableForHand()) {
+                if (blindTracker.isSeatAvailable(table.seats[buttonIndex])) {
                     foundButton = true;
                 }
                 else {
@@ -373,7 +384,7 @@ export class DeadButtonController implements IButtonController {
 */
         // Only active players can be eligible to get the button
 
-        this.log(`blindTracker has ${blindTracker.activePlayers.size} active players`);
+        this.log(`blindTracker has ${blindTracker.getNumActivePlayers()} active players`);
 
         const paidMap: RoundPayments = new RoundPayments();
 
@@ -444,7 +455,7 @@ export class DeadButtonController implements IButtonController {
             for (let b = 0; b < blindTracker.blinds.length; b++) {
 
                 // Go backwards one spot
-                buttonIndex = table.findPreviousAvailableSeatIndex(buttonIndex - 1);
+                buttonIndex = this.findPreviousAvailableSeatIndex(table, blindTracker, buttonIndex - 1);
 
             }
 
@@ -459,10 +470,10 @@ export class DeadButtonController implements IButtonController {
                 let bbSeatIndex: number = blindTracker.bigBlindIndex;
 
                 // Go back the number of rounds that we have active players
-                for (let r = 0; r < blindTracker.activePlayers.size; r++) {
+                for (let r = 0; r < blindTracker.getNumActivePlayers(); r++) {
 
                     // This sets the Big Blind index for this previous round of betting
-                    bbSeatIndex = table.findPreviousAvailableSeatIndex(bbSeatIndex - 1);
+                    bbSeatIndex = this.findPreviousAvailableSeatIndex(table, blindTracker, bbSeatIndex - 1);
 
                     const rp: RoundPayments = new RoundPayments();
 
@@ -477,7 +488,7 @@ export class DeadButtonController implements IButtonController {
 
                         for (let bi = 0; bi < (blindTracker.blinds.length - 1) - blindIndex; bi++) {
 
-                            blindSeatIndex = table.findPreviousAvailableSeatIndex(blindSeatIndex - 1);
+                            blindSeatIndex = this.findPreviousAvailableSeatIndex(table, blindTracker, blindSeatIndex - 1);
 
                         }
 
@@ -505,6 +516,18 @@ export class DeadButtonController implements IButtonController {
 
     }   // determineLastPayorOfBlinds
 
+
+    private findNextAvailableSeatIndex(table: Table, blindTracker: BlindTracker, startIndex: number): number {
+
+        return table.findNextSeat(startIndex, (seat) => blindTracker.isSeatAvailable(seat));
+
+    }
+
+    private findPreviousAvailableSeatIndex(table: Table, blindTracker: BlindTracker, startIndex: number): number {
+
+        return table.findPreviousSeat(startIndex, (seat) => blindTracker.isSeatAvailable(seat));
+
+    }
 
 
 

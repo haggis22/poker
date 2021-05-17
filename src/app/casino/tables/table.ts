@@ -130,21 +130,5 @@ export class Table {
 
     }
 
-    public findNextAvailableSeatIndex(startIndex: number): number {
-
-        return this.findNextSeat(startIndex, (seat) => seat.isAvailableForHand());
-
-    }
-
-    public findPreviousAvailableSeatIndex(startIndex: number): number {
-
-        return this.findPreviousSeat(startIndex, (seat) => seat.isAvailableForHand());
-
-    }
-
-
-
-
-
 
 }
