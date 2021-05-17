@@ -188,7 +188,45 @@ export class DeadButtonController implements IButtonController {
         if (blindTracker.currentStep == BlindTracker.STEP_JOIN_BLINDS) {
 
             // Skip this for now
-            blindTracker.currentStep = BlindTracker.STEP_ANTES;
+
+            if (blindTracker.blinds.length) {
+
+                // Find the next available player after the Big Blind that is not active and is available to player (not sitting out, has chips, etc)
+                const seatEligibility: (seat: Seat) => boolean = (seat: Seat) =>
+                    (seat.player && !blindTracker.activePlayers.has(seat.player.userID) && seat.isAvailableForHand());
+
+                const blindSeatIndex: number = table.findNextSeat(blindTracker.bigBlindIndex + 1, seatEligibility);
+
+                if (blindSeatIndex != null) {
+
+                    // Push the big blind onto the array of forced bets
+                    forcedBets.push(blindTracker.blinds[blindTracker.blinds.length - 1]);
+
+                    if (blindTracker.ante > 0) {
+
+                        forcedBets.push(new Ante(blindTracker.ante));
+
+                    }
+
+                    table.betStatus.seatIndex = blindSeatIndex;
+                    table.betStatus.actionOnUserID = table.seats[blindSeatIndex].player.userID;
+                    table.betStatus.forcedBets = forcedBets;
+                    return true;
+
+                }
+
+                // No-one around that can pay the big blind to join, so move on
+                blindTracker.currentStep = BlindTracker.STEP_ANTES;
+
+
+            }
+            else {
+
+                // No blinds - so move on
+                blindTracker.currentStep = BlindTracker.STEP_ANTES;
+
+            }
+
 
         }
 
