@@ -1440,7 +1440,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         seat.clearHand();
 
         // This should only be called between hands, and not just for a regular fold, so we can clear out their mucked cards as well
-        seat.muckedCards.length == 0;
+        seat.muckedCards.length = 0;
 
         this.queueAction(new IsInHandAction(this.table.id, seat.index, false));
 
