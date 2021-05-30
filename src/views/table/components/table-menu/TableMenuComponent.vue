@@ -2,6 +2,11 @@
 
     <div class="table-menu">
 
+        <div class="table-name">
+            <div class="name-row"><span class="name">{{ table.name }}</span> <span class="id">(#{{ table.id }})</span></div>
+            <div class="description">{{ table.description }}</div>
+        </div>
+
         <div v-if="!showAddChipsDialog" class="table-actions">
 
             <div class="sit-out" :class="{ 'disabled': hasPendingStatusRequest }">
@@ -79,6 +84,8 @@
     const TableMenuComponent = defineComponent({
 
         setup() {
+
+            const table = computed(() => tableState.getTable.value);
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
@@ -305,6 +312,8 @@
 
             return {
 
+                table,
+
                 chipFormatter,
 
                 numAddChips,
@@ -345,9 +354,18 @@
 <style scoped lang="scss">
 
 
-    .sit-out.disabled
+    .sit-out
     {
-        color: #888;
+        input {
+            vertical-align: bottom;
+        }
+
+    
+        &.disabled
+        {
+            color: #888;
+        }
+
     }
 
 
