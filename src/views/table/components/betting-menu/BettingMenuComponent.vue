@@ -40,18 +40,18 @@
                                       @button-click="toggleCall"></bet-button-component>
 
                 <bet-button-component v-if="isLimitRaiseAllowed"
-                                      :action="betDescription"
+                                      :action="hasBettingOpened ? 'Raise To' : 'Bet' "
                                       :is-activated="isRaiseActivated"
                                       :amount="myMinRaise.totalBet"
                                       @button-click="toggleLimitRaise"></bet-button-component>
 
                 <bet-button-component v-if="isNoLimitRaiseAllowed && !isRaiseActivated"
-                                      :action="betDescription"
+                                      :action="hasBettingOpened ? 'Raise To': 'Bet'"
                                       :is-activated="false"
                                       @button-click="readyRaise"></bet-button-component>
 
                 <bet-button-component v-if="isNoLimitRaiseAllowed && isRaiseActivated"
-                                      :action="betDescription"
+                                      :action="hasBettingOpened ? 'Raise To' : 'Bet'"
                                       :is-activated="isRaiseActivated"
                                       :amount="myMinRaise.totalBet"
                                       @button-click="toggleNoLimitRaise"></bet-button-component>
@@ -89,7 +89,7 @@
                 </div>
                 <div class="buttons">
                     <button type="button" class="cancel" @click.stop="cancelRaise">Cancel</button>
-                    <button type="button" class="raise" @click.stop="lockInRaise">Raise</button>
+                    <button type="button" class="raise" @click.stop="lockInRaise">{{ hasBettingOpened ? 'Raise': 'Bet' }}</button>
                 </div>
             </div>
 
@@ -159,7 +159,7 @@ import { Table } from '@/app/casino/tables/table';
 
             const isRaiseActivated = computed((): boolean => pendingBetCommand.value instanceof RaiseCommand);
 
-            const betDescription = computed((): string => numRaises.value > 0 ? 'Raise To' : 'Bet');
+            const hasBettingOpened = computed((): boolean => numRaises.value > 0);
 
             const showRaiseDialog = ref(false);
 
@@ -440,7 +440,7 @@ import { Table } from '@/app/casino/tables/table';
                 isNoLimitRaiseAllowed,
                 isRaiseActivated,
 
-                betDescription,
+                hasBettingOpened,
 
                 minRaise,
                 maxRaise,
