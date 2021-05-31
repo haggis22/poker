@@ -4,7 +4,8 @@
 
         <div v-for="(message, index) in getMessages" 
              :key="`log-${index}`"
-             class="message">{{ message }}</div>
+             class="message"
+             v-html="highlightText(message)"></div>
 
     </div>
 
@@ -19,6 +20,10 @@ import './log.scss';
     import { defineComponent, computed, ref, onUpdated } from 'vue';
 
     import { tableState } from "@/store/table-state";
+    import { CardSuit } from '@/app/cards/card-suit';
+
+
+
 
 
 const LogComponent = defineComponent({
@@ -45,6 +50,23 @@ const LogComponent = defineComponent({
 
         }
 
+        // The parentheses will capture the card value/suit in a capture group so that we can re-insert it with the proper tag around it
+        const regExps = CardSuit.VALUES.map(val => {
+            return { exp: new RegExp('([AKQJ0123456789]+' + val.symbol + ')', 'gui'), wordClass: val.text };
+        });
+
+        const highlightText = (message: string): string => {
+
+            for (let re of regExps) {
+
+                message = message.replace(re.exp, '<span class="' + re.wordClass + '" style="font-weight: bold;">$1</span>');
+
+            }
+
+            return message;
+
+        };
+
         onUpdated(() => {
 
             scrollToEnd();
@@ -56,7 +78,9 @@ const LogComponent = defineComponent({
 
             log,
 
-            getMessages
+            getMessages,
+
+            highlightText
 
         };
 

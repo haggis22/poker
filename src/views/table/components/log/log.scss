@@ -1,18 +1,32 @@
-﻿.action-log
-{
+﻿@import "../../../../styles/cards";
+
+.action-log {
     border: 2px solid black;
     background: white;
     padding: 5px;
     overflow-y: scroll;
-
-    position: relative;
-    margin-top: 10px;
-
+    position: absolute;
+    top: 300px;
     width: 360px;
     height: 200px;
 
-    .message
-    {
+    .message {
+
+        .spade {
+            @include spade;
+        }
+
+        .club {
+            @include club;
+        }
+
+        .heart {
+            @include heart;
+        }
+
+        .diamond {
+            @include diamond;
+        }
 
     }
 
