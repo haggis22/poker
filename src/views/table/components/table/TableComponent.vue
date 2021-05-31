@@ -1,40 +1,38 @@
 ﻿<template>
 
-    <div v-if="table">
+    <div v-if="table" class="table seats-6">
 
-        <div class="table seats-6">
-
-            <div class="betting-line">
-                <seat-component v-for="seat in table.seats"
-                                :key="'seat-' + seat.index"
-                                :seat-index="seat.index"
-                                :bet-status="table.betStatus">
-                </seat-component>
-                <dealer-box-component></dealer-box-component>
-                <bet-component v-for="bet in table.betStatus.bets"
-                               :key="'bet-' + bet.seatIndex"
-                               :bet="bet">
-                </bet-component>
-                <bet-component v-for="ante in table.betStatus.antes"
-                               :key="'ante-' + ante.seatIndex"
-                               :bet="ante">
-                </bet-component>
-                <pot-component v-for="pot in table.betStatus.pots"
-                               :key="'pot-' + pot.index"
-                               :pot="pot">
-                </pot-component>
-                <won-pot-component v-for="pot in wonPots"
-                                   :key="`won-pot-${pot.index}-${pot.seatIndex}`"
-                                   :pot="pot">
-                </won-pot-component>
-                <div v-if="table.buttonIndex != null" class="button" :class="'seat-'+table.buttonIndex">
-                    <div class="text">button</div>
-                </div>
-                <board-component :board="table.board"></board-component>
-                <winning-hand-component v-if="winningHand"></winning-hand-component>
+        <div class="betting-line">
+            <seat-component v-for="seat in table.seats"
+                            :key="'seat-' + seat.index"
+                            :seat-index="seat.index"
+                            :bet-status="table.betStatus">
+            </seat-component>
+            <dealer-box-component></dealer-box-component>
+            <bet-component v-for="bet in table.betStatus.bets"
+                            :key="'bet-' + bet.seatIndex"
+                            :bet="bet">
+            </bet-component>
+            <bet-component v-for="ante in table.betStatus.antes"
+                            :key="'ante-' + ante.seatIndex"
+                            :bet="ante">
+            </bet-component>
+            <pot-component v-for="pot in table.betStatus.pots"
+                            :key="'pot-' + pot.index"
+                            :pot="pot">
+            </pot-component>
+            <won-pot-component v-for="pot in wonPots"
+                                :key="`won-pot-${pot.index}-${pot.seatIndex}`"
+                                :pot="pot">
+            </won-pot-component>
+            <div v-if="table.buttonIndex != null" class="button" :class="'seat-'+table.buttonIndex">
+                <div class="text">button</div>
             </div>
-        </div><!-- table seats-6 -->
-    </div>
+            <board-component :board="table.board"></board-component>
+            <winning-hand-component v-if="winningHand"></winning-hand-component>
+        </div>
+    </div><!-- table seats-6 -->
+
 </template>
 
 <script lang="ts">

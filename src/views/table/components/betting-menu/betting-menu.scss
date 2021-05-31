@@ -1,12 +1,15 @@
 ﻿.betting-menu {
-    border: 2px solid black;
-    background-color: lightgrey;
+
+    border: none;
+    background-color: aliceblue;
     padding: 5px;
     overflow-y: auto;
     position: absolute;
-    top: 220px;
+
+    top: 620px;
+
     width: 300px;
-    height: 100px;
+    height: 200px;
 
     .bet-actions {
         width: 100%;
@@ -15,11 +18,22 @@
             width: 100%;
             display: flex;
             flex-direction: row;
-            justify-content: space-around;
+            /* justify-content: space-around;  */
         }
     }
 
     .raise-dialog {
+
+        button
+        {
+            width: 100%;
+            height: 100%;
+        }
+
+        .slider
+        {
+        }
+
         .min-raise,
         .max-raise {
             vertical-align: bottom;
@@ -35,13 +49,10 @@
 
         .chips-slider {
             vertical-align: middle;
+            -webkit-appearance: slider-vertical;
+            writing-mode: bt-lr;
         }
 
-        .buttons {
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
-        }
     }
+
 }

@@ -18,6 +18,11 @@
         border: 1px solid black;
         margin-right: 3px;
 
+        &.disabled
+        {
+            border-color: #ddd;
+        }
+
         &.activated 
         {
             background-color: #0f0;
@@ -29,7 +34,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
         text-align: left;
     }
 

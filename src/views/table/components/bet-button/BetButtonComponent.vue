@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <button type="button" class="bet-button" @click="$emit('button-click')">
+    <button type="button" class="bet-button" @click="$emit('button-click')" :disabled="disabled">
         <div :class="lightClasses"></div>
         <div class="text">
             <div class="action">{{ action }}</div>
@@ -36,6 +36,10 @@ import './bet-button.scss';
             amount: {
                 type: Number,
                 required: false
+            },
+            disabled: {
+                type: Boolean,
+                required: false
             }
 
         },
@@ -47,7 +51,14 @@ import './bet-button.scss';
 
                 let classes = ['light'];
 
-                if (props.isActivated) {
+                if (props.disabled) {
+
+                    classes.push('disabled');
+
+                }
+
+                // Can't be disabled *and* activated
+                else if (props.isActivated) {
 
                     classes.push('activated');
 

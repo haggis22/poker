@@ -20,8 +20,9 @@ $table-width: 800px;
     @extend .table-colors;
     height: $table-height;
     width: $table-width;
-    position: relative;
+    position: absolute;
     top: 200px;
+    left: 400px;
 
     .betting-line {
         background: transparent;

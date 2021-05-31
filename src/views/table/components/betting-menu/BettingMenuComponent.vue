@@ -2,95 +2,129 @@
 
     <div class="betting-menu">
 
-        <div class="bet-actions" v-if="remainsToAnte">
+        <div style="height: 150px; background: pink;">
+            <div v-if="showRaiseDialog" class="raise-dialog" style="display: grid; grid-gap: 5px; grid-template-columns: repeat(4, 50px); grid-template-rows: repeat(4, 30px);">
 
-            <div class="buttons">
+                <div style="grid-column: 1; grid-row: 2;">
+                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raisePotAmount)">Pot</button>
+                </div>
 
-                <bet-button-component :action="'Sit Out'"
-                                      :is-activated="isFoldActivated"
-                                      @button-click="toggleFold"></bet-button-component>
+                <div style="grid-column: 1; grid-row: 3;">
+                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raiseHalfPotAmount)">1/2</button>
+                </div>
 
-                <bet-button-component :action="'Ante'"
-                                      :is-activated="isAnteActivated"
-                                      :amount="myCall.chipsAdded"
-                                      @button-click="toggleAnte"></bet-button-component>
+                <div style="grid-column: 2; grid-row: 2;">
+                    <button type="button" @click.stop="stepUp" :disabled="raiseChips === maxRaise">&#x1f781;</button>
+                </div>
 
-            </div>
+                <div style="grid-column: 2; grid-row: 3;">
+                    <button type="button" @click.stop="stepDown" :disabled="raiseChips === minRaise">&#x1f783;</button>
+                </div>
 
-        </div>
-
-        <div class="bet-actions" v-if="remainsToAct">
-
-            <div v-if="!showRaiseDialog" class="buttons">
-
-                <bet-button-component v-if="isFoldAllowed"
-                                      :action="'Fold'"
-                                      :is-activated="isFoldActivated"
-                                      @button-click="toggleFold"></bet-button-component>
-
-                <bet-button-component v-if="isCheckAllowed"
-                                      :action="'Check'"
-                                      :is-activated="isCheckActivated"
-                                      @button-click="toggleCheck"></bet-button-component>
-
-                <bet-button-component v-if="isCallAllowed"
-                                      :action="'Call'"
-                                      :is-activated="isCallActivated"
-                                      :amount="myCall.chipsAdded"
-                                      @button-click="toggleCall"></bet-button-component>
-
-                <bet-button-component v-if="isLimitRaiseAllowed"
-                                      :action="hasBettingOpened ? 'Raise To' : 'Bet' "
-                                      :is-activated="isRaiseActivated"
-                                      :amount="myMinRaise.totalBet"
-                                      @button-click="toggleLimitRaise"></bet-button-component>
-
-                <bet-button-component v-if="isNoLimitRaiseAllowed && !isRaiseActivated"
-                                      :action="hasBettingOpened ? 'Raise To': 'Bet'"
-                                      :is-activated="false"
-                                      @button-click="readyRaise"></bet-button-component>
-
-                <bet-button-component v-if="isNoLimitRaiseAllowed && isRaiseActivated"
-                                      :action="hasBettingOpened ? 'Raise To' : 'Bet'"
-                                      :is-activated="isRaiseActivated"
-                                      :amount="myMinRaise.totalBet"
-                                      @button-click="toggleNoLimitRaise"></bet-button-component>
-
-            </div><!-- buttons -->
-
-            <div v-if="showRaiseDialog" class="raise-dialog">
-
-                <div>
-                    <span class="min-raise">{{ chipFormatter.format(minRaise) }}</span>
-                    <button type="button"
-                            @click.stop="stepDown"
-                            :disabled="raiseChips === minRaise">
-                        &#x2039;
-                    </button>
+                <div class="slider" style="grid-column: 3; grid-row: 1/4;">
                     <input type="range"
                            class="chips-slider"
                            v-model.number="raiseChips"
                            :min="minRaise"
                            :max="maxRaise"
-                           :step="step" />
-                    <button type="button"
-                            @click.stop="stepUp"
-                            :disabled="raiseChips === maxRaise">
-                        &#x203a;
-                    </button>
-                    <span class="max-raise">{{ chipFormatter.format(maxRaise) }}</span>
+                           :step="step"
+                           orient="vertical" />
                 </div>
-                <div class="raise-amount">{{ chipFormatter.format(raiseChips) }}</div>
-                <div class="buttons">
-                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raiseThirdPotAmount)">1/3</button>
-                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raiseHalfPotAmount)">1/2</button>
-                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(raisePotAmount)">Pot</button>
-                    <button type="button" class="raise-pot" @click.stop="setRaiseChips(allInAmount)">All</button>
-                </div>
-                <div class="buttons">
-                    <button type="button" class="cancel" @click.stop="cancelRaise">Cancel</button>
-                    <button type="button" class="raise" @click.stop="lockInRaise">{{ hasBettingOpened ? 'Raise': 'Bet' }}</button>
-                </div>
+
+                <div class="max-raise" style="grid-column: 4; grid-row: 1;">{{ chipFormatter.format(maxRaise) }}</div>
+
+                <div class="min-raise" style="grid-column: 4; grid-row: 4;">{{ chipFormatter.format(minRaise) }}</div>
+
+
+            </div>
+        </div>
+
+        <div class="bet-actions">
+
+            <div v-if="isAnteState" class="buttons">
+
+                <span>
+
+                    <bet-button-component :action="'Sit Out'"
+                                          :is-activated="isFoldActivated"
+                                          :disabled="!remainsToAnte"
+                                          @button-click="toggleFold"></bet-button-component>
+
+                </span>
+
+                <span>
+
+                    <bet-button-component :action="''"
+                                          :is-activated="false"
+                                          :disabled="true"></bet-button-component>
+
+                </span>
+
+                <span>
+
+                    <bet-button-component :action="'Ante'"
+                                          :is-activated="isAnteActivated"
+                                          :amount="myCall ? myCall.chipsAdded : null"
+                                          :disabled="!remainsToAnte"
+                                          @button-click="toggleAnte"></bet-button-component>
+
+                </span>
+
+            </div>
+
+            <div v-if="isBetState" class="buttons">
+
+                <span>
+
+                    <bet-button-component :action="'Fold'"
+                                          :is-activated="isFoldActivated"
+                                          :disabled="!remainsToAct"
+                                          @button-click="toggleFold"></bet-button-component>
+
+                </span>
+
+                <span>
+
+                    <bet-button-component v-if="isCheckAllowed"
+                                          :action="'Check'"
+                                          :is-activated="isCheckActivated"
+                                          @button-click="toggleCheck"></bet-button-component>
+
+                    <bet-button-component v-if="isCallAllowed"
+                                          :action="'Call'"
+                                          :is-activated="isCallActivated"
+                                          :amount="myCall ? myCall.chipsAdded : null"
+                                          @button-click="toggleCall"></bet-button-component>
+
+                </span>
+
+                <span>
+
+                    <bet-button-component v-if="isLimitRaiseAllowed"
+                                          :action="hasBettingOpened ? 'Raise To' : 'Bet' "
+                                          :is-activated="isRaiseActivated"
+                                          :amount="myMinRaise.totalBet"
+                                          @button-click="toggleLimitRaise"></bet-button-component>
+
+                    <bet-button-component v-if="isNoLimitRaiseAllowed && !isRaiseActivated && !showRaiseDialog"
+                                          :action="hasBettingOpened ? 'Raise': 'Bet'"
+                                          :is-activated="false"
+                                          @button-click="readyRaise"></bet-button-component>
+
+                    <bet-button-component v-if="isNoLimitRaiseAllowed && isRaiseActivated && !showRaiseDialog"
+                                          :action="hasBettingOpened ? 'Raise To' : 'Bet'"
+                                          :is-activated="isRaiseActivated"
+                                          :amount="myMinRaise.totalBet"
+                                          @button-click="toggleNoLimitRaise"></bet-button-component>
+
+                    <bet-button-component v-if="isNoLimitRaiseAllowed && showRaiseDialog"
+                                          :action="hasBettingOpened ? 'Raise To' : 'Bet'"
+                                          :is-activated="isRaiseActivated"
+                                          :amount="raiseChips"
+                                          @button-click="lockInRaise"></bet-button-component>
+
+                </span>
+
             </div>
 
         </div>
@@ -104,7 +138,7 @@
     
 import './betting-menu.scss';
 
-    import { defineComponent, computed, ref } from "vue";
+    import { defineComponent, computed, ref, watch } from "vue";
 
     import { AnteCommand } from '@/app/commands/table/betting/ante-command';
     import { BettingCommand } from '@/app/commands/table/betting/betting-command';
@@ -133,29 +167,33 @@ import { Table } from '@/app/casino/tables/table';
 
             const pendingBetCommand = computed((): BettingCommand => tableState.getPendingBetCommand.value);
 
+            const isAnteState = computed((): boolean => tableState.getTable.value.state instanceof BlindsAndAntesState);
+
+            const isBetState = computed((): boolean => tableState.getTable.value.state instanceof BetState);
+
             const myCall = computed((): Bet => tableState.getMyCall.value);
             const myMinRaise = computed((): Bet => tableState.getMyMinRaise.value);
             const myMaxRaise = computed((): Bet => tableState.getMyMaxRaise.value);
 
             const numRaises = computed((): number => tableState.getBetStatus.value?.numRaises || 0);
 
-            const isFoldAllowed = computed((): boolean => true);
+            const isFoldAllowed = computed((): boolean => remainsToAct.value);
 
             const isFoldActivated = computed((): boolean => pendingBetCommand.value instanceof FoldCommand);
 
             const isAnteActivated = computed((): boolean => pendingBetCommand.value instanceof AnteCommand);
 
-            const isCheckAllowed = computed((): boolean => myCall.value && myCall.value.chipsAdded === 0);
+            const isCheckAllowed = computed((): boolean => remainsToAct.value && myCall.value && myCall.value.chipsAdded === 0);
 
             const isCheckActivated = computed((): boolean => pendingBetCommand.value instanceof CheckCommand);
 
-            const isCallAllowed = computed((): boolean => myCall.value && myCall.value.chipsAdded > 0);
+            const isCallAllowed = computed((): boolean => remainsToAct.value && myCall.value && myCall.value.chipsAdded > 0);
 
             const isCallActivated = computed((): boolean => pendingBetCommand.value instanceof CallCommand);
 
-            const isLimitRaiseAllowed = computed((): boolean => myMinRaise.value && myMaxRaise.value && myMinRaise.value.chipsAdded === myMaxRaise.value.chipsAdded);
+            const isLimitRaiseAllowed = computed((): boolean => remainsToAct.value && myMinRaise.value && myMaxRaise.value && myMinRaise.value.chipsAdded === myMaxRaise.value.chipsAdded);
 
-            const isNoLimitRaiseAllowed = computed((): boolean => myMinRaise.value && myMaxRaise.value && myMaxRaise.value.chipsAdded > myMinRaise.value.chipsAdded);
+            const isNoLimitRaiseAllowed = computed((): boolean => remainsToAct.value && myMinRaise.value && myMaxRaise.value && myMaxRaise.value.chipsAdded > myMinRaise.value.chipsAdded);
 
             const isRaiseActivated = computed((): boolean => pendingBetCommand.value instanceof RaiseCommand);
 
@@ -279,7 +317,7 @@ import { Table } from '@/app/casino/tables/table';
 
             const readyRaise = (): void => {
 
-                raiseChips.value = myMinRaise.value.totalBet;
+                setRaiseChips(myMinRaise.value.totalBet);
                 showRaiseDialog.value = true;
 
             };
@@ -304,11 +342,6 @@ import { Table } from '@/app/casino/tables/table';
 
             }
 
-            const goAllIn = (): void => {
-
-
-
-            }
 
             const currentTotalPot = computed((): number => tableState.getTable.value.betStatus.getCurrentTotalPot());
 
@@ -408,17 +441,21 @@ import { Table } from '@/app/casino/tables/table';
 
             }
 
-            const cancelRaise = (): void => {
+            watch(isBetState, (newValue, oldValue) => {
 
-                tableState.clearPendingBetCommands();
+                raiseChips.value = null;
                 showRaiseDialog.value = false;
 
-            }
+            });
+
 
             return {
 
                 pendingBetCommand,
 
+                isAnteState,
+                isBetState,
+                
                 myCall,
                 myMinRaise,
                 myMaxRaise,
@@ -455,7 +492,6 @@ import { Table } from '@/app/casino/tables/table';
                 remainsToAnte,
                 remainsToAct,
 
-                raiseChips,
                 step,
 
                 toggleFold,
@@ -470,13 +506,13 @@ import { Table } from '@/app/casino/tables/table';
                 readyRaise,
                 stepDown,
                 stepUp,
+                raiseChips,
                 setRaiseChips,
                 raisePotAmount,
                 raiseHalfPotAmount,
                 raiseThirdPotAmount,
                 allInAmount,
                 lockInRaise,
-                cancelRaise,
 
                 currentTotalPot,
 

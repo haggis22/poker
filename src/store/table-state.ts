@@ -386,6 +386,7 @@ const setMyMaxRaise = (raise: Bet): void => {
 
 };
 
+
 const clearRequiredBetValues = (): void => {
 
     // null is different from 0 in that it indicates that the given option is not even available
