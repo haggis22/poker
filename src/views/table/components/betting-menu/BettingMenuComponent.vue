@@ -2,7 +2,7 @@
 
     <div class="betting-menu">
 
-        <div style="height: 150px; background: pink;">
+        <div style="height: 150px; background-color: transparent;">
             <div v-if="showRaiseDialog" class="raise-dialog" style="display: grid; grid-gap: 5px; grid-template-columns: repeat(4, 50px); grid-template-rows: repeat(4, 30px);">
 
                 <div style="grid-column: 1; grid-row: 2;">

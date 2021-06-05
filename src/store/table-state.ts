@@ -362,7 +362,11 @@ const clearPendingBetCommands = (): void => {
 };
 
 
-const getMyCall = computed(() => state.myCall);
+const getMyCall = computed(() => {
+
+
+
+});
 
 const getMyMinRaise = computed(() => state.myMinRaise);
 
