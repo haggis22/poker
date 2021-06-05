@@ -164,6 +164,10 @@ export class LobbyManager implements MessageBroadcaster {
         let cornDogNL: Table = this.createCornDogNL();
         this.log(`Created table ${cornDogNL.name} with ID ${cornDogNL.id}`);
 
+        let cdOmaha: Table = this.createCDOmaha();
+        this.log(`Created table ${cdOmaha.name} with ID ${cdOmaha.id}`);
+
+
     }  // setUp
 
 
@@ -279,6 +283,43 @@ export class LobbyManager implements MessageBroadcaster {
         return table;
 
     }  // createKershner
+
+
+    createCDOmaha(): Table {
+
+        let tableID = ++this.nextID;
+
+        let rules = new TableRules(/* numSeats */ 6, /* timeToAnte */ 5, /* timeToAct */ 10);
+
+        let ante = 0;
+
+        // Both of the regular blinds are live bets (they could towards the current round of betting)
+        let blinds: Blind[] =
+            [
+                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 25, true, true),
+                new Blind(1, Blind.TYPE_BIG, 'the big blind', 50, true, true)
+            ];
+
+        let bets: number[] = [50, 50, 50, 50];
+        let maxRaises: number = null;
+
+        let stakes = new Stakes(ante, blinds, bets, Stakes.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+
+        let table: Table = new Table(tableID, 'Corn Dog Omaha', '0.25/0.50 No-Limit Omaha', stakes, rules);
+        let deck: Deck = new Deck();
+        let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
+
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
+
+        this.tableControllerMap.set(table.id, tableController);
+
+        // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
+        // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
+        tableController.setGame((new GameFactory()).create(PokerGameOmaha.ID));
+
+        return table;
+
+    }  // createCornDogNL
 
 
     public getTableController(tableID: number): TableController {

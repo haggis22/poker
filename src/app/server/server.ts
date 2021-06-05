@@ -79,6 +79,9 @@ createRoboClient(3, 'mgillmore');
 createRoboClient(3, 'benney');
 */
 
+createRoboClient(4, 'jhoepken');
+
+
 wss.on('connection', (socket: WebSocket) => {
 
     clients.add(new ServerClient(new ServerWebSocketWrapper(socket), userManager, lobbyManager, cashierManager));

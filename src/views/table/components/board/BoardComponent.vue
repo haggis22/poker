@@ -13,7 +13,7 @@
 
     import './board.scss';
 
-    import { defineComponent, computed } from 'vue';
+    import { defineComponent, computed, ref } from 'vue';
 
     import { Board } from '@/app/casino/tables/boards/board';
     import { UIPosition } from '@/app/ui/ui-position';
@@ -55,8 +55,8 @@
                 if (card.isDealing) {
 
                     console.log(`Starting animation for ${card.index}`)
-                    card.top = dealerPosition.top;
-                    card.left = dealerPosition.left;
+                    card.top = computed(() => dealerPosition.top);
+                    card.left = computed(() => dealerPosition.left);
                     card.isFacedown = true;
 
                     // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
@@ -78,8 +78,8 @@
                 else {
 
                     // no animation - just put the card in place
-                    card.top = calculateFinalTop(card);
-                    card.left = calculateFinalLeft(card);
+                    card.top = computed(() => calculateFinalTop(card));
+                    card.left = computed(() => calculateFinalLeft(card));
 
                 }
 
@@ -118,8 +118,8 @@
 
     function animateFlop(card: CardUI): void {
 
-        card.top = calculateFinalTop(card);
-        card.left = 10;
+        card.top = computed(() => calculateFinalTop(card));
+        card.left = computed(() => 10);
 
         setTimeout(() => {
 
@@ -127,7 +127,7 @@
 
             setTimeout(() => {
 
-                card.left = calculateFinalLeft(card);
+                card.left = computed(() => calculateFinalLeft(card));
 
             }, 300);
 
@@ -139,8 +139,8 @@
 
     function animateOthers(card: CardUI): void {
 
-        card.top = calculateFinalTop(card);
-        card.left = calculateFinalLeft(card);
+        card.top = computed(() => calculateFinalTop(card));
+        card.left = computed(() => calculateFinalLeft(card));
 
         setTimeout(() => {
 

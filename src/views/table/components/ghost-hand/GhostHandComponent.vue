@@ -15,7 +15,7 @@
 
     import './ghost-hand.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { UIPosition } from '@/app/ui/ui-position';
     import CardComponent from '../card/CardComponent.vue';
@@ -39,8 +39,8 @@
             const cardCreated = (card: CardUI): void => {
 
                 console.log(`Showing ghost card for ${card.index}`)
-                card.top = 5;
-                card.left = 50 + (card.index * 50);
+                card.top = computed(() => 5);
+                card.left = computed(() => 50 + (card.index * 50));
                 card.isFacedown = false;
 
             };

@@ -14,7 +14,7 @@
 
 import './hand.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { UIPosition } from '@/app/ui/ui-position';
 
@@ -38,20 +38,22 @@ import './hand.scss';
         },
         setup(props) {
 
+            const func = computed((): number => 3);
+
             const cardCreated = (card: CardUI): void => {
 
                 if (card.isDealing) {
 
                     console.log(`Starting dealing animation for ${card.index}`)
-                    card.top = props.dealerPosition.top;
-                    card.left = props.dealerPosition.left;
+                    card.top = computed(() => props.dealerPosition.top);
+                    card.left = computed(() => props.dealerPosition.left);
                     card.isFacedown = true;
 
                     // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
                     setTimeout(() => {
 
-                        card.top = calculateFinalTop(card);
-                        card.left = calculateFinalLeft(card);
+                        card.top = computed(() => calculateFinalTop(card, props.cards.length));
+                        card.left = computed(() => calculateFinalLeft(card, props.cards.length));
                         card.isFacedown = false;
 
                     }, 10);
@@ -59,8 +61,8 @@ import './hand.scss';
                 }
                 else {
 
-                    card.top = calculateFinalTop(card);
-                    card.left = calculateFinalLeft(card);
+                    card.top = computed(() => calculateFinalTop(card, props.cards.length));
+                    card.left = computed(() => calculateFinalLeft(card, props.cards.length));
 
                 }
 
@@ -79,15 +81,15 @@ import './hand.scss';
 
     });
 
-    function calculateFinalTop(card: CardUI): number {
+    function calculateFinalTop(card: CardUI, numTotalCards: number): number {
 
         return 5;
 
     }
 
-    function calculateFinalLeft(card: CardUI): number {
+    function calculateFinalLeft(card: CardUI, numTotalCards: number): number {
 
-        return 50 + (card.index * 50);
+        return 38 - ((numTotalCards - 1) * 8) + (card.index * (100 / (numTotalCards + 1)));
 
     }
 

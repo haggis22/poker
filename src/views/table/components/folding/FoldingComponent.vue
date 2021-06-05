@@ -14,7 +14,7 @@
 
     import './folding.scss';
 
-    import { defineComponent } from 'vue';
+    import { defineComponent, computed } from 'vue';
 
     import { UIPosition } from '@/app/ui/ui-position';
     import CardComponent from '../card/CardComponent.vue';
@@ -39,21 +39,21 @@
             const cardCreated = (card: CardUI): void => {
 
                 console.log(`Starting folding animation for ${card.index}`)
-                card.top = 5;
-                card.left = 50 + (card.index * 50);
+                card.top = computed(() => 5);
+                card.left = computed(() => 50 + (card.index * 50));
                 card.isFacedown = false;
 
                 // After only the briefest of pauses, we're going to mark this card as "mucked", so it goes flying towards the dealer
                 setTimeout(() => {
 
-                    card.top = props.dealerPosition.top;
-                    card.left = props.dealerPosition.left;
+                    card.top = computed(() => props.dealerPosition.top);
+                    card.left = computed(() => props.dealerPosition.left);
                     card.isFacedown = true;
 
                     // After we have given the card time to reach the dealer, then zap it
                     setTimeout(() => {
 
-                        card.top = card.left = null;
+                        card.top = card.left = computed(() => null);
 
                     }, 300)
 
