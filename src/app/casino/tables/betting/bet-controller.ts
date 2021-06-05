@@ -290,7 +290,7 @@ class BetController {
     public calculateCall(table: Table, seat: Seat, userID: number): Bet {
 
         // If they don't have a seat, or chips then they can't call
-        if (!seat || !seat.player || seat.player.chips === 0) {
+        if (!seat || !seat.player || !seat.isInHand || seat.player.chips === 0) {
 
             return null;
 

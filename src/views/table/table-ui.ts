@@ -623,7 +623,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     private clearLocalBets(): void {
 
-        tableState.clearRequiredBetValues();
         tableState.clearPendingBetCommands();
 
     }
@@ -676,50 +675,18 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     private betState(): void {
 
-        const seat: Seat = this.getMySeat();
-        const myUserID: number = userState.getUserID.value;
-
-        if (seat && myUserID != null) {
-
-            // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            let myCall: Bet = betController.calculateCall(this.getTable(), seat, myUserID);
-
-            tableState.setMyCall(myCall);
-            tableState.setMyMinRaise(betController.calculateMinimumRaise(this.getTable(), seat, myUserID, myCall));
-            tableState.setMyMaxRaise(betController.calculateMaximumRaise(this.getTable(), seat, myUserID, myCall));
-
-        }
-        else {
-
-            tableState.clearRequiredBetValues();
-
-        }
 
     }  // betState
 
 
     private anteState(): void {
 
-        const seat: Seat = this.getMySeat();
-        const myUserID: number = userState.getUserID.value;
+        const mySeat = tableState.getMySeat.value;
 
-        tableState.clearRequiredBetValues();
+        // If I am marked as "not sitting out" then ready my blinds & ante bet
+        if (tableState.getMyCall.value && mySeat && mySeat.player && mySeat.player.isSittingOut === false) {
 
-        if (seat && seat.isInHand) {
-
-            // reset the player's default bet - this is the minimum value at which they could bet/raise the action (it does not relate to calls)
-            const myCall = betController.calculateCall(this.getTable(), seat, myUserID);
-
-            tableState.setMyCall(myCall);
-
-            // no betting, only calling, with antes, so nothing to do for myMinRaise or myMaxRaise
-
-            // If I am marked as "not sitting out" then ready my blinds & ante bet
-            if (seat.player.isSittingOut === false) {
-
-                this.setBetCommand(new AnteCommand(this.getTable().id));
-
-            }  
+            this.setBetCommand(new AnteCommand(this.getTable().id));
 
         }
 
@@ -892,15 +859,9 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         const table: Table = tableState.getTable.value;
 
-        let myCall: Bet = betController.calculateCall(table, mySeat, myUserID);
-        let myMinRaise: Bet = betController.calculateMinimumRaise(table, mySeat, myUserID, myCall);
-        let myMaxRaise: Bet = betController.calculateMaximumRaise(table, mySeat, myUserID, myCall);
-
-        tableState.setMyCall(myCall);
-
-        // Calculate the min and max raises allowed here
-        tableState.setMyMinRaise(myMinRaise);
-        tableState.setMyMaxRaise(myMaxRaise);
+        const myCall: Bet = tableState.getMyCall.value;
+        const myMinRaise: Bet = tableState.getMyMinRaise.value;
+        const myMaxRaise: Bet = tableState.getMyMaxRaise.value;
 
         let pendingBetCommand: BettingCommand = tableState.getPendingBetCommand.value;
 
@@ -973,7 +934,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         this.log(`It is ${anteSeat.getName()}'s turn to ante`);
 
         tableState.clearTimers();
-        tableState.clearRequiredBetValues();
 
         if (anteSeat) {
 
@@ -981,8 +941,6 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
                 if (table.betStatus.seatIndex === tableState.getMySeatIndex.value
                     && table.betStatus.actionOnUserID === userState.getUserID.value) {
-
-                    tableState.setMyCall(betController.calculateCall(table, anteSeat, userState.getUserID.value));
 
                     this.setBetCommand(new AnteCommand(tableState.getTableID.value))
 

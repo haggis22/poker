@@ -18,6 +18,8 @@ import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 import { WonPot } from '@/app/casino/tables/betting/won-pot';
 import { UIPosition } from '@/app/ui/ui-position';
 import { BettingCommand } from '@/app/commands/table/betting/betting-command';
+import { betController } from '@/app/casino/tables/betting/bet-controller';
+import { userState } from './user-state';
 
 
 const state = reactive({
@@ -154,6 +156,8 @@ const setMySeatIndex = (seatIndex: number): void => {
     state.mySeatIndex = seatIndex;
 
 }
+
+const getMySeat = computed(() => getMySeatIndex.value == null ? null : state.table.seats[getMySeatIndex.value]);
 
 
 const getPlayer = (seatIndex: number): Player => {
@@ -364,41 +368,39 @@ const clearPendingBetCommands = (): void => {
 
 const getMyCall = computed(() => {
 
+    if (getMySeat.value != null && userState.getUserID.value != null) {
 
+        return betController.calculateCall(state.table, getMySeat.value, userState.getUserID.value);
+
+    }
+
+    return null;
 
 });
 
-const getMyMinRaise = computed(() => state.myMinRaise);
+const getMyMinRaise = computed(() => {
 
-const getMyMaxRaise = computed(() => state.myMaxRaise);
+    if (getMySeat.value != null && userState.getUserID.value != null) {
 
-const setMyCall = (call: Bet): void => {
+        return betController.calculateMinimumRaise(state.table, getMySeat.value, userState.getUserID.value, getMyCall.value);
 
-    state.myCall = call;
+    }
 
-};
+    return null;
 
-const setMyMinRaise = (raise: Bet): void => {
+});
 
-    state.myMinRaise = raise;
+const getMyMaxRaise = computed(() => {
 
-};
+    if (getMySeat.value != null && userState.getUserID.value != null) {
 
-const setMyMaxRaise = (raise: Bet): void => {
+        return betController.calculateMaximumRaise(state.table, getMySeat.value, userState.getUserID.value, getMyCall.value);
 
-    state.myMaxRaise = raise;
+    }
 
-};
+    return null;
 
-
-const clearRequiredBetValues = (): void => {
-
-    // null is different from 0 in that it indicates that the given option is not even available
-    setMyCall(null);
-    setMyMinRaise(null);
-    setMyMaxRaise(null);
-
-};
+});
 
 
 const getBetStatus = computed(() => state.table?.betStatus);
@@ -607,6 +609,7 @@ export const tableState = {
 
     getMySeatIndex,
     setMySeatIndex,
+    getMySeat,
 
     /* Seat mutations */
     setIsInHand,
@@ -630,12 +633,8 @@ export const tableState = {
     clearPendingBetCommands,
 
     getMyCall, 
-    setMyCall,
     getMyMinRaise,
-    setMyMinRaise,
     getMyMaxRaise,
-    setMyMaxRaise,
-    clearRequiredBetValues,
 
     getBetStatus,
     setBetStatus,
