@@ -79,7 +79,8 @@
                     <bet-button-component :action="'Fold'"
                                           :is-activated="isFoldActivated"
                                           :disabled="!remainsToAct"
-                                          @button-click="toggleFold"></bet-button-component>
+                                          @button-click="toggleFold"
+                                          ></bet-button-component>
 
                 </span>
 
@@ -94,6 +95,7 @@
                                           :action="'Call'"
                                           :is-activated="isCallActivated"
                                           :amount="myCall ? myCall.chipsAdded : null"
+                                          :requires-delay="true"
                                           @button-click="toggleCall"></bet-button-component>
 
                 </span>
@@ -104,17 +106,20 @@
                                           :action="hasBettingOpened ? 'Raise To' : 'Bet' "
                                           :is-activated="isRaiseActivated"
                                           :amount="myMinRaise.totalBet"
+                                          :requires-delay="true"
                                           @button-click="toggleLimitRaise"></bet-button-component>
 
                     <bet-button-component v-if="isNoLimitRaiseAllowed && !isRaiseActivated && !showRaiseDialog"
                                           :action="hasBettingOpened ? 'Raise': 'Bet'"
                                           :is-activated="false"
+                                          :requires-delay="true"
                                           @button-click="readyRaise"></bet-button-component>
 
                     <bet-button-component v-if="isNoLimitRaiseAllowed && isRaiseActivated && !showRaiseDialog"
                                           :action="hasBettingOpened ? 'Raise To' : 'Bet'"
                                           :is-activated="isRaiseActivated"
                                           :amount="myMinRaise.totalBet"
+                                          :requires-delay="true"
                                           @button-click="toggleNoLimitRaise"></bet-button-component>
 
                     <bet-button-component v-if="isNoLimitRaiseAllowed && showRaiseDialog"

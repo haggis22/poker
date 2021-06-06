@@ -1,6 +1,9 @@
 ﻿<template>
 
-    <button type="button" class="bet-button" @click="$emit('button-click')" :disabled="disabled">
+    <button type="button" 
+                :class="buttonClasses" 
+                @click="tryClick()" 
+                :disabled="disabled">
         <div :class="lightClasses"></div>
         <div class="text">
             <div class="action">{{ action }}</div>
@@ -15,9 +18,8 @@
     
 import './bet-button.scss';
 
-    import { defineComponent, computed } from "vue";
+    import { defineComponent, computed, ref, onMounted } from "vue";
 
-    import { MoneyFormatter } from "@/app/casino/tables/chips/money-formatter";
     import { tableState } from '@/store/table-state';
 
 
@@ -40,16 +42,36 @@ import './bet-button.scss';
             disabled: {
                 type: Boolean,
                 required: false
+            },
+            requiresDelay: {
+                type: Boolean,
+                required: false
             }
 
         },
-        setup(props) {
+        setup(props, context) {
 
             const chipFormatter = computed(() => tableState.getChipFormatter.value);
 
+            const isClickable = ref(!props.requiresDelay);
+
+            const buttonClasses = computed((): string[] => {
+
+                const classes = ['bet-button'];
+
+                if (!isClickable.value) {
+
+                    classes.push('not-clickable');
+
+                }
+
+                return classes;
+
+            });
+
             const lightClasses = computed((): string[] => {
 
-                let classes = ['light'];
+                const classes = ['light'];
 
                 if (props.disabled) {
 
@@ -68,11 +90,31 @@ import './bet-button.scss';
 
             });
 
+            const tryClick = () => {
+
+                if (isClickable.value) {
+
+                    context.emit('button-click');
+
+                }
+
+            }
+
+            onMounted(() => {
+
+                setTimeout(() => { isClickable.value = true; }, 400);
+
+            });
+
 
             return {
 
                 chipFormatter,
 
+                isClickable,
+                tryClick,
+
+                buttonClasses,
                 lightClasses
 
             };

@@ -10,6 +10,11 @@
     box-sizing: border-box;
     align-items: center;
 
+    &.not-clickable
+    {
+        background-color: orange;
+    }
+
     .light
     {
         background-color: #ddd;
