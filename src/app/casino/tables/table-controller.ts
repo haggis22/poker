@@ -1680,11 +1680,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             }
 
+            // We're going to pause, even if we didn't just flip cards - it gives everyone time to process the board running out.
+            await this.wait(this.TIME_ALL_IN_FLIP_CARDS);
 
         }
 
-        // We're going to pause, even if we didn't just flip cards - it gives everyone time to process the board running out.
-        await this.wait(this.TIME_ALL_IN_FLIP_CARDS);
 
 
     }
