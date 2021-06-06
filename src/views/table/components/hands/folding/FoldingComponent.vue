@@ -17,8 +17,9 @@
     import { defineComponent, computed } from 'vue';
 
     import { UIPosition } from '@/app/ui/ui-position';
-    import CardComponent from '../card/CardComponent.vue';
-    import { CardUI } from '../../card-ui';
+    import CardComponent from '../../cards/card/CardComponent.vue';
+    import { CardUI } from '../../cards/card-ui';
+import { handPositionCalculator } from '../hand-position-calculator';
 
 
     const FoldingComponent = defineComponent({
@@ -39,8 +40,9 @@
             const cardCreated = (card: CardUI): void => {
 
                 console.log(`Starting folding animation for ${card.index}`)
-                card.top = computed(() => 5);
-                card.left = computed(() => 50 + (card.index * 50));
+
+                card.top = computed(() => handPositionCalculator.calculateHoldingTop(card.index, props.cards.length));
+                card.left = computed(() => handPositionCalculator.calculateHoldingLeft(card.index, props.cards.length));
                 card.isFacedown = false;
 
                 // After only the briefest of pauses, we're going to mark this card as "mucked", so it goes flying towards the dealer

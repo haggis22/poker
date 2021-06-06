@@ -17,10 +17,9 @@ import './hand.scss';
     import { defineComponent, computed } from 'vue';
 
     import { UIPosition } from '@/app/ui/ui-position';
-
-    import CardComponent from '../card/CardComponent.vue';
-    import { CardUI } from '../../card-ui';
-
+    import CardComponent from '../../cards/card/CardComponent.vue';
+    import { CardUI } from '../../cards/card-ui';
+import { handPositionCalculator } from '../hand-position-calculator';
 
 
     const HandComponent = defineComponent({
@@ -38,8 +37,6 @@ import './hand.scss';
         },
         setup(props) {
 
-            const func = computed((): number => 3);
-
             const cardCreated = (card: CardUI): void => {
 
                 if (card.isDealing) {
@@ -52,8 +49,8 @@ import './hand.scss';
                     // After only the briefest of pauses, we're going to mark this card as "dealt", so it comes flying in
                     setTimeout(() => {
 
-                        card.top = computed(() => calculateFinalTop(card, props.cards.length));
-                        card.left = computed(() => calculateFinalLeft(card, props.cards.length));
+                        card.top = computed(() => handPositionCalculator.calculateHoldingTop(card.index, props.cards.length));
+                        card.left = computed(() => handPositionCalculator.calculateHoldingLeft(card.index, props.cards.length));
                         card.isFacedown = false;
 
                     }, 10);
@@ -61,8 +58,8 @@ import './hand.scss';
                 }
                 else {
 
-                    card.top = computed(() => calculateFinalTop(card, props.cards.length));
-                    card.left = computed(() => calculateFinalLeft(card, props.cards.length));
+                    card.top = computed(() => handPositionCalculator.calculateHoldingTop(card.index, props.cards.length));
+                    card.left = computed(() => handPositionCalculator.calculateHoldingLeft(card.index, props.cards.length));
 
                 }
 
@@ -81,17 +78,6 @@ import './hand.scss';
 
     });
 
-    function calculateFinalTop(card: CardUI, numTotalCards: number): number {
-
-        return 5;
-
-    }
-
-    function calculateFinalLeft(card: CardUI, numTotalCards: number): number {
-
-        return 38 - ((numTotalCards - 1) * 8) + (card.index * (100 / (numTotalCards + 1)));
-
-    }
 
 
     export default HandComponent;

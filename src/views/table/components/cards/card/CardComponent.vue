@@ -28,7 +28,7 @@
     import { Card } from '@/app/cards/card';
     import { FacedownCard } from '@/app/cards/face-down-card';
 
-    import { CardUI } from '../../card-ui';
+    import { CardUI } from '../card-ui';
     import { tableState } from '@/store/table-state';
 
     const CardComponent = defineComponent({

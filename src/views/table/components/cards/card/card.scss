@@ -1,4 +1,4 @@
-﻿@import "../../../../styles/cards";
+﻿@import "../../../../../styles/cards";
 
 // $card-font: "Times New Roman", serif;
 $card-font: sans-serif;
@@ -10,7 +10,6 @@ $card-font: sans-serif;
     transition: top 0.3s, left 0.3s;
     transition-timing-function: ease-out;
 
-
     .card-inner {
         position: relative;
         width: 100%;
@@ -19,6 +18,7 @@ $card-font: sans-serif;
         transition: transform 0.7s;
         transform-style: preserve-3d;
         box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        background-color: white;
 
         .card-front, .card-back {
             position: absolute;
@@ -45,8 +45,14 @@ $card-font: sans-serif;
     }
 
     &.showdown:not(.used) {
+        /*
         opacity: 0.5;
         transition: opacity 0.25s;
+*/
+        .card-inner {
+            background-color: #999;
+            transition: background-color 0.25s;
+        }
     }
 
 
@@ -131,7 +137,6 @@ $card-font: sans-serif;
         border-radius: 10%;
         height: 4em;
         width: 2.7em;
-        background-color: white;
 
         .card-front {
 

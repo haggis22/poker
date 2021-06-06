@@ -55,10 +55,10 @@
     import { BetStatus} from '@/app/casino/tables/betting/bet-status';
     import { RequestSeatCommand } from '@/app/commands/table/request-seat-command';
 
-    import HandComponent from '../hand/HandComponent.vue';
-    import FoldingComponent from '../folding/FoldingComponent.vue';
     import TimerComponent from '../timer/TimerComponent.vue';
-    import GhostHandComponent from '../ghost-hand/GhostHandComponent.vue';
+    import HandComponent from '../hands/hand/HandComponent.vue';
+    import FoldingComponent from '../hands/folding/FoldingComponent.vue';
+    import GhostHandComponent from '../hands/ghost-hand/GhostHandComponent.vue';
 
     import { tableUI } from '../../table-ui';
     import { tableState } from "@/store/table-state";

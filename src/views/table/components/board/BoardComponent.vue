@@ -17,8 +17,8 @@
 
     import { Board } from '@/app/casino/tables/boards/board';
     import { UIPosition } from '@/app/ui/ui-position';
-    import { CardUI } from '../../card-ui';
-    import CardComponent from '../card/CardComponent.vue';
+    import { CardUI } from '../cards/card-ui';
+    import CardComponent from '../cards/card/CardComponent.vue';
     import { tableState } from '@/store/table-state';
 
 
