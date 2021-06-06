@@ -1670,8 +1670,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             // Flip all the cards face-up
             for (let seat of this.table.seats) {
 
-                if (seat.hand) {
+                if (seat.hand && seat.hand.cards.filter(card => card instanceof FacedownCard || !card.isFaceUp).length) {
 
+                    // They have at least one card face down, so flip 'em up
                     seat.hand.flipCards();
                     this.queueAction(new FlipCardsAction(this.table.id, seat.index, seat.hand));
 
@@ -1679,9 +1680,12 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             }
 
-            await this.wait(this.TIME_ALL_IN_FLIP_CARDS);
 
         }
+
+        // We're going to pause, even if we didn't just flip cards - it gives everyone time to process the board running out.
+        await this.wait(this.TIME_ALL_IN_FLIP_CARDS);
+
 
     }
 
