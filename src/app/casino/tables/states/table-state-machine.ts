@@ -1,6 +1,8 @@
 ﻿import { TableState } from "./table-state";
 import { BetweenHandsState } from "./between-hands-state";
 import { OpenState } from "./open-state";
+import { DealState } from './dealing/deal-state';
+import { DealBoardState } from './dealing/deal-board-state';
 
 export class TableStateMachine {
 
@@ -40,6 +42,22 @@ export class TableStateMachine {
         }
 
         return this.states[this.currentStateIndex];
+
+    }
+
+
+    public getRemainingDealStates(): TableState[] {
+
+        const remainingStates = [] as TableState[];
+
+        for (let s = this.currentStateIndex + 1; s < this.states.length; s++)
+        {
+            if (this.states[s] instanceof DealState || this.states[s] instanceof DealBoardState) {
+                remainingStates.push(this.states[s]);
+            }
+        }
+
+        return remainingStates;
 
     }
 

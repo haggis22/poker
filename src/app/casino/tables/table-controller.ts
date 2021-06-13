@@ -44,7 +44,7 @@ import { Deck } from "../../cards/deck";
 import { TableStateAction } from "../../actions/table/state/table-state-action";
 import { MessagePair } from "../../messages/message-pair";
 import { DeepCopier } from "../../communication/deep-copier";
-import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ClearTimerAction, Stakes, ClearBettingActionsAction, BettingActionAction, Blind } from "../../communication/serializable";
+import { DeclareHandAction, Card, HandCompleteAction, GatherBetsAction, GatherBetsCompleteAction, Pot, AnteTurnAction, DealBoardState, User, ChatCommand, ChatAction, GatherAntesAction, GatherAntesCompleteAction, TableSummary, SeatVacatedAction, TableConnectedAction, ErrorMessage, OpenState, ClearTimerAction, Stakes, ClearBettingActionsAction, BettingActionAction, Blind, Board, HandEvaluation } from "../../communication/serializable";
 import { Game } from "../../games/game";
 import { SetGameAction } from "../../actions/table/game/set-game-action";
 import { SetStatusAction } from "../../actions/table/players/set-status-action";
@@ -1675,9 +1675,63 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private calculateOdds(): void {
 
+        let remainingStates: TableState[] = this.game.stateMachine.getRemainingDealStates();
+
+        let seatWinnersMap: Map<number, number> = new Map<number, number>();
+
+        const numSimulations = 10;
+
+        // Do a Monte Carlo simulation to see how many times each remaining player would win
+        for (let t = 0; t < numSimulations; t++) {
+
+            // deal from a copy of the deck
+            let deck: Deck = this.deck.clone();
+            deck.shuffleRemaining();
+
+            for (let dealState of remainingStates) {
+
+            }
+
+            const seatHands = [] as { seatIndex: number, hand: Hand }[];
+
+            for (let seat of this.table.seats) {
+
+                if (seat.hand) {
+
+                    seatHands.push({ seatIndex: seat.index, hand: seat.hand });
+
+                }
+
+            }
+
+            const winners: HandWinner[] = this.determineBestHands(seatHands, this.table.board);
+
+            if (winners.length > 0) {
+
+                let winningHand: HandEvaluation = winners[0].evaluation;
+
+                for (let winner of winners) {
+
+                    if (winner.evaluation.compareTo(winningHand) >= 0) {
+
+                        seatWinnersMap.set(winner.seatIndex, (seatWinnersMap.get(winner.seatIndex) || 0) + 1);
+
+                    }
+                    else {
+
+                        // stop looking for winners
+                        break;
+                    }
+
+                }
+
+            }
+
+        }
+
         for (let seat of this.table.seats) {
 
-            seat.chanceToWin = seat.hand ? 0.5 : null;
+            seat.chanceToWin = seatWinnersMap.has(seat.index) ? seatWinnersMap.get(seat.index) / numSimulations : null;
 
         }
 
@@ -1819,18 +1873,28 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private findWinners(): Array<HandWinner> {
 
-        let handWinners: Array<HandWinner> = new Array<HandWinner>();
+        const hands = [] as { seatIndex: number, hand: Hand }[];
 
-        for (let seat of this.table.seats) {
+        for (const seat of this.table.seats) {
 
             if (seat.hand) {
 
-                // Put their best hand on the list
-                handWinners.push(new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seat.hand, this.table.board), seat.index))
+                hands.push({ seatIndex: seat.index, hand: seat.hand });
 
             }
 
         }
+
+        return this.determineBestHands(hands, this.table.board)
+
+
+    }  // findWinners
+
+
+    private determineBestHands(hands: { seatIndex: number, hand: Hand }[], board: Board): Array<HandWinner> {
+
+        // Put their best hand on the list
+        let handWinners: Array<HandWinner> = hands.map(seatHand => new HandWinner(this.game.handSelector.select(this.game.handEvaluator, seatHand.hand, board), seatHand.seatIndex));
 
         // rank the hands, from best to worst
         handWinners.sort(function (w1, w2) {
