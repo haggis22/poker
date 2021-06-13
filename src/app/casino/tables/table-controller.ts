@@ -94,7 +94,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private readonly TIME_COMPLETE_HAND: number = 0;
 
-    private readonly TIME_ALL_IN_FLIP_CARDS: number = 1500;
+    private readonly TIME_ALL_IN_FLIP_CARDS: number = 2000;
 
 
     private cashierManager: CashierManager;
@@ -1648,7 +1648,11 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // If we have zero or one player with chips left, but multiple people in the pot, then time to flip 'em up
         if (betController.checkAllIn(this.table)) {
 
-            this.calculateOdds();
+            this.calculateOdds(250);
+            this.calculateOdds(1000);
+            this.calculateOdds(5000);
+            this.calculateOdds(10000);
+            this.calculateOdds(50000);
 
             // Flip all the cards face-up
             for (let seat of this.table.seats) {
@@ -1674,15 +1678,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     }
 
-    private calculateOdds(): void {
+    private calculateOdds(numSimulations: number): void {
 
         const startTime = Date.now();
 
         let remainingStates: TableState[] = this.game.stateMachine.getRemainingDealStates();
 
         let seatWinnersMap: Map<number, number> = new Map<number, number>();
-
-        const numSimulations = 250;
 
         // Do a Monte Carlo simulation to see how many times each remaining player would win
         for (let t = 0; t < numSimulations; t++) {
@@ -1736,8 +1738,28 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
             if (winners.length > 0) {
 
-                let winningHand: HandEvaluation = winners[0].evaluation;
+                const winner = winners[0];
 
+                if (winners.length > 1) {
+
+                    // only give the top hand a win if it is not tied with the second-best
+                    if (winner.evaluation.compareTo(winners[1].evaluation) > 0) {
+
+                        seatWinnersMap.set(winner.seatIndex, (seatWinnersMap.get(winner.seatIndex) || 0) + 1);
+
+                    }
+
+                }
+                else {
+
+                    // only one player, so give them the win
+                    seatWinnersMap.set(winner.seatIndex, (seatWinnersMap.get(winner.seatIndex) || 0) + 1);
+
+                }
+
+
+/*
+ * This version will count a tie as a win for all that tie for the best hand
                 for (let winner of winners) {
 
                     if (winner.evaluation.compareTo(winningHand) >= 0) {
@@ -1752,12 +1774,17 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     }
 
                 }
+*/
 
             }
 
         }
 
+        let mostWins: number = 0;
+
         for (let seat of this.table.seats) {
+
+            mostWins = Math.max(mostWins, seatWinnersMap.get(seat.index) || 0);
 
             seat.chanceToWin = !seat.hand
                 ? null
@@ -1767,7 +1794,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         const duration = Date.now() - startTime;
 
-        this.log(`Took ${duration} ms to calculate ${numSimulations} simulations`);
+        this.log(`Took ${duration} ms to calculate ${numSimulations} simulations; the favorite won ${(100 * mostWins / numSimulations).toFixed(1)}% of the time`);
 
     }
 
