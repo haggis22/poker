@@ -5,7 +5,7 @@
         <div v-for="(message, index) in getMessages" 
              :key="`log-${index}`"
              class="message"
-             v-html="highlightText(message)"></div>
+             v-html="formatMessage(message)"></div>
 
     </div>
 
@@ -21,6 +21,7 @@ import './log.scss';
 
     import { tableState } from "@/store/table-state";
     import { CardSuit } from '@/app/cards/card-suit';
+    import { Commentary } from '@/app/commentary/commentary';
 
 
 
@@ -32,7 +33,7 @@ const LogComponent = defineComponent({
 
         const log = ref(null as HTMLElement);
 
-        const getMessages = computed((): string[] => tableState.getMessages.value);
+        const getMessages = computed((): Commentary[] => tableState.getMessages.value);
 
         const scrollToEnd = (): void => {
 
@@ -55,11 +56,19 @@ const LogComponent = defineComponent({
             return { exp: new RegExp('([AKQJ0123456789]+' + val.symbol + ')', 'gui'), wordClass: val.text };
         });
 
-        const highlightText = (message: string): string => {
+        const formatMessage = (commentary: Commentary): string => {
+
+            let message = commentary.message;
 
             for (let re of regExps) {
 
-                message = message.replace(re.exp, '<span class="' + re.wordClass + '" style="font-weight: bold;">$1</span>');
+                message = message.replace(re.exp, '<span class="' + re.wordClass + '" class="card">$1</span>');
+
+            }
+
+            if (commentary.type == Commentary.TYPE.CHAT) {
+
+                message = `<span class="chat">${message}</span>`;
 
             }
 
@@ -80,7 +89,7 @@ const LogComponent = defineComponent({
 
             getMessages,
 
-            highlightText
+            formatMessage
 
         };
 

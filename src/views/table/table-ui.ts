@@ -33,6 +33,7 @@ import { betController } from '@/app/casino/tables/betting/bet-controller';
 import { messageState } from '@/store/message-state';
 import { v4 as uuidv4 } from 'uuid';
 import { BettingActionAction } from '@/app/actions/table/betting/betting-action-action';
+import { Commentary } from '@/app/commentary/commentary';
 
 
 const logger: Logger = new Logger();
@@ -516,6 +517,11 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
     }
 
+
+    private addCommentaryMessage(message: string) {
+        tableState.addMessage(new Commentary(Commentary.TYPE.ACTION, message));
+    }
+
     private playerSeatedAction(action: PlayerSeatedAction): void {
 
         const result = tableState.setPlayer(action.seatIndex, action.player);
@@ -523,7 +529,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (result) {
 
             let message = `${action.player.name} sits at Table ${action.tableID}, seat ${(action.seatIndex + 1)}`;
-            tableState.addMessage(message);
+            this.addCommentaryMessage(message);
             this.log(message);
 
             if (action.player.userID === this.getUser().id) {
@@ -548,7 +554,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
             let seat: Seat = this.getTable().seats[action.seatIndex];
 
             let message = `${seat.getSeatName()} is now open`;
-            tableState.addMessage(message);
+            this.addCommentaryMessage(message);
 
             this.log(message);
             this.log(`Players: [ ${this.getTable().seats.filter(s => s.player).map(s => s.player.name).join(" ")} ]`);
@@ -744,7 +750,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         let seat = this.findSeat(action.seatIndex);
 
         let message: string = `${seat.getName()} now has the button`;
-        tableState.addMessage(message);
+        this.addCommentaryMessage(message);
         this.log(message);
 
     }   // moveButton
@@ -772,7 +778,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        tableState.addMessage(message);
+        this.addCommentaryMessage(message);
         this.log(message);
 
     }   // dealCard
@@ -795,7 +801,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         let message: string = `The board is dealt ${ action.cards.map(card => this.describeCard(card)).join(" ") }`;
 
-        tableState.addMessage(message);
+        this.addCommentaryMessage(message);
         this.log(message);
 
     }   // dealBoardAction
@@ -1020,7 +1026,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         }
 
-        tableState.addMessage(message);
+        this.addCommentaryMessage(message);
         this.log(message);
 
     }  // betAction
@@ -1038,7 +1044,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         let message: string = `${seat.getName()} folds`;
 
-        tableState.addMessage(message);
+        this.addCommentaryMessage(message);
         this.log(message);
 
     }  // fold
@@ -1061,7 +1067,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat.hand?.cards?.length) {
 
             let message: string = `${seat.getName()} has ${seat.hand.cards.map(card => card.toString()).join(" ")}`;
-            tableState.addMessage(message);
+            this.addCommentaryMessage(message);
             this.log(message);
 
         }
@@ -1076,7 +1082,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         let message: string = `${seat.getName()} has ${game?.handDescriber.describe(action.handEvaluation)}`;
 
-        tableState.addMessage(message);
+        this.addCommentaryMessage(message);
         this.log(message);
 
     }  // declareHand
@@ -1114,7 +1120,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
             ? `${seat.getName()} wins ${tableState.getChipFormatter.value.format(pot.amount)} from ${potDescription}${handDescription}`
             : `${seat.getSeatName()} wins ${tableState.getChipFormatter.value.format(pot.amount)} from ${potDescription}${handDescription}`;
 
-        tableState.addMessage(message);
+        this.addCommentaryMessage(message);
         this.log(message);
         
     }  // winPot
@@ -1127,7 +1133,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
         if (seat.player) {
 
             let message: string = `${tableState.getChipFormatter.value.format(action.amount)} is returned to ${seat.getName()}`;
-            tableState.addMessage(message);
+            this.addCommentaryMessage(message);
             this.log(message);
         
         }
@@ -1204,7 +1210,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     private chatAction(action: ChatAction): void {
 
         const message = `${action.username}: ${action.message}`;
-        tableState.addMessage(message);
+        tableState.addMessage(new Commentary(Commentary.TYPE.CHAT, message));
 
         this.log(`${action.username}: ${action.message}`);
 

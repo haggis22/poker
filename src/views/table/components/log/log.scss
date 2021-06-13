@@ -12,6 +12,17 @@
 
     .message {
 
+        .card
+        {
+            font-weight: bold;
+        }
+
+        .chat
+        {
+            font-weight: bold;
+            font-style: italic;
+        }
+
         .spade {
             @include spade;
         }

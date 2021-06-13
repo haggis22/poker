@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <div class="chat">
+    <div class="chat-component">
 
         <input type="text" 
                class="chat-text"
@@ -15,8 +15,6 @@
 
 <script lang="ts">
 
-
-    import './chat.scss';
 
     import { defineComponent, ref, computed } from 'vue';
 
@@ -60,3 +58,22 @@
 export default ChatComponent;
 
 </script>
+
+<style scoped lang="scss">
+
+    .chat-component {
+
+        position: absolute;
+        top: 230px;
+        width: 500px;
+
+        .chat-text
+        {
+            width: 300px;
+            height: 1.1em;
+        }
+
+    }
+
+
+</style>

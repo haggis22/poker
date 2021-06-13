@@ -6,9 +6,6 @@ import { Player } from '@/app/players/player';
 import { Seat } from '@/app/casino/tables/seat';
 import { Timer } from '@/app/timers/timer';
 import { TableState } from '@/app/casino/tables/states/table-state';
-import { AnteCommand } from '@/app/commands/table/betting/ante-command';
-import { BetCommand } from '@/app/commands/table/betting/bet-command';
-import { FoldCommand } from '@/app/commands/table/betting/fold-command';
 import { Bet } from '@/app/casino/tables/betting/bet';
 import { BetStatus } from '@/app/casino/tables/betting/bet-status';
 import { Card } from '@/app/cards/card';
@@ -20,6 +17,7 @@ import { UIPosition } from '@/app/ui/ui-position';
 import { BettingCommand } from '@/app/commands/table/betting/betting-command';
 import { betController } from '@/app/casino/tables/betting/bet-controller';
 import { userState } from './user-state';
+import { Commentary } from '@/app/commentary/commentary';
 
 
 const state = reactive({
@@ -29,7 +27,7 @@ const state = reactive({
 
     table: null as Table,
     game: null as Game,
-    messages: [] as string[],
+    messages: [] as Commentary[],
 
     mySeatIndex: null as number,
 
@@ -141,9 +139,9 @@ const setGame = (game: Game): void => {
     state.game = game;
 }
 
-const getMessages = computed(() => state.messages);
+const getMessages = computed((): Commentary[] => state.messages);
 
-const addMessage = (message: string): void => {
+const addMessage = (message: Commentary): void => {
 
     state.messages.push(message);
 
