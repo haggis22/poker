@@ -1648,11 +1648,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         // If we have zero or one player with chips left, but multiple people in the pot, then time to flip 'em up
         if (betController.checkAllIn(this.table)) {
 
-            this.calculateOdds(250);
-            this.calculateOdds(1000);
+            // 5000 generally seems to match 50K better than 10K does....???  And 5K takes 1/10th as long as 50K
             this.calculateOdds(5000);
-            this.calculateOdds(10000);
-            this.calculateOdds(50000);
 
             // Flip all the cards face-up
             for (let seat of this.table.seats) {
@@ -1686,29 +1683,61 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         let seatWinnersMap: Map<number, number> = new Map<number, number>();
 
-        // Do a Monte Carlo simulation to see how many times each remaining player would win
-        for (let t = 0; t < numSimulations; t++) {
+        // deal from a copy of the deck
+        let deck: Deck = this.deck.clone();
 
-            // deal from a copy of the deck
-            let deck: Deck = this.deck.clone();
-            deck.shuffleRemaining();
+        // Track the cards that get dealt so that we can just put them back in the deck before the next simulation rather than
+        // creating it from scratch every time
+        let usedCards: Card[] = [];
 
-            const seatHands = [] as { seatIndex: number, hand: Hand }[];
+        const seatHands: { seatIndex: number, hand: Hand }[] = [];
 
-            for (let seat of this.table.seats) {
+        // Remember how many cards have been dealt to the players so that we can reset it after each round
+        let numPlayerCards: number = 0;
 
-                if (seat.hand) {
+        for (let seat of this.table.seats) {
 
-                    // Create a copy of their hand as it is now
-                    // TODO: if the hole cards are all done then do this up front to save time & effort
-                    seatHands.push({ seatIndex: seat.index, hand: seat.hand.clone() });
+            if (seat.hand) {
 
-                }
+                // Create a copy of their hand as it is now
+                // TODO: if the hole cards are all done then do this up front to save time & effort
+                seatHands.push({ seatIndex: seat.index, hand: seat.hand.clone() });
+
+                // Making the assumption that all player hands are the same length
+                numPlayerCards = seat.hand.cards.length;
 
             }
 
-            const board: Board = this.table.board.clone();
+        }
 
+        const board: Board = this.table.board.clone();
+
+        // Remember how many cards are already on the board so that we can reset it after each run
+        const numBoardCards: number = board.cards.length;
+
+
+
+        // Do a Monte Carlo simulation to see how many times each remaining player would win
+        for (let t = 0; t < numSimulations; t++) {
+
+            if (usedCards.length) {
+
+                // put the dealt cards back in the deck
+                deck.cards.push(...usedCards);
+                usedCards.length = 0;
+
+            }
+
+            // shuffle the reconstituted deck
+            deck.shuffleRemaining();
+
+            // Reset the cards in each player's hand
+            for (const seatHand of seatHands) {
+                seatHand.hand.cards.length = numPlayerCards;
+            }
+
+            // Reset the board cards
+            board.cards.length = numBoardCards;
 
             for (let dealState of remainingStates) {
 
@@ -1717,7 +1746,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     // deal all the hands a card - we're not going to worry about what order they would be dealt in the real world - it's all random, right?
                     for (let seatHand of seatHands) {
 
-                        seatHand.hand.deal(deck.deal());
+                        const card = deck.deal();
+                        usedCards.push(card);
+                        seatHand.hand.deal(card);
 
                     }
 
@@ -1726,7 +1757,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                     for (let b = 0; b < dealState.numCards; b++) {
 
-                        board.deal(deck.deal());
+                        const card = deck.deal();
+                        usedCards.push(card);
+                        board.deal(card);
 
                     }
 
