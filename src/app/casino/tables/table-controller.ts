@@ -70,6 +70,7 @@ import { RemainingActor } from './betting/remaining-actor';
 import { v4 as uuidv4 } from 'uuid';
 import { IChipFormatter } from './chips/chip-formatter';
 import { Timer } from '../../timers/timer';
+import { ProbabilityAction } from '../../actions/table/probability/probability-action';
 
 const logger: Logger = new Logger();
 
@@ -1644,28 +1645,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private async checkAllIn(): Promise<void> {
 
-        let numSeatsInHand: number = 0;
-        let numPlayersWithChips: number = 0;
+        // If we have zero or one player with chips left, but multiple people in the pot, then time to flip 'em up
+        if (betController.checkAllIn(this.table)) {
 
-        for (let seat of this.table.seats) {
-
-            if (seat.isInHand) {
-
-                numSeatsInHand++;
-
-                if (seat.player && seat.player.chips > 0) {
-                    numPlayersWithChips++;
-                }
-
-            }
-
-        }
-
-        // If we have:
-        // 1. Multiple players in the hand, so it's not just a pot won with folding
-        // 2. There is not more than one player with the ability to act (everyone or everyone but one is all-in)
-        // then let's see everyone's cards
-        if (numSeatsInHand >= 2 && numPlayersWithChips <= 1) {
+            this.calculateOdds();
 
             // Flip all the cards face-up
             for (let seat of this.table.seats) {
@@ -1678,6 +1661,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 }
 
+                this.queueAction(new ProbabilityAction(seat.index, seat.chanceToWin));
+
+
             }
 
             // We're going to pause, even if we didn't just flip cards - it gives everyone time to process the board running out.
@@ -1685,7 +1671,15 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         }
 
+    }
 
+    private calculateOdds(): void {
+
+        for (let seat of this.table.seats) {
+
+            seat.chanceToWin = seat.hand ? 0.5 : null;
+
+        }
 
     }
 
@@ -2087,6 +2081,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             if (seat.isInHand) {
 
                 this.queueAction(new ClearHandAction(this.table.id, seat.index));
+
+            }
+
+            if (seat.chanceToWin != null) {
+
+                seat.chanceToWin = null;
+                this.queueAction(new ProbabilityAction(seat.index, null));
 
             }
 

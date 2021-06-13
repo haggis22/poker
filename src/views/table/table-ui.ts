@@ -34,6 +34,7 @@ import { messageState } from '@/store/message-state';
 import { v4 as uuidv4 } from 'uuid';
 import { BettingActionAction } from '@/app/actions/table/betting/betting-action-action';
 import { Commentary } from '@/app/commentary/commentary';
+import { ProbabilityAction } from '@/app/actions/table/probability/probability-action';
 
 
 const logger: Logger = new Logger();
@@ -362,6 +363,13 @@ class TableUI implements MessageHandler, CommandBroadcaster {
             return this.chatAction(action);
 
         }
+
+        if (action instanceof ProbabilityAction) {
+
+            return this.probabilityAction(action);
+
+        }
+
 
 
         this.log(`Heard ${action.constructor.name}`);
@@ -1214,7 +1222,14 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`${action.username}: ${action.message}`);
 
-    }  // chat
+    }  // chatAction
+
+
+    private probabilityAction(action: ProbabilityAction): void {
+
+        tableState.setProbability(action.seatIndex, action.chance);
+
+    }  // probabilityAction
 
 
     public setBetCommand(betCommand: BettingCommand) {

@@ -341,6 +341,17 @@ const clearTimers = (): void => {
 
 }
 
+const setProbability = (seatIndex: number, chanceToWin: number): void => {
+
+    let seat: Seat = state.table.seats[seatIndex];
+
+    if (seat) {
+        seat.chanceToWin = chanceToWin;
+    }
+
+};
+
+
 const getPendingBetCommand = computed((): BettingCommand => state.pendingBetCommand);
 
 const setPendingBetCommand = (command: BettingCommand): void => {
@@ -623,6 +634,8 @@ export const tableState = {
     startTimer,
     clearTimer,
     clearTimers,
+
+    setProbability,
 
     getPendingBetCommand,
     setPendingBetCommand,

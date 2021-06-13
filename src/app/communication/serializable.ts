@@ -50,6 +50,8 @@ export { BetReturnedAction } from "../actions/table/betting/bet-returned-action"
 export { ClearTimerAction } from "../actions/table/betting/clear-timer-action";
 export { Timer } from '../timers/timer';
 
+export { ProbabilityAction } from '../actions/table/probability/probability-action';
+
 
 export { BlindsAndAntesState } from "../casino/tables/states/betting/blinds-and-antes-state";
 export { AnteTurnAction } from "../actions/table/antes/ante-turn-action";

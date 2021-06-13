@@ -17,6 +17,7 @@ export class Seat {
 
     public action: string;
     public timer: Timer;
+    public chanceToWin: number;
 
 
 
@@ -32,6 +33,7 @@ export class Seat {
 
         this.action = null;
         this.timer = null;
+        this.chanceToWin = null;
 
     }
 

@@ -6,6 +6,7 @@
         <div class="avatar">
             <div class="action-container">
                 <timer-component v-if="getTimer" :timer="getTimer"></timer-component>
+                <probability-component v-if="getProbability != null" :chance="getProbability"></probability-component>
                 <div class="action" v-if="getAction">{{ getAction }}</div>
             </div>
         </div>
@@ -56,6 +57,8 @@
     import { RequestSeatCommand } from '@/app/commands/table/request-seat-command';
 
     import TimerComponent from '../timer/TimerComponent.vue';
+    import ProbabilityComponent from '../probability/ProbabilityComponent.vue';
+
     import HandComponent from '../hands/hand/HandComponent.vue';
     import FoldingComponent from '../hands/folding/FoldingComponent.vue';
     import GhostHandComponent from '../hands/ghost-hand/GhostHandComponent.vue';
@@ -129,6 +132,8 @@
 
             const getTimer = computed((): Timer => seat.value.timer);
 
+            const getProbability = computed((): number => seat.value.chanceToWin);
+
             const isMySeat = computed((): boolean => tableState.getMySeatIndex.value == seatIndex);
 
             const amISitting = computed((): boolean => tableState.getMySeatIndex.value != null);
@@ -186,7 +191,9 @@
                 // methods
                 sit,
 
-                chipFormatter
+                chipFormatter,
+
+                getProbability
 
             };
 
@@ -195,7 +202,8 @@
             HandComponent,
             FoldingComponent,
             GhostHandComponent,
-            TimerComponent
+            TimerComponent,
+            ProbabilityComponent
         }
 
     });

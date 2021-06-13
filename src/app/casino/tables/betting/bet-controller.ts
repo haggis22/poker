@@ -817,6 +817,34 @@ class BetController {
     }  // calculateRemainingActors
 
 
+    public checkAllIn(table: Table): boolean {
+
+        let numSeatsInHand: number = 0;
+        let numPlayersWithChips: number = 0;
+
+        for (let seat of table.seats) {
+
+            if (seat.isInHand) {
+
+                numSeatsInHand++;
+
+                if (seat.player && seat.player.chips > 0) {
+                    numPlayersWithChips++;
+                }
+
+            }
+
+        }
+
+        // If we have:
+        // 1. Multiple players in the hand, so it's not just a pot won with folding
+        // 2. There is not more than one player with the ability to act (everyone or everyone but one is all-in)
+        // then let's see everyone's cards
+        return numSeatsInHand >= 2 && numPlayersWithChips <= 1;
+
+    }
+
+
 }
 
 export const betController = new BetController();
