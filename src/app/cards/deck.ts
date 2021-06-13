@@ -8,13 +8,13 @@ export class Deck {
 
     constructor() {
 
-        this.shuffle();
+        this.cards = new Array();
 
     }
 
     private reset(): void 
     {
-        this.cards = new Array();
+        this.cards.length = 0;
 
         for (let value of CardValue.VALUES) {
 
@@ -31,7 +31,14 @@ export class Deck {
 
     public shuffle(): void {
 
+        // Build a fresh deck and then shuffle up
         this.reset();
+
+        this.shuffleRemaining();
+
+    }
+
+    public shuffleRemaining(): void {
 
         for (let card of this.cards) {
             card.sortValue = Math.random();
@@ -40,6 +47,18 @@ export class Deck {
         this.cards.sort((a, b) => a.sortValue - b.sortValue);
 
     }
+
+
+    public clone(): Deck {
+
+        const cloneDeck: Deck = new Deck();
+
+        cloneDeck.cards.push(...this.cards);
+
+        return cloneDeck;
+
+    }
+
 
     public display(): string {
 
