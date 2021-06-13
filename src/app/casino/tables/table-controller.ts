@@ -1682,7 +1682,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         let seatWinnersMap: Map<number, number> = new Map<number, number>();
 
-        const numSimulations = 25;
+        const numSimulations = 250;
 
         // Do a Monte Carlo simulation to see how many times each remaining player would win
         for (let t = 0; t < numSimulations; t++) {
@@ -1759,7 +1759,9 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
         for (let seat of this.table.seats) {
 
-            seat.chanceToWin = seatWinnersMap.has(seat.index) ? seatWinnersMap.get(seat.index) / numSimulations : null;
+            seat.chanceToWin = !seat.hand
+                ? null
+                : seatWinnersMap.has(seat.index) ? seatWinnersMap.get(seat.index) / numSimulations : 0;
 
         }
 
