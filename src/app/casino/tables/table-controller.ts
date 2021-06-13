@@ -1661,6 +1661,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 }
 
+                this.queueAction(new ProbabilityAction(seat.index, null));
+
                 this.queueAction(new ProbabilityAction(seat.index, seat.chanceToWin));
 
             }
