@@ -18,6 +18,7 @@ export class Hand {
 
     }
 
+
     public deal(card: Card | FacedownCard): void {
 
         this.cards.push(card);
@@ -39,5 +40,12 @@ export class Hand {
 
     }
 
+    public clone(): Hand {
+
+        const hand: Hand = new Hand();
+        hand.cards = [...this.cards];
+        return hand;
+
+    }
 
 }

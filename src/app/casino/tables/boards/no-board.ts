@@ -18,4 +18,12 @@ export class NoBoard implements Board {
         throw new Error("Method not implemented.");
     }
 
+
+    public clone(): Board {
+
+        return new NoBoard();
+
+    }
+
+
 }

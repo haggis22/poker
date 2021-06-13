@@ -6,7 +6,7 @@
         <div class="avatar">
             <div class="action-container">
                 <timer-component v-if="getTimer" :timer="getTimer"></timer-component>
-                <probability-component v-if="getProbability != null" :chance="getProbability"></probability-component>
+                <probability-component v-if="chanceToWin != null" :chance="chanceToWin"></probability-component>
                 <div class="action" v-if="getAction">{{ getAction }}</div>
             </div>
         </div>
@@ -132,13 +132,11 @@
 
             const getTimer = computed((): Timer => seat.value.timer);
 
-            const getProbability = computed((): number => seat.value.chanceToWin);
+            const chanceToWin = computed((): number => seat.value.chanceToWin);
 
             const isMySeat = computed((): boolean => tableState.getMySeatIndex.value == seatIndex);
 
             const amISitting = computed((): boolean => tableState.getMySeatIndex.value != null);
-
-            const isAllIn = computed((): boolean => seat.value && seat.value.isAllIn());
 
             const chipsClasses = computed((): string[] => {
 
@@ -193,7 +191,7 @@
 
                 chipFormatter,
 
-                getProbability
+                chanceToWin
 
             };
 

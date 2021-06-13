@@ -1228,6 +1228,7 @@ class TableUI implements MessageHandler, CommandBroadcaster {
     private probabilityAction(action: ProbabilityAction): void {
 
         tableState.setProbability(action.seatIndex, action.chance);
+        this.log(`===============> PROBABILITY CHANCE ${action.seatIndex}: ${(action.chance* 100)}%`);
 
     }  // probabilityAction
 

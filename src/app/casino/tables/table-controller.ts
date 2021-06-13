@@ -1663,7 +1663,6 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
                 this.queueAction(new ProbabilityAction(seat.index, seat.chanceToWin));
 
-
             }
 
             // We're going to pause, even if we didn't just flip cards - it gives everyone time to process the board running out.
@@ -1675,11 +1674,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
 
     private calculateOdds(): void {
 
+        const startTime = Date.now();
+
         let remainingStates: TableState[] = this.game.stateMachine.getRemainingDealStates();
 
         let seatWinnersMap: Map<number, number> = new Map<number, number>();
 
-        const numSimulations = 10;
+        const numSimulations = 25;
 
         // Do a Monte Carlo simulation to see how many times each remaining player would win
         for (let t = 0; t < numSimulations; t++) {
@@ -1688,23 +1689,48 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             let deck: Deck = this.deck.clone();
             deck.shuffleRemaining();
 
-            for (let dealState of remainingStates) {
-
-            }
-
             const seatHands = [] as { seatIndex: number, hand: Hand }[];
 
             for (let seat of this.table.seats) {
 
                 if (seat.hand) {
 
-                    seatHands.push({ seatIndex: seat.index, hand: seat.hand });
+                    // Create a copy of their hand as it is now
+                    // TODO: if the hole cards are all done then do this up front to save time & effort
+                    seatHands.push({ seatIndex: seat.index, hand: seat.hand.clone() });
 
                 }
 
             }
 
-            const winners: HandWinner[] = this.determineBestHands(seatHands, this.table.board);
+            const board: Board = this.table.board.clone();
+
+
+            for (let dealState of remainingStates) {
+
+                if (dealState instanceof DealState) {
+
+                    // deal all the hands a card - we're not going to worry about what order they would be dealt in the real world - it's all random, right?
+                    for (let seatHand of seatHands) {
+
+                        seatHand.hand.deal(deck.deal());
+
+                    }
+
+                }
+                else if (dealState instanceof DealBoardState) {
+
+                    for (let b = 0; b < dealState.numCards; b++) {
+
+                        board.deal(deck.deal());
+
+                    }
+
+                }
+
+            }
+
+            const winners: HandWinner[] = this.determineBestHands(seatHands, board);
 
             if (winners.length > 0) {
 
@@ -1734,6 +1760,10 @@ export class TableController implements CommandHandler, MessageBroadcaster {
             seat.chanceToWin = seatWinnersMap.has(seat.index) ? seatWinnersMap.get(seat.index) / numSimulations : null;
 
         }
+
+        const duration = Date.now() - startTime;
+
+        this.log(`Took ${duration} ms to calculate ${numSimulations} simulations`);
 
     }
 

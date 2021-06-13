@@ -27,4 +27,12 @@ export class HoldEmBoard implements Board {
 
     }
 
+    public clone(): Board {
+
+        const board: Board = new HoldEmBoard();
+        board.cards.push(...this.cards);
+        return board;
+
+    }
+
 }

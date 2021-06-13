@@ -346,6 +346,7 @@ const setProbability = (seatIndex: number, chanceToWin: number): void => {
     let seat: Seat = state.table.seats[seatIndex];
 
     if (seat) {
+        seat.chanceToWin = null;
         seat.chanceToWin = chanceToWin;
     }
 

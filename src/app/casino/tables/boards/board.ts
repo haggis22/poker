@@ -8,4 +8,6 @@ export interface Board {
 
     deal(card: Card): void;
 
+    clone(): Board;
+
 }
