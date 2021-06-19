@@ -28,6 +28,7 @@ import { DeadButtonController } from '../tables/buttons/dead-button-controller';
 import { CashierManager } from '../cashier/cashier-manager';
 import { MoneyFormatter } from '../tables/chips/money-formatter';
 import { RandomBlindAssigner } from '../tables/buttons/random-blind-assigner';
+import { Limits } from '../tables/betting/limits';
 
 
 export class LobbyManager implements MessageBroadcaster {
@@ -189,9 +190,10 @@ export class LobbyManager implements MessageBroadcaster {
         let bets: number[] = [100, 100, 200, 200];
         let maxRaises: number = 4;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let limits = new Limits(Limits.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', stakes, rules);
+        let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', limits, stakes, rules);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
@@ -227,9 +229,10 @@ export class LobbyManager implements MessageBroadcaster {
         let bets: number[] = [50, 50, 50, 50];
         let maxRaises: number = null;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', stakes, rules);
+        let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', limits, stakes, rules);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
@@ -265,9 +268,10 @@ export class LobbyManager implements MessageBroadcaster {
         let bets: number[] = [100, 100, 200, 200];
         let maxRaises: number = 4;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let limits = new Limits(Limits.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', stakes, rules);
+        let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', limits, stakes, rules);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
@@ -303,9 +307,10 @@ export class LobbyManager implements MessageBroadcaster {
         let bets: number[] = [50, 50, 50, 50];
         let maxRaises: number = null;
 
-        let stakes = new Stakes(ante, blinds, bets, Stakes.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Corn Dog Omaha', '0.25/0.50 No-Limit Omaha', stakes, rules);
+        let table: Table = new Table(tableID, 'Corn Dog Omaha', '0.25/0.50 No-Limit Omaha', limits, stakes, rules);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 

@@ -9,6 +9,7 @@ import { BlindTracker } from '../blind-tracker';
 import { RandomBlindAssigner } from '../random-blind-assigner';
 import { IBlindAssigner } from '../i-blind-assigner';
 import { ExplicitBlindAssigner } from '../explicit-blind-assigner';
+import { Limits } from '../../betting/limits';
 
 
 class Harness
@@ -34,10 +35,11 @@ function setup(blindAssigner: IBlindAssigner): Harness {
             new Blind(1, Blind.TYPE_BIG, "big blind", 100, true, true)
         ];
 
-    const stakes: Stakes = new Stakes(0, blinds, [25, 50], Stakes.NO_LIMIT, 4, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+    const limits: Limits = new Limits(Limits.NO_LIMIT, 4, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+    const stakes: Stakes = new Stakes(0, blinds, [25, 50]);
     const rules: TableRules = new TableRules(6, 10, 10);
 
-    const table: Table = new Table(1, 'Test', 'Test', stakes, rules);
+    const table: Table = new Table(1, 'Test', 'Test', limits, stakes, rules);
 
     table.seats[0].player = new Player(1, 'Danny');
     table.seats[0].player.chips = 1000;

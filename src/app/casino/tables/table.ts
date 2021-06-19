@@ -5,6 +5,7 @@ import { OpenState } from "./states/open-state";
 import { Seat } from "./seat";
 import { TableRules } from "./table-rules";
 import { BetStatus } from "./betting/bet-status";
+import { Limits } from './betting/limits';
 import { Stakes } from "./betting/stakes";
 import { Game } from "../../games/game";
 import { Card } from '@/app/cards/card';
@@ -17,6 +18,7 @@ export class Table {
     public name: string;
     public description: string;
 
+    public limits: Limits;
     public stakes: Stakes;
     public rules: TableRules;
     public state: TableState;
@@ -31,12 +33,13 @@ export class Table {
     public buttonIndex: number;
 
 
-    constructor(id: number, name: string, description: string, stakes: Stakes, rules: TableRules) {
+    constructor(id: number, name: string, description: string, limits: Limits, stakes: Stakes, rules: TableRules) {
 
         this.id = id;
         this.name = name;
         this.description = description;
 
+        this.limits = limits;
         this.stakes = stakes;
         this.rules = rules;
 

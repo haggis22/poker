@@ -7,6 +7,7 @@ import { IServerClient } from "../../communication/server-side/i-server-client";
 import { CurrentBalanceAction } from "../../actions/cashier/current-balance-action";
 import { MessageHandler } from '../../messages/message-handler';
 import { SubscribeCashierCommand } from '../../commands/cashier/subscribe-cashier-command';
+import { Limits } from '../tables/betting/limits';
 
 export class CashierManager {
 
@@ -173,9 +174,9 @@ export class CashierManager {
 
             }
 
-            const stakes: Stakes = tableController.getStakes();
+            const limits: Limits = tableController.getLimits();
 
-            if (stakes) {
+            if (limits) {
 
                 const playerExistingChips: number = tableController.getPlayerChips(command.userID);
 
@@ -185,7 +186,7 @@ export class CashierManager {
 
                 }
 
-                const minChipsToBeAdded: number = stakes.minBuyIn - playerExistingChips;
+                const minChipsToBeAdded: number = limits.minBuyIn - playerExistingChips;
 
                 if (command.amount < minChipsToBeAdded) {
 
@@ -193,7 +194,7 @@ export class CashierManager {
 
                 }
 
-                const maxChipsCanBeAdded: number = stakes.maxBuyIn - playerExistingChips;
+                const maxChipsCanBeAdded: number = limits.maxBuyIn - playerExistingChips;
 
                 if (maxChipsCanBeAdded <= 0) {
 

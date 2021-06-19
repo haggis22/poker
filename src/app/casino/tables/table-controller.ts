@@ -71,6 +71,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { IChipFormatter } from './chips/chip-formatter';
 import { Timer } from '../../timers/timer';
 import { ProbabilityAction } from '../../actions/table/probability/probability-action';
+import { Limits } from './betting/limits';
 
 const logger: Logger = new Logger();
 
@@ -2294,11 +2295,19 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
+    public getLimits(): Limits {
+
+        return this.table.limits;
+
+    }
+
+
     public getStakes(): Stakes {
 
         return this.table.stakes;
 
     }
+
 
     public getChipFormatter(): IChipFormatter {
 

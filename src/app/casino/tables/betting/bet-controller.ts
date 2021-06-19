@@ -12,6 +12,7 @@ import { Ante } from "./ante";
 import { InvalidBet } from "./invalid-bet";
 import { InvalidFold } from "./invalid-fold";
 import { RemainingActor } from './remaining-actor';
+import { Limits } from './limits';
 
 
 class BetController {
@@ -342,7 +343,7 @@ class BetController {
         }
 
         // Next, check to see if we already have our maximum number of bets/raises. If there is a limit specified, and we've hit it, then no more raises are possible
-        if (table.stakes.maxRaises != null && table.betStatus.numRaises >= table.stakes.maxRaises) {
+        if (table.limits.maxRaises != null && table.betStatus.numRaises >= table.limits.maxRaises) {
             return null;
         }
 
@@ -421,7 +422,7 @@ class BetController {
             return null;
         }
 
-        if (table.stakes.limitVsNoLimit === Stakes.LIMIT) {
+        if (table.limits.limitVsNoLimit === Limits.LIMIT) {
             return minRaise;
         }
 
