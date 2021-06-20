@@ -111,9 +111,9 @@
 
                 if (table) {
 
-                    if (myChips.value != null && myChips.value < table.stakes.minBuyIn) {
+                    if (myChips.value != null && myChips.value < table.limits.minBuyIn) {
 
-                        return table.stakes.minBuyIn - myChips.value;
+                        return table.limits.minBuyIn - myChips.value;
 
                     }
 
@@ -225,7 +225,7 @@
 
                 const table: Table = tableState.getTable.value;
 
-                return table && myChips.value != null && myChips.value >= table.stakes.maxBuyIn;
+                return table && myChips.value != null && myChips.value >= table.limits.maxBuyIn;
 
             });
 
@@ -245,7 +245,7 @@
                     // then the most they can buy in for is to 1) get them to the cap or 2) how much they have in the bank
                     if (myChips.value != null) {
                        
-                        return Math.min(table.stakes.maxBuyIn - myChips.value, currentBalance.value);
+                        return Math.min(table.limits.maxBuyIn - myChips.value, currentBalance.value);
 
                     }
 

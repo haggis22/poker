@@ -29,13 +29,17 @@ import { CashierManager } from '../cashier/cashier-manager';
 import { MoneyFormatter } from '../tables/chips/money-formatter';
 import { RandomBlindAssigner } from '../tables/buttons/random-blind-assigner';
 import { Limits } from '../tables/betting/limits';
+import { TournamentController } from '../tournaments/tournament-controller';
+import { TourneyFormatter } from '../tables/chips/tourney-formatter';
+import { Game } from '@/app/games/game';
+import { Tournament } from '../tournaments/tournament';
 
 
 export class LobbyManager implements MessageBroadcaster {
 
     public cashierManager: CashierManager;
 
-    private nextID: number;
+    private nextTableID: number;
 
     // Key = tableID
     // Value = TableController for that table
@@ -44,6 +48,14 @@ export class LobbyManager implements MessageBroadcaster {
     // Key = id of the IServerClient
     // Value = TableController that is currently serving that client
     private tableControllerByClientMap: Map<string, TableController>;
+
+
+    private nextTournamentID: number;
+
+
+    // Key = tournamentID
+    // Value = TournamentController for that tournament
+    private tournamentControllerMap: Map<number, TournamentController>;
 
 
     private messageQueue: Array<Message>;
@@ -57,11 +69,14 @@ export class LobbyManager implements MessageBroadcaster {
 
     constructor() {
 
-        this.nextID = 0;
+        this.nextTableID = 0;
 
         this.tableControllerMap = new Map<number, TableController>();
-
         this.tableControllerByClientMap = new Map<string, TableController>();
+
+        this.nextTournamentID = 0;
+
+        this.tournamentControllerMap = new Map<number, TournamentController>();
 
         this.messageQueue = new Array<Message>();
         this.lobbySubscribers = new Map<string, MessageHandler>();
@@ -168,13 +183,14 @@ export class LobbyManager implements MessageBroadcaster {
         let cdOmaha: Table = this.createCDOmaha();
         this.log(`Created table ${cdOmaha.name} with ID ${cdOmaha.id}`);
 
+        this.createCornDogTournament();
 
     }  // setUp
 
 
     createCornDog(): Table {
 
-        let tableID = ++this.nextID;
+        let tableID = ++this.nextTableID;
 
         let rules = new TableRules(6, /* timeToAnte */ 5, /* timeToAct */ 10);
 
@@ -213,8 +229,6 @@ export class LobbyManager implements MessageBroadcaster {
 
     createCornDogNL(): Table {
 
-        let tableID = ++this.nextID;
-
         let rules = new TableRules(/* numSeats */ 6, /* timeToAnte */ 5, /* timeToAct */ 10);
 
         let ante = 0;
@@ -232,7 +246,8 @@ export class LobbyManager implements MessageBroadcaster {
         let limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
         let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', limits, stakes, rules);
+        let table: Table = this.createTable('Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', limits, stakes, rules);
+
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
@@ -252,7 +267,7 @@ export class LobbyManager implements MessageBroadcaster {
 
     createKershner(): Table {
 
-        let tableID = ++this.nextID;
+        let tableID = ++this.nextTableID;
 
         let rules = new TableRules(6, /* timeToAnte */ 5, /* timeToAct */ 10);
 
@@ -291,7 +306,7 @@ export class LobbyManager implements MessageBroadcaster {
 
     createCDOmaha(): Table {
 
-        let tableID = ++this.nextID;
+        let tableID = ++this.nextTableID;
 
         let rules = new TableRules(/* numSeats */ 6, /* timeToAnte */ 5, /* timeToAct */ 10);
 
@@ -324,7 +339,72 @@ export class LobbyManager implements MessageBroadcaster {
 
         return table;
 
-    }  // createCornDogNL
+    }  // createCDOmaha
+
+
+    createCornDogTournament(): void {
+
+        let ante = 0;
+
+        // Both of the regular blinds are live bets (they could towards the current round of betting)
+        let blinds: Blind[] =
+            [
+                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 25, true, true),
+                new Blind(1, Blind.TYPE_BIG, 'the big blind', 50, true, true)
+            ];
+
+        // Unlimited raises for NL tourney
+        const maxRaises: number = null;
+
+        let limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+
+        const levels: Stakes[] = [];
+
+        // Duration is in seconds
+        const levelDuration = 30;
+
+        const buyIn: number = 2000;
+        const startingStack: number = 1000;
+
+        let rules = new TableRules(6, /* timeToAnte */ 5, /* timeToAct */ 10);
+
+        let game: Game = (new GameFactory()).create(PokerGameTexasHoldEm.ID);
+
+        let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
+
+        const deck = new Deck();
+
+        const tournament = this.createTournament('Corn Dog Invitational', buyIn, startingStack, limits, levels, levelDuration, rules, game, deck); 
+
+        const tournamentController = new TournamentController(this.cashierManager,
+            this,
+            tournament,
+            buttonController,
+            new TourneyFormatter());
+
+        this.tournamentControllerMap.set(tournament.id, tournamentController);
+
+
+    }  // createCornDogTournament
+
+
+    public createTable(name: string, description: string, limits: Limits, stakes: Stakes, rules: TableRules): Table {
+
+        return new Table(++this.nextTableID, name, description, limits, stakes, rules);
+
+    }  // createTable
+
+
+    public createTournament(name: string, buyIn: number, startingStack: number,
+        limits: Limits, levels: Stakes[], levelDuration: number,
+        rules: TableRules,
+        game: Game, deck: Deck): Tournament {
+
+        return new Tournament(++this.nextTableID, name, buyIn, startingStack, limits, levels, levelDuration, rules, game, deck);
+
+    }  // createTournament
+
+
 
 
     public getTableController(tableID: number): TableController {
