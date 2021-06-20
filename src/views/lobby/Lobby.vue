@@ -16,9 +16,9 @@
     import { GameClient } from '../../app/communication/client-side/game-client';
 
     import LobbyComponent from './components/lobby/LobbyComponent.vue';
-    import { lobbyState } from '@/store/lobby-state';
     import { userState } from '@/store/user-state';
-import { SubscribeLobbyCommand } from '@/app/communication/serializable';
+
+    import { SubscribeLobbyCommand } from '@/app/communication/serializable';
 
 
     export default defineComponent({

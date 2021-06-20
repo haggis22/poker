@@ -12,6 +12,7 @@ import { IButtonController } from '../tables/buttons/i-button-controller';
 import { Table } from '../tables/table';
 import { Game } from '@/app/games/game';
 import { Tournament } from './tournament';
+import { TournamentSummary } from './tournament-summary';
 
 
 const logger: Logger = new Logger();
@@ -112,7 +113,15 @@ export class TournamentController {
 
         }
 
-    }
+    }   // checkLevel
+
+
+    public getSummary(): TournamentSummary {
+
+        return new TournamentSummary(this.tournament.id, this.tournament.name);
+
+    }  // getSummary
+
 
 
 }

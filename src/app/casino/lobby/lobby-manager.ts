@@ -22,7 +22,7 @@ import { MessageBroadcaster } from '../../messages/message-broadcaster';
 import { MessageHandler } from '../../messages/message-handler';
 import { Message } from "../../messages/message";
 import { Action } from '../../actions/action';
-import { SubscribeLobbyCommand, ListTablesAction, TableSummary } from '../../communication/serializable';
+import { SubscribeLobbyCommand, ListTablesAction, ListTournamentsAction, TableSummary, TournamentSummary } from '../../communication/serializable';
 import { IButtonController } from '../tables/buttons/i-button-controller';
 import { DeadButtonController } from '../tables/buttons/dead-button-controller';
 import { CashierManager } from '../cashier/cashier-manager';
@@ -458,6 +458,7 @@ export class LobbyManager implements MessageBroadcaster {
 
             // only send the summaries to this new client, not EVERYBODY!!!
             client.handleMessage(new ActionMessage(new ListTablesAction(this.getTablesStatus())));
+            client.handleMessage(new ActionMessage(new ListTournamentsAction(this.getTournamentsStatus())));
 
         }
 
@@ -467,9 +468,16 @@ export class LobbyManager implements MessageBroadcaster {
 
     private getTablesStatus(): TableSummary[] {
 
-        return [...this.tableControllerMap.values()].map(controller => controller.getTableSummary());
+        return [...this.tableControllerMap.values()].map(controller => controller.getSummary());
 
     }  // getTablesStatus
+
+
+    private getTournamentsStatus(): TournamentSummary[] {
+
+        return [...this.tournamentControllerMap.values()].map(controller => controller.getSummary());
+
+    }  // getTournamentsStatus
 
 
     private pushTableStatus(): void {

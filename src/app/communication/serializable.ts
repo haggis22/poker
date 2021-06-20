@@ -16,6 +16,7 @@ export { AuthenticationFailedAction } from "../actions/security/authentication-f
 export { JoinTableCommand } from "../commands/lobby/join-table-command";
 export { SubscribeLobbyCommand } from "../commands/lobby/subscribe-lobby-command";
 export { ListTablesAction } from "../actions/lobby/list-tables.action";
+export { ListTournamentsAction } from "../actions/lobby/list-tournaments.action";
 
 // Cashier activity
 export { AddChipsAction } from "../actions/table/players/add-chips-action";
@@ -24,6 +25,9 @@ export { CheckBalanceCommand } from "../commands/cashier/check-balance-command";
 export { SubscribeCashierCommand } from "../commands/cashier/subscribe-cashier-command";
 export { CurrentBalanceAction } from "../actions/cashier/current-balance-action";
 
+
+// Tournament communication
+export { TournamentSummary } from "../casino/tournaments/tournament-summary";
 
 // Table communication
 

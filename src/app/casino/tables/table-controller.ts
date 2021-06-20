@@ -201,13 +201,13 @@ export class TableController implements CommandHandler, MessageBroadcaster {
     }
 
 
-    public getTableSummary(): TableSummary {
+    public getSummary(): TableSummary {
 
         let players: string[] = this.table.seats.reduce((arr: string[], seat: Seat) => { if (seat.player != null) { arr.push(seat.player.name); } return arr; }, []);
 
         return new TableSummary(this.table.id, this.table.name, this.table.description, this.table.seats.length, players);
 
-    }  // getTableSummary
+    }  // getSummary
 
 
     public registerMessageHandler(handler: MessageHandler): void {

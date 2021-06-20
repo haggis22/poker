@@ -6,7 +6,7 @@ import { ActionMessage } from "../../app/messages/action-message";
 import { Command } from "../../app/commands/command";
 import { Logger } from "../../app/logging/logger";
 import { Action } from "../../app/actions/action";
-import { AuthenticatedAction, ListTablesAction, LogoutAction } from "../../app/communication/serializable";
+import { AuthenticatedAction, ListTablesAction, ListTournamentsAction, LogoutAction } from "../../app/communication/serializable";
 import { lobbyState } from "@/store/lobby-state";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -104,6 +104,12 @@ class LobbyClient implements MessageHandler, CommandBroadcaster {
 
         }
 
+        if (action instanceof ListTournamentsAction) {
+
+            return this.listTournamentsAction(action);
+
+        }
+
 
 
     }  // handleMessage
@@ -131,6 +137,14 @@ class LobbyClient implements MessageHandler, CommandBroadcaster {
         lobbyState.setTables(action.tables);
 
     }   // listTablesAction
+
+
+    public listTournamentsAction(action: ListTournamentsAction): void {
+
+        lobbyState.setTournaments(action.tournaments);
+
+    }   // listTournamentsAction
+
 
 }
 

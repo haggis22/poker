@@ -6,7 +6,7 @@ import { ActionMessage } from "../../app/messages/action-message";
 import { Command } from "../../app/commands/command";
 import { Logger } from "../../app/logging/logger";
 import { Action } from "../../app/actions/action";
-import { AuthenticatedAction, SubscribeLobbyCommand, TableSummary, ListTablesAction, SubscribeCashierCommand, CurrentBalanceAction, LoginCommand, LoginFailedAction, LogoutCommand, LogoutAction, AuthenticationFailedAction } from "../../app/communication/serializable";
+import { AuthenticatedAction, SubscribeCashierCommand, CurrentBalanceAction, LoginCommand, LoginFailedAction, LogoutCommand, LogoutAction, AuthenticationFailedAction } from "../../app/communication/serializable";
 import { userState } from "@/store/user-state";
 import { lobbyState } from "@/store/lobby-state";
 import { v4 as uuidv4 } from 'uuid';
@@ -156,13 +156,6 @@ class CasinoClient implements MessageHandler, CommandBroadcaster {
 
     }   // loginFailedAction
 
-
-
-    public listTablesAction(action: ListTablesAction): void {
-
-        lobbyState.setTables(action.tables);
-
-    }   // listTablesAction
 
 
     public currentBalanceAction(action: CurrentBalanceAction): void {
