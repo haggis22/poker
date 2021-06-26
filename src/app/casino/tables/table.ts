@@ -32,8 +32,10 @@ export class Table {
     // tracks which seat has the button so that we know where to deal the next card
     public buttonIndex: number;
 
+    public chipFormatterType: string;
 
-    constructor(id: number, name: string, description: string, limits: Limits, stakes: Stakes, rules: TableRules) {
+
+    constructor(id: number, name: string, description: string, limits: Limits, stakes: Stakes, rules: TableRules, chipFormatterType: string) {
 
         this.id = id;
         this.name = name;
@@ -55,6 +57,8 @@ export class Table {
         this.betStatus = new BetStatus();
 
         this.state = new OpenState();
+
+        this.chipFormatterType = chipFormatterType;
 
     }
 

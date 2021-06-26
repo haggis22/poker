@@ -55,7 +55,6 @@
             tableState.initialize();
 
             tableState.setTableID(Number(route.params.tableID));
-            tableState.setChipFormatter(new MoneyFormatter());
 
             tableUI.initialize();
 

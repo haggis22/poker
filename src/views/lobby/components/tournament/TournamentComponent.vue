@@ -1,8 +1,9 @@
 ﻿<template>
 
     <tr>
-        <td>{{ tournament.id }}</td>
+        <td class="id">{{ tournament.id }}</td>
         <td class="name">{{ tournament.name }}</td>
+        <td class="buy-in">{{ chipFormatter.format(tournament.buyIn) }}</td>
     </tr>
 
 </template>
@@ -12,6 +13,8 @@
     import { defineComponent, computed } from 'vue';
 
     import { TournamentSummary } from '@/app/casino/tournaments/tournament-summary';
+    import { userState } from "@/store/user-state";
+import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 
 
     const TournamentComponent = defineComponent({
@@ -24,12 +27,15 @@
             },
 
 
-
         },
         setup(props) {
 
+            const chipFormatter = computed(() => userState.getChipFormatter.value);
+
 
             return {
+
+                chipFormatter
 
             };
 
@@ -45,16 +51,5 @@
 
 <style scoped lang="scss">
 
-    .name,
-    .description,
-    .players
-    {
-        text-align: left;
-    }
-
-    .seats
-    {
-        text-align: center;
-    }
 
 </style>

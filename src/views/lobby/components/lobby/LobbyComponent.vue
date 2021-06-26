@@ -4,10 +4,12 @@
 
         <div class="cash-games">
 
+            <h3>Cash Games</h3>
+
             <table cellpadding="5" cellspacing="0" class="table-tables">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th class="id">ID</th>
                         <th class="name">Name</th>
                         <th class="description">Desc</th>
                         <th class="seats">Seats</th>
@@ -27,11 +29,14 @@
 
         <div class="tournaments">
 
+            <h3>Tournaments</h3>
+
             <table cellpadding="5" cellspacing="0" class="table-tournaments">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th class="id">ID</th>
                         <th class="name">Name</th>
+                        <th class="buy-in">Buy In</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,6 +81,8 @@
 
                 tables,
 
+                tournaments
+
             };
 
         },
@@ -96,20 +103,25 @@
 
     $font: "Times New Roman", serif;
 
-    .table-tables {
+    .table-tables,
+    .table-tournaments {
 
         border: 2px solid black;
+        width: 500px;
 
-        .name, 
-        .description,
-        .players
+        &::v-deep .id, &::v-deep .name, &::v-deep .description, &::v-deep .players
         {
             text-align: left;
         }
 
-        .seats
-        {
+        &::v-deep
+        .seats {
             text-align: center;
+        }
+
+        &::v-deep
+        .buy-in {
+            text-align: right;
         }
 
     }

@@ -3,6 +3,8 @@
 export class TourneyFormatter implements IChipFormatter
 {
 
+    public static readonly ID: string = 'tournament';
+
     private formatter: Intl.NumberFormat;
 
 

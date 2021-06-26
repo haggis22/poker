@@ -72,6 +72,7 @@ import { IChipFormatter } from './chips/chip-formatter';
 import { Timer } from '../../timers/timer';
 import { ProbabilityAction } from '../../actions/table/probability/probability-action';
 import { Limits } from './betting/limits';
+import { ChipFormatterFactory } from './chips/chip-formatter-factory';
 
 const logger: Logger = new Logger();
 
@@ -141,8 +142,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
                     lobbyManager: LobbyManager,
                     table: Table,
                     deck: Deck,
-                    buttonController: IButtonController,
-                    chipFormatter: IChipFormatter) {
+                    buttonController: IButtonController) {
 
         this.id = uuidv4();
 
@@ -152,7 +152,8 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.table = table;
         this.deck = deck;
 
-        this.chipFormatter = chipFormatter;
+        const chipFormatterFactory = new ChipFormatterFactory();
+        this.chipFormatter = chipFormatterFactory.create(table.chipFormatterType);
 
         this.copier = new DeepCopier();
 

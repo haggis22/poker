@@ -10,6 +10,7 @@ import { RandomBlindAssigner } from '../random-blind-assigner';
 import { IBlindAssigner } from '../i-blind-assigner';
 import { ExplicitBlindAssigner } from '../explicit-blind-assigner';
 import { Limits } from '../../betting/limits';
+import { MoneyFormatter } from '../../chips/money-formatter';
 
 
 class Harness
@@ -39,7 +40,7 @@ function setup(blindAssigner: IBlindAssigner): Harness {
     const stakes: Stakes = new Stakes(0, blinds, [25, 50]);
     const rules: TableRules = new TableRules(6, 10, 10);
 
-    const table: Table = new Table(1, 'Test', 'Test', limits, stakes, rules);
+    const table: Table = new Table(1, 'Test', 'Test', limits, stakes, rules, MoneyFormatter.ID);
 
     table.seats[0].player = new Player(1, 'Danny');
     table.seats[0].player.chips = 1000;

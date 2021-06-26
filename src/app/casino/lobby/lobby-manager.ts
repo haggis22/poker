@@ -209,11 +209,11 @@ export class LobbyManager implements MessageBroadcaster {
         let limits = new Limits(Limits.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
         let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', limits, stakes, rules);
+        let table: Table = new Table(tableID, 'Corn Dog', '1/2 Limit Hold\'em', limits, stakes, rules, MoneyFormatter.ID);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -246,12 +246,12 @@ export class LobbyManager implements MessageBroadcaster {
         let limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
         let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = this.createTable('Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', limits, stakes, rules);
+        let table: Table = this.createTable('Corn Dog NL', '0.25/0.50 No-Limit Texas Hold\'em', limits, stakes, rules, MoneyFormatter.ID);
 
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -286,11 +286,11 @@ export class LobbyManager implements MessageBroadcaster {
         let limits = new Limits(Limits.LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
         let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', limits, stakes, rules);
+        let table: Table = new Table(tableID, 'Kershner', '1/2 Limit Hold\'em', limits, stakes, rules, MoneyFormatter.ID);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
         
@@ -325,11 +325,11 @@ export class LobbyManager implements MessageBroadcaster {
         let limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
         let stakes = new Stakes(ante, blinds, bets);
 
-        let table: Table = new Table(tableID, 'Corn Dog Omaha', '0.25/0.50 No-Limit Omaha', limits, stakes, rules);
+        let table: Table = new Table(tableID, 'Corn Dog Omaha', '0.25/0.50 No-Limit Omaha', limits, stakes, rules, MoneyFormatter.ID);
         let deck: Deck = new Deck();
         let buttonController: IButtonController = new DeadButtonController(new RandomBlindAssigner());
 
-        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController, new MoneyFormatter());
+        let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
         this.tableControllerMap.set(table.id, tableController);
 
@@ -388,9 +388,9 @@ export class LobbyManager implements MessageBroadcaster {
     }  // createCornDogTournament
 
 
-    public createTable(name: string, description: string, limits: Limits, stakes: Stakes, rules: TableRules): Table {
+    public createTable(name: string, description: string, limits: Limits, stakes: Stakes, rules: TableRules, chipFormatterType: string): Table {
 
-        return new Table(++this.nextTableID, name, description, limits, stakes, rules);
+        return new Table(++this.nextTableID, name, description, limits, stakes, rules, chipFormatterType);
 
     }  // createTable
 

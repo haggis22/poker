@@ -21,6 +21,7 @@
     import { userState } from '@/store/user-state';
     import { casinoClient } from './casino-client';
     import router from '@/router';
+import { ChipFormatterFactory } from '@/app/casino/tables/chips/chip-formatter-factory';
 
     export default defineComponent({
         name: "Casino",
@@ -84,7 +85,8 @@
 
             // const showLogin = computed((): boolean => isAuthenticated.value === false && router.currentRoute.value.name == 'Login');
 
-            userState.setChipFormatter(new MoneyFormatter());
+            const chipFormatterFactory = new ChipFormatterFactory();
+            userState.setChipFormatter(chipFormatterFactory.create(MoneyFormatter.ID));
 
             return {
               //  showLogin

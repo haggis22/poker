@@ -51,16 +51,5 @@
 
 <style scoped lang="scss">
 
-    .name,
-    .description,
-    .players
-    {
-        text-align: left;
-    }
-
-    .seats
-    {
-        text-align: center;
-    }
 
 </style>

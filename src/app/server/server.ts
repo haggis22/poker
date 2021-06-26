@@ -101,7 +101,7 @@ function createRoboClient(tableID: number, authToken: string): void {
     serverSocketSide.connect(clientSocketSide);
 
     // Client Side
-    let ui: RoboTableUI = new RoboTableUI(tableID, new MoneyFormatter());
+    let ui: RoboTableUI = new RoboTableUI(tableID);
     let tableWatcher: TableWatcher = new TableWatcher(tableID);
     let gameClient: GameClient = new GameClient(new FakeSocketWrapper(clientSocketSide), new NPCAuthenticationManager(authToken));
 

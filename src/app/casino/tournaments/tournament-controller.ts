@@ -13,6 +13,7 @@ import { Table } from '../tables/table';
 import { Game } from '@/app/games/game';
 import { Tournament } from './tournament';
 import { TournamentSummary } from './tournament-summary';
+import { TourneyFormatter } from '../tables/chips/tourney-formatter';
 
 
 const logger: Logger = new Logger();
@@ -75,9 +76,9 @@ export class TournamentController {
 
     private start(): void {
 
-        const table: Table = this.lobbyManager.createTable(this.tournament.name, this.tournament.name, this.tournament.limits, /* stakes */ null, this.tournament.rules);
+        const table: Table = this.lobbyManager.createTable(this.tournament.name, this.tournament.name, this.tournament.limits, /* stakes */ null, this.tournament.rules, TourneyFormatter.ID);
 
-        let tableController: TableController = new TableController(this.cashierManager, this.lobbyManager, table, this.tournament.deck, this.buttonController, this.chipFormatter);
+        let tableController: TableController = new TableController(this.cashierManager, this.lobbyManager, table, this.tournament.deck, this.buttonController);
         tableController.setGame(this.tournament.game);
 
         this.tableControllerMap.set(table.id, tableController);
@@ -118,7 +119,7 @@ export class TournamentController {
 
     public getSummary(): TournamentSummary {
 
-        return new TournamentSummary(this.tournament.id, this.tournament.name);
+        return new TournamentSummary(this.tournament);
 
     }  // getSummary
 

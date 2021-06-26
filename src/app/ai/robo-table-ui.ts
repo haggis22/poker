@@ -23,6 +23,7 @@ import { IChipFormatter } from "../casino/tables/chips/chip-formatter";
 import { BetStatus } from "../casino/tables/betting/bet-status";
 import { betController } from "../casino/tables/betting/bet-controller";
 import { v4 as uuidv4 } from 'uuid';
+import { ChipFormatterFactory } from '../casino/tables/chips/chip-formatter-factory';
 
 
 const TIME_TO_THINK = 1200;
@@ -51,13 +52,12 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
 
 
 
-    constructor(tableID: number, chipFormatter: IChipFormatter) {
+    constructor(tableID: number) {
 
         this.id = uuidv4();
         this.isAlive = true;
 
         this.tableID = tableID;
-        this.chipFormatter = chipFormatter;
 
         this.commandHandlers = new Map<string, CommandHandler>();
 
@@ -258,6 +258,10 @@ export class RoboTableUI implements MessageHandler, CommandBroadcaster {
     private tableSnapshotAction(action: TableSnapshotAction): void {
 
         this.table = action.table;
+
+        // Set up the chip formatter based on the table
+        const chipFormatterFactory = new ChipFormatterFactory();
+        this.chipFormatter = chipFormatterFactory.create(action.table.chipFormatterType);
 
         // request a seat at the table - the null parameter means any seat will do
         // Mark always wants to sit in seat 3

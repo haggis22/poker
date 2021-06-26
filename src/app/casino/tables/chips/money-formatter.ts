@@ -3,6 +3,8 @@
 export class MoneyFormatter implements IChipFormatter
 {
 
+    public static readonly ID: string = 'money';
+
     private formatter: Intl.NumberFormat;
 
 

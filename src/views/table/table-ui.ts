@@ -35,6 +35,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BettingActionAction } from '@/app/actions/table/betting/betting-action-action';
 import { Commentary } from '@/app/commentary/commentary';
 import { ProbabilityAction } from '@/app/actions/table/probability/probability-action';
+import { ChipFormatterFactory } from '@/app/casino/tables/chips/chip-formatter-factory';
 
 
 const logger: Logger = new Logger();
@@ -464,6 +465,11 @@ class TableUI implements MessageHandler, CommandBroadcaster {
 
         this.log(`Heard TableSnapshotAction for ${action.table.id}`);
         tableState.setTable(action.table);
+
+        // Set the chip formatter based on the table's type
+        const chipFormatterFactory = new ChipFormatterFactory();
+        tableState.setChipFormatter(chipFormatterFactory.create(action.table.chipFormatterType));
+
 
         // See if I'm alreading sitting at the table
         let mySeat: Seat = action.table.seats.find(seat => seat.player && seat.player.userID === this.getUser().id);
