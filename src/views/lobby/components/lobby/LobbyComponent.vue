@@ -105,22 +105,24 @@
 
     .table-tables,
     .table-tournaments {
-
         border: 2px solid black;
         width: 500px;
 
-        &::v-deep .id, &::v-deep .name, &::v-deep .description, &::v-deep .players
+        .id, .name, .description, .players,
+        &::v-deep(.id, .name, .description, .players)
         {
             text-align: left;
         }
 
-        &::v-deep
-        .seats {
+        .seats,
+        &::v-deep(.seats)
+        {
             text-align: center;
         }
 
-        &::v-deep
-        .buy-in {
+        .buy-in,
+        &::v-deep(.buy-in)
+        {
             text-align: right;
         }
 
