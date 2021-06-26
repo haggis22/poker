@@ -6,7 +6,7 @@ export class TournamentSummary {
     public name: string;
 
     public buyIn: number;
-
+    public numRegistrants: number;
 
 
     constructor(tournament: Tournament) {
@@ -14,6 +14,7 @@ export class TournamentSummary {
         this.id = tournament.id;
         this.name = tournament.name;
         this.buyIn = tournament.buyIn;
+        this.numRegistrants = tournament.numRegistrants;
 
     }
 

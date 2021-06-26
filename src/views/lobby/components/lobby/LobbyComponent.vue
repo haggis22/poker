@@ -36,6 +36,7 @@
                     <tr>
                         <th class="id">ID</th>
                         <th class="name">Name</th>
+                        <th class="registrants"># Registered</th>
                         <th class="buy-in">Buy In</th>
                     </tr>
                 </thead>
@@ -108,8 +109,10 @@
         border: 2px solid black;
         width: 500px;
 
-        .id, .name, .description, .players,
-        &::v-deep(.id, .name, .description, .players)
+        .id, &::v-deep(.id), 
+            .name, &::v-deep(.name), .description, &::v-deep(.description),
+        .players,
+            &::v-deep(.players)
         {
             text-align: left;
         }
@@ -120,11 +123,11 @@
             text-align: center;
         }
 
-        .buy-in,
-        &::v-deep(.buy-in)
-        {
-            text-align: right;
-        }
+    .buy-in, .registrants,
+    &::v-deep(.buy-in),
+    &::v-deep(.registrants) {
+        text-align: right;
+    }
 
     }
 

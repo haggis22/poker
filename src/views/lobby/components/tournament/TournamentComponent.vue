@@ -3,6 +3,7 @@
     <tr>
         <td class="id">{{ tournament.id }}</td>
         <td class="name">{{ tournament.name }}</td>
+        <td class="registrants">{{ tournament.numRegistrants.toLocaleString() }}</td>
         <td class="buy-in">{{ chipFormatter.format(tournament.buyIn) }}</td>
     </tr>
 
@@ -14,7 +15,6 @@
 
     import { TournamentSummary } from '@/app/casino/tournaments/tournament-summary';
     import { userState } from "@/store/user-state";
-import { IChipFormatter } from '@/app/casino/tables/chips/chip-formatter';
 
 
     const TournamentComponent = defineComponent({
