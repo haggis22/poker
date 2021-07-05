@@ -6,7 +6,7 @@ import { ActionMessage } from "../../app/messages/action-message";
 import { Command } from "../../app/commands/command";
 import { Logger } from "../../app/logging/logger";
 import { Action } from "../../app/actions/action";
-import { AuthenticatedAction, ListTablesAction, ListTournamentsAction, LogoutAction } from "../../app/communication/serializable";
+import { AuthenticatedAction, ListTablesAction, ListTournamentsAction, LogoutAction, RegisterTournamentCommand } from "../../app/communication/serializable";
 import { lobbyState } from "@/store/lobby-state";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -141,9 +141,18 @@ class LobbyClient implements MessageHandler, CommandBroadcaster {
 
     public listTournamentsAction(action: ListTournamentsAction): void {
 
+        console.log('Heard ListTournamentsAction');
         lobbyState.setTournaments(action.tournaments);
 
     }   // listTournamentsAction
+
+
+
+    public registerForTournament(tournamentID: number): void {
+
+        this.broadcastCommand(new RegisterTournamentCommand(tournamentID));
+
+    }   // registerForTournament
 
 
 }

@@ -1,4 +1,5 @@
 import { Tournament } from './tournament';
+import { User } from '@/app/players/user';
 
 export class TournamentSummary {
 
@@ -6,15 +7,17 @@ export class TournamentSummary {
     public name: string;
 
     public buyIn: number;
-    public numRegistrants: number;
+
+    // the list of userIDs that have registered for the tournament
+    public registrants: number[];
 
 
-    constructor(tournament: Tournament) {
+    constructor(tournament: Tournament, registrants: number[]) {
 
         this.id = tournament.id;
         this.name = tournament.name;
         this.buyIn = tournament.buyIn;
-        this.numRegistrants = tournament.numRegistrants;
+        this.registrants = [...registrants];
 
     }
 

@@ -22,8 +22,6 @@ export class Tournament {
     public game: Game;
     public deck: Deck;
 
-    public numRegistrants: number;
-
 
 
     public constructor(id: number, name: string, buyIn: number, startingStack: number,
@@ -44,7 +42,6 @@ export class Tournament {
         this.game = game;
         this.deck = deck;
 
-        this.numRegistrants = 0;
 
     }
 

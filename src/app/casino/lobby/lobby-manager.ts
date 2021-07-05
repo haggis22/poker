@@ -22,7 +22,7 @@ import { MessageBroadcaster } from '../../messages/message-broadcaster';
 import { MessageHandler } from '../../messages/message-handler';
 import { Message } from "../../messages/message";
 import { Action } from '../../actions/action';
-import { SubscribeLobbyCommand, ListTablesAction, ListTournamentsAction, TableSummary, TournamentSummary } from '../../communication/serializable';
+import { SubscribeLobbyCommand, ListTablesAction, ListTournamentsAction, TableSummary, TournamentSummary, RegisterTournamentCommand, ErrorMessage } from '../../communication/serializable';
 import { IButtonController } from '../tables/buttons/i-button-controller';
 import { DeadButtonController } from '../tables/buttons/dead-button-controller';
 import { CashierManager } from '../cashier/cashier-manager';
@@ -33,6 +33,7 @@ import { TournamentController } from '../tournaments/tournament-controller';
 import { TourneyFormatter } from '../tables/chips/tourney-formatter';
 import { Game } from '@/app/games/game';
 import { Tournament } from '../tournaments/tournament';
+import { CommandResult } from '../../commands/command-result';
 
 
 export class LobbyManager implements MessageBroadcaster {
@@ -90,7 +91,7 @@ export class LobbyManager implements MessageBroadcaster {
 
     }
 
-    public handleCommand(command: LobbyCommand, serverClient: IServerClient): void {
+    public handleCommand(command: LobbyCommand, serverClient: IServerClient): Message {
 
         if (command instanceof JoinTableCommand) {
 
@@ -101,6 +102,12 @@ export class LobbyManager implements MessageBroadcaster {
         if (command instanceof SubscribeLobbyCommand) {
 
             return this.subscribe(serverClient);
+
+        }
+
+        if (command instanceof RegisterTournamentCommand) {
+
+            return this.registerTournament(command, serverClient);
 
         }
 
@@ -420,7 +427,7 @@ export class LobbyManager implements MessageBroadcaster {
     }
 
 
-    private addTableClient(tableID: number, client: IServerClient): void {
+    private addTableClient(tableID: number, client: IServerClient): Message {
 
         const existingTableController: TableController = this.tableControllerByClientMap.get(client.id);
         if (existingTableController) {
@@ -428,7 +435,7 @@ export class LobbyManager implements MessageBroadcaster {
             if (existingTableController.getTableID() === tableID)
             {
                 // already connected - nothing to do
-                return;
+                return null;
             }
 
             this.log(`Existing TableController for this client for a different table - disconnecting it`);
@@ -450,7 +457,7 @@ export class LobbyManager implements MessageBroadcaster {
     }  // addTableClient
 
 
-    subscribe(client: IServerClient): void {
+    subscribe(client: IServerClient): Message {
 
         if (client.isAlive) {
 
@@ -462,8 +469,41 @@ export class LobbyManager implements MessageBroadcaster {
 
         }
 
+        return null;
 
     }  // subscribe
+
+
+    registerTournament(command: RegisterTournamentCommand, client: IServerClient): Message {
+
+        if (client.isAlive) {
+
+            const tournamentController: TournamentController = this.tournamentControllerMap.get(command.tournamentID);
+
+            if (tournamentController == null) {
+
+                return new ErrorMessage(`Unknown tournament ID ${command.tournamentID}`, command.userID);
+
+            }
+
+            const registrationCheckResult: CommandResult = tournamentController.isEligibleForRegistration(command.userID);
+
+            if (!registrationCheckResult.isSuccess) {
+
+                return new ErrorMessage(registrationCheckResult.message, command.userID);
+
+            }
+
+            const registrationResult: CommandResult = tournamentController.register(command.userID);
+
+            // TODO: Handle unsuccessful registration
+            return new Message(registrationResult.message, command.userID);
+
+        }
+
+
+    }  // subscribe
+
 
 
     private getTablesStatus(): TableSummary[] {
@@ -471,13 +511,6 @@ export class LobbyManager implements MessageBroadcaster {
         return [...this.tableControllerMap.values()].map(controller => controller.getSummary());
 
     }  // getTablesStatus
-
-
-    private getTournamentsStatus(): TournamentSummary[] {
-
-        return [...this.tournamentControllerMap.values()].map(controller => controller.getSummary());
-
-    }  // getTournamentsStatus
 
 
     private pushTableStatus(): void {
@@ -492,6 +525,27 @@ export class LobbyManager implements MessageBroadcaster {
         this.pushTableStatus();
 
     }  // notifyTableUpdated
+
+
+    private getTournamentsStatus(): TournamentSummary[] {
+
+        return [...this.tournamentControllerMap.values()].map(controller => controller.getSummary());
+
+    }  // getTournamentsStatus
+
+
+    private pushTournamentStatus(): void {
+
+        this.broadcastMessage(new ActionMessage(new ListTournamentsAction(this.getTournamentsStatus())));
+
+    }  // pushTableStatus
+
+
+    public notifyTournamentUpdated(tournament: Tournament): void {
+
+        this.pushTournamentStatus();
+
+    }
 
 
 

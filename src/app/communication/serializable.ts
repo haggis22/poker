@@ -1,4 +1,5 @@
-﻿export { Command } from "../commands/command";
+﻿
+export { Command } from "../commands/command";
 export { Message } from "../messages/message";
 export { ErrorMessage } from "../messages/error-message";
 export { ActionMessage } from "../messages/action-message";
@@ -130,6 +131,8 @@ export { TableState } from "../casino/tables/states/table-state";
 export { TableStateAction } from "../actions/table/state/table-state-action";
 
 export { Stakes } from "../casino/tables/betting/stakes";
+export { Limits } from '../casino/tables/betting/limits';
+
 export { TableRules } from "../casino/tables/table-rules";
 export { Board } from "../casino/tables/boards/board";
 export { Deck } from "../cards/deck";
@@ -150,6 +153,6 @@ export { SetStatusAckedAction } from "../actions/table/players/set-status-acked-
 
 export { IsInHandAction } from "../actions/table/players/is-in-hand-action";
 
-
+export { RegisterTournamentCommand } from '../commands/lobby/register-tournament-command';
 
 

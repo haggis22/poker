@@ -109,7 +109,7 @@ export class ServerClient implements IServerClient {
 
             if (obj instanceof LobbyCommand) {
 
-                return this.lobbyManager.handleCommand(obj, this);
+                return this.handleMessage(this.lobbyManager.handleCommand(obj, this));
 
             }
 

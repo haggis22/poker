@@ -14,6 +14,7 @@ import { Game } from '@/app/games/game';
 import { Tournament } from './tournament';
 import { TournamentSummary } from './tournament-summary';
 import { TourneyFormatter } from '../tables/chips/tourney-formatter';
+import { CommandResult } from '../../commands/command-result';
 
 
 const logger: Logger = new Logger();
@@ -39,7 +40,7 @@ export class TournamentController {
 
     private chipFormatter: IChipFormatter;
 
-    private registrants: Player[];
+    private registrants: number[];
 
 
 
@@ -69,7 +70,7 @@ export class TournamentController {
 
         this.tableControllerMap = new Map<number, TableController>();
 
-
+        this.registrants = [];
 
     }
 
@@ -119,9 +120,33 @@ export class TournamentController {
 
     public getSummary(): TournamentSummary {
 
-        return new TournamentSummary(this.tournament);
+        return new TournamentSummary(this.tournament, this.registrants);
 
     }  // getSummary
+
+
+    public isEligibleForRegistration(userID: number): CommandResult {
+
+        if (this.registrants.find(registrantID => registrantID === userID)) {
+
+            return new CommandResult(false, 'You are already registered');
+
+        }
+
+        return new CommandResult(true, 'You are able to register');
+
+    }
+
+    public register(userID: number): CommandResult {
+
+        this.registrants.push(userID);
+
+        this.lobbyManager.notifyTournamentUpdated(this.tournament);
+
+        return new CommandResult(true, 'Registration successful');
+
+    }
+
 
 
 

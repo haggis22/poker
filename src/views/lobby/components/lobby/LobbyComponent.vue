@@ -38,6 +38,7 @@
                         <th class="name">Name</th>
                         <th class="registrants"># Registered</th>
                         <th class="buy-in">Buy In</th>
+                        <th class="register">Register</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +119,9 @@
         }
 
         .seats,
-        &::v-deep(.seats)
+        &::v-deep(.seats),
+        .register,
+        &::v-deep(.register)
         {
             text-align: center;
         }
