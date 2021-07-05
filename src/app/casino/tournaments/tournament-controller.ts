@@ -137,6 +137,13 @@ export class TournamentController {
 
     }
 
+    public getBuyIn(): number {
+
+        return this.tournament.buyIn;
+
+    }
+
+
     public register(userID: number): CommandResult {
 
         this.registrants.push(userID);

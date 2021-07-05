@@ -494,6 +494,12 @@ export class LobbyManager implements MessageBroadcaster {
 
             }
 
+            const withdrawalResult: CommandResult = this.cashierManager.withdrawMoney(command.userID, tournamentController.getBuyIn());
+
+            if (!withdrawalResult.isSuccess) {
+                return new ErrorMessage(`Registration failed: ${withdrawalResult}`, command.userID);
+            }
+
             const registrationResult: CommandResult = tournamentController.register(command.userID);
 
             // TODO: Handle unsuccessful registration

@@ -8,6 +8,7 @@ import { CurrentBalanceAction } from "../../actions/cashier/current-balance-acti
 import { MessageHandler } from '../../messages/message-handler';
 import { SubscribeCashierCommand } from '../../commands/cashier/subscribe-cashier-command';
 import { Limits } from '../tables/betting/limits';
+import { CommandResult } from '../../commands/command-result';
 
 export class CashierManager {
 
@@ -159,15 +160,6 @@ export class CashierManager {
 
         if (tableController) {
 
-            let user: User = this.userManager.fetchUserByID(command.userID);
-
-            if (user.balance < command.amount) {
-
-                // not enough money to buy that amount of chips
-                return new ErrorMessage('You do not have enough chips', command.userID);
-
-            }
-
             if (tableController.isPlayerInHand(command.userID)) {
 
                 return new ErrorMessage('You cannot add chips while in a hand', command.userID);
@@ -204,14 +196,20 @@ export class CashierManager {
                 // Reduce their chip buy to the table max, if necessary
                 const chipsToAdd: number = Math.min(maxChipsCanBeAdded, command.amount);
 
-                user.balance -= chipsToAdd;
+                const withdrawalResult: CommandResult = this.withdrawMoney(command.userID, command.amount);
 
-                this.broadcastBalanceUpdate(user.id);
+                if (!withdrawalResult.isSuccess) {
+
+                    // not enough money to buy that amount of chips
+                    return new ErrorMessage(withdrawalResult.message, command.userID);
+
+                }
+
+                this.broadcastBalanceUpdate(command.userID);
 
                 return tableController.addChips(command.userID, chipsToAdd);
 
             }
-
 
         }
 
@@ -220,12 +218,42 @@ export class CashierManager {
     }  // addChipsCommand
 
 
-    public cashInChips(userID: number, amount: number): Message {
+    public withdrawMoney(userID: number, amount: number): CommandResult {
 
-        if (amount <= 0) {
+        let user: User = this.userManager.fetchUserByID(userID);
 
-            // Nothing to do here. Either a waste of time or someone trying to get sneaky
-            return new ErrorMessage('Cannot cash in a negative amount', userID);
+        user.balance -= amount;
+
+        if (user.balance < 0) {
+
+            // not enough money to buy that amount of chips
+
+            // give it back...
+            user.balance += amount;
+
+            // ...and then say no
+            return new CommandResult(false, 'You do not have enough money');
+
+        }
+
+        this.broadcastBalanceUpdate(userID);
+
+        return new CommandResult(true, `Successful withdrawal`);
+
+    }  // withdrawMoney
+
+
+    public depositMoney(userID: number, amount: number): CommandResult {
+
+        if (amount < 0) {
+
+            return new CommandResult(false, 'Cannot deposit a negative amount');
+
+        }
+
+        if (amount == 0) {
+
+            return new CommandResult(false, 'Cannot deposit zero');
 
         }
 
@@ -235,7 +263,20 @@ export class CashierManager {
 
         this.broadcastBalanceUpdate(user.id);
 
-        // successfully added to a player not in the hand
+
+    }   // depositMoney
+
+
+    public cashInChips(userID: number, amount: number): Message {
+
+        const depositResult: CommandResult = this.depositMoney(userID, amount);
+
+        if (!depositResult.isSuccess) {
+
+            return new ErrorMessage(depositResult.message, userID);
+
+        }
+
         return new Message('Success', userID);
 
     }  // cashInChips
