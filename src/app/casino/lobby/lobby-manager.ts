@@ -370,7 +370,7 @@ export class LobbyManager implements MessageBroadcaster {
         // Duration is in seconds
         const levelDuration = 30;
 
-        const buyIn: number = 2000;
+        const buyIn: number = 200000;
         const startingStack: number = 1000;
 
         let rules = new TableRules(6, /* timeToAnte */ 5, /* timeToAct */ 10);
@@ -388,6 +388,11 @@ export class LobbyManager implements MessageBroadcaster {
             tournament,
             buttonController,
             new TourneyFormatter());
+
+        tournamentController.register(5);
+        tournamentController.register(6);
+        tournamentController.register(7);
+        tournamentController.register(8);
 
         this.tournamentControllerMap.set(tournament.id, tournamentController);
 
@@ -497,7 +502,7 @@ export class LobbyManager implements MessageBroadcaster {
             const withdrawalResult: CommandResult = this.cashierManager.withdrawMoney(command.userID, tournamentController.getBuyIn());
 
             if (!withdrawalResult.isSuccess) {
-                return new ErrorMessage(`Registration failed: ${withdrawalResult}`, command.userID);
+                return new ErrorMessage(`Registration failed: ${withdrawalResult.message}`, command.userID);
             }
 
             const registrationResult: CommandResult = tournamentController.register(command.userID);

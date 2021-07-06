@@ -3,6 +3,7 @@
     <div class="page-casino">
 
         <banner-component></banner-component>
+        <message-popup-component></message-popup-component>
 
         <router-view></router-view>
     </div>
@@ -10,23 +11,28 @@
 </template>
 
 <script lang="ts">
+
     import { defineComponent, computed, watch, onUnmounted } from "vue";
 
+   
     import { MoneyFormatter } from '../../app/casino/tables/chips/money-formatter';
 
-    import BannerComponent from './components/banner/BannerComponent.vue';
     import { GameClient } from '../../app/communication/client-side/game-client';
     import { BrowserWebSocketWrapper } from '../../app/communication/client-side/browser-web-socket-wrapper';
     import { ClientAuthenticationManager } from '@/app/communication/client-side/client-authentication-manager';
     import { userState } from '@/store/user-state';
     import { casinoClient } from './casino-client';
     import router from '@/router';
-import { ChipFormatterFactory } from '@/app/casino/tables/chips/chip-formatter-factory';
+    import { ChipFormatterFactory } from '@/app/casino/tables/chips/chip-formatter-factory';
+
+    import BannerComponent from './components/banner/BannerComponent.vue';
+    import MessagePopupComponent from '../components/message-popup/MessagePopupComponent.vue';
 
     export default defineComponent({
         name: "Casino",
         components: {
             BannerComponent,
+            MessagePopupComponent
         },
         setup() {
 
