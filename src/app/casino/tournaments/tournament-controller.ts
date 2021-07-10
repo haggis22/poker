@@ -68,10 +68,12 @@ export class TournamentController {
 
         const table: Table = this.lobbyManager.createTable(this.tournament.name, this.tournament.name, this.tournament.limits, /* stakes */ null, this.tournament.rules, TourneyFormatter.ID);
 
-        let tableController: TableController = new TableController(this.cashierManager, this.lobbyManager, table, this.tournament.deck, this.buttonController);
+        const tableController: TableController = new TableController(this.cashierManager, this.lobbyManager, table, this.tournament.deck, this.buttonController);
         tableController.setGame(this.tournament.game);
 
         this.tableControllerMap.set(table.id, tableController);
+
+        this.lobbyManager.addTableController(tableController);
 
         // This will set up the first level
         this.checkLevel();
@@ -80,12 +82,17 @@ export class TournamentController {
 
     private checkStart(): void {
 
+        if (this.tournament.hasStarted()) {
+            return;
+        }
+
         if (this.registrants.length == 5) {
 
+            this.start();
 
         }
 
-    }
+    }  // checkStart
 
 
     public checkLevel(): void {

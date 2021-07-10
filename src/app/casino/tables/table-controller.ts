@@ -163,6 +163,7 @@ export class TableController implements CommandHandler, MessageBroadcaster {
         this.betTimerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
         this.buttonController = buttonController;
+
         this.blindTracker = new BlindTracker(table.stakes);
 
         this.setStatusRequests = new Map<number, SetStatusCommand>();

@@ -51,9 +51,6 @@ export class BlindTracker {
         this.activePlayers = new Map<number, number>();
         this.availablePlayers = new Map<number, number>();
 
-        this.ante = stakes.ante;
-        this.blinds = stakes.blinds;
-
         this.roundPayments = [];
 
         this.buttonIndex = null;
@@ -63,8 +60,16 @@ export class BlindTracker {
 
         this.paidAntes = new Set<number>();
 
+        if (stakes) {
+
+            this.ante = stakes.ante;
+            this.blinds = stakes.blinds;
+
+        }
+
 
     }
+
 
     private log(message: string): void {
 

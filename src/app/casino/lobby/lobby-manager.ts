@@ -222,7 +222,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
-        this.tableControllerMap.set(table.id, tableController);
+        this.addTableController(tableController);
 
         // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
         // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
@@ -260,7 +260,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
-        this.tableControllerMap.set(table.id, tableController);
+        this.addTableController(tableController);
 
         // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
         // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
@@ -299,7 +299,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
-        this.tableControllerMap.set(table.id, tableController);
+        this.addTableController(tableController);
         
         // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
         // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
@@ -338,7 +338,7 @@ export class LobbyManager implements MessageBroadcaster {
 
         let tableController: TableController = new TableController(this.cashierManager, this, table, deck, buttonController);
 
-        this.tableControllerMap.set(table.id, tableController);
+        this.addTableController(tableController);
 
         // tableController.setGame((new GameFactory()).create(PokerGameFiveCardStud.ID));
         // tableController.setGame((new GameFactory()).create(PokerGameSevenCardStud.ID));
@@ -351,21 +351,28 @@ export class LobbyManager implements MessageBroadcaster {
 
     createCornDogTournament(): void {
 
-        let ante = 0;
-
-        // Both of the regular blinds are live bets (they could towards the current round of betting)
-        let blinds: Blind[] =
-            [
-                new Blind(0, Blind.TYPE_SMALL, 'the small blind', 25, true, true),
-                new Blind(1, Blind.TYPE_BIG, 'the big blind', 50, true, true)
-            ];
-
         // Unlimited raises for NL tourney
         const maxRaises: number = null;
 
-        let limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+        const limits = new Limits(Limits.NO_LIMIT, maxRaises, /* minBuyIn */ 500, /* maxBuyIn */ 10000);
+
+
+        let ante = 0;
 
         const levels: Stakes[] = [];
+
+        for (let l = 0; l < 10; l++) {
+
+            const smallBlind: Blind = new Blind(0, Blind.TYPE_SMALL, 'the small blind', 25 * (l+1), true, true);
+            const bigBlind: Blind = new Blind(1, Blind.TYPE_BIG, 'the big blind', 50 * (l+1), true, true);
+
+            const bets: number[] = Array(4).fill(bigBlind.amount);
+
+            const level: Stakes = new Stakes(ante, [smallBlind, bigBlind], bets);
+
+            levels.push(level);
+
+        }
 
         // Duration is in seconds
         const levelDuration = 30;
@@ -418,6 +425,11 @@ export class LobbyManager implements MessageBroadcaster {
 
 
 
+    public addTableController(tableController: TableController): void {
+
+        this.tableControllerMap.set(tableController.getTableID(), tableController);
+
+    }  // addTableController
 
     public getTableController(tableID: number): TableController {
 
