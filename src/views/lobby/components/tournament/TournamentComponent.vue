@@ -65,6 +65,11 @@
 
                 }
 
+                else if (!tournament.value.isRegistrationOpen)
+                {
+                    return 'Registration is closed';
+                }
+
                 else if (!hasEnoughMoney) {
 
                     return 'You do not have enough money to buy in to this tournament';

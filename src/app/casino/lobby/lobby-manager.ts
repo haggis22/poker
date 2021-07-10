@@ -370,7 +370,7 @@ export class LobbyManager implements MessageBroadcaster {
         // Duration is in seconds
         const levelDuration = 30;
 
-        const buyIn: number = 200000;
+        const buyIn: number = 2000;
         const startingStack: number = 1000;
 
         let rules = new TableRules(6, /* timeToAnte */ 5, /* timeToAct */ 10);
@@ -507,7 +507,6 @@ export class LobbyManager implements MessageBroadcaster {
 
             const registrationResult: CommandResult = tournamentController.register(command.userID);
 
-            // TODO: Handle unsuccessful registration
             return new Message(registrationResult.message, command.userID);
 
         }

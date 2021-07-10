@@ -32,12 +32,6 @@ export class TournamentController {
 
     private buttonController: IButtonController;
 
-
-    private levels: Stakes[];
-
-    private currentLevel: Stakes;
-    private levelCounter: number;
-
     private chipFormatter: IChipFormatter;
 
     private registrants: number[];
@@ -58,11 +52,6 @@ export class TournamentController {
         this.lobbyManager = lobbyManager;
 
         this.tournament = tournament;
-
-        this.levels = [...tournament.levels];
-
-        this.levelCounter = 0;
-        this.currentLevel = null;
 
         this.buttonController = buttonController;
 
@@ -89,29 +78,44 @@ export class TournamentController {
 
     }
 
+    private checkStart(): void {
+
+        if (this.registrants.length == 5) {
+
+
+        }
+
+    }
+
 
     public checkLevel(): void {
 
-        const levelUp: boolean = !this.currentLevel || this.levelCounter > this.tournament.levelDuration;
+        if (this.tournament.levels.length === 0) {
+
+            throw new Error('There are no levels configured for this tournament');
+
+        }
+
+        const levelUp: boolean = this.tournament.currentLevelPtr == null || this.tournament.levelCounter > this.tournament.levelDuration;
 
         if (levelUp) {
 
-            if (this.levels.length === 0) {
+            let nextLevelPtr = this.tournament.currentLevelPtr == null ? 0 : (this.tournament.currentLevelPtr + 1);
 
-                if (!this.currentLevel) {
-
-                    throw new Error('There are no levels configured for this tournament');
-
-                }
+            if (nextLevelPtr >= this.tournament.levels.length) {
 
                 // We have no more levels configured - just stay on this level forever
 
             }
+            else {
 
-            this.currentLevel = this.levels.shift();
+                // Since we have changed levels, reset the counter
+                this.tournament.levelCounter = 0;
 
-            // Since we have changed levels, reset the counter
-            this.levelCounter = 0;
+                // Move up a level
+                this.tournament.currentLevelPtr = nextLevelPtr;
+
+            }
 
         }
 
@@ -120,12 +124,25 @@ export class TournamentController {
 
     public getSummary(): TournamentSummary {
 
-        return new TournamentSummary(this.tournament, this.registrants);
+        return new TournamentSummary(this.tournament, this.registrants, this.isRegistrationOpen());
 
     }  // getSummary
 
 
+    public isRegistrationOpen(): boolean {
+
+        return !this.tournament.hasStarted();
+
+    }  // isRegistrationOpen
+
+
     public isEligibleForRegistration(userID: number): CommandResult {
+
+        if (!this.isRegistrationOpen()) {
+
+            return new CommandResult(false, 'Registration is not open');
+
+        }
 
         if (this.registrants.find(registrantID => registrantID === userID)) {
 
@@ -150,7 +167,11 @@ export class TournamentController {
 
         this.lobbyManager.notifyTournamentUpdated(this.tournament);
 
+        this.checkStart();
+
         return new CommandResult(true, 'Registration successful');
+
+
 
     }
 

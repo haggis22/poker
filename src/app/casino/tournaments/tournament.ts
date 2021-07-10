@@ -17,6 +17,10 @@ export class Tournament {
 
     public levelDuration: number;
 
+    public currentLevelPtr: number;
+    // The counter that tracks how far we are through the current level, whether by time or number of hands, etc
+    public levelCounter: number;
+
     public rules: TableRules;
 
     public game: Game;
@@ -36,12 +40,24 @@ export class Tournament {
         this.buyIn = buyIn;
         this.startingStack = startingStack;
         this.limits = limits;
+
         this.levels = levels;
         this.levelDuration = levelDuration;
+        this.currentLevelPtr = null;
+        this.levelCounter = null;
+
         this.rules = rules;
         this.game = game;
         this.deck = deck;
 
+
+
+    }
+
+
+    public hasStarted(): boolean {
+
+        return this.currentLevelPtr != null;
 
     }
 
